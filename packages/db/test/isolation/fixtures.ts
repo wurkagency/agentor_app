@@ -41,7 +41,7 @@ export async function seedFixtures(admin: pg.ClientBase): Promise<void> {
     ID.tenantB,
   ]);
   await q(
-    `insert into users (id, email, name) values
+    `insert into auth.users (id, email, name) values
        ($1, 'owner-a@example.test', 'Owner A'),
        ($2, 'dev-a@example.test', 'Restricted Dev A'),
        ($3, 'reader-a@example.test', 'Reader A'),

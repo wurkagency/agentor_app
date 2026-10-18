@@ -24,6 +24,9 @@ env:
   DATABASE_URL_SUPPORT: postgres://agentor_support:agentor_support_ci@127.0.0.1:5432/agentor
   DATABASE_URL_OPS: postgres://agentor_readonly_ops:agentor_ops_ci@127.0.0.1:5432/agentor
   REDIS_URL: redis://127.0.0.1:6379
+  APP_URL: http://localhost:3000
+  SMTP_URL: smtp://127.0.0.1:1025
+  BETTER_AUTH_SECRET: ci-only-secret-not-used-anywhere-else-0123456789
 
 jobs:
   verify:
@@ -39,6 +42,9 @@ jobs:
         ports: ['5432:5432']
         options: >-
           --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 3s --health-retries 30
+      mailpit:
+        image: axllent/mailpit:latest
+        ports: ['1025:1025']
       redis:
         image: redis:7-alpine
         ports: ['6379:6379']

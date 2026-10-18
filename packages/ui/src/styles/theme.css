@@ -154,6 +154,9 @@
   /* ---- Named sizes that are fixed by the spec but off the 4 px grid ------------------ */
   --spacing-badge: 22px; /* ModeBadge height (§4) */
   --spacing-mono-line: 20px;
+  --spacing-header: 88px; /* app header (decision 1) */
+  --spacing-subnav: 56px; /* secondary navigation row */
+  --spacing-editor-header: 64px; /* compact header in the editor */
 
   /* ---- Breakpoints (designspecifikation §3.1) ---------------------------------------- */
   --breakpoint-*: initial;

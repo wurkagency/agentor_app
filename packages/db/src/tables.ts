@@ -9,9 +9,14 @@ export const GLOBAL_TABLES: Readonly<Record<string, string>> = {
 
 /** RLS tables that are not keyed by tenant_id and therefore get dedicated isolation tests. */
 export const NON_TENANT_RLS_TABLES: Readonly<Record<string, string>> = {
-  tenants: 'Policy id = app.current_tenant_id().',
-  users: 'Global identity; visible to yourself and to members of the current tenant.',
+  tenants: 'Policy id = app.current_tenant_id(), plus own tenants before a tenant is chosen.',
 };
+
+/**
+ * Identity schema (Better Auth, ADR 0004). Not tenant data and not RLS-protected; only
+ * agentor_web may access it, which check-rls enforces.
+ */
+export const AUTH_SCHEMA = 'auth';
 
 /** Tables agentor_web must never be able to read (produktspecifikation §9.2). */
 export const WORKER_ONLY_READ_TABLES = ['connection_secrets', 'tenant_keys'] as const;

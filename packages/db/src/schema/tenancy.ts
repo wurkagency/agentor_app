@@ -10,6 +10,7 @@ import {
   unique,
   uuid,
 } from 'drizzle-orm/pg-core';
+import { users as authUsers } from './auth.js';
 import { createdAt, idColumn, tenantIdColumn, updatedAt } from './columns.js';
 
 export const tenants = pgTable(
@@ -31,22 +32,6 @@ export const tenants = pgTable(
   ],
 );
 
-/** Global identity. One user can be a member of several tenants (D9). */
-export const users = pgTable(
-  'users',
-  {
-    id: idColumn().primaryKey(),
-    email: text('email').notNull(),
-    name: text('name').notNull(),
-    createdAt: createdAt(),
-    updatedAt: updatedAt(),
-  },
-  (t) => [
-    unique('users_email_key').on(t.email),
-    check('users_email_lower', sql`${t.email} = lower(${t.email})`),
-  ],
-);
-
 export const MEMBERSHIP_ROLES = ['owner', 'admin', 'developer', 'reader'] as const;
 export type MembershipRole = (typeof MEMBERSHIP_ROLES)[number];
 
@@ -57,7 +42,7 @@ export const memberships = pgTable(
     id: idColumn(),
     userId: uuid('user_id')
       .notNull()
-      .references(() => users.id, { onDelete: 'cascade' }),
+      .references(() => authUsers.id, { onDelete: 'cascade' }),
     role: text('role').$type<MembershipRole>().notNull(),
     /** 'all' = every flow; 'selected' = only flows in flow_grants. */
     flowScope: text('flow_scope').$type<'all' | 'selected'>().notNull().default('all'),

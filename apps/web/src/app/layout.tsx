@@ -1,7 +1,7 @@
 import { Toaster, TooltipProvider } from '@agentor/ui';
 import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
-import { getLocale } from 'next-intl/server';
+import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { jakarta, jetbrains } from './fonts';
 import './globals.css';
@@ -13,13 +13,14 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
+  const t = await getTranslations('nav');
   return (
     <html lang={locale} className={`${jakarta.variable} ${jetbrains.variable}`}>
       <body>
         <NextIntlClientProvider>
           <TooltipProvider>
             {children}
-            <Toaster />
+            <Toaster label={t('notifications')} />
           </TooltipProvider>
         </NextIntlClientProvider>
       </body>

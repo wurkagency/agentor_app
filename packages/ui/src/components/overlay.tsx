@@ -127,6 +127,75 @@ export function DropdownMenuItem({
   );
 }
 
+export const DropdownMenuSub = Menu.Sub;
+export const DropdownMenuRadioGroup = Menu.RadioGroup;
+
+export function DropdownMenuSubTrigger({
+  className,
+  icon,
+  hint,
+  children,
+  ...props
+}: ComponentPropsWithoutRef<typeof Menu.SubTrigger> & { icon?: ReactNode; hint?: ReactNode }) {
+  return (
+    <Menu.SubTrigger
+      className={cn(
+        'flex h-10 cursor-pointer select-none items-center gap-3 rounded-sm px-3 text-body font-medium text-fg-1 focus-visible:-outline-offset-2',
+        'data-highlighted:bg-bg-base data-[state=open]:bg-bg-base',
+        className,
+      )}
+      {...props}
+    >
+      {icon && <span className="text-fg-2">{icon}</span>}
+      <span className="flex-1">{children}</span>
+      {hint && <span className="ml-auto text-meta font-medium text-fg-2">{hint}</span>}
+    </Menu.SubTrigger>
+  );
+}
+
+export function DropdownMenuSubContent({
+  className,
+  ...props
+}: ComponentPropsWithoutRef<typeof Menu.SubContent>) {
+  return (
+    <Menu.Portal>
+      <Menu.SubContent
+        sideOffset={8}
+        collisionPadding={16}
+        className={cn(
+          'z-50 min-w-56 rounded-md bg-surface p-2 shadow-card outline-none',
+          className,
+        )}
+        {...props}
+      />
+    </Menu.Portal>
+  );
+}
+
+export function DropdownMenuRadioItem({
+  className,
+  children,
+  ...props
+}: ComponentPropsWithoutRef<typeof Menu.RadioItem>) {
+  return (
+    <Menu.RadioItem
+      className={cn(
+        'flex h-10 cursor-pointer select-none items-center gap-3 rounded-sm px-3 text-body font-medium text-fg-1 focus-visible:-outline-offset-2',
+        'data-highlighted:bg-bg-base',
+        className,
+      )}
+      {...props}
+    >
+      <span className="inline-flex w-4 justify-center">
+        <Menu.ItemIndicator>
+          <span className="block size-2 rounded-full bg-fg-1" />
+        </Menu.ItemIndicator>
+      </span>
+      {children}
+    </Menu.RadioItem>
+  );
+}
+
 export function DropdownMenuSeparator() {
   return <Menu.Separator className="my-1 h-px bg-border" />;
 }

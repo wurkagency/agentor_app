@@ -56,7 +56,8 @@ export default tseslint.config(
   },
   {
     files: ['**/*.{ts,tsx,js,mjs,cjs}'],
-    ignores: ['packages/db/**'],
+    // Seed scripts and e2e tests are tooling that set up and inspect the database directly.
+    ignores: ['packages/db/**', 'apps/*/scripts/**', 'apps/*/e2e/**'],
     rules: { 'no-restricted-imports': ['error', DB_ONLY_IMPORTS] },
   },
   {

@@ -47,14 +47,7 @@ describe('tenants', () => {
   });
 });
 
-describe('users', () => {
-  it('shows only members of the current tenant', async () => {
-    const { result } = await run('web', A_OWNER, 'select id from users order by id');
-    expect(result!.rows.map((r) => r.id).sort()).toEqual(
-      [ID.userAOwner, ID.userADevRestricted, ID.userAReader, ID.userShared].sort(),
-    );
-  });
-
+describe('identity and pre-tenant visibility (ADR 0004)', () => {
   it('shows a shared user only the memberships of the current tenant', async () => {
     const { result } = await run(
       'web',
@@ -65,26 +58,56 @@ describe('users', () => {
     expect(result!.rows.map((r) => r.tenant_id)).toEqual([ID.tenantA]);
   });
 
-  it('shows only yourself before a tenant is chosen', async () => {
-    const { result } = await run('web', { userId: ID.userBOwner }, 'select id from users');
-    expect(result!.rows.map((r) => r.id)).toEqual([ID.userBOwner]);
+  it('before a tenant is chosen, a user sees only their own memberships and tenants', async () => {
+    const shared = { userId: ID.userShared };
+    const m = await run('web', shared, 'select tenant_id, user_id from memberships');
+    expect(m.result!.rows.every((r) => r.user_id === ID.userShared)).toBe(true);
+    expect(m.result!.rows.map((r) => r.tenant_id).sort()).toEqual([ID.tenantA, ID.tenantB].sort());
+    const t = await run('web', shared, 'select id from tenants');
+    expect(t.result!.rows.map((r) => r.id).sort()).toEqual([ID.tenantA, ID.tenantB].sort());
+
+    const ownerB = { userId: ID.userBOwner };
+    const tb = await run('web', ownerB, 'select id from tenants');
+    expect(tb.result!.rows.map((r) => r.id)).toEqual([ID.tenantB]);
   });
 
-  it('cannot update another user', async () => {
-    const { result } = await run('web', A_OWNER, `update users set name = 'x' where id = $1`, [
-      ID.userAReader,
-    ]);
+  it('own-membership visibility switches off once a tenant is chosen', async () => {
+    const { result } = await run(
+      'web',
+      { tenantId: ID.tenantB, userId: ID.userAOwner },
+      'select tenant_id from memberships where user_id = $1',
+      [ID.userAOwner],
+    );
     expect(result!.rowCount).toBe(0);
   });
 
-  it('cannot create a user with another id than its own', async () => {
-    const { error } = await run(
-      'web',
-      A_OWNER,
-      `insert into users (id, email, name) values ($1, 'new@example.test', 'New')`,
-      [crypto.randomUUID()],
-    );
-    expect(error?.code).toBe(INSUFFICIENT_PRIVILEGE);
+  it('without a user and without a tenant, nothing is visible', async () => {
+    for (const table of ['memberships', 'tenants']) {
+      const { result } = await run('web', {}, `select 1 from ${table}`);
+      expect(result!.rowCount, table).toBe(0);
+    }
+  });
+
+  it('only the web role can reach the auth schema', async () => {
+    const { result } = await run('web', null, 'select count(*)::int as n from auth.users');
+    expect(result!.rows[0].n).toBeGreaterThan(0);
+    for (const role of ['worker', 'support', 'ops'] as const) {
+      for (const table of [
+        'users',
+        'sessions',
+        'accounts',
+        'two_factors',
+        'passkeys',
+        'verifications',
+      ]) {
+        const { error } = await run(
+          role,
+          { tenantId: ID.tenantA },
+          `select 1 from auth.${table} limit 1`,
+        );
+        expect(error?.code, `${role} auth.${table}`).toBe(INSUFFICIENT_PRIVILEGE);
+      }
+    }
   });
 });
 

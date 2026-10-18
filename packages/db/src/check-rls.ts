@@ -1,6 +1,7 @@
 import type pg from 'pg';
 import {
   APPEND_ONLY_TABLES,
+  AUTH_SCHEMA,
   GLOBAL_TABLES,
   NON_TENANT_RLS_TABLES,
   RUNTIME_ROLES,
@@ -122,6 +123,29 @@ export async function checkRls(client: pg.ClientBase): Promise<string[]> {
         if (await hasPrivilege(role, table, p)) {
           problems.push(`${role} has ${p} on append-only table ${table}`);
         }
+      }
+    }
+  }
+  // Identity schema: web only.
+  const { rows: authTables } = await client.query<{ table: string }>(
+    `select c.relname as table from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = $1 and c.relkind in ('r', 'p') order by 1`,
+    [AUTH_SCHEMA],
+  );
+  if (authTables.length === 0) problems.push(`no tables in schema ${AUTH_SCHEMA}`);
+  for (const role of ['agentor_worker', 'agentor_support', 'agentor_readonly_ops']) {
+    const { rows } = await client.query<{ ok: boolean }>(
+      'select has_schema_privilege($1, $2, $3) as ok',
+      [role, AUTH_SCHEMA, 'USAGE'],
+    );
+    if (rows[0]?.ok) problems.push(`${role} has USAGE on schema ${AUTH_SCHEMA}`);
+    for (const t of authTables) {
+      for (const p of ['SELECT', 'INSERT', 'UPDATE', 'DELETE']) {
+        const { rows: r } = await client.query<{ ok: boolean }>(
+          'select has_table_privilege($1, $2, $3) as ok',
+          [role, `${AUTH_SCHEMA}.${t.table}`, p],
+        );
+        if (r[0]?.ok) problems.push(`${role} has ${p} on ${AUTH_SCHEMA}.${t.table}`);
       }
     }
   }

@@ -1,4 +1,9 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { defineConfig, devices } from '@playwright/test';
+
+const rootEnv = resolve(process.cwd(), '../../.env.local');
+if (!process.env.CI && existsSync(rootEnv)) process.loadEnvFile(rootEnv);
 
 const port = Number(process.env.E2E_PORT ?? 3000);
 const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${port}`;
@@ -10,6 +15,7 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${port}`;
  */
 export default defineConfig({
   testDir: './e2e',
+  globalSetup: './e2e/global-setup.ts',
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,

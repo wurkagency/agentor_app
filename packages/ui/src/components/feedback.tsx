@@ -81,9 +81,11 @@ export function Banner({
 
 /* ---- Toast: bottom right, 360 px, 6 s; errors stay until dismissed (§4, §5.5) ----------------- */
 
-export function Toaster() {
+/** label: accessible name of the toast region, e.g. "Notifikationer". */
+export function Toaster({ label }: { label: string }) {
   return (
     <SonnerToaster
+      containerAriaLabel={label}
       position="bottom-right"
       gap={8}
       offset={24}

@@ -66,7 +66,9 @@ const rule = {
         if (
           p.type === 'VariableDeclarator' &&
           p.id.type === 'Identifier' &&
-          /^[A-Z_]+$/.test(p.id.name)
+          /^[A-Z_]+$/.test(p.id.name) &&
+          p.init &&
+          (p.init.type === 'ObjectExpression' || p.init.type === 'ArrayExpression')
         ) {
           // Constant lookup tables of class names, e.g. const SIZE = { 24: 'size-6 …' }.
           return 'class';
