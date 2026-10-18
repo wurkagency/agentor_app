@@ -6,6 +6,8 @@ This plan turns the approved specs and the round-1 design into a codebase. It ma
 
 Sources and order of authority are fixed by the build brief: (1) the decisions list in `docs/design/runde-1/README.md`, (2) the boards, (3) `designspecifikation.md`, (4) `docs/brand/`, (5) `produktspecifikation.md`, (6) connector specs.
 
+**Local-only references** (in `docs/` but excluded from git on purpose, never committed): `docs/integrations/Dinero.md` (the settings structure of today's Dinero integration, which §5.3 of the product spec says the editor mirrors), `docs/integrations/Integrations.md` (the full connector catalogue the architecture must carry), `docs/specifications/` (originals of `docs/specs/`). `docs/SPECIFICATION.md` is the superseded draft (produktspecifikation §0 and D3) and is not used. Nothing from these files that identifies a real customer (e.g. the Dinero company name and number in `Dinero.md`) goes into seed data, tests or fixtures.
+
 ---
 
 ## 1. Architecture in one page
@@ -188,7 +190,14 @@ Outline only; detailed plan written at the Phase 1 gate.
 
 - **M8 Sync engine:** BullMQ queues per stage, idempotency, fan-out from published routes, dependency resolution, per-connection and per-tenant token buckets (`moveToDelayed`), retries/backoff, dead-letter → failed records, polling cursors with 2 min overlap, echo suppression, graceful shutdown, retention jobs (payloads 30 d, records 13 mo, audit 24 mo), Prometheus metrics, Pino with `tenant_id`, GlitchTip/Sentry EU without payloads.
 - **M9 WooCommerce connector:** consumer key/secret auth, connection test, programmatic webhook registration + HMAC, hourly polling fallback, orders, refunds (partial, line-level), customers (guest checkout, email match), products/variations/categories (primary category), order status trigger, line-item account mapping with category → product → fallback, three-level VAT override and conflict flags. Contract tests against WooCommerce in Docker.
-- **M10 Dinero connector:** OAuth via Visma Connect, chart of accounts and VAT code lookups, contacts by email, sales and credit-note posting in Test / Kladde / Live, order reference + attachment, rate limit. Contract tests against a Dinero sandbox.
+- **M10 Dinero connector:** OAuth via Visma Connect, chart of accounts and VAT code lookups, contacts by email, sales and credit-note posting in Test / Kladde / Live, order reference + attachment, rate limit. Contract tests against a Dinero sandbox. The manifest's `settingsSchema` mirrors the setting groups in `docs/integrations/Dinero.md`:
+  - *Ordretype:* invoices (default) or cashbook.
+  - *Kunder:* default payment term and days, customer updates with field selection (Navn, Adresse, Postnr., By, Land, Telefon, E-mail), match field.
+  - *Fakturaer:* sync by order state, base currency, the six accounts (momspligtigt, momsfrit, EU B2B, udland, fragt momspligtig/momsfri), invoice template, prices incl. moms, English on foreign orders, payment setup by payment method, payment term from Dinero customer, header with `[order_number]`, customer comments, delivery address in comment, use products in Dinero, rounding differences, draft updates, book invoices, register payment, EAN invoice, invoice e-mail.
+  - *Produkter:* allow creation (default unit, accounts for momspligtige/momsfrie products), allow updates with field selection.
+  - *Kreditnotaer:* refund accounts (momspligtig/momsfri), header with `[refund_number]`/`[order_number]`, book credit notes.
+
+  Category → account and product exceptions (decision 9, WooCommerce spec §4) sit on top of these defaults.
 - **M11 Notifications, PWA, mobile:** e-mail/SMS via Brevo, Web Push (VAPID, own server), service worker caching the shell only, IndexedDB status snapshot keyed by user+tenant and wiped on logout/401 (covered by the isolation suite), mobile screens `M1`–`M7`, `D10-Afstemning` if it's in Phase 2 (see questions).
 
 ---
@@ -293,10 +302,10 @@ Each has the default I'll use if you don't answer. **Q1–Q10 block M3/M4**; the
 23. **Small text:** bottom-nav labels 11/600, badges 10/700. *Default:* as drawn, checked for 4,5:1.
 
 **Phase 2 (decide before Phase 2 starts)**
-24. **Dinero posting model.** The Dinero spec recommends manual vouchers (no duplicate invoice); the design names the port "Fakturaer" and the dialog says "der oprettes fakturaer i Dinero". *Default:* manual voucher as the mechanism, "Fakturaer" as the word the customer sees, invoice mode later.
+24. **Dinero posting model.** The Dinero connector spec recommends manual vouchers as primary and invoices as an optional later mode. `Dinero.md` (today's integration) and the design both use invoices as the default ("Fakturaer", "der oprettes fakturaer i Dinero"), with cashbook as an opt-in setting. *Default:* follow `Dinero.md` and the design: invoices by default, cashbook (manual voucher) as the "Opret ordrer i kassekladden" setting, both in M10.
 25. **Draft-first** for new Dinero routes (Dinero spec Q2). *Default:* yes.
 26. **WooCommerce trigger statuses** (WooCommerce spec Q3). *Default:* processing + completed, configurable.
-27. **`dinero.md`** is referenced by the Dinero spec but wasn't in the copy list (and `Dinero.md` shows as deleted in the `agentor` working tree). Should I use it?
+27. ~~`dinero.md`~~ **Resolved:** found at `docs/integrations/Dinero.md` (local only). It feeds M10 and Q24.
 28. **Reconciliation (`D10-Afstemning`)** is Phase 3 in §14.1 but in the route map. *Default:* M11, once real Dinero data exists; Phase 1 shows the tab with an empty state.
 29. **Mobile layouts.** *Default:* Phase 1 screens work from 1024 px and don't break below; `M1`–`M7` ship with the PWA in M11.
 
