@@ -1,0 +1,16 @@
+packages:
+  - apps/*
+  - packages/*
+
+# Supply-chain hardening: wait a week before adopting new releases, refuse exotic
+# (git/tarball) transitive sources, and never accept a package that downgrades its trust level.
+minimumReleaseAge: 10080
+blockExoticSubdeps: true
+trustPolicy: no-downgrade
+# Reviewed exceptions: legitimate releases published before the maintainer enabled provenance.
+trustPolicyExclude:
+  - undici-types@6.21.0
+
+allowBuilds:
+  esbuild: true
+  msgpackr-extract: true

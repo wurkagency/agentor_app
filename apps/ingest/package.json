@@ -1,0 +1,22 @@
+{
+  "name": "@agentor/ingest",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsx watch src/main.ts",
+    "start": "node dist/main.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "fastify": "^5.0.0",
+    "pino": "^10.0.0"
+  },
+  "devDependencies": {
+    "@agentor/config": "workspace:*",
+    "tsx": "^4.0.0",
+    "vitest": "^4.0.0"
+  }
+}
