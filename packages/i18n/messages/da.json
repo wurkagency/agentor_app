@@ -1,0 +1,60 @@
+{
+  "common": {
+    "appName": "Agentor",
+    "close": "Luk",
+    "cancel": "Annullér",
+    "save": "Gem",
+    "saving": "Gemmer…",
+    "retry": "Prøv igen",
+    "copy": "Kopiér",
+    "copied": "Kopieret",
+    "undo": "Fortryd",
+    "remove": "Fjern",
+    "loading": "Indlæser…",
+    "loadError": "Kunne ikke hente data",
+    "advanced": "Avanceret",
+    "required": "Påkrævet",
+    "moreActions": "Flere handlinger",
+    "search": "Søg",
+    "unlimited": "ubegrænset",
+    "all": "alle"
+  },
+  "status": {
+    "ok": "Aktiv",
+    "warn": "Advarsel",
+    "error": "Fejl",
+    "broken": "Afbrudt",
+    "paused": "Pauset",
+    "info": "Test",
+    "draft": "Kladde",
+    "since": "{status} · siden {time}"
+  },
+  "mode": {
+    "live": "Live",
+    "draft": "Kladde",
+    "test": "Test",
+    "liveHint": "Bogføres med det samme",
+    "draftHint": "Bogføres som kladde",
+    "testHint": "Prøvekørsel · skriver intet"
+  },
+  "dev": {
+    "title": "Komponenter",
+    "intro": "Alle komponenter i alle tilstande. Kun synlig under udvikling.",
+    "buttons": "Knapper",
+    "states": "Standard · hover · fokus · aktiv · deaktiveret · indlæser",
+    "newFlow": "Nyt flow",
+    "creating": "Opretter…",
+    "publish": "Publicér",
+    "publishing": "Publicerer…",
+    "testRun": "Testkør",
+    "running": "Kører…",
+    "validate": "Validér",
+    "validating": "Validerer…",
+    "reauth": "Genautentificér",
+    "connecting": "Forbinder…",
+    "deleteFlow": "Slet flow",
+    "deleting": "Sletter…",
+    "retryFailed": "Gentag fejlede",
+    "fixAccount": "Ret konto"
+  }
+}

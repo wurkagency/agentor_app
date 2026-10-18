@@ -1,0 +1,275 @@
+/*
+ * Agentor app design tokens as a Tailwind v4 theme.
+ *
+ * Sources (in order of authority): docs/design/runde-1/README.md decisions, the boards
+ * (Main, Komponenter-*), designspecifikation §2, docs/brand/tokens. Tailwind's default palette,
+ * radii, shadows, font sizes and breakpoints are reset, so only these tokens exist as
+ * utilities. Components never use hex, rgba or arbitrary values (lint rule agentor/no-design-literals).
+ *
+ * White-label: the brand accent routes through --tenant-* first (docs/brand/tokens/theming.css).
+ */
+@theme {
+  /* ---- Colour: brand ----------------------------------------------------------------- */
+  --color-*: initial;
+  --color-primary: var(--tenant-color-primary, #d0e84a);
+  --color-primary-bright: var(--tenant-color-primary-bright, #dcee55);
+  --color-fg-1: #1a1a18;
+  --color-fg-2: #6b6b67;
+  /* fg-3 is 2,79:1 on white: icons and arrows only, never text (Main board). */
+  --color-fg-3: #9b9b97;
+  --color-navy: var(--tenant-color-secondary-navy, #13293a);
+  --color-on-navy: #ffffff;
+  --color-on-navy-muted: rgb(255 255 255 / 0.78);
+  --color-border: #e4e1db;
+  --color-border-strong: #c8c5bf;
+  /* Fill inside white surfaces (skeleton, hover, chips). Not the page background (decision 6). */
+  --color-bg-base: #f0ede8;
+  --color-surface: #ffffff;
+  /* Page background (README decision 6). */
+  --color-canvas: #f7f5f1;
+  --color-canvas-dots: #dcd8d1;
+  --color-subrow: #fcfbf9;
+  --color-white: #ffffff;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* ---- Colour: status (designspecifikation §2.2) ------------------------------------- */
+  --color-ok-fg: #2f7d4f;
+  --color-ok-bg: #e6f2ea;
+  --color-warn-fg: #a86412;
+  --color-warn-bg: #fbf0dc;
+  --color-error-fg: #b42318;
+  --color-error-bg: #fbe7e4;
+  --color-paused-fg: #6b6b67;
+  --color-paused-bg: #efede8;
+  --color-info-fg: #2b5c8a;
+  --color-info-bg: #e5edf5;
+
+  /* ---- Colour: translucent app tokens found on the boards ---------------------------- */
+  --color-scrim: rgb(26 26 24 / 0.4);
+  --color-row-hover: rgb(240 237 232 / 0.5);
+  --color-white-60: rgb(255 255 255 / 0.6);
+  --color-white-14: rgb(255 255 255 / 0.14);
+  --color-lime-diff: rgb(208 232 74 / 0.22);
+  --color-lime-drop: rgb(208 232 74 / 0.3);
+  --color-lime-halo: rgb(208 232 74 / 0.45);
+  --color-navy-tint: rgb(19 41 58 / 0.04);
+
+  /* ---- Type (designspecifikation §2.4) ------------------------------------------------- */
+  --font-*: initial;
+  --font-sans: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), 'JetBrains Mono', ui-monospace, monospace;
+
+  --text-*: initial;
+  --text-page: 28px;
+  --text-page--line-height: 1.2;
+  --text-page--letter-spacing: -0.01em;
+  --text-page--font-weight: 600;
+  --text-section: 20px;
+  --text-section--line-height: 1.3;
+  --text-section--letter-spacing: -0.01em;
+  --text-section--font-weight: 600;
+  --text-card: 16px;
+  --text-card--line-height: 1.4;
+  --text-card--font-weight: 600;
+  --text-body: 14px;
+  --text-body--line-height: 1.55;
+  --text-table: 13px;
+  --text-table--line-height: 1.4;
+  --text-meta: 12px;
+  --text-meta--line-height: 1.4;
+  --text-micro: 11px;
+  --text-micro--line-height: 1.3;
+  --text-nano: 10px;
+  --text-nano--line-height: 1.2;
+  --text-nav: 15px;
+  --text-nav--line-height: 1.4;
+  --text-mono: 12.5px;
+  --text-mono--line-height: 1.6;
+  --text-stat: 40px;
+  --text-stat--line-height: 1;
+  --text-stat--letter-spacing: -0.03em;
+  --text-stat--font-weight: 700;
+  --text-stat-compact: 24px;
+  --text-stat-compact--line-height: 1;
+  --text-stat-compact--letter-spacing: -0.02em;
+  --text-stat-compact--font-weight: 700;
+  /* Health-band counters on Overblik (D1). */
+  --text-counter: 28px;
+  --text-counter--line-height: 1;
+  --text-counter--font-weight: 700;
+  --text-logo: 24px;
+  --text-logo--line-height: 1;
+  --text-logo--letter-spacing: -0.02em;
+  --text-logo--font-weight: 700;
+
+  --tracking-*: initial;
+  --tracking-tight: -0.02em;
+  --tracking-snug: -0.01em;
+  --tracking-normal: 0em;
+  --tracking-eyebrow: 0.08em;
+  --tracking-cta: 0.1em;
+
+  /* ---- Radius (designspecifikation §2.5 + boards) ------------------------------------ */
+  --radius-*: initial;
+  --radius-2xs: 4px; /* checkbox */
+  --radius-xs: 6px; /* 24 px logos, kbd */
+  --radius-sm: 8px; /* inputs, table chips, tooltips */
+  --radius-node: 12px; /* editor nodes, palette rows, radio cards, banners */
+  --radius-md: 16px; /* cards, panels, dialogs */
+  --radius-lg: 20px; /* highlighted lime panels */
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  /* ---- Shadow and rings ------------------------------------------------------------------ */
+  --shadow-*: initial;
+  --shadow-sm: 0 2px 12px rgb(0 0 0 / 0.06);
+  --shadow-card: 0 8px 32px rgb(0 0 0 / 0.1);
+  --shadow-overlay: 0 16px 56px rgb(0 0 0 / 0.14);
+  --shadow-ring-strong: inset 0 0 0 1.5px var(--color-border-strong);
+  --shadow-ring-chip: inset 0 0 0 1px var(--color-border-strong);
+  --shadow-ring-border: inset 0 0 0 1px var(--color-border);
+  --shadow-ring-off: inset 0 0 0 1.5px var(--color-fg-2);
+  --shadow-ring-dark: inset 0 0 0 1.5px var(--color-fg-1);
+  --shadow-ring-dark-2: inset 0 0 0 2px var(--color-fg-1);
+  --shadow-ring-lime: inset 0 0 0 1.5px var(--color-primary);
+  --shadow-ring-error: inset 0 0 0 1.5px var(--color-error-fg);
+  --shadow-ring-error-2: inset 0 0 0 2px var(--color-error-fg);
+  --shadow-hairline-t: inset 0 1px 0 var(--color-border);
+  --shadow-hairline-b: inset 0 -1px 0 var(--color-border);
+  --shadow-hairline-l: inset 1px 0 0 var(--color-border);
+  --shadow-hairline-r: inset -1px 0 0 var(--color-border);
+  --shadow-tab-active: inset 0 -2px 0 var(--color-fg-1);
+  --shadow-row-selected: inset 2px 0 0 var(--color-primary), inset 3px 0 0 var(--color-fg-1);
+  --shadow-cutout-canvas: 0 0 0 2px var(--color-canvas);
+  --shadow-cutout-white: 0 0 0 2px var(--color-white);
+  --shadow-card-error: 0 2px 12px rgb(0 0 0 / 0.06), 0 0 0 1.5px var(--color-error-fg);
+  --shadow-card-warn: 0 2px 12px rgb(0 0 0 / 0.06), 0 0 0 1.5px var(--color-warn-fg);
+  --shadow-lime-dark: 0 0 0 2px var(--color-primary), 0 0 0 3px var(--color-fg-1);
+  --shadow-port-selected: 0 0 0 3px var(--color-white), 0 0 0 4.5px var(--color-fg-1);
+  --shadow-port-drop: 0 0 0 2px var(--color-fg-1), 0 0 0 6px var(--color-lime-halo);
+  --shadow-radio-on: inset 0 0 0 5px var(--color-fg-1);
+  --shadow-dot-broken: 0 0 0 2px var(--color-error-bg);
+
+  /* ---- Named sizes that are fixed by the spec but off the 4 px grid ------------------ */
+  --spacing-badge: 22px; /* ModeBadge height (§4) */
+  --spacing-mono-line: 20px;
+
+  /* ---- Breakpoints (designspecifikation §3.1) ---------------------------------------- */
+  --breakpoint-*: initial;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+
+  --container-*: initial;
+  --container-content: 1200px;
+  --container-form: 720px;
+  --container-focus: 480px;
+
+  /* ---- Motion (designspecifikation §2.6) --------------------------------------------- */
+  --ease-*: initial;
+  --ease-standard: ease;
+  --animate-*: initial;
+  --animate-spin: spin 1s linear infinite;
+  --animate-pulse: pulse 1.6s ease-in-out infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+}
+
+/* App shell sizes (README decision 1). Plain properties, used by layout components. */
+:root {
+  --app-header-height: 88px;
+  --app-editor-header-height: 64px;
+  --app-editor-toolbar-height: 56px;
+  --app-secondary-nav-height: 56px;
+  --app-inspector-width: 440px;
+  --app-inspector-width-compact: 400px;
+  --app-palette-width: 240px;
+  --app-bottom-panel-height: 240px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    color: var(--color-fg-1);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Visible 2 px focus ring with 2 px offset everywhere (designspecifikation §9.1). */
+  :focus-visible {
+    outline: 2px solid var(--color-fg-1);
+    outline-offset: 2px;
+  }
+  .on-navy :focus-visible,
+  .on-navy:focus-visible {
+    outline-color: var(--color-white);
+  }
+  ::placeholder {
+    color: var(--color-fg-2);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility eyebrow {
+  font-size: var(--text-meta);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-fg-2);
+}
+
+@utility dots-grid {
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(var(--color-canvas-dots) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Inspector field row: label left 148 px, control right (README decision 8, D3-Editor). */
+@utility field-inline {
+  grid-template-columns: 148px minmax(0, 1fr);
+}
+
+/* Dialog placement: near the top, never taller or wider than the viewport minus margins. */
+@utility dialog-frame {
+  top: max(64px, 10vh);
+  max-height: calc(100vh - 128px);
+  max-width: calc(100vw - 32px);
+}
+
+/* KeyValueList: label column 140 px (Komponenter-Data). */
+@utility grid-cols-kv {
+  grid-template-columns: 140px minmax(0, 1fr);
+}

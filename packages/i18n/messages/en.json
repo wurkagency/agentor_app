@@ -1,0 +1,60 @@
+{
+  "common": {
+    "appName": "Agentor",
+    "close": "Close",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving…",
+    "retry": "Try again",
+    "copy": "Copy",
+    "copied": "Copied",
+    "undo": "Undo",
+    "remove": "Remove",
+    "loading": "Loading…",
+    "loadError": "Couldn't load data",
+    "advanced": "Advanced",
+    "required": "Required",
+    "moreActions": "More actions",
+    "search": "Search",
+    "unlimited": "unlimited",
+    "all": "all"
+  },
+  "status": {
+    "ok": "Active",
+    "warn": "Warning",
+    "error": "Error",
+    "broken": "Disconnected",
+    "paused": "Paused",
+    "info": "Test",
+    "draft": "Draft",
+    "since": "{status} · since {time}"
+  },
+  "mode": {
+    "live": "Live",
+    "draft": "Draft",
+    "test": "Test",
+    "liveHint": "Booked immediately",
+    "draftHint": "Booked as draft",
+    "testHint": "Trial run · writes nothing"
+  },
+  "dev": {
+    "title": "Components",
+    "intro": "Every component in every state. Visible in development only.",
+    "buttons": "Buttons",
+    "states": "Default · hover · focus · active · disabled · loading",
+    "newFlow": "New flow",
+    "creating": "Creating…",
+    "publish": "Publish",
+    "publishing": "Publishing…",
+    "testRun": "Test run",
+    "running": "Running…",
+    "validate": "Validate",
+    "validating": "Validating…",
+    "reauth": "Reconnect",
+    "connecting": "Connecting…",
+    "deleteFlow": "Delete flow",
+    "deleting": "Deleting…",
+    "retryFailed": "Retry failed",
+    "fixAccount": "Fix account"
+  }
+}

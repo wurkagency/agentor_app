@@ -1,0 +1,51 @@
+import { defineConfig, devices } from '@playwright/test';
+
+const port = Number(process.env.E2E_PORT ?? 3000);
+const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${port}`;
+
+/**
+ * e2e + screenshot comparison. Desktop design width is 1440 × 900 (designspecifikation §3).
+ * Visual snapshots are OS-specific (font rasterisation), so they live per platform and the
+ * "visual" project only runs where baselines exist (PLAYWRIGHT_VISUAL=1).
+ */
+export default defineConfig({
+  testDir: './e2e',
+  fullyParallel: false,
+  workers: 1,
+  retries: process.env.CI ? 1 : 0,
+  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list']],
+  expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: 'disabled' } },
+  snapshotPathTemplate: '{testDir}/__screenshots__/{platform}/{testFilePath}/{arg}{ext}',
+  use: {
+    baseURL,
+    viewport: { width: 1440, height: 900 },
+    locale: 'da-DK',
+    timezoneId: 'Europe/Copenhagen',
+    trace: 'retain-on-failure',
+  },
+  projects: [
+    {
+      name: 'desktop',
+      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+      grepInvert: /@visual/,
+    },
+    ...(process.env.PLAYWRIGHT_VISUAL === '1'
+      ? [
+          {
+            name: 'visual',
+            use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+            grep: /@visual/,
+          },
+        ]
+      : []),
+  ],
+  webServer: process.env.E2E_BASE_URL
+    ? undefined
+    : {
+        command: process.env.CI ? 'pnpm start' : 'pnpm dev',
+        url: `${baseURL}/dev/components`,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+        env: { AGENTOR_DEV_PAGES: '1', PORT: String(port) },
+      },
+});

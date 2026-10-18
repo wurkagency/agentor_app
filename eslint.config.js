@@ -1,7 +1,9 @@
 // @ts-check
 import js from '@eslint/js';
 import globals from 'globals';
+import reactHooks from 'eslint-plugin-react-hooks';
 import tseslint from 'typescript-eslint';
+import noDesignLiterals from './packages/config/eslint/no-design-literals.js';
 
 /**
  * Repo-wide lint. The key security rule: only packages/db may talk to the database
@@ -31,6 +33,7 @@ export default tseslint.config(
       '**/next-env.d.ts',
       '**/playwright-report/**',
       '**/test-results/**',
+      'apps/web/shot.mjs',
     ],
   },
   js.configs.recommended,
@@ -55,6 +58,19 @@ export default tseslint.config(
     files: ['**/*.{ts,tsx,js,mjs,cjs}'],
     ignores: ['packages/db/**'],
     rules: { 'no-restricted-imports': ['error', DB_ONLY_IMPORTS] },
+  },
+  {
+    files: ['apps/web/src/**/*.{ts,tsx}', 'packages/ui/src/**/*.{ts,tsx}'],
+    languageOptions: { globals: { ...globals.browser } },
+    plugins: {
+      agentor: { rules: { 'no-design-literals': noDesignLiterals } },
+      'react-hooks': reactHooks,
+    },
+    rules: {
+      'agentor/no-design-literals': 'error',
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'error',
+    },
   },
   {
     // CLI scripts and tests may print.
