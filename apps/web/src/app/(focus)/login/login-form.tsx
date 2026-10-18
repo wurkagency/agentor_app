@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { syncLocale } from '@/app/actions/session';
+import { rememberNext } from '@/lib/safe-next';
 
 type ErrorKey = 'invalid' | 'locked' | 'rateLimited' | 'passkey' | 'generic';
 
@@ -26,7 +27,7 @@ function toErrorKey(
   return 'generic';
 }
 
-export function LoginForm() {
+export function LoginForm({ next = '/' }: { next?: string }) {
   const t = useTranslations('auth');
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -38,6 +39,7 @@ export function LoginForm() {
     e.preventDefault();
     setError(null);
     setBusy('password');
+    rememberNext(next);
     const { data, error: err } = await authClient.signIn.email({
       email: email.trim().toLowerCase(),
       password,
@@ -50,7 +52,7 @@ export function LoginForm() {
     // With MFA enabled the client plugin redirects to /login/mfa; otherwise we're signed in.
     if (data && 'twoFactorRedirect' in data && data.twoFactorRedirect) return;
     await syncLocale();
-    router.replace('/');
+    router.replace(next);
     router.refresh();
   }
 
@@ -64,7 +66,7 @@ export function LoginForm() {
       return;
     }
     await syncLocale();
-    router.replace('/');
+    router.replace(next);
     router.refresh();
   }
 

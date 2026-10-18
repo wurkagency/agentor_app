@@ -50,6 +50,20 @@
       "when": 1792364006764,
       "tag": "0006_auth_security",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792365949917,
+      "tag": "0007_team_and_settings",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792365975874,
+      "tag": "0008_team_security",
+      "breakpoints": true
     }
   ]
 }

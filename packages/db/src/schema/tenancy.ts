@@ -1,6 +1,8 @@
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   check,
+  integer,
   foreignKey,
   index,
   jsonb,
@@ -19,14 +21,27 @@ export const tenants = pgTable(
     id: idColumn().primaryKey(),
     name: text('name').notNull(),
     cvr: text('cvr'),
+    addressLine: text('address_line'),
+    postalCode: text('postal_code'),
+    city: text('city'),
+    billingEmail: text('billing_email'),
     locale: text('locale').notNull().default('da'),
     timeZone: text('time_zone').notNull().default('Europe/Copenhagen'),
     currency: text('currency').notNull().default('DKK'),
     status: text('status').notNull().default('active'),
+    /** "Kræv totrin for hele teamet" (D12-Sikkerhed). */
+    requireMfaAll: boolean('require_mfa_all').notNull().default(false),
+    /** Break-glass needs approval by an owner or admin (D8). On by default. */
+    supportRequiresApproval: boolean('support_requires_approval').notNull().default(true),
+    /** Status thresholds (produktspecifikation §7.1), adjustable per tenant. */
+    alertErrorRatePct: integer('alert_error_rate_pct').notNull().default(5),
+    alertConsecutiveFailures: integer('alert_consecutive_failures').notNull().default(3),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
+    check('tenants_alert_rate_check', sql`${t.alertErrorRatePct} between 1 and 100`),
+    check('tenants_alert_failures_check', sql`${t.alertConsecutiveFailures} between 1 and 100`),
     check('tenants_locale_check', sql`${t.locale} in ('da', 'en')`),
     check('tenants_status_check', sql`${t.status} in ('active', 'suspended', 'deleting')`),
   ],
@@ -46,6 +61,8 @@ export const memberships = pgTable(
     role: text('role').$type<MembershipRole>().notNull(),
     /** 'all' = every flow; 'selected' = only flows in flow_grants. */
     flowScope: text('flow_scope').$type<'all' | 'selected'>().notNull().default('all'),
+    /** External users (agency, accountant) are tagged "Ekstern" and don't use a seat (PLAN Q1b). */
+    isExternal: boolean('is_external').notNull().default(false),
     createdAt: createdAt(),
   },
   (t) => [
@@ -69,6 +86,8 @@ export const auditLog = pgTable(
     id: idColumn(),
     actorUserId: uuid('actor_user_id'),
     actorKind: text('actor_kind').$type<'user' | 'support' | 'system'>().notNull(),
+    /** Display name at the time of the action, e.g. "Mette Holm" or "Anne · Agentor". */
+    actorName: text('actor_name'),
     action: text('action').notNull(),
     objectType: text('object_type').notNull(),
     objectId: uuid('object_id'),

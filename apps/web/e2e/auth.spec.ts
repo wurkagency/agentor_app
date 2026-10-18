@@ -1,7 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import pg from 'pg';
-import { fillPassword, login, totp, USERS } from './support';
+import globalSetup from './global-setup';
+import { fillPassword, fullLogin, login, totp, USERS } from './support';
 
 /** M2 acceptance: authentication, MFA, roles, tenant switching and security headers. */
 
@@ -32,7 +33,7 @@ test('a wrong password explains what to do, in Danish', async ({ page }) => {
 });
 
 test('owner signs in with password and TOTP and lands on Overblik', async ({ page }) => {
-  await login(page, 'mette');
+  await fullLogin(page, 'mette');
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Mette');
   const nav = page.getByRole('navigation', { name: 'Primær navigation' });
   await expect(nav.getByRole('link', { name: 'Overblik' })).toHaveAttribute('aria-current', 'page');
@@ -94,6 +95,13 @@ test('profile menu switches language and company (keyboard)', async ({ page }) =
   await expect(
     page.getByRole('button', { name: /Konto og virksomhed: Mette Holm, Nordlys Outlet ApS/ }),
   ).toBeVisible();
+
+  // Switch back: later tests reuse this session.
+  await openSub(/Konto og virksomhed/, /Skift virksomhed/);
+  await choose('Nordlys Cykler ApS');
+  await expect(
+    page.getByRole('button', { name: /Konto og virksomhed: Mette Holm, Nordlys Cykler ApS/ }),
+  ).toBeVisible();
 });
 
 test('an admin without MFA must enrol before using the app', async ({ page }) => {
@@ -122,6 +130,9 @@ test('an admin without MFA must enrol before using the app', async ({ page }) =>
   await page.getByRole('button', { name: 'Jeg har gemt koderne' }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Jonas');
+
+  // Jonas now has a new TOTP secret; restore the sample data for the tests that follow.
+  globalSetup();
 });
 
 test('pages carry a nonce CSP and anti-framing headers', async ({ page }) => {

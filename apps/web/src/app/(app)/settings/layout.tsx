@@ -20,12 +20,9 @@ export default async function SettingsLayout({ children }: { children: ReactNode
         ]
       : []),
     { href: '/settings/notifications', label: t('notificationSettings') },
-    ...(admin
-      ? [
-          { href: '/settings/security', label: t('security') },
-          { href: '/settings/audit-log', label: t('auditLog') },
-        ]
-      : [{ href: '/settings/profile', label: t('myProfile') }]),
+    { href: '/settings/security', label: t('security') },
+    ...(admin ? [{ href: '/settings/audit-log', label: t('auditLog') }] : []),
+    { href: '/settings/profile', label: t('myProfile') },
   ];
   return (
     <>

@@ -10,6 +10,8 @@ export const ID = {
   userBOwner: '0190a000-0000-7000-8000-0000000b0001',
   /** Member of both tenants, like an agency (D9). */
   userShared: '0190a000-0000-7000-8000-0000000ab001',
+  /** Has an account but no membership yet; invited to tenant A. */
+  userInviteeA: '0190a000-0000-7000-8000-0000000ac001',
   memAOwner: '0190a000-0000-7000-8000-0000000a1001',
   memADevRestricted: '0190a000-0000-7000-8000-0000000a1002',
   memAReader: '0190a000-0000-7000-8000-0000000a1003',
@@ -30,6 +32,10 @@ export const ID = {
   secretB: '0190a000-0000-7000-8000-0000000b6001',
   auditA: '0190a000-0000-7000-8000-0000000a7001',
   auditB: '0190a000-0000-7000-8000-0000000b7001',
+  inviteA: '0190a000-0000-7000-8000-0000000a8001',
+  inviteB: '0190a000-0000-7000-8000-0000000b8001',
+  grantSupportA: '0190a000-0000-7000-8000-0000000a9001',
+  grantSupportB: '0190a000-0000-7000-8000-0000000b9001',
 } as const;
 
 /** Seeds two tenants with at least one row in every tenant table. Runs as superuser. */
@@ -46,8 +52,16 @@ export async function seedFixtures(admin: pg.ClientBase): Promise<void> {
        ($2, 'dev-a@example.test', 'Restricted Dev A'),
        ($3, 'reader-a@example.test', 'Reader A'),
        ($4, 'owner-b@example.test', 'Owner B'),
-       ($5, 'shared@example.test', 'Shared Agency')`,
-    [ID.userAOwner, ID.userADevRestricted, ID.userAReader, ID.userBOwner, ID.userShared],
+       ($5, 'shared@example.test', 'Shared Agency'),
+       ($6, 'invitee-a@example.test', 'Invitee A')`,
+    [
+      ID.userAOwner,
+      ID.userADevRestricted,
+      ID.userAReader,
+      ID.userBOwner,
+      ID.userShared,
+      ID.userInviteeA,
+    ],
   );
   await q(
     `insert into memberships (tenant_id, id, user_id, role, flow_scope) values
@@ -116,6 +130,29 @@ export async function seedFixtures(admin: pg.ClientBase): Promise<void> {
     `insert into audit_log (tenant_id, id, actor_kind, action, object_type) values
        ($1, $3, 'system', 'test.seed', 'tenant'), ($2, $4, 'system', 'test.seed', 'tenant')`,
     [ID.tenantA, ID.tenantB, ID.auditA, ID.auditB],
+  );
+  await q(
+    `insert into invitations (tenant_id, id, email, role, token_hash, expires_at, invited_by) values
+       ($1, $3, 'invitee-a@example.test', 'reader', 'hash-a', now() + interval '7 days', $5),
+       ($2, $4, 'invitee-b@example.test', 'reader', 'hash-b', now() + interval '7 days', $6)`,
+    [ID.tenantA, ID.tenantB, ID.inviteA, ID.inviteB, ID.userAOwner, ID.userBOwner],
+  );
+  await q(
+    `insert into notification_prefs (tenant_id, user_id, event, email) values
+       ($1, $3, 'connection_broken', true), ($2, $4, 'connection_broken', true)`,
+    [ID.tenantA, ID.tenantB, ID.userAOwner, ID.userBOwner],
+  );
+  await q(`insert into notification_settings (tenant_id, user_id) values ($1, $3), ($2, $4)`, [
+    ID.tenantA,
+    ID.tenantB,
+    ID.userAOwner,
+    ID.userBOwner,
+  ]);
+  await q(
+    `insert into support_access_grants (tenant_id, id, case_ref, reason, support_name, expires_at) values
+       ($1, $3, '#1', 'test', 'Support A', now() + interval '1 hour'),
+       ($2, $4, '#2', 'test', 'Support B', now() + interval '1 hour')`,
+    [ID.tenantA, ID.tenantB, ID.grantSupportA, ID.grantSupportB],
   );
   await q('commit');
 }

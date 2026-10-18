@@ -93,17 +93,18 @@ await inTenant(n.id, async () => {
     n.name,
     n.cvr,
   ]);
-  const m = async (userId: string, role: string, scope = 'all') =>
+  const m = async (userId: string, role: string, scope = 'all', external = false) =>
     (
       await owner.query<{ id: string }>(
-        `insert into memberships (tenant_id, user_id, role, flow_scope) values ($1, $2, $3, $4) returning id`,
-        [n.id, userId, role, scope],
+        `insert into memberships (tenant_id, user_id, role, flow_scope, is_external) values ($1, $2, $3, $4, $5) returning id`,
+        [n.id, userId, role, scope, external],
       )
     ).rows[0]!.id;
   await m(USERS.mette.id, 'owner');
   await m(USERS.jonas.id, 'admin');
-  const sara = await m(USERS.sara.id, 'developer', 'selected');
-  await m(USERS.bo.id, 'reader');
+  // Sara (freelance developer) and Bo (accountant) are external: tagged "Ekstern", no seat.
+  const sara = await m(USERS.sara.id, 'developer', 'selected', true);
+  await m(USERS.bo.id, 'reader', 'all', true);
   for (const f of Object.values(FLOWS)) {
     await owner.query(`insert into flows (tenant_id, id, name) values ($1, $2, $3)`, [
       n.id,

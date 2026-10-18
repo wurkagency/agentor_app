@@ -126,6 +126,23 @@ export async function checkRls(client: pg.ClientBase): Promise<string[]> {
       }
     }
   }
+  // Private app schema: functions only; no runtime role may touch its tables.
+  const { rows: appTables } = await client.query<{ table: string }>(
+    `select c.relname as table from pg_class c join pg_namespace n on n.oid = c.relnamespace
+      where n.nspname = 'app' and c.relkind in ('r', 'p')`,
+  );
+  for (const t of appTables) {
+    for (const role of RUNTIME_ROLES) {
+      for (const p of ['SELECT', 'INSERT', 'UPDATE', 'DELETE']) {
+        const { rows: r } = await client.query<{ ok: boolean }>(
+          'select has_table_privilege($1, $2, $3) as ok',
+          [role, `app.${t.table}`, p],
+        );
+        if (r[0]?.ok) problems.push(`${role} has ${p} on app.${t.table}`);
+      }
+    }
+  }
+
   // Identity schema: web only.
   const { rows: authTables } = await client.query<{ table: string }>(
     `select c.relname as table from pg_class c join pg_namespace n on n.oid = c.relnamespace

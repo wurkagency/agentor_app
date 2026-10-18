@@ -2,6 +2,7 @@ import {
   getMembership,
   listOwnTenants,
   setSessionTenant,
+  tenantRequiresMfa,
   type MembershipContext,
 } from '@agentor/db';
 import { headers } from 'next/headers';
@@ -88,8 +89,12 @@ export const requireAppContext = cache(async (): Promise<AppContext> => {
     if (!membership) redirect('/login');
     await setSessionTenant(db(), s.sessionId, tenantId);
   }
-  if ((membership.role === 'owner' || membership.role === 'admin') && !s.user.twoFactorEnabled) {
-    redirect('/login/mfa/setup');
+  if (!s.user.twoFactorEnabled) {
+    const privileged = membership.role === 'owner' || membership.role === 'admin';
+    // Owners and admins always; everyone when the tenant requires it ("Kræv totrin for hele teamet").
+    if (privileged || (await tenantRequiresMfa(db(), { tenantId: tenantId!, userId: s.user.id }))) {
+      redirect('/login/mfa/setup');
+    }
   }
   return { ...s, activeTenantId: tenantId, tenant: membership, tenantCount: own.length };
 });

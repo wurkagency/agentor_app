@@ -1,20 +1,22 @@
 import { getTranslations } from 'next-intl/server';
-import { ComingSoon } from '@/components/pages/coming-soon';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { requireAppContext } from '@/server/auth/session';
+import { ProfileForms } from './profile-forms';
 
 export async function generateMetadata() {
-  const t = await getTranslations('nav');
-  return { title: t('myProfile') };
+  const t = await getTranslations('profile');
+  return { title: t('title') };
 }
 
-export default async function Page() {
-  await requireAppContext();
-  const t = await getTranslations('nav');
+/** Min profil (profile menu, README decision 3). No board; built from the settings form pattern. */
+export default async function ProfilePage() {
+  const ctx = await requireAppContext();
+  const t = await getTranslations('profile');
+  const nav = await getTranslations('nav');
   return (
     <PageBody>
-      <PageHeader eyebrow={t('settings')} title={t('myProfile')} />
-      <ComingSoon />
+      <PageHeader eyebrow={nav('settings')} title={t('title')} />
+      <ProfileForms name={ctx.user.name} email={ctx.user.email} locale={ctx.user.locale} />
     </PageBody>
   );
 }

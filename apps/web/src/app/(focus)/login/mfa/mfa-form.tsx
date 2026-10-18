@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { syncLocale } from '@/app/actions/session';
+import { takeNext } from '@/lib/safe-next';
 
 const LENGTH = 6;
 
@@ -72,7 +73,7 @@ export function MfaForm() {
       return;
     }
     await syncLocale();
-    router.replace('/');
+    router.replace(takeNext());
     router.refresh();
   }
 

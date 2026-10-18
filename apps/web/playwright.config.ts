@@ -18,6 +18,8 @@ export default defineConfig({
   globalSetup: './e2e/global-setup.ts',
   fullyParallel: false,
   workers: 1,
+  // TOTP codes can't be reused, so some logins wait for the next 30-second period.
+  timeout: 60_000,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : [['list']],
   expect: { toHaveScreenshot: { maxDiffPixelRatio: 0.01, animations: 'disabled' } },

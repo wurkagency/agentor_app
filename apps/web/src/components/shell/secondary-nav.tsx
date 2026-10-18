@@ -72,8 +72,8 @@ export function SecondaryBar({
 /** Content area: max 1200 px on the same axis as the header (decision 1). */
 export function PageBody({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <main id="main" className={cn('flex-1 px-4 pb-10 pt-6 md:px-10', className)}>
-      <div className="mx-auto flex max-w-content flex-col gap-6">{children}</div>
+    <main id="main" className={cn('flex-1 px-4 pb-8 pt-5 md:px-10', className)}>
+      <div className="mx-auto flex max-w-content flex-col gap-5">{children}</div>
     </main>
   );
 }
