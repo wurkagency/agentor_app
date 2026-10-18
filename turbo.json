@@ -1,6 +1,20 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "agentGuidance": false,
+  "globalPassThroughEnv": [
+    "CI",
+    "NODE_ENV",
+    "DATABASE_*",
+    "REDIS_URL",
+    "BETTER_AUTH_SECRET",
+    "APP_URL",
+    "SMTP_URL",
+    "MAIL_FROM",
+    "AGENTOR_*",
+    "E2E_*",
+    "PLAYWRIGHT_*",
+    "ISOLATION_SABOTAGE"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
