@@ -1,0 +1,517 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "App-skal-B-Indstillinger.dc.html": {
+      "h": 900,
+      "title": "1.5b App-skal · Indstillinger valgt",
+      "w": 1440,
+      "x": 10640,
+      "y": 1020
+    },
+    "App-skal-B.dc.html": {
+      "h": 900,
+      "title": "1.5b App-skal uden sidebar · 1440",
+      "w": 1440,
+      "x": 10640,
+      "y": 0
+    },
+    "App-skal.dc.html": {
+      "h": 900,
+      "title": "1.5 App-skal tom · 1440",
+      "w": 1440,
+      "x": 7600,
+      "y": 0
+    },
+    "D1-Overblik-Problemer.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "D1 Overblik · problemer",
+      "w": 1440,
+      "x": 1520,
+      "y": 3000
+    },
+    "D1-Overblik.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "D1 Overblik · alt kører",
+      "w": 1440,
+      "x": 0,
+      "y": 3000
+    },
+    "D10-Afstemning.dc.html": {
+      "h": 900,
+      "title": "D10 Aktivitet · afstemning",
+      "w": 1440,
+      "x": 1520,
+      "y": 6560
+    },
+    "D10-Aktivitet-Log.dc.html": {
+      "h": 960,
+      "title": "D10 Aktivitet · log",
+      "w": 1440,
+      "x": 0,
+      "y": 6560
+    },
+    "D11-Inviter.dc.html": {
+      "h": 900,
+      "title": "D11 Invitér bruger",
+      "w": 1440,
+      "x": 4560,
+      "y": 6560
+    },
+    "D11-Team.dc.html": {
+      "h": 900,
+      "title": "D11 Team og adgang",
+      "w": 1440,
+      "x": 3040,
+      "y": 6560
+    },
+    "D12-Auditlog.dc.html": {
+      "h": 900,
+      "title": "D12 Audit-log",
+      "w": 1440,
+      "x": 0,
+      "y": 7580
+    },
+    "D12-Notifikationer.dc.html": {
+      "h": 900,
+      "title": "D12 Notifikationer",
+      "w": 1440,
+      "x": 6080,
+      "y": 6560
+    },
+    "D12-Sikkerhed.dc.html": {
+      "h": 900,
+      "title": "D12 Sikkerhed",
+      "w": 1440,
+      "x": 7600,
+      "y": 6560
+    },
+    "D13-Abonnement.dc.html": {
+      "h": 1180,
+      "title": "D13 Abonnement og forbrug",
+      "w": 1440,
+      "x": 1520,
+      "y": 7580
+    },
+    "D14-Login.dc.html": {
+      "h": 900,
+      "title": "D14 Log ind",
+      "w": 1440,
+      "x": 3040,
+      "y": 7580
+    },
+    "D14-MFA.dc.html": {
+      "h": 900,
+      "title": "D14 Totrinsbekræftelse",
+      "w": 1440,
+      "x": 4560,
+      "y": 7580
+    },
+    "D14-Onboarding-1.dc.html": {
+      "h": 900,
+      "title": "D14 Onboarding 1 · virksomhed",
+      "w": 1440,
+      "x": 6080,
+      "y": 7580
+    },
+    "D14-Onboarding-2.dc.html": {
+      "h": 900,
+      "title": "D14 Onboarding 2 · plan og betaling",
+      "w": 1440,
+      "x": 7600,
+      "y": 7580
+    },
+    "D14-Onboarding-3.dc.html": {
+      "h": 900,
+      "title": "D14 Onboarding 3 · skabelon",
+      "w": 1440,
+      "x": 0,
+      "y": 8880
+    },
+    "D2-Integrationer-Samlet.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Prototype · Integrationer samlet",
+      "w": 1440,
+      "x": 3920,
+      "y": 8880
+    },
+    "D2-Integrationer.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "D2 Integrationer · flow udfoldet",
+      "w": 1440,
+      "x": 3040,
+      "y": 3000
+    },
+    "D3-Editor-Skjult.dc.html": {
+      "h": 900,
+      "title": "D3 Editor · inspektør skjult",
+      "w": 1440,
+      "x": 7600,
+      "y": 4400
+    },
+    "D3-Editor-Start.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "Prototype · editor, intet valgt",
+      "w": 1440,
+      "x": 5440,
+      "y": 8880
+    },
+    "D3-Editor-Traek.dc.html": {
+      "h": 900,
+      "title": "D3 Editor · under træk",
+      "w": 1440,
+      "x": 6080,
+      "y": 3000
+    },
+    "D3-Editor-Validering.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "D3 Editor · valideringsfejl",
+      "w": 1440,
+      "x": 7600,
+      "y": 3000
+    },
+    "D3-Editor.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "D3 Editor · rute valgt, Mapping",
+      "w": 1440,
+      "x": 4560,
+      "y": 3000
+    },
+    "D4-Guide.dc.html": {
+      "h": 900,
+      "title": "D4 Editor med guide · 2 af 4",
+      "w": 1440,
+      "x": 1520,
+      "y": 4400
+    },
+    "D4-Skabelonvaelger.dc.html": {
+      "h": 900,
+      "title": "D4 Skabelonvælger",
+      "w": 1440,
+      "x": 0,
+      "y": 4400
+    },
+    "D5-GaaLive.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "D5 Publicér · Gå Live",
+      "w": 1440,
+      "x": 4560,
+      "y": 4400
+    },
+    "D5-Testkoersel.dc.html": {
+      "h": 900,
+      "is_interactive": true,
+      "title": "D5 Testkørsel",
+      "w": 1440,
+      "x": 3040,
+      "y": 4400
+    },
+    "D6-Listevisning.dc.html": {
+      "h": 900,
+      "title": "D6 Editor · listevisning",
+      "w": 1440,
+      "x": 6080,
+      "y": 4400
+    },
+    "D7-Flow-Fejl.dc.html": {
+      "h": 1060,
+      "title": "D7 Flowdetalje · med fejl",
+      "w": 1440,
+      "x": 1520,
+      "y": 5420
+    },
+    "D7-Flow-Oversigt.dc.html": {
+      "h": 1000,
+      "title": "D7 Flowdetalje · oversigt",
+      "w": 1440,
+      "x": 0,
+      "y": 5420
+    },
+    "D8-Koersler-Forretning.dc.html": {
+      "h": 960,
+      "title": "D8 Kørsler · fejlet record",
+      "w": 1440,
+      "x": 3040,
+      "y": 5420
+    },
+    "D8-Koersler-Udvikler.dc.html": {
+      "h": 1000,
+      "title": "D8 Kørsler · udviklervisning",
+      "w": 1440,
+      "x": 4560,
+      "y": 5420
+    },
+    "D9-Dinero-Afbrudt.dc.html": {
+      "h": 900,
+      "title": "D9 Forbindelse · afbrudt",
+      "w": 1440,
+      "x": 7600,
+      "y": 5420
+    },
+    "D9-Forbindelser.dc.html": {
+      "h": 900,
+      "title": "D9 Forbindelser",
+      "w": 1440,
+      "x": 6080,
+      "y": 5420
+    },
+    "D9-Katalog.dc.html": {
+      "h": 1720,
+      "title": "D9 Tilføj forbindelse · katalog",
+      "w": 1440,
+      "x": 9120,
+      "y": 5420
+    },
+    "Komponenter-Data.dc.html": {
+      "h": 2240,
+      "title": "1.2 Data og formularer",
+      "w": 1440,
+      "x": 3040,
+      "y": 0
+    },
+    "Komponenter-Feedback.dc.html": {
+      "h": 1760,
+      "title": "1.3 Dialoger og feedback",
+      "w": 1440,
+      "x": 4560,
+      "y": 0
+    },
+    "Komponenter-Handlinger.dc.html": {
+      "h": 2040,
+      "title": "1.1 Handlinger og status",
+      "w": 1440,
+      "x": 1520,
+      "y": 0
+    },
+    "Komponenter-Tilstande.dc.html": {
+      "h": 1840,
+      "title": "1.4 Tom, indlæser og fejl",
+      "w": 1440,
+      "x": 6080,
+      "y": 0
+    },
+    "M1-Overblik.dc.html": {
+      "h": 844,
+      "title": "M1 Overblik",
+      "w": 390,
+      "x": 1520,
+      "y": 8880
+    },
+    "M2-Integrationer.dc.html": {
+      "h": 844,
+      "title": "M2 Integrationer",
+      "w": 390,
+      "x": 1990,
+      "y": 8880
+    },
+    "M3-Fejl.dc.html": {
+      "h": 844,
+      "title": "M3 Fejldetalje",
+      "w": 390,
+      "x": 2460,
+      "y": 8880
+    },
+    "M4-Notifikationer.dc.html": {
+      "h": 844,
+      "title": "M4 Notifikationer",
+      "w": 390,
+      "x": 2930,
+      "y": 8880
+    },
+    "M5-Editor.dc.html": {
+      "h": 844,
+      "title": "M5 Editor på mobil",
+      "w": 390,
+      "x": 3400,
+      "y": 8880
+    },
+    "Main.dc.html": {
+      "h": 2590,
+      "title": "1.0 Tokens",
+      "w": 1440,
+      "x": 0,
+      "y": 0
+    },
+    "D1-Ny-kunde.dc.html": {
+      "x": 0,
+      "y": 10500,
+      "w": 1440,
+      "h": 900,
+      "title": "D1 Overblik · ny kunde"
+    },
+    "D1-Soeg.dc.html": {
+      "x": 1520,
+      "y": 10500,
+      "w": 1440,
+      "h": 900,
+      "title": "⌘K Søg eller hop til"
+    },
+    "D2-Valg.dc.html": {
+      "x": 3040,
+      "y": 10500,
+      "w": 1440,
+      "h": 900,
+      "title": "D2 Integrationer · masseredigering"
+    },
+    "D2-Tom.dc.html": {
+      "x": 4560,
+      "y": 10500,
+      "w": 1440,
+      "h": 900,
+      "title": "D2 Integrationer · tom"
+    },
+    "D2-Graense.dc.html": {
+      "x": 6080,
+      "y": 10500,
+      "w": 1440,
+      "h": 900,
+      "title": "D2 Integrationer · planens grænse"
+    },
+    "D2-Notifikationer.dc.html": {
+      "x": 7600,
+      "y": 10500,
+      "w": 1440,
+      "h": 900,
+      "title": "Notifikationer · popover"
+    },
+    "D3-Editor-Laest.dc.html": {
+      "x": 9120,
+      "y": 10500,
+      "w": 1440,
+      "h": 900,
+      "title": "D3 Editor · skrivebeskyttet"
+    },
+    "M6-Installer.dc.html": {
+      "x": 10640,
+      "y": 10500,
+      "w": 390,
+      "h": 844,
+      "title": "M6 Installation på iPhone"
+    },
+    "M7-Push.dc.html": {
+      "x": 11110,
+      "y": 10500,
+      "w": 390,
+      "h": 844,
+      "title": "M7 Push-eksempler"
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-18T12:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "etape1": {
+      "kind": "title1",
+      "maxW": 8000,
+      "text": "Etape 1 — Fundament",
+      "w": 240,
+      "x": 0,
+      "y": -300
+    },
+    "etape2": {
+      "kind": "title1",
+      "maxW": 8000,
+      "text": "Etape 2 — Kerneskærme",
+      "w": 240,
+      "x": 0,
+      "y": 2700
+    },
+    "etape3": {
+      "kind": "title1",
+      "maxW": 8000,
+      "text": "Etape 3 — Resten af runde 1",
+      "w": 240,
+      "x": 0,
+      "y": 4130
+    },
+    "proto": {
+      "fill": "green",
+      "maxH": 260,
+      "size": 24,
+      "text": "Prototype-sti (tryk Play på D1 Overblik · problemer): Overblik → Integrationer → fold flowet ud (lime chevron) → Åbn editor → klik på ruten Ordrer → Fakturaer → klik på feltet EU B2B-salg (vælger 1015) → Testkør → Publicér → Publicér og gå Live → Overblik, alt kører.",
+      "w": 560,
+      "x": 3920,
+      "y": 9840
+    },
+    "etape3b": {
+      "x": 0,
+      "y": 10230,
+      "text": "Etape 3 — Supplerende tilstande",
+      "kind": "title1",
+      "maxW": 11500
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Komponenter-Handlinger.dc.html",
+    "Komponenter-Data.dc.html",
+    "Komponenter-Feedback.dc.html",
+    "Komponenter-Tilstande.dc.html",
+    "App-skal.dc.html",
+    "App-skal-B.dc.html",
+    "App-skal-B-Indstillinger.dc.html",
+    "D1-Overblik.dc.html",
+    "D1-Overblik-Problemer.dc.html",
+    "D2-Integrationer.dc.html",
+    "D3-Editor.dc.html",
+    "D3-Editor-Traek.dc.html",
+    "D3-Editor-Validering.dc.html",
+    "D4-Skabelonvaelger.dc.html",
+    "D4-Guide.dc.html",
+    "D5-Testkoersel.dc.html",
+    "D5-GaaLive.dc.html",
+    "D6-Listevisning.dc.html",
+    "D3-Editor-Skjult.dc.html",
+    "D7-Flow-Oversigt.dc.html",
+    "D7-Flow-Fejl.dc.html",
+    "D8-Koersler-Forretning.dc.html",
+    "D8-Koersler-Udvikler.dc.html",
+    "D9-Forbindelser.dc.html",
+    "D9-Dinero-Afbrudt.dc.html",
+    "D10-Aktivitet-Log.dc.html",
+    "D10-Afstemning.dc.html",
+    "D11-Team.dc.html",
+    "D11-Inviter.dc.html",
+    "D12-Notifikationer.dc.html",
+    "D12-Sikkerhed.dc.html",
+    "D12-Auditlog.dc.html",
+    "D13-Abonnement.dc.html",
+    "D14-Login.dc.html",
+    "D14-MFA.dc.html",
+    "D14-Onboarding-1.dc.html",
+    "D14-Onboarding-2.dc.html",
+    "D14-Onboarding-3.dc.html",
+    "M1-Overblik.dc.html",
+    "M2-Integrationer.dc.html",
+    "M3-Fejl.dc.html",
+    "M4-Notifikationer.dc.html",
+    "M5-Editor.dc.html",
+    "D2-Integrationer-Samlet.dc.html",
+    "D3-Editor-Start.dc.html",
+    "D9-Katalog.dc.html",
+    "D1-Ny-kunde.dc.html",
+    "D1-Soeg.dc.html",
+    "D2-Valg.dc.html",
+    "D2-Tom.dc.html",
+    "D2-Graense.dc.html",
+    "D2-Notifikationer.dc.html",
+    "D3-Editor-Laest.dc.html",
+    "M6-Installer.dc.html",
+    "M7-Push.dc.html"
+  ],
+  "pages": [],
+  "title": "Agentor App — Runde 1"
+}

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>Overblik · søg ⌘K</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F1}
+.ds{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1A1A18;font-size:14px;line-height:1.55}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wrap{width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box}
+.pl{position:relative;font-size:15px;font-weight:500;color:#6B6B67;text-decoration:none;padding:4px 0;white-space:nowrap}
+.pl.on{color:#1A1A18;font-weight:600;box-shadow:inset 0 -2px 0 #1A1A18}
+.sl{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:9999px;font-size:13px;font-weight:500;color:#6B6B67;text-decoration:none;white-space:nowrap}
+.sl.on{background:#FFFFFF;color:#1A1A18;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.icb{width:36px;height:36px;border-radius:9999px;display:grid;place-items:center;border:0;background:transparent;color:#1A1A18;cursor:pointer;position:relative}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;box-sizing:border-box;padding:0 16px;border-radius:9999px;font-family:inherit;font-size:13px;font-weight:600;border:0;color:#1A1A18;background:transparent;white-space:nowrap;cursor:pointer;text-decoration:none}
+.btn-l{height:48px;padding:0 28px;font-size:12px;font-weight:700;letter-spacing:.10em;text-transform:uppercase}
+.btn-s{height:28px;padding:0 12px;font-size:12px}
+.p{background:#D0E84A}
+.s{background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #C8C5BF}
+.card{background:#FFFFFF;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.ct{font-size:16px;font-weight:600;line-height:1.4;margin:0}
+.meta{font-size:12px;font-weight:500;color:#6B6B67}
+.cnt{display:flex;flex-direction:column;gap:6px;padding:0 20px;text-decoration:none;color:#1A1A18;border-radius:12px;justify-content:center}
+.cnt:hover{background:#F7F5F1}
+.cnt-n{font-size:28px;font-weight:700;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.cnt-l{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600}
+.cnt-l .i{width:14px;height:14px}
+.stat-l{font-size:13px;font-weight:500;color:#6B6B67}
+.stat-n{font-size:40px;font-weight:700;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.stat-u{font-size:16px;font-weight:500;color:#6B6B67}
+.trend{display:inline-flex;align-items:center;gap:4px;font-size:13px;font-weight:600}
+.dot{width:8px;height:8px;border-radius:9999px;flex:none}
+.act{display:grid;grid-template-columns:44px minmax(0,1fr) 92px 72px;align-items:center;gap:8px;height:30px;font-size:13px;box-shadow:inset 0 -1px 0 #E4E1DB}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px}
+</style>
+</helmet>
+<div class="ds" style="width: 1440px; height: 900px; background: #F7F5F1; display: flex; flex-direction: column; overflow: hidden; position: relative">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+<symbol id="wf" viewBox="0 0 24 24"><rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect></symbol>
+<symbol id="rf" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></symbol>
+<symbol id="pg" viewBox="0 0 24 24"><path d="M12 22v-5"></path><path d="M9 8V2"></path><path d="M15 8V2"></path><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"></path></symbol>
+<symbol id="sr" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></symbol>
+<symbol id="bl" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></symbol>
+<symbol id="ch" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></symbol>
+<symbol id="cc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></symbol>
+<symbol id="ta" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></symbol>
+<symbol id="cx" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></symbol>
+<symbol id="up" viewBox="0 0 24 24"><path d="m19 5 3-3"></path><path d="m2 22 3-3"></path><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"></path><path d="M7.5 13.5 10 11"></path><path d="M10.5 16.5 13 14"></path><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"></path></symbol>
+<symbol id="cp" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="10" x2="10" y1="15" y2="9"></line><line x1="14" x2="14" y1="15" y2="9"></line></symbol>
+<symbol id="au" viewBox="0 0 24 24"><path d="M7 7h10v10"></path><path d="M7 17 17 7"></path></symbol>
+<symbol id="ad" viewBox="0 0 24 24"><path d="M7 7l10 10"></path><path d="M17 7v10H7"></path></symbol>
+<symbol id="pu" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></symbol>
+<symbol id="ar" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></symbol>
+<symbol id="if" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></symbol>
+</svg>
+
+<header style="flex: none; padding: 0 40px">
+<div class="wrap" style="height: 88px; display: flex; align-items: center; gap: 56px">
+<a href="#" aria-label="Agentor, gå til Overblik" style="text-decoration: none; color: #1A1A18; flex: none; font-size: 24px; font-weight: 700; letter-spacing: -0.02em">Agent<span style="border-bottom: 2px solid #1A1A18; padding-bottom: 1px">or</span></a>
+<nav aria-label="Primær navigation" style="display: flex; align-items: center; gap: 36px; flex: 1; min-width: 0">
+<a class="pl on" href="#" aria-current="page">Overblik</a>
+<a class="pl" href="D2-Integrationer.dc.html">Integrationer</a>
+<a class="pl" href="#">Forbindelser</a>
+<a class="pl" href="#">Aktivitet</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 4px; flex: none">
+<button class="icb" type="button" aria-label="Søg eller hop til, genvej ⌘K"><svg class="i"><use href="#sr"></use></svg></button>
+<button class="icb" type="button" aria-label="Notifikationer: intet kræver handling"><svg class="i"><use href="#bl"></use></svg></button>
+<button type="button" aria-haspopup="menu" aria-label="Konto og virksomhed: Mette Holm, Nordlys Cykler ApS" style="margin-left: 8px; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 10px 0 4px; border: 0; border-radius: 9999px; background: #FFFFFF; box-shadow: 0 2px 12px rgba(0,0,0,.06); cursor: pointer; font-family: inherit">
+<span style="width: 32px; height: 32px; border-radius: 9999px; background: #13293A; color: #FFFFFF; display: grid; place-items: center; font-size: 11px; font-weight: 600">MH</span>
+<span style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2"><span style="font-size: 13px; font-weight: 600">Nordlys Cykler</span><span style="font-size: 11px; font-weight: 500; color: #6B6B67">Mette Holm</span></span>
+<svg class="i" style="width: 14px; height: 14px; color: #6B6B67"><use href="#ch"></use></svg>
+</button>
+</div>
+</div>
+</header>
+
+<div style="flex: none; padding: 0 40px">
+<div class="wrap" style="height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: inset 0 1px 0 #E4E1DB">
+<nav aria-label="Periode" style="display: flex; align-items: center; gap: 4px">
+<a class="sl" href="#">I dag</a>
+<a class="sl on" href="#" aria-current="true">7 dage</a>
+<a class="sl" href="#">30 dage</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: #6B6B67; font-weight: 500">
+<span>Transaktioner</span>
+<span style="width: 96px; height: 8px; border-radius: 9999px; background: #E4E1DB; overflow: hidden; display: block"><span style="display: block; width: 71%; height: 8px; border-radius: 9999px; background: #D0E84A; box-shadow: inset 0 0 0 1px rgba(26,26,24,.25)"></span></span>
+<span style="color: #1A1A18; font-weight: 600; font-variant-numeric: tabular-nums">1.420 / 2.000</span>
+</div>
+</div>
+</div>
+
+<main style="flex: 1; min-height: 0; padding: 20px 40px 32px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 20px">
+
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em">God eftermiddag, Mette</h1>
+<p style="margin: 0; color: #6B6B67">Nordlys Cykler ApS · sidste 7 dage · opdateret for 1 min. siden</p>
+</div>
+<div style="display: flex; gap: 8px; align-items: center"><a class="btn s" href="#">Se aktivitet</a><a class="btn btn-l p" href="#"><svg class="i" style="width: 16px; height: 16px"><use href="#pu"></use></svg>Nyt flow</a></div>
+</div>
+
+<section class="card" aria-label="Status for alle flows" style="display: grid; grid-template-columns: 360px repeat(5, minmax(0, 1fr)); align-items: stretch; height: 112px; padding: 12px">
+<div style="display: flex; align-items: center; gap: 16px; padding: 0 12px 0 8px; box-shadow: inset -1px 0 0 #E4E1DB; margin-right: 8px">
+<span style="width: 56px; height: 56px; border-radius: 9999px; background: #E6F2EA; color: #2F7D4F; display: grid; place-items: center; flex: none"><svg class="i" style="width: 28px; height: 28px"><use href="#cc"></use></svg></span>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<strong style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.3">Alt kører</strong>
+<span style="font-size: 13px; color: #6B6B67">6 flows · intet kræver handling</span>
+</div>
+</div>
+<a class="cnt" href="D2-Integrationer.dc.html"><span class="cnt-n">5</span><span class="cnt-l"><svg class="i" style="color: #2F7D4F"><use href="#cc"></use></svg>Aktiv</span></a>
+<a class="cnt" href="#"><span class="cnt-n" style="color: #6B6B67">0</span><span class="cnt-l" style="color: #6B6B67"><svg class="i" style="color: #A86412"><use href="#ta"></use></svg>Advarsel</span></a>
+<a class="cnt" href="#"><span class="cnt-n" style="color: #6B6B67">0</span><span class="cnt-l" style="color: #6B6B67"><svg class="i" style="color: #B42318"><use href="#cx"></use></svg>Fejl</span></a>
+<a class="cnt" href="#"><span class="cnt-n" style="color: #6B6B67">0</span><span class="cnt-l" style="color: #6B6B67"><svg class="i" style="color: #B42318"><use href="#up"></use></svg>Afbrudt</span></a>
+<a class="cnt" href="#"><span class="cnt-n">1</span><span class="cnt-l"><svg class="i" style="color: #6B6B67"><use href="#cp"></use></svg>Pauset</span></a>
+</section>
+
+<section aria-label="Nøgletal" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px">
+<div class="card" style="background: #D0E84A; border-radius: 20px; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px">
+<span class="stat-l" style="color: #1A1A18" title="Summen af ordrer, Agentor har sendt videre. Ikke bogført omsætning.">Synkroniseret omsætning</span>
+<div><span class="stat-n">184.320</span> <span class="stat-u" style="color: #1A1A18">kr.</span></div>
+<div style="display: flex; justify-content: space-between; align-items: flex-end"><span class="trend"><svg class="i" style="width: 14px; height: 14px"><use href="#au"></use></svg>12 % mod forrige 7 dage</span><svg width="72" height="32" viewBox="0 0 72 32" aria-hidden="true"><polyline points="0,24 12,20 24,22 36,14 48,16 60,8 70,6" fill="none" stroke="#1A1A18" stroke-width="1.5" stroke-linejoin="round"></polyline><circle cx="70" cy="6" r="3" fill="#1A1A18"></circle></svg></div>
+</div>
+<div class="card" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 10px">
+<span class="stat-l">Ordrer</span>
+<div><span class="stat-n">412</span></div>
+<div style="display: flex; justify-content: space-between; align-items: flex-end"><span class="trend"><svg class="i" style="width: 14px; height: 14px"><use href="#au"></use></svg>8 %</span><svg width="72" height="32" viewBox="0 0 72 32" aria-hidden="true"><polyline points="0,20 12,22 24,16 36,18 48,12 60,14 70,9" fill="none" stroke="#9B9B97" stroke-width="1.5" stroke-linejoin="round"></polyline><circle cx="70" cy="9" r="3.5" fill="#D0E84A" stroke="#1A1A18" stroke-width="1"></circle></svg></div>
+</div>
+<div class="card" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 10px">
+<span class="stat-l">Records synkroniseret</span>
+<div><span class="stat-n">1.906</span></div>
+<div style="display: flex; justify-content: space-between; align-items: flex-end"><span class="trend"><svg class="i" style="width: 14px; height: 14px"><use href="#au"></use></svg>5 %</span><svg width="72" height="32" viewBox="0 0 72 32" aria-hidden="true"><polyline points="0,18 12,16 24,20 36,12 48,14 60,10 70,11" fill="none" stroke="#9B9B97" stroke-width="1.5" stroke-linejoin="round"></polyline><circle cx="70" cy="11" r="3.5" fill="#D0E84A" stroke="#1A1A18" stroke-width="1"></circle></svg></div>
+</div>
+<div class="card" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 10px">
+<span class="stat-l">Fejlrate</span>
+<div><span class="stat-n">0,4</span> <span class="stat-u">%</span></div>
+<div style="display: flex; justify-content: space-between; align-items: flex-end"><span class="trend"><svg class="i" style="width: 14px; height: 14px"><use href="#ad"></use></svg>0,2 point</span><svg width="72" height="32" viewBox="0 0 72 32" aria-hidden="true"><polyline points="0,10 12,8 24,14 36,12 48,18 60,20 70,22" fill="none" stroke="#9B9B97" stroke-width="1.5" stroke-linejoin="round"></polyline><circle cx="70" cy="22" r="3.5" fill="#D0E84A" stroke="#1A1A18" stroke-width="1"></circle></svg></div>
+</div>
+</section>
+
+<section style="display: grid; grid-template-columns: 340px minmax(0, 1fr) 280px; gap: 20px; align-items: stretch">
+<div class="card" style="padding: 20px 20px 16px; display: flex; flex-direction: column; height: 308px; box-sizing: border-box">
+<h2 class="ct">Kræver handling</h2>
+<div style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px">
+<span style="width: 48px; height: 48px; border-radius: 9999px; background: #E6F2EA; color: #2F7D4F; display: grid; place-items: center"><svg class="i" style="width: 24px; height: 24px"><use href="#cc"></use></svg></span>
+<strong style="font-weight: 600">Intet kræver handling</strong>
+<span class="meta" style="max-width: 240px">Vi giver besked her og på klokken, hvis noget går i stå.</span>
+</div>
+</div>
+
+<div class="card" style="padding: 20px 20px 8px; display: flex; flex-direction: column; height: 308px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 6px"><h2 class="ct">Seneste aktivitet</h2><a href="#" style="font-size: 13px; font-weight: 600; color: #1A1A18">Se alle kørsler</a></div>
+<div class="act" style="font-size: 12px; font-weight: 600; color: #1A1A18; height: 26px"><span>Tid</span><span>Flow · rute</span><span class="num">Records</span><span>Udfald</span></div>
+<div class="act"><span class="meta">14:06</span><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Webshop → regnskab · Ordrer → Fakturaer</span><span class="num">12</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2F7D4F"></span>OK</span></div>
+<div class="act"><span class="meta">14:06</span><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Webshop → regnskab · Kunder → Dinero Kunder</span><span class="num">4</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2F7D4F"></span>OK</span></div>
+<div class="act"><span class="meta">14:01</span><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Kunder til nyhedsbrev · Kunder → Kontakter</span><span class="num">9</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2F7D4F"></span>OK</span></div>
+<div class="act"><span class="meta">13:56</span><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Outlet → regnskab · Ordrer → Fakturaer</span><span class="num">7</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2F7D4F"></span>OK</span></div>
+<div class="act"><span class="meta">13:51</span><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Kreditnotaer · Kreditnotaer → Kreditnotaer</span><span class="num">1</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2F7D4F"></span>OK</span></div>
+<div class="act"><span class="meta">13:46</span><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Webshop → regnskab · Kunder → HubSpot</span><span class="num">6</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2B5C8A"></span>Test</span></div>
+<div class="act"><span class="meta">13:36</span><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Webshop → regnskab · Ordrer → Fakturaer</span><span class="num">18</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2F7D4F"></span>OK</span></div>
+<div class="act" style="box-shadow: none"><span class="meta">13:31</span><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Outlet → regnskab · Kunder → Kunder</span><span class="num">3</span><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2F7D4F"></span>OK</span></div>
+</div>
+
+<div class="card" style="padding: 20px; display: flex; flex-direction: column; gap: 16px; height: 308px; box-sizing: border-box">
+<h2 class="ct">Forbrug</h2>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 600">Transaktioner</span><span style="font-variant-numeric: tabular-nums">1.420 / 2.000</span></div><div style="height: 8px; border-radius: 9999px; background: #F0EDE8; overflow: hidden"><div style="height: 8px; width: 71%; border-radius: 9999px; background: #D0E84A; box-shadow: inset 0 0 0 1px rgba(26,26,24,.25)"></div></div><span class="meta">71 % · nulstilles 1. nov.</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 600">Integrationssæt</span><span>2 / alle</span></div><div style="height: 8px; border-radius: 9999px; background: #F0EDE8; overflow: hidden"><div style="height: 8px; width: 100%; border-radius: 9999px; background: #F0EDE8"></div></div><span class="meta">Business · ingen grænse</span></div>
+<div style="flex: 1"></div>
+<div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; box-shadow: inset 0 1px 0 #E4E1DB; padding-top: 12px"><span><strong style="font-weight: 600">Business</strong> · 159 kr./md.</span><a href="#" style="font-weight: 600; color: #1A1A18">Abonnement</a></div>
+</div>
+</section>
+</div>
+</main>
+<div style="position: absolute; inset: 0; background: rgba(26,26,24,.40); display: flex; justify-content: center; align-items: flex-start; padding-top: 120px; z-index: 5"><div role="dialog" aria-label="Søg eller hop til" style="width: 640px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.10); display: flex; flex-direction: column; overflow: hidden"><label style="display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 20px; box-shadow: inset 0 -1px 0 #E4E1DB"><svg class="i" style="width: 16px; height: 16px; color: #6B6B67"><use href="#sr"></use></svg><input value="1044" aria-label="Søg" style="border: 0; outline: 0; font: inherit; font-size: 16px; flex: 1; background: transparent; color: #1A1A18"><span class="meta" style="font-size: 11px; box-shadow: inset 0 0 0 1px #E4E1DB; border-radius: 6px; padding: 2px 6px">Esc</span></label><div style="padding: 8px; display: flex; flex-direction: column; gap: 2px"><span class="eyebrow" style="font-size: 11px; padding: 8px 12px 4px">Ordrer</span><a href="#" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px; background: #F0EDE8; color: #1A1A18; text-decoration: none; font-size: 14px"><svg class="i" style="width: 16px; height: 16px; color: #6B6B67"><use href="#cx"></use></svg><span style="flex: 1; display: flex; gap: 8px; align-items: baseline; min-width: 0"><span style="white-space: nowrap"><span class="mono">#10447</span> Hans Weber GmbH</span><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Fejlet 14:06 · Webshop → regnskab og CRM</span></span><span class="meta" style="font-size: 11px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #E4E1DB; border-radius: 6px; padding: 2px 6px">↵</span></a><a href="#" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px;  color: #1A1A18; text-decoration: none; font-size: 14px"><svg class="i" style="width: 16px; height: 16px; color: #6B6B67"><use href="#cc"></use></svg><span style="flex: 1; display: flex; gap: 8px; align-items: baseline; min-width: 0"><span style="white-space: nowrap"><span class="mono">#10441</span> Lars Bak</span><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Faktura oprettet · 17. okt.</span></span></a><a href="#" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px;  color: #1A1A18; text-decoration: none; font-size: 14px"><svg class="i" style="width: 16px; height: 16px; color: #6B6B67"><use href="#cc"></use></svg><span style="flex: 1; display: flex; gap: 8px; align-items: baseline; min-width: 0"><span style="white-space: nowrap"><span class="mono">#10440</span> Sofie Holm</span><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Faktura oprettet · 17. okt.</span></span></a><span class="eyebrow" style="font-size: 11px; padding: 10px 12px 4px">Flows og forbindelser</span><a href="#" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px;  color: #1A1A18; text-decoration: none; font-size: 14px"><svg class="i" style="width: 16px; height: 16px; color: #6B6B67"><use href="#wf"></use></svg><span style="flex: 1; display: flex; gap: 8px; align-items: baseline; min-width: 0"><span style="white-space: nowrap">Webshop → regnskab og CRM</span><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Flow · 5 ruter</span></span></a><a href="#" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px;  color: #1A1A18; text-decoration: none; font-size: 14px"><svg class="i" style="width: 16px; height: 16px; color: #6B6B67"><use href="#pg"></use></svg><span style="flex: 1; display: flex; gap: 8px; align-items: baseline; min-width: 0"><span style="white-space: nowrap">Dinero · Nordlys Cykler</span><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Forbindelse</span></span></a><span class="eyebrow" style="font-size: 11px; padding: 10px 12px 4px">Hurtighandlinger</span><a href="#" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px;  color: #1A1A18; text-decoration: none; font-size: 14px"><svg class="i" style="width: 16px; height: 16px; color: #6B6B67"><use href="#pu"></use></svg><span style="flex: 1; display: flex; gap: 8px; align-items: baseline; min-width: 0"><span style="white-space: nowrap">Nyt flow</span><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Vælg en skabelon</span></span><span class="meta" style="font-size: 11px; background: #FFFFFF; box-shadow: inset 0 0 0 1px #E4E1DB; border-radius: 6px; padding: 2px 6px">N</span></a><a href="#" style="display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 10px;  color: #1A1A18; text-decoration: none; font-size: 14px"><svg class="i" style="width: 16px; height: 16px; color: #6B6B67"><use href="#rf"></use></svg><span style="flex: 1; display: flex; gap: 8px; align-items: baseline; min-width: 0"><span style="white-space: nowrap">Gentag alle fejlede records</span><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">3 i dag</span></span></a></div><div style="padding: 10px 20px; box-shadow: inset 0 1px 0 #E4E1DB; display: flex; gap: 16px" class="meta"><span>↑↓ vælg</span><span>↵ åbn</span><span>Esc luk</span></div></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

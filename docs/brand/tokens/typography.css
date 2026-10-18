@@ -1,0 +1,80 @@
+/* =============================================================
+   AGENTOR — TYPOGRAPHY TOKENS
+   Source font appears to be a custom geometric humanist sans-serif.
+   Closest free match: Plus Jakarta Sans (Google Fonts).
+   ⚠️ SUBSTITUTION: Flag to owner — provide original font files
+      if brand uses a licensed typeface (e.g. Neue Haas Grotesk,
+      Aktiv Grotesk, or a bespoke variant).
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap');
+
+:root {
+  /* --- Font families ---
+     Agentor uses a single sans family throughout; no monospace observed. */
+  --font-sans:      var(--tenant-font-sans, 'Plus Jakarta Sans'), system-ui, -apple-system, sans-serif;
+
+  /* --- Font sizes ---
+     Based on estimated 1280px viewport.
+     Confidence: 80–90%
+  */
+  --text-xs:        11px;   /* micro labels */
+  --text-sm:        13px;   /* captions, tags, chips */
+  --text-base:      15px;   /* body / nav links */
+  --text-md:        16px;   /* slightly larger body */
+  --text-lg:        20px;   /* sub-headings, stats label */
+  --text-xl:        28px;   /* section headers */
+  --text-2xl:       36px;   /* card headings — confidence 85% */
+  --text-3xl:       48px;   /* large stat numbers */
+  --text-4xl:       64px;   /* large display */
+  --text-hero:      88px;   /* hero headline — confidence 85% */
+  --text-hero-body: 18px;   /* hero descriptive paragraph */
+
+  /* --- Font weights --- */
+  --weight-regular:   400;
+  --weight-medium:    500;
+  --weight-semibold:  600;
+  --weight-bold:      700;
+  --weight-extrabold: 800;
+
+  /* --- Line heights --- */
+  --leading-tight:   1.05;  /* hero / display headings */
+  --leading-snug:    1.20;  /* card headings */
+  --leading-normal:  1.50;  /* body text */
+  --leading-relaxed: 1.65;  /* descriptive body text */
+
+  /* --- Letter spacing --- */
+  --tracking-tight:   -0.02em;  /* display headings */
+  --tracking-normal:   0em;
+  --tracking-wide:     0.06em;  /* CTA button text */
+  --tracking-wider:    0.10em;  /* all-caps labels */
+
+  /* --- Semantic type roles --- */
+  --text-hero-size:     var(--text-hero);
+  --text-hero-weight:   var(--weight-medium);  /* QA A1: hero is Medium 500, NOT ExtraBold */
+  --text-hero-leading:  var(--leading-tight);
+  --text-hero-tracking: var(--tracking-tight);
+
+  --text-heading-size:     var(--text-2xl);
+  --text-heading-weight:   var(--weight-bold);
+  --text-heading-leading:  var(--leading-snug);
+  --text-heading-tracking: var(--tracking-tight);
+
+  /* Display heading — large section/CTA headlines. Medium weight,
+     lighter than the bold card-heading role (QA A7 / B5). */
+  --text-display-size:     var(--text-2xl);
+  --text-display-weight:   var(--weight-medium);
+  --text-display-leading:  var(--leading-snug);
+  --text-display-tracking: var(--tracking-tight);
+
+  --text-body-size:     var(--text-base);
+  --text-body-weight:   var(--weight-regular);
+  --text-body-leading:  var(--leading-relaxed);
+
+  --text-label-size:    var(--text-sm);
+  --text-label-weight:  var(--weight-bold);
+  --text-label-tracking: var(--tracking-wider);
+
+  --text-stat-size:     var(--text-3xl);
+  --text-stat-weight:   var(--weight-bold);
+}
