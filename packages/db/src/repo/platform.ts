@@ -1295,6 +1295,8 @@ export interface ErrorGroup {
   previousCustomers: number;
   trend: 'rising' | 'stable' | 'falling';
   caseNumbers: number[];
+  /** Which customers, for the totals only; never shown per group. */
+  tenantIds: string[];
 }
 
 export async function errorGroups(
@@ -1369,6 +1371,7 @@ export async function errorGroups(
           caseNumbers: caseRows.rows
             .filter((c) => c.body.includes(g.code))
             .map((c) => Number(c.number)),
+          tenantIds: [...g.now.keys()],
         };
       })
       .sort((a, b) => b.customers - a.customers || b.records - a.records);
@@ -1519,4 +1522,23 @@ export async function activeGrantsAll(db: Database, userId: string) {
     tenantId: r.tenant_id,
     expiresAt: new Date(r.expires_at),
   }));
+}
+
+/** The staff member's support session in progress, if any ("Session i gang", S6). */
+export async function myOpenSession(db: Database, userId: string) {
+  const [s] = await asStaff(db, userId, (tx) =>
+    tx
+      .select()
+      .from(supportSessions)
+      .where(
+        and(
+          eq(supportSessions.staffUserId, userId),
+          isNull(supportSessions.endedAt),
+          gte(supportSessions.lastActionAt, new Date(Date.now() - 60 * 60_000)),
+        ),
+      )
+      .orderBy(desc(supportSessions.startedAt))
+      .limit(1),
+  );
+  return s ?? null;
 }
