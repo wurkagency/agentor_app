@@ -76,7 +76,10 @@ export async function listConnections(db: Database, ctx: Ctx): Promise<Connectio
       .select(columns)
       .from(connections)
       .orderBy(asc(connections.connectorId), asc(connections.name));
-    return Promise.all(rows.map(async (r) => ({ ...r, usedInFlows: await countUsage(tx, r.id) })));
+    // One query at a time: a transaction is a single connection, and pg doesn't pipeline.
+    const out: ConnectionRow[] = [];
+    for (const r of rows) out.push({ ...r, usedInFlows: await countUsage(tx, r.id) });
+    return out;
   });
 }
 
