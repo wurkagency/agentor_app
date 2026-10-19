@@ -721,7 +721,7 @@
     "currentPlanNote": "Din nuværende plan",
     "upgrade": "Opgradér",
     "downgrade": "Nedgradér",
-    "overLimit": "Kan ikke vælges: du er over {plan}s grænse for {what}.",
+    "overLimit": "Kan ikke vælges: du er over grænsen for {what} på {plan}.",
     "blocker": {
       "integrationSets": "integrationssæt",
       "destinationsPerFlow": "destinationer pr. flow",
@@ -769,7 +769,14 @@
     "pdfVat": "Moms 25 %",
     "pdfTotal": "I alt",
     "pdfFooter": "Betalt med kort via QuickPay. Spørgsmål til fakturaen: faktura@agentor.dk",
-    "pdfTimelog": "Tidslog (registreret / afregnet, oprundet til 15 min. pr. registrering)"
+    "pdfTimelog": "Tidslog (registreret / afregnet, oprundet til 15 min. pr. registrering)",
+    "perYear": "{price} kr./år",
+    "switchYearly": "Skift til årlig",
+    "switchMonthly": "Skift til månedlig",
+    "switchYearlyBody": "Fra næste fornyelse {date} betaler du {price} for et helt år. Et år koster det samme som 10 måneder.",
+    "switchMonthlyBody": "Fra næste fornyelse {date} betaler du {price} hver måned.",
+    "yearlyDone": "Du betaler årligt fra næste fornyelse",
+    "monthlyDone": "Du betaler månedligt fra næste fornyelse"
   },
   "checkout": {
     "title": "Tilføj kort",
@@ -2331,9 +2338,31 @@
       "supportTitle": "Support",
       "supportMeta": "Timepris og adgangsregler",
       "plansTitle": "Planer",
-      "plansMeta": "Kun visning. Ændring af planer og priser kommer i en senere version.",
+      "plansMeta": "Pris og grænser pr. plan. Kun Superadmin kan ændre dem.",
       "colPlan": "Plan",
-      "colPrice": "Pris pr. md. ekskl. moms"
+      "colPrice": "Pris pr. md. ekskl. moms",
+      "colSeats": "Brugere",
+      "colTransactions": "Transaktioner/md.",
+      "colEdit": "Redigér",
+      "unlimited": "Ubegrænset",
+      "plan": {
+        "edit": "Redigér {plan}",
+        "title": "Plan: {plan}",
+        "help": "Nye grænser gælder med det samme for kunder på planen. En ny pris gælder fra næste fornyelse.",
+        "price": "Pris pr. måned (kr. ekskl. moms)",
+        "limit": {
+          "seats": "Brugere",
+          "transactionsPerMonth": "Transaktioner pr. måned",
+          "integrationSets": "Integrationssæt",
+          "destinationsPerFlow": "Destinationer pr. flow"
+        },
+        "unlimited": "Ubegrænset",
+        "unlimitedHelp": "Tom: ubegrænset",
+        "polling": "Hent data hvert (minutter)",
+        "save": "Gem plan",
+        "saved": "{plan} er gemt",
+        "error": "Planen blev ikke gemt. Prøv igen."
+      }
     },
     "status": {
       "title": "Systemstatus",

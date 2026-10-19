@@ -90,14 +90,32 @@ export function evaluateSandboxed(source: string, input: unknown): Promise<unkno
   });
 }
 
+const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+/** Sets a dotted field on a plain record copy. Keys that reach a prototype are refused. */
 function setPath(target: Record<string, unknown>, path: string, value: unknown) {
   const keys = path.split('.');
+  if (keys.some((k) => FORBIDDEN_KEYS.has(k) || k === '')) throw new Error('invalid field');
   let o: Record<string, unknown> = target;
   for (const k of keys.slice(0, -1)) {
-    if (typeof o[k] !== 'object' || o[k] === null) o[k] = {};
-    o = o[k] as Record<string, unknown>;
+    const next = Object.hasOwn(o, k) ? o[k] : undefined;
+    if (typeof next !== 'object' || next === null || Array.isArray(next)) {
+      const fresh: Record<string, unknown> = {};
+      Object.defineProperty(o, k, {
+        value: fresh,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+      o = fresh;
+    } else o = next as Record<string, unknown>;
   }
-  o[keys.at(-1)!] = value;
+  Object.defineProperty(o, keys.at(-1)!, {
+    value,
+    enumerable: true,
+    writable: true,
+    configurable: true,
+  });
 }
 
 /**

@@ -260,6 +260,13 @@
       "when": 1792439383848,
       "tag": "0036_invoice_timelog_option",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1792439679108,
+      "tag": "0037_plans_and_interval",
+      "breakpoints": true
     }
   ]
 }

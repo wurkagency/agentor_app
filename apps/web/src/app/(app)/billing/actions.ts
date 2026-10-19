@@ -1,6 +1,6 @@
 'use server';
 
-import { BillingError, buyTransactionAddon, changePlan } from '@agentor/db';
+import { BillingError, buyTransactionAddon, changeInterval, changePlan } from '@agentor/db';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { actorFor, type ActionResult } from '@/server/actor';
@@ -22,6 +22,21 @@ export async function switchPlan(planId: string): Promise<ActionResult<{ blocker
     throw e;
   }
   revalidatePath('/', 'layout');
+  return { ok: true };
+}
+
+/** "Skift til årlig" / "Skift til månedlig" (D13), from the next renewal. Owner only. */
+export async function switchInterval(interval: string): Promise<ActionResult> {
+  const ctx = await requireRole(['owner']);
+  const parsed = z.enum(['month', 'year']).safeParse(interval);
+  if (!parsed.success) return { ok: false, error: 'invalid' };
+  try {
+    await changeInterval(db(), await actorFor(ctx), parsed.data);
+  } catch (e) {
+    if (e instanceof BillingError) return { ok: false, error: e.code };
+    throw e;
+  }
+  revalidatePath('/billing');
   return { ok: true };
 }
 

@@ -229,13 +229,39 @@ Note on the seed: the prototype path uses Dinero/WooCommerce names and logos on 
 - Payment links point to the customer's own Abonnement page, where the owner updates the card; the next retry charges it.
 - Failed-charge notices to the customer during retries are the existing in-app past-due banner; e-mail per retry is a follow-up.
 
+### M10 · Superadmin access, sync engine and the remaining gaps (decided 19 Oct 2026)
+
+**Decisions by Charlie**
+- **Superadmin opens any customer's app directly**, without a request or approval, and invisibly to the customer apart from the audit log. Supporters keep the M8 rules (case, reason, approval, 24 h). Replaces "no standing access, Superadmin included" in README decision 16. Built as a hidden, 24-hour `superadmin` grant, so every database check and the audit log stay as for support.
+- **External users take a seat**: seats count every user. The seed customer (4 users on Business, 3 seats) is over its limit on purpose.
+- **Retention**: payloads with personal data 30 days, run and record history 13 months, audit log 24 months, from `plan_entitlements` per plan. Run daily by the scheduler (`app.retention_sweep`).
+- **No promises in copy**: advisor booking, setup times and the "Giv besked" waitlist button are removed.
+- **A Superadmin like the local one on the server**: `agentor-superadmin <email> "<name>"` (password at a hidden prompt, two-step login at first sign-in), installed by `agentor-deploy`.
+
+**Sync engine (no connectors yet)**
+- Fetch job → one job per route (BullMQ flow) → finish job. Job payloads carry ids; fetched records wait in `sync_payloads` and are deleted when the run finishes.
+- Polling cursor per flow, connection and entity, read again minus 2 minutes; idempotency key (flow, connection, entity, source id, source version) in `sync_items`; echo suppression from `entity_links` (what Agentor wrote where).
+- Dependency resolution from the manifest (`dependencies`, e.g. Dinero needs the customer and products first), written once per destination and remembered.
+- Token buckets in Redis per destination connection (manifest `rateLimit`) and per tenant.
+- Typed write errors: invalid data → "Kræver handling" without retry; transient, rate-limited and unauthorized → retried per record after 1, 5, 15, 60, 180, 360, 360 minutes (±20 % jitter), 8 tries; then "Kræver handling" with "Gentag". Automatic retries go through the scheduler (`flows.next_retry_at`).
+- Webhooks start runs for the named records; repeated deliveries are dropped by delivery id.
+- Stale runs (a worker that died) are failed after an hour; Prometheus metrics on `METRICS_PORT` (localhost).
+- Contract-test kit for adapters (`packages/connectors/test/contract.ts`); the mock adapters pass it.
+
+**Gaps closed**
+- Editor: OR groups in filters; JSONata field mapping in Developer view, evaluated in a worker thread that is killed after 250 ms (adds `jsonata`, named in the architecture); drag from the palette.
+- Finans: lines by hand and the time log on support invoices; owners get a notice on every failed payment.
+- Plans: price and limits editable by Superadmin in Platformindstillinger; customers switch between monthly and yearly billing.
+
+**Still open:** Systemstatus stays the M8 page (no board). Agentor's legal entity and CVR on invoices, the CVR lookup schema check and the provisional overage price need input before launch.
+
 ### Phase 2 · First live integration (after approval)
 
 Outline only; detailed plan written at the Phase 1 gate.
 
-- **M8 Sync engine:** BullMQ queues per stage, idempotency, fan-out from published routes, dependency resolution, per-connection and per-tenant token buckets (`moveToDelayed`), retries/backoff, dead-letter → failed records, polling cursors with 2 min overlap, echo suppression, graceful shutdown, retention jobs (payloads 30 d, records 13 mo, audit 24 mo), Prometheus metrics, Pino with `tenant_id`, GlitchTip/Sentry EU without payloads.
-- **M9 WooCommerce connector:** consumer key/secret auth, connection test, programmatic webhook registration + HMAC, hourly polling fallback, orders, refunds (partial, line-level), customers (guest checkout, email match), products/variations/categories (primary category), order status trigger, line-item account mapping with category → product → fallback, three-level VAT override and conflict flags. Contract tests against WooCommerce in Docker.
-- **M10 Dinero connector:** OAuth via Visma Connect, chart of accounts and VAT code lookups, contacts by email, sales and credit-note posting in Test / Kladde / Live, order reference + attachment, rate limit. Contract tests against a Dinero sandbox. The manifest's `settingsSchema` mirrors the setting groups in `docs/integrations/Dinero.md`:
+- ~~**Sync engine**~~ built in M10 (above). The original outline: BullMQ queues per stage, idempotency, fan-out from published routes, dependency resolution, per-connection and per-tenant token buckets (`moveToDelayed`), retries/backoff, dead-letter → failed records, polling cursors with 2 min overlap, echo suppression, graceful shutdown, retention jobs (payloads 30 d, records 13 mo, audit 24 mo), Prometheus metrics, Pino with `tenant_id`, GlitchTip/Sentry EU without payloads.
+- **WooCommerce connector** (planned separately): consumer key/secret auth, connection test, programmatic webhook registration + HMAC, hourly polling fallback, orders, refunds (partial, line-level), customers (guest checkout, email match), products/variations/categories (primary category), order status trigger, line-item account mapping with category → product → fallback, three-level VAT override and conflict flags. Contract tests against WooCommerce in Docker.
+- **Dinero connector** (planned separately): OAuth via Visma Connect, chart of accounts and VAT code lookups, contacts by email, sales and credit-note posting in Test / Kladde / Live, order reference + attachment, rate limit. Contract tests against a Dinero sandbox. The manifest's `settingsSchema` mirrors the setting groups in `docs/integrations/Dinero.md`:
   - *Ordretype:* invoices (default) or cashbook.
   - *Kunder:* default payment term and days, customer updates with field selection (Navn, Adresse, Postnr., By, Land, Telefon, E-mail), match field.
   - *Fakturaer:* sync by order state, base currency, the six accounts (momspligtigt, momsfrit, EU B2B, udland, fragt momspligtig/momsfri), invoice template, prices incl. moms, English on foreign orders, payment setup by payment method, payment term from Dinero customer, header with `[order_number]`, customer comments, delivery address in comment, use products in Dinero, rounding differences, draft updates, book invoices, register payment, EAN invoice, invoice e-mail.
@@ -243,7 +269,7 @@ Outline only; detailed plan written at the Phase 1 gate.
   - *Kreditnotaer:* refund accounts (momspligtig/momsfri), header with `[refund_number]`/`[order_number]`, book credit notes.
 
   Category → account and product exceptions (decision 9, WooCommerce spec §4) sit on top of these defaults.
-- **M11 Notifications, PWA, mobile:** e-mail/SMS via Brevo, Web Push (VAPID, own server), service worker caching the shell only, IndexedDB status snapshot keyed by user+tenant and wiped on logout/401 (covered by the isolation suite), mobile screens `M1`–`M7`, `D10-Afstemning` if it's in Phase 2 (see questions).
+- **Notifications, PWA, mobile** (later, decided 19 Oct 2026): e-mail/SMS via Brevo, Web Push (VAPID, own server), service worker caching the shell only, IndexedDB status snapshot keyed by user+tenant and wiped on logout/401 (covered by the isolation suite), mobile screens `M1`–`M7`, `D10-Afstemning` if it's in Phase 2 (see questions).
 
 ---
 
@@ -315,9 +341,9 @@ Each has the default I'll use if you don't answer. **Q1–Q10 block M3/M4**; the
 
 **Plans, billing and limits**
 1. **The full `plan_entitlements` table.** *Partly answered:* transactions/month are Startup 100, Business 1.000, Enterprise 2.000, so the seed's usage meter becomes e.g. 712 / 1.000 instead of 1.420 / 2.000 (the 71 % shown on the boards is kept). Polling 15/5/1 min (D7). Integration sets: Startup 1 (answered, replaces `[ANTAL]`), Business and Enterprise alle (D13-Abonnement shows "2 / alle" on Business; the board outranks agentor.dk's "2", migration 0015). Destinations per flow: 3 on Startup and Business, unlimited on Enterprise (answered). Overage: **100 DKK per 1.000 transactions, provisional** (answered; marked `FOLLOW-UP` in the seed and in `plan_entitlements` so it can't ship unnoticed).
-   - **Q1b · Seats:** *answered*, Startup 2, Business 3, Enterprise unlimited. This replaces the boards' "plads til 10" and "4 / 10". **Still open:** do external users with per-flow access count? *Default:* they don't. Then the seed is 3 / 3 on Business (Mette, Jonas, Bo) with Sara as external, which is consistent; if they count, the seed tenant is over its limit.
+   - **Q1b · Seats:** *answered*, Startup 2, Business 3, Enterprise unlimited. This replaces the boards' "plads til 10" and "4 / 10". *Answered 19 Oct 2026:* external users count; the seed customer is over its limit on purpose.
 2. **Plan features on D13 that the spec doesn't have:** annual billing ("Skift til årlig"), SSO and white-label on Enterprise, "Eksterne brugere" from Business, "Supportadgang og audit-log" on Startup. *Default:* feature text comes from `plan_entitlements`; none of the extra features are built.
-3. **Retention.** The spec has three periods for three kinds of data (§9.6): request/response payloads with personal data 30 d (GDPR), run and record metadata without personal data 13 mo, audit log 24 mo, "configurable per plan". The boards show one number: "Gemmes i 90 dage på Business" (Aktivitet) and "Opbevaring 90/90 dage" (D13). *Answer: unknown what the 90 days covers.* **Decision for now (marked `FOLLOW-UP`):** spec values for every plan (payloads 30 d, run and record history 13 mo, audit 24 mo), stored as `plan_entitlements` so they can differ per plan later. The boards' "90 dage" copy is rendered from the entitlement instead of hardcoded, so it will read "13 måneder" until you decide otherwise.
+3. **Retention.** The spec has three periods for three kinds of data (§9.6): request/response payloads with personal data 30 d (GDPR), run and record metadata without personal data 13 mo, audit log 24 mo, "configurable per plan". The boards show one number: "Gemmes i 90 dage på Business" (Aktivitet) and "Opbevaring 90/90 dage" (D13). *Answer: unknown what the 90 days covers.* **Decided 19 Oct 2026:** spec values for every plan (payloads 30 d, run and record history 13 mo, audit 24 mo), stored as `plan_entitlements` so they can differ per plan later. The boards' "90 dage" copy is rendered from the entitlement instead of hardcoded, so it will read "13 måneder" until you decide otherwise.
 4. **Quota behaviour.** D2 decision: 7 days of grace after 100 %. A component sheet says runs queue until the 1st; another warns at 89 % vs the 80 % rule. *Default:* D2 (7 days, then add-on), warning at 80 %.
 5. **QuickPay test merchant:** *answered*, test merchant credentials received and stored in the git-ignored `.env.local` only (never in the repo, CI or logs). M4 unit tests use a mocked QuickPay client; one opt-in integration test runs against QuickPay's test mode locally. Still open but non-blocking: invoice number format (AG-2026-1043 shown), prices shown with moms, "Du betaler først, når du forlader opsætningen". *Default:* copy as drawn.
 6. **CVR lookup:** *answered*, CVR data from Virk via Datafordeler's GraphQL API (documentation: https://confluence.kds.dk/pages/viewpage.action?pageId=187105434). Built behind a `CompanyRegistry` interface in M4; the Datafordeler credentials (service user) go in `.env.local` / `.env.production` only and are needed before M4 can be verified. Still open: the "Ordrer pr. måned" bands behind the plan recommendation. *Default:* as drawn (200–1.000 → Business).
@@ -341,7 +367,7 @@ Each has the default I'll use if you don't answer. **Q1–Q10 block M3/M4**; the
 18. **Seed inconsistencies:** error counts (2 vs 3 Kreditnotaer records, "3 flows kræver handling" vs the items shown), "Outlet → regnskab · 3 ruter", seed plan (Startup in D2-Graense, Business elsewhere). *Default:* Business everywhere plus a separate seed state for D2-Graense; numbers made consistent and every change listed in the M6 PR.
 19. **"Kørsler" and "Skabeloner" pills** under Integrationer. *Default:* as in §5.
 20. **"Synkroniseret omsætning"** with or without moms (spec: by choice; D5 shows "uden moms"). *Default:* without moms, with a tenant setting.
-21. **Promises in copy I can't verify:** "Book 20 minutter med en rådgiver", "Opsætning tager typisk 10 minutter", the "Giv besked" waitlist, custom connectors in Developer view, several accounts per connector ("Tilføj konto"), "Prøver igen om 5 min.", "ca. 1.240 kontakter". *Default:* build several accounts per connector (the model allows it) and the waitlist as stored interest; hide the advisor booking and custom-connector text until you confirm.
+21. **Promises in copy I can't verify:** "Book 20 minutter med en rådgiver", "Opsætning tager typisk 10 minutter", the "Giv besked" waitlist, custom connectors in Developer view, several accounts per connector ("Tilføj konto"), "Prøver igen om 5 min.", "ca. 1.240 kontakter". *Answered 19 Oct 2026:* none of these promises ship; the advisor booking, setup times and the waitlist button are removed.
 
 **Accessibility**
 22. **Input border contrast** (§5). *Default:* `--color-border-strong`.

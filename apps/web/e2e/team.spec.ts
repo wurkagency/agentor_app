@@ -8,6 +8,8 @@ import { login, ownerSql } from './support';
 /** M3 acceptance: team, invitations, settings and audit log (D11, D12). */
 
 test.describe.configure({ mode: 'serial' });
+// The invite test lifts the customer to Enterprise and adds a member; reseed once the file is done.
+test.afterAll(() => globalSetup());
 
 test('team list shows roles, per-flow access, external users and MFA state (D11-Team)', async ({
   page,
@@ -74,7 +76,6 @@ test('invite a reader by e-mail; they create an account and join (D11-Inviter)',
       .first()
       .getByRole('row', { name: /Ny Bogholder/ }),
   ).toContainText('Læser');
-  globalSetup();
 });
 
 test('change a role and access in one go; the audit log records it', async ({ page }) => {

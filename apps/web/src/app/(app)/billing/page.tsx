@@ -50,7 +50,18 @@ export default async function BillingPage() {
         <PlanHero
           className="lg:col-span-5"
           planName={o.plan.name}
-          price={t('perMonth', { price: n(Math.round(o.plan.priceMonthlyOre / 100)) })}
+          price={
+            o.subscription.interval === 'year'
+              ? t('perYear', { price: n(Math.round((o.plan.priceMonthlyOre * 10) / 100)) })
+              : t('perMonth', { price: n(Math.round(o.plan.priceMonthlyOre / 100)) })
+          }
+          interval={o.subscription.interval}
+          switchPrice={
+            o.subscription.interval === 'year'
+              ? t('perMonth', { price: n(Math.round(o.plan.priceMonthlyOre / 100)) })
+              : t('perYear', { price: n(Math.round((o.plan.priceMonthlyOre * 10) / 100)) })
+          }
+          renewsOn={renews ? formatDate(renews, locale) : null}
           renewal={
             o.subscription.status === 'incomplete'
               ? t('noCardYet')

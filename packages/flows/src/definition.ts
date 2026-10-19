@@ -49,7 +49,16 @@ export const routeSchema = z.object({
   filters: z.array(filterRuleSchema).default([]),
   /** Developer mapping: JSONata expression per target field, e.g. "customer.name". */
   expressions: z
-    .record(z.string().regex(/^[A-Za-z][\w.]{0,79}$/), z.string().max(2000))
+    .record(
+      z
+        .string()
+        .regex(/^[A-Za-z][\w]*(\.[A-Za-z][\w]*){0,7}$/)
+        .max(80)
+        .refine(
+          (k) => !k.split('.').some((p) => ['__proto__', 'constructor', 'prototype'].includes(p)),
+        ),
+      z.string().max(2000),
+    )
     .default({}),
   /** Update existing records in the destination (matched via the cross-reference). */
   updateExisting: z.boolean().default(true),

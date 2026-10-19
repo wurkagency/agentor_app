@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
+import globalSetup from './global-setup';
 import { latestMailTo } from './mailpit';
 import { base32Decode, login, totp } from './support';
 
@@ -114,7 +115,7 @@ test('subscription page: plan, meters, blocked downgrade and invoices (D13)', as
 
   const startup = page.getByRole('region', { name: 'Startup', exact: true });
   await expect(startup.getByRole('button', { name: 'Nedgradér' })).toBeDisabled();
-  await expect(startup).toContainText('Kan ikke vælges: du er over Startups grænse');
+  await expect(startup).toContainText('Kan ikke vælges: du er over grænsen for');
   const business = page.getByRole('region', { name: 'Business', exact: true });
   await expect(business).toContainText('Din plan');
 
@@ -133,7 +134,7 @@ test('subscription page: plan, meters, blocked downgrade and invoices (D13)', as
   expect(file.suggestedFilename()).toBe('AG-2026-1043.pdf');
 });
 
-test('upgrade to Enterprise and back to Business', async ({ page }) => {
+test('upgrade to Enterprise; Business is then blocked while over its seats', async ({ page }) => {
   await login(page, 'mette');
   await page.goto('/billing');
   await page.getByRole('button', { name: 'Opgradér til Enterprise' }).click();
@@ -144,15 +145,11 @@ test('upgrade to Enterprise and back to Business', async ({ page }) => {
     'Din plan',
   );
 
-  await page
-    .getByRole('region', { name: 'Business', exact: true })
-    .getByRole('button', { name: 'Nedgradér' })
-    .click();
-  await page
-    .getByRole('dialog', { name: 'Skift til Business?' })
-    .getByRole('button', { name: 'Nedgradér' })
-    .click();
-  await expect(page.getByText('Du er nu på Business')).toBeVisible();
+  // Four users on three Business seats: the downgrade waits until a seat is freed.
+  const business = page.getByRole('region', { name: 'Business', exact: true });
+  await expect(business.getByRole('button', { name: 'Nedgradér' })).toBeDisabled();
+  await expect(business).toContainText('du er over grænsen for brugere på Business');
+  globalSetup();
 });
 
 test('the transaction meter is in the secondary bar for every member', async ({ page }) => {
@@ -183,4 +180,18 @@ test('a plan with no free seats refuses further invitations (D11)', async ({ pag
   };
   const dialog = await invite(`ingen.plads.${Date.now()}@example.test`);
   await expect(dialog.getByText('Planen har ikke flere pladser')).toBeVisible();
+});
+
+test('the owner switches to yearly billing from the next renewal (D13)', async ({ page }) => {
+  await login(page, 'mette');
+  await page.goto('/billing');
+  await page.getByRole('button', { name: 'Skift til årlig' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Skift til årlig' });
+  await expect(dialog).toContainText('1.590 kr./år');
+  await dialog.getByRole('button', { name: 'Skift til årlig' }).click();
+  await expect(page.getByText('Du betaler årligt fra næste fornyelse')).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Business' }).first()).toBeVisible();
+  await page.getByRole('button', { name: 'Skift til månedlig' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Skift til månedlig' }).click();
+  await expect(page.getByText('Du betaler månedligt fra næste fornyelse')).toBeVisible();
 });

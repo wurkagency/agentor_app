@@ -769,7 +769,14 @@
     "pdfVat": "VAT 25%",
     "pdfTotal": "Total",
     "pdfFooter": "Paid by card via QuickPay. Questions about the invoice: faktura@agentor.dk",
-    "pdfTimelog": "Time log (registered / billed, rounded up to 15 min. per registration)"
+    "pdfTimelog": "Time log (registered / billed, rounded up to 15 min. per registration)",
+    "perYear": "{price} kr./yr",
+    "switchYearly": "Switch to yearly",
+    "switchMonthly": "Switch to monthly",
+    "switchYearlyBody": "From the next renewal on {date} you pay {price} for a whole year. A year costs the same as 10 months.",
+    "switchMonthlyBody": "From the next renewal on {date} you pay {price} every month.",
+    "yearlyDone": "You pay yearly from the next renewal",
+    "monthlyDone": "You pay monthly from the next renewal"
   },
   "checkout": {
     "title": "Add card",
@@ -2331,9 +2338,31 @@
       "supportTitle": "Support",
       "supportMeta": "Hourly rate and access rules",
       "plansTitle": "Plans",
-      "plansMeta": "Read-only. Changing plans and prices comes in a later version.",
+      "plansMeta": "Price and limits per plan. Only Superadmin can change them.",
       "colPlan": "Plan",
-      "colPrice": "Price per month excl. VAT"
+      "colPrice": "Price per month excl. VAT",
+      "colSeats": "Users",
+      "colTransactions": "Transactions/mo.",
+      "colEdit": "Edit",
+      "unlimited": "Unlimited",
+      "plan": {
+        "edit": "Edit {plan}",
+        "title": "Plan: {plan}",
+        "help": "New limits apply at once to customers on the plan. A new price applies from their next renewal.",
+        "price": "Price per month (kr. ex. VAT)",
+        "limit": {
+          "seats": "Users",
+          "transactionsPerMonth": "Transactions per month",
+          "integrationSets": "Integration sets",
+          "destinationsPerFlow": "Destinations per flow"
+        },
+        "unlimited": "Unlimited",
+        "unlimitedHelp": "Empty: unlimited",
+        "polling": "Fetch data every (minutes)",
+        "save": "Save plan",
+        "saved": "{plan} saved",
+        "error": "The plan was not saved. Try again."
+      }
     },
     "status": {
       "title": "System status",

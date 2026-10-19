@@ -183,3 +183,17 @@ describe('OR groups and developer mapping', () => {
     });
   });
 });
+
+describe('expression fields can never reach a prototype', () => {
+  it('refuses __proto__ and constructor paths', async () => {
+    const { parseDefinition: parse } = await import('../src/definition.js');
+    expect(() =>
+      parse({
+        ...def,
+        routes: [{ ...def.routes[0], expressions: { 'constructor.prototype.x': '1' } }],
+      }),
+    ).toThrow();
+    await expect(applyExpressions({}, { '__proto__.polluted': '1' })).rejects.toThrow();
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+});

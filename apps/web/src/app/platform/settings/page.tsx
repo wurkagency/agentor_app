@@ -2,6 +2,7 @@ import { getPlatformSettings, listPlans } from '@agentor/db';
 import { formatMoney, type Locale } from '@agentor/i18n';
 import { Card, CardHeader, Table, Td, Th, Tr } from '@agentor/ui';
 import { getLocale, getTranslations } from 'next-intl/server';
+import { PlanEditButton } from '@/components/platform/plan-editor';
 import { RulesForm } from '@/components/platform/staff-controls';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
@@ -14,7 +15,7 @@ export async function generateMetadata() {
 
 /**
  * Platformindstillinger (Superadmin): the hourly rate for billable support time (README decision
- * 18: 640 kr. ex. VAT), the bookkeeper's e-mail for the monthly report and the access rules. Not drawn on the boards; plans are read-only here until their screen exists (FOLLOW-UP).
+ * 18: 640 kr. ex. VAT), the bookkeeper's e-mail for the monthly report and the access rules, and the plans' price and limits. Not drawn on the boards.
  */
 export default async function PlatformSettingsPage() {
   const { actor } = await requireStaff(true);
@@ -45,17 +46,32 @@ export default async function PlatformSettingsPage() {
             <thead>
               <tr>
                 <Th className="pl-5">{t('colPlan')}</Th>
-                <Th numeric className="pr-5">
-                  {t('colPrice')}
-                </Th>
+                <Th numeric>{t('colPrice')}</Th>
+                <Th numeric>{t('colSeats')}</Th>
+                <Th numeric>{t('colTransactions')}</Th>
+                <Th className="pr-5" aria-label={t('colEdit')} />
               </tr>
             </thead>
             <tbody>
               {plans.map((p) => (
                 <Tr key={p.id}>
                   <Td className="pl-5 font-semibold">{p.name}</Td>
-                  <Td numeric className="pr-5">
-                    {formatMoney(p.priceMonthlyOre / 100, locale)}
+                  <Td numeric>{formatMoney(p.priceMonthlyOre / 100, locale)}</Td>
+                  <Td numeric>{p.entitlements.seats ?? t('unlimited')}</Td>
+                  <Td numeric>{p.entitlements.transactionsPerMonth ?? t('unlimited')}</Td>
+                  <Td className="pr-5 text-right">
+                    <PlanEditButton
+                      plan={{
+                        id: p.id,
+                        name: p.name,
+                        priceKr: p.priceMonthlyOre / 100,
+                        seats: p.entitlements.seats,
+                        transactionsPerMonth: p.entitlements.transactionsPerMonth,
+                        integrationSets: p.entitlements.integrationSets,
+                        destinationsPerFlow: p.entitlements.destinationsPerFlow,
+                        pollingIntervalMinutes: p.entitlements.pollingIntervalMinutes,
+                      }}
+                    />
                   </Td>
                 </Tr>
               ))}

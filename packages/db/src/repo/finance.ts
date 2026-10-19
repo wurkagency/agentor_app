@@ -490,3 +490,38 @@ export async function logFinanceAction(
       .values({ actorUserId: actor.userId, actorName: actor.name, action, detail }),
   );
 }
+
+export const EDITABLE_PLAN_KEYS = [
+  'seats',
+  'transactions_per_month',
+  'integration_sets',
+  'destinations_per_flow',
+  'polling_interval_minutes',
+] as const;
+
+/**
+ * Superadmin changes a plan's monthly price and limits (P6 "Ændre planer, priser"). Null in a
+ * limit means unlimited. Customers see the change at once; prices apply from the next renewal.
+ */
+export async function updatePlan(
+  db: Database,
+  actor: StaffActor,
+  planId: string,
+  input: {
+    priceMonthlyOre: number;
+    values: Partial<Record<(typeof EDITABLE_PLAN_KEYS)[number], number | null>>;
+  },
+): Promise<void> {
+  requireSuperadmin(actor);
+  await asStaff(db, actor.userId, async (tx) => {
+    await tx.execute(
+      sql`select app.platform_plan_update(${planId}, ${input.priceMonthlyOre}::int, ${JSON.stringify(input.values)}::jsonb)`,
+    );
+    await tx.insert(platformAudit).values({
+      actorUserId: actor.userId,
+      actorName: actor.name,
+      action: 'plan.updated',
+      detail: { planId, ...input },
+    });
+  });
+}

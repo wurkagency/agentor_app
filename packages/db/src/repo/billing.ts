@@ -114,6 +114,7 @@ export interface BillingOverview {
     cardExpiry: string | null;
     currentPeriodEnd: Date | null;
     pastDueSince: Date | null;
+    interval: 'month' | 'year';
   };
   plan: PlanInfo;
   plans: PlanInfo[];
@@ -163,6 +164,7 @@ export async function getBillingOverview(
         cardExpiry: sub.cardExpiry,
         currentPeriodEnd: sub.currentPeriodEnd,
         pastDueSince: sub.pastDueSince,
+        interval: sub.interval,
       },
       plan,
       plans: all,
@@ -268,6 +270,35 @@ export async function changePlan(db: Database, actor: Actor, planId: string): Pr
       objectId: sub.id,
       before: { plan: sub.planId },
       after: { plan: planId },
+    });
+  });
+}
+
+/**
+ * Monthly or yearly billing (D13 "Skift til årlig"; a year costs 10 months). Owner only (the
+ * update policy); it applies from the next renewal, so the current period is untouched.
+ */
+export async function changeInterval(
+  db: Database,
+  actor: Actor,
+  interval: 'month' | 'year',
+): Promise<void> {
+  await withTenant(db, actor, async (tx) => {
+    const [sub] = await tx.select().from(subscriptions).limit(1);
+    if (!sub) throw new BillingError('NO_SUBSCRIPTION');
+    if (sub.interval === interval) return;
+    const res = await tx
+      .update(subscriptions)
+      .set({ interval, updatedAt: new Date() })
+      .where(eq(subscriptions.id, sub.id))
+      .returning({ id: subscriptions.id });
+    if (!res.length) throw new BillingError('FORBIDDEN');
+    await writeAudit(tx, actor, {
+      action: 'subscription.interval_changed',
+      objectType: 'subscription',
+      objectId: sub.id,
+      before: { interval: sub.interval },
+      after: { interval },
     });
   });
 }
