@@ -240,7 +240,8 @@
       "published": "{name} publicerede v{number}",
       "supportRequested": "{name} fra Agentor support beder om adgang i {hours, plural, one {# time} other {# timer}}",
       "supportOpened": "{name} fra Agentor support har adgang i {hours, plural, one {# time} other {# timer}}",
-      "supportExtension": "{name} fra Agentor support beder om at forlænge adgangen"
+      "supportExtension": "{name} fra Agentor support beder om at forlænge adgangen",
+      "paymentFailed": "Betalingen af faktura {number} blev afvist. {retry, select, none {Opdatér kortet under Abonnement.} other {Vi prøver automatisk igen.}}"
     },
     "actions": {
       "connection_broken": "Genautentificér",
@@ -767,7 +768,8 @@
     "pdfNet": "Beløb ekskl. moms",
     "pdfVat": "Moms 25 %",
     "pdfTotal": "I alt",
-    "pdfFooter": "Betalt med kort via QuickPay. Spørgsmål til fakturaen: faktura@agentor.dk"
+    "pdfFooter": "Betalt med kort via QuickPay. Spørgsmål til fakturaen: faktura@agentor.dk",
+    "pdfTimelog": "Tidslog (registreret / afregnet, oprundet til 15 min. pr. registrering)"
   },
   "checkout": {
     "title": "Tilføj kort",
@@ -2703,7 +2705,16 @@
         "recipient": "Modtager",
         "showRounding": "Vis oprunding pr. linje",
         "showRoundingHelp": "Viser registreret og afregnet tid side om side",
-        "notBilled": "{time} på kundens sager er markeret som ikke fakturerbar (fx fejl hos Agentor) og er ikke med."
+        "notBilled": "{time} på kundens sager er markeret som ikke fakturerbar (fx fejl hos Agentor) og er ikke med.",
+        "addLine": "Tilføj linje",
+        "addLineHelp": "En linje på fakturaen ud over tiden, fx goodwill. Et negativt beløb er en rabat.",
+        "lineText": "Tekst",
+        "lineAmount": "Beløb ekskl. moms (kr.)",
+        "lineAmountHelp": "Brug minus for rabat",
+        "lineAdded": "Linjen er tilføjet",
+        "removeLine": "Fjern linjen {text}",
+        "attachTimelog": "Vedhæft tidslog",
+        "attachTimelogHelp": "Dato og tid pr. registrering står under fakturaen. Interne noter kommer aldrig med."
       },
       "due": "Forfald",
       "customer": {

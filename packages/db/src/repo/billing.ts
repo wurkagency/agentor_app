@@ -700,6 +700,22 @@ export async function applyChargeResult(
           .where(eq(subscriptions.id, sub.id));
       }
     }
+    // The owners hear about every failed try, with when it is tried again (README decision 18);
+    // a payment that goes through clears the notice.
+    if (result.accepted)
+      await tx.execute(sql`
+        update notifications set resolved_at = ${now}
+         where message_key = 'paymentFailed' and resolved_at is null
+           and params ->> 'number' = ${inv.number ?? ''}`);
+    else
+      await tx.execute(sql`
+        insert into notifications (tenant_id, user_id, event, needs_action, message_key, params, href)
+        select ${tenantId}::uuid, m.user_id, 'payment_failed', true, 'paymentFailed',
+               ${JSON.stringify({
+                 number: inv.number ?? '',
+                 retry: retry ? 'yes' : 'none',
+               })}::jsonb, '/billing'
+          from memberships m where m.role = 'owner'`);
     await writeSystemAudit(tx, tenantId, {
       action: result.accepted ? 'invoice.paid' : 'invoice.failed',
       objectType: 'invoice',

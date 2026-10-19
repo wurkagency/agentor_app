@@ -1,8 +1,9 @@
 import {
   DEFAULT_SUPPORT_RATE_ORE,
+  roundUpQuarter,
   supportLines,
   supportMonth,
-  supportTotals,
+  withVat,
   type SupportEntry,
   type SupportLine,
 } from '@agentor/core';
@@ -126,6 +127,7 @@ export interface FinanceInvoice {
   nextRetryAt: Date | null;
   reminders: number;
   lastReminderAt: Date | null;
+  attachTimelog: boolean;
   createdAt: Date;
 }
 
@@ -171,6 +173,7 @@ export async function financeInvoices(
       nextRetryAt: date(i.next_retry_at),
       reminders: (i.reminders as number) ?? 0,
       lastReminderAt: date(i.last_reminder_at),
+      attachTimelog: i.attach_timelog !== false,
       createdAt: date(i.created_at)!,
     };
   });
@@ -264,54 +267,115 @@ function lineDetail(l: SupportLine): string {
 
 /**
  * Builds or refreshes the support drafts for a month (F3 "Forhåndsvis fakturaer"): one per
- * customer with billable time on a case. Approved and sent invoices are left as they are.
+ * customer with billable time on a case, plus the lines added by hand (F5 "Tilføj linje"),
+ * which a refresh keeps. Approved and sent invoices are left as they are.
  */
 export async function saveSupportDrafts(
   db: Database,
   actor: StaffActor,
   year: number,
   month: number,
+  opts: {
+    tenantId?: string;
+    addLine?: { text: string; amountOre: number };
+    removeLine?: number;
+  } = {},
 ): Promise<{ drafts: number }> {
   requireSuperadmin(actor);
   const m = supportMonth(year, month);
-  const [entries, rate] = await Promise.all([
+  const [entries, rate, existing] = await Promise.all([
     financeTime(db, actor, m.firstDay, m.lastDay),
     supportRateOre(db, actor),
+    financeInvoices(db, actor, m.start, new Date(Date.now() + 86_400_000)),
   ]);
+  const drafts = new Map(
+    existing
+      .filter(
+        (i) =>
+          i.kind === 'support' &&
+          i.status === 'draft' &&
+          !i.approvedAt &&
+          i.periodStart.getTime() === m.start.getTime(),
+      )
+      .map((i) => [i.tenantId, i]),
+  );
   const byTenant = new Map<string, FinanceTimeEntry[]>();
   for (const e of entries) byTenant.set(e.tenantId, [...(byTenant.get(e.tenantId) ?? []), e]);
-  let drafts = 0;
+  for (const t of drafts.keys()) if (!byTenant.has(t)) byTenant.set(t, []);
+  if (opts.tenantId && !byTenant.has(opts.tenantId)) byTenant.set(opts.tenantId, []);
+  let count = 0;
   await asStaff(db, actor.userId, async (tx) => {
     for (const [tenantId, list] of byTenant) {
+      if (opts.tenantId && tenantId !== opts.tenantId) continue;
       const lines = supportLines(list, rate);
-      if (lines.length === 0) continue;
-      const totals = supportTotals(lines);
-      const invoiceLines: InvoiceLine[] = lines.map((l) => ({
-        text: l.text,
-        amountOre: l.amountOre,
-        caseId: l.caseId,
-        caseNumber: l.caseNumber,
-        registeredMinutes: l.registeredMinutes,
-        billedMinutes: l.billedMinutes,
-        rateOre: l.rateOre,
-        detail: lineDetail(l),
-      }));
+      let manual = (drafts.get(tenantId)?.lines ?? []).filter((l) => l.manual);
+      if (opts.removeLine !== undefined)
+        manual = manual.filter((_, idx) => idx !== opts.removeLine);
+      if (opts.addLine)
+        manual.push({ text: opts.addLine.text, amountOre: opts.addLine.amountOre, manual: true });
+      if (lines.length === 0 && manual.length === 0) continue;
+      const invoiceLines: InvoiceLine[] = [
+        ...lines.map((l) => ({
+          text: l.text,
+          amountOre: l.amountOre,
+          caseId: l.caseId,
+          caseNumber: l.caseNumber,
+          registeredMinutes: l.registeredMinutes,
+          billedMinutes: l.billedMinutes,
+          rateOre: l.rateOre,
+          detail: lineDetail(l),
+          log: list
+            .filter((e) => l.entryIds.includes(e.id))
+            .sort((a, b) => a.workDate.localeCompare(b.workDate))
+            .map((e) => ({
+              date: e.workDate,
+              registeredMinutes: e.minutes,
+              billedMinutes: roundUpQuarter(e.minutes),
+            })),
+        })),
+        ...manual,
+      ];
+      const net = Math.max(
+        0,
+        invoiceLines.reduce((a, l) => a + l.amountOre, 0),
+      );
+      const { vat } = withVat(net);
       await tx.execute(sql`select app.platform_finance_save_draft(
         ${tenantId}::uuid, ${m.start.toISOString()}::timestamptz, ${m.end.toISOString()}::timestamptz,
         ${`Support · ${MONTHS_DA[month - 1]} ${year}`}, ${JSON.stringify(invoiceLines)}::jsonb,
-        ${totals.net}::int, ${totals.vat}::int,
+        ${net}::int, ${vat}::int,
         ${`{${lines.flatMap((l) => l.entryIds).join(',')}}`}::uuid[],
         ${m.sendAt.toISOString()}::timestamptz)`);
-      drafts++;
+      count++;
     }
     await tx.insert(platformAudit).values({
       actorUserId: actor.userId,
       actorName: actor.name,
-      action: 'finance.drafts_built',
-      detail: { year, month, drafts },
+      action: opts.addLine
+        ? 'finance.line_added'
+        : opts.removeLine !== undefined
+          ? 'finance.line_removed'
+          : 'finance.drafts_built',
+      detail: { year, month, drafts: count, ...(opts.tenantId ? { tenantId: opts.tenantId } : {}) },
     });
   });
-  return { drafts };
+  return { drafts: count };
+}
+
+/** F5 "Vedhæft tidslog": print the time log on the support invoice, or not. */
+export async function setDraftTimelog(
+  db: Database,
+  actor: StaffActor,
+  tenantId: string,
+  invoiceId: string,
+  attach: boolean,
+): Promise<void> {
+  requireSuperadmin(actor);
+  await asStaff(db, actor.userId, (tx) =>
+    tx.execute(
+      sql`select app.platform_finance_timelog(${tenantId}::uuid, ${invoiceId}::uuid, ${attach}, ${actor.name})`,
+    ),
+  );
 }
 
 export async function approveSupportInvoice(

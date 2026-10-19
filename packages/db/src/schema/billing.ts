@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  boolean,
   jsonb,
   check,
   foreignKey,
@@ -143,6 +144,10 @@ export interface InvoiceLine {
   billedMinutes?: number;
   rateOre?: number;
   detail?: string;
+  /** Added by hand on Finans (F5 "Tilføj linje"), e.g. a goodwill discount; kept on refresh. */
+  manual?: boolean;
+  /** The registrations behind a case line, for the time log on the invoice. */
+  log?: { date: string; registeredMinutes: number; billedMinutes: number }[];
 }
 
 export const invoices = pgTable(
@@ -175,6 +180,8 @@ export const invoices = pgTable(
     attempts: integer('attempts').notNull().default(0),
     nextRetryAt: ts('next_retry_at'),
     reminders: integer('reminders').notNull().default(0),
+    /** Support invoices: print the time log (date and minutes per registration) on the PDF. */
+    attachTimelog: boolean('attach_timelog').notNull().default(true),
     lastReminderAt: ts('last_reminder_at'),
     createdAt: createdAt(),
   },

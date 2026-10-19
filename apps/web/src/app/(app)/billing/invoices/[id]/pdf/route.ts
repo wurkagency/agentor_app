@@ -40,6 +40,19 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         [tenant.postalCode, tenant.city].filter(Boolean).join(' '),
       ].filter((x): x is string => Boolean(x)),
     },
+    ...(i.kind === 'support' && i.attachTimelog
+      ? {
+          timelog: {
+            title: t('pdfTimelog'),
+            rows: i.lines.flatMap((l) =>
+              (l.log ?? []).map((e) => ({
+                text: `${formatDate(new Date(`${e.date}T12:00:00Z`), locale)} · ${l.text}`,
+                amount: `${formatMinutes(e.registeredMinutes, locale)} / ${formatMinutes(e.billedMinutes, locale)}`,
+              })),
+            ),
+          },
+        }
+      : {}),
     labels: {
       invoice: t('pdfInvoice'),
       date: t('date'),

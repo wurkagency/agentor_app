@@ -8,6 +8,11 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ButtonLink } from '@/components/button-link';
 import { ApproveButton, PreviewInvoicesButton } from '@/components/platform/finance/draft-buttons';
+import {
+  AddLineButton,
+  RemoveLineButton,
+  TimelogToggle,
+} from '@/components/platform/finance/draft-lines';
 import { dayMonth, money, monthLong, withParams } from '@/components/platform/finance/bits';
 import { Logo } from '@/components/logo';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
@@ -41,25 +46,29 @@ export default async function SupportInvoicePage({
   if (!sub) notFound();
   const showRounding = sp.rounding === '1';
   const invoice = c?.invoice ?? null;
-  // A sent or approved invoice shows its own lines; a draft shows the live lines.
-  const lines =
-    invoice && (invoice.approvedAt || invoice.status !== 'draft')
-      ? invoice.lines.map((l) => ({
-          text: l.text,
-          detail: l.detail ?? '',
-          registered: l.registeredMinutes ?? 0,
-          billed: l.billedMinutes ?? 0,
-          rate: l.rateOre ?? data.rateOre,
-          amount: l.amountOre,
-        }))
-      : (c?.lines ?? []).map((l) => ({
-          text: l.text,
-          detail: '',
-          registered: l.registeredMinutes,
-          billed: l.billedMinutes,
-          rate: l.rateOre,
-          amount: l.amountOre,
-        }));
+  // Once a draft exists it shows its own lines (with lines added by hand); before that the
+  // live lines from the time registered so far.
+  const editable = Boolean(invoice && invoice.status === 'draft' && !invoice.approvedAt);
+  let manualIndex = 0;
+  const lines = invoice
+    ? invoice.lines.map((l) => ({
+        text: l.text,
+        detail: l.detail ?? '',
+        registered: l.registeredMinutes ?? 0,
+        billed: l.billedMinutes ?? 0,
+        rate: l.rateOre ?? null,
+        amount: l.amountOre,
+        manual: l.manual ? manualIndex++ : null,
+      }))
+    : (c?.lines ?? []).map((l) => ({
+        text: l.text,
+        detail: '',
+        registered: l.registeredMinutes,
+        billed: l.billedMinutes,
+        rate: l.rateOre as number | null,
+        amount: l.amountOre,
+        manual: null as number | null,
+      }));
   const net = lines.reduce((a, l) => a + l.amount, 0);
   const vat = Math.round(net * 0.25);
   const prev = index > 0 ? data.customers[index - 1] : null;
@@ -172,18 +181,30 @@ export default async function SupportInvoicePage({
             </thead>
             <tbody>
               {lines.map((l) => (
-                <Tr key={l.text}>
+                <Tr key={`${l.text}-${l.manual ?? ''}`}>
                   <Td className="pl-6">
                     <span className="flex flex-col whitespace-normal">
                       <span>{l.text}</span>
                       {l.detail && <span className="text-meta text-fg-2">{l.detail}</span>}
                     </span>
                   </Td>
-                  {showRounding && <Td numeric>{formatMinutes(l.registered, locale)}</Td>}
-                  <Td numeric>{formatMinutes(l.billed, locale)}</Td>
-                  <Td numeric>{money(l.rate, locale)}</Td>
+                  {showRounding && (
+                    <Td numeric>{l.manual === null ? formatMinutes(l.registered, locale) : '–'}</Td>
+                  )}
+                  <Td numeric>{l.manual === null ? formatMinutes(l.billed, locale) : '–'}</Td>
+                  <Td numeric>{l.rate === null ? '–' : money(l.rate, locale)}</Td>
                   <Td numeric className="pr-6">
-                    {money(l.amount, locale)}
+                    <span className="inline-flex items-center justify-end gap-1">
+                      {money(l.amount, locale)}
+                      {l.manual !== null && editable && (
+                        <RemoveLineButton
+                          tenantId={tenantId}
+                          month={m.key}
+                          index={l.manual}
+                          label={l.text}
+                        />
+                      )}
+                    </span>
                   </Td>
                 </Tr>
               ))}
@@ -266,6 +287,17 @@ export default async function SupportInvoicePage({
               </span>
             </Link>
           </Card>
+          {invoice && (
+            <Card>
+              <TimelogToggle
+                tenantId={tenantId}
+                invoiceId={invoice.id}
+                attach={invoice.attachTimelog}
+                disabled={!editable}
+              />
+            </Card>
+          )}
+          {editable && <AddLineButton tenantId={tenantId} month={m.key} />}
           {c && c.nonBillableMinutes > 0 && (
             <Banner tone="info">
               {t('draft.notBilled', { time: formatMinutes(c.nonBillableMinutes, locale) })}

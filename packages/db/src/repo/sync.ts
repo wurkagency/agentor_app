@@ -626,7 +626,9 @@ export async function markDelivery(
     try {
       // A savepoint, so a duplicate doesn't abort the whole transaction.
       await tx.transaction((sp) =>
-        sp.execute(sql`update inbound_events set delivery_id = ${deliveryId} where id = ${eventId}`),
+        sp.execute(
+          sql`update inbound_events set delivery_id = ${deliveryId} where id = ${eventId}`,
+        ),
       );
       return true;
     } catch (e) {

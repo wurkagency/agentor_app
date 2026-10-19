@@ -92,6 +92,8 @@ export interface InvoicePdfInput {
   total: string;
   status: string;
   customer: { name: string; cvr: string | null; address: string[] };
+  /** Support invoices: the time log under the totals (F5 "Vedhæft tidslog"). */
+  timelog?: { title: string; rows: { text: string; amount: string }[] };
   labels: {
     invoice: string;
     date: string;
@@ -150,9 +152,29 @@ export function invoicePdf(i: InvoicePdfInput): Buffer {
     { text: i.total, x: 539, y: 492 - shift, size: 11, bold: true, align: 'right' },
     { text: L.footer, x: 56, y: 80, size: 8 },
   ];
-  return renderPdf(lines, [
+  const rules = [
     { y: 582, x1: 56, x2: 539 },
     { y: 548 - shift, x1: 56, x2: 539 },
     { y: 504 - shift, x1: 360, x2: 539 },
-  ]);
+  ];
+  if (i.timelog && i.timelog.rows.length) {
+    // One page: as many registrations as fit above the footer, then a count of the rest.
+    const top = 450 - shift;
+    const fit = Math.max(0, Math.floor((top - 110) / 13));
+    const rows = i.timelog.rows.slice(0, fit);
+    lines.push({ text: i.timelog.title, x: 56, y: top, size: 9, bold: true });
+    rules.push({ y: top - 6, x1: 56, x2: 539 });
+    rows.forEach((r, n) => {
+      lines.push({ text: r.text, x: 56, y: top - 20 - n * 13, size: 9 });
+      lines.push({ text: r.amount, x: 539, y: top - 20 - n * 13, size: 9, align: 'right' });
+    });
+    if (i.timelog.rows.length > rows.length)
+      lines.push({
+        text: `+ ${i.timelog.rows.length - rows.length}`,
+        x: 56,
+        y: top - 20 - rows.length * 13,
+        size: 9,
+      });
+  }
+  return renderPdf(lines, rules);
 }

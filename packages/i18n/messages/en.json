@@ -240,7 +240,8 @@
       "published": "{name} published v{number}",
       "supportRequested": "{name} from Agentor support asks for access for {hours, plural, one {# hour} other {# hours}}",
       "supportOpened": "{name} from Agentor support has access for {hours, plural, one {# hour} other {# hours}}",
-      "supportExtension": "{name} from Agentor support asks to extend the access"
+      "supportExtension": "{name} from Agentor support asks to extend the access",
+      "paymentFailed": "The payment of invoice {number} was declined. {retry, select, none {Update the card under Subscription.} other {We will try again automatically.}}"
     },
     "actions": {
       "connection_broken": "Reconnect",
@@ -767,7 +768,8 @@
     "pdfNet": "Amount excl. VAT",
     "pdfVat": "VAT 25%",
     "pdfTotal": "Total",
-    "pdfFooter": "Paid by card via QuickPay. Questions about the invoice: faktura@agentor.dk"
+    "pdfFooter": "Paid by card via QuickPay. Questions about the invoice: faktura@agentor.dk",
+    "pdfTimelog": "Time log (registered / billed, rounded up to 15 min. per registration)"
   },
   "checkout": {
     "title": "Add card",
@@ -2703,7 +2705,16 @@
         "recipient": "Recipient",
         "showRounding": "Show rounding per line",
         "showRoundingHelp": "Shows registered and billed time side by side",
-        "notBilled": "{time} on the customer's cases is marked not billable (e.g. Agentor's mistake) and is left out."
+        "notBilled": "{time} on the customer's cases is marked not billable (e.g. Agentor's mistake) and is left out.",
+        "addLine": "Add line",
+        "addLineHelp": "A line on the invoice besides the time, e.g. goodwill. A negative amount is a discount.",
+        "lineText": "Text",
+        "lineAmount": "Amount ex. VAT (kr.)",
+        "lineAmountHelp": "Use minus for a discount",
+        "lineAdded": "The line was added",
+        "removeLine": "Remove the line {text}",
+        "attachTimelog": "Attach time log",
+        "attachTimelogHelp": "Date and time per registration under the invoice. Internal notes are never included."
       },
       "due": "Due",
       "customer": {

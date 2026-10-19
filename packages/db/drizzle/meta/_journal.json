@@ -246,6 +246,20 @@
       "when": 1792438160726,
       "tag": "0034_entity_links_fk",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1792439382488,
+      "tag": "0035_invoice_timelog",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1792439383848,
+      "tag": "0036_invoice_timelog_option",
+      "breakpoints": true
     }
   ]
 }

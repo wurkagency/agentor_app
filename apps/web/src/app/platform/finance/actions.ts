@@ -8,6 +8,7 @@ import {
   notifyInvoice,
   PlatformError,
   saveSupportDrafts,
+  setDraftTimelog,
   setSubscriptionDiscount,
 } from '@agentor/db';
 import { formatDate, formatMoney, type Locale } from '@agentor/i18n';
@@ -210,4 +211,72 @@ export async function sendStatementAction(
     invoices: open.length,
   });
   return { ok: true, data: { email: sub.billingEmail } };
+}
+
+/** F5 "Tilføj linje": a line by hand on the month's support draft, e.g. goodwill (negative). */
+export async function addDraftLineAction(input: {
+  tenantId: string;
+  month: string;
+  text: string;
+  amountKr: number;
+}): Promise<ActionResult> {
+  const { actor } = await requireStaff(true);
+  const parsed = z
+    .object({
+      tenantId: uuid,
+      month: z.string().regex(/^\d{4}-\d{2}$/),
+      text: z.string().trim().min(1).max(200),
+      amountKr: z.number().min(-1_000_000).max(1_000_000),
+    })
+    .safeParse(input);
+  if (!parsed.success) return { ok: false, error: 'invalid' };
+  const m = parseMonth(parsed.data.month);
+  try {
+    await saveSupportDrafts(db(), actor, m.year, m.month, {
+      tenantId: parsed.data.tenantId,
+      addLine: { text: parsed.data.text, amountOre: Math.round(parsed.data.amountKr * 100) },
+    });
+  } catch (e) {
+    return fail(e);
+  }
+  revalidatePath('/platform/finance', 'layout');
+  return { ok: true };
+}
+
+export async function removeDraftLineAction(input: {
+  tenantId: string;
+  month: string;
+  index: number;
+}): Promise<ActionResult> {
+  const { actor } = await requireStaff(true);
+  if (!isUuid(input.tenantId) || !Number.isInteger(input.index) || input.index < 0)
+    return { ok: false, error: 'invalid' };
+  const m = parseMonth(input.month);
+  try {
+    await saveSupportDrafts(db(), actor, m.year, m.month, {
+      tenantId: input.tenantId,
+      removeLine: input.index,
+    });
+  } catch (e) {
+    return fail(e);
+  }
+  revalidatePath('/platform/finance', 'layout');
+  return { ok: true };
+}
+
+/** F5 "Vedhæft tidslog". */
+export async function setTimelogAction(input: {
+  tenantId: string;
+  invoiceId: string;
+  attach: boolean;
+}): Promise<ActionResult> {
+  const { actor } = await requireStaff(true);
+  if (!isUuid(input.tenantId) || !isUuid(input.invoiceId)) return { ok: false, error: 'invalid' };
+  try {
+    await setDraftTimelog(db(), actor, input.tenantId, input.invoiceId, input.attach === true);
+  } catch (e) {
+    return fail(e);
+  }
+  revalidatePath('/platform/finance', 'layout');
+  return { ok: true };
 }

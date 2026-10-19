@@ -71,6 +71,17 @@ test('support is drafted per case, rounded per registration, and approved', asyn
   await expect(
     page.getByText('20 min. på kundens sager er markeret som ikke fakturerbar'),
   ).toBeVisible();
+  // A line by hand (goodwill) and the time log, before approval.
+  await page.getByRole('button', { name: 'Tilføj linje' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Tilføj linje' });
+  await dialog.getByLabel('Tekst').fill('Goodwill for ventetid');
+  await dialog.getByLabel('Beløb ekskl. moms (kr.)').fill('-160');
+  await dialog.getByRole('button', { name: 'Tilføj linje' }).click();
+  await expect(page.getByRole('row', { name: /Goodwill for ventetid/ })).toContainText('-160,00');
+  const timelog = page.getByRole('checkbox', { name: /Vedhæft tidslog/ });
+  await expect(timelog).toBeChecked();
+  await timelog.click();
+  await expect(timelog).not.toBeChecked();
   await page.getByRole('button', { name: 'Godkend' }).click();
   await expect(page.getByText('Godkendt af Kasper Nyborg')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Godkendt' })).toBeDisabled();
