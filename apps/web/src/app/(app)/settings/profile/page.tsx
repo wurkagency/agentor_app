@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
-import { requireAppContext } from '@/server/auth/session';
+import { requireCustomerArea } from '@/server/auth/session';
 import { ProfileForms } from './profile-forms';
 
 export async function generateMetadata() {
@@ -10,7 +10,7 @@ export async function generateMetadata() {
 
 /** Min profil (profile menu, README decision 3). No board; built from the settings form pattern. */
 export default async function ProfilePage() {
-  const ctx = await requireAppContext();
+  const ctx = await requireCustomerArea();
   const t = await getTranslations('profile');
   const nav = await getTranslations('nav');
   return (

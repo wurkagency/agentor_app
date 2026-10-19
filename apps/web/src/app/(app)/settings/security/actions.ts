@@ -11,11 +11,11 @@ import {
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { actorFor, type ActionResult } from '@/server/actor';
-import { requireAppContext, requireRole } from '@/server/auth/session';
+import { requireCustomerArea, requireRole } from '@/server/auth/session';
 import { db } from '@/server/infra';
 
 export async function logoutOtherSessions(): Promise<ActionResult<{ count: number }>> {
-  const ctx = await requireAppContext();
+  const ctx = await requireCustomerArea();
   const count = await revokeOtherSessions(db(), ctx.user.id, ctx.sessionId);
   const actor = await actorFor(ctx);
   await withTenant(db(), actor, (tx) =>
@@ -26,7 +26,7 @@ export async function logoutOtherSessions(): Promise<ActionResult<{ count: numbe
 }
 
 export async function logoutSession(sessionId: string): Promise<ActionResult> {
-  const ctx = await requireAppContext();
+  const ctx = await requireCustomerArea();
   if (!z.uuid().safeParse(sessionId).success || sessionId === ctx.sessionId)
     return { ok: false, error: 'NOT_FOUND' };
   // Scoped to the signed-in user: you can only end your own sessions.

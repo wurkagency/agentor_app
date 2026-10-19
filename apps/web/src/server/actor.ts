@@ -22,6 +22,8 @@ export async function actorFor(
     name: ctx.user.name,
     ip: await clientIp(),
     role: ctx.tenant.role,
+    // Logged in the customer's audit log as Agentor support, with the staff member's name.
+    ...(ctx.support ? { kind: 'support' as const } : {}),
   };
 }
 

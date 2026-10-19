@@ -38,6 +38,8 @@
   --color-ok-bg: #e6f2ea;
   --color-warn-fg: #a86412;
   --color-warn-bg: #fbf0dc;
+  /* Internal notes in support cases (README decision 17): never shown to the customer. */
+  --color-note-bg: #fbf0dc;
   --color-error-fg: #b42318;
   --color-error-bg: #fbe7e4;
   --color-paused-fg: #6b6b67;
@@ -141,6 +143,7 @@
   --shadow-hairline-r: inset -1px 0 0 var(--color-border);
   --shadow-hairline-y: inset 0 1px 0 var(--color-border), inset 0 -1px 0 var(--color-border);
   --shadow-tab-active: inset 0 -2px 0 var(--color-fg-1);
+  --shadow-tab-active-light: inset 0 -2px 0 var(--color-on-navy);
   --shadow-row-selected: inset 2px 0 0 var(--color-primary), inset 3px 0 0 var(--color-fg-1);
   --shadow-cutout-canvas: 0 0 0 2px var(--color-canvas);
   --shadow-cutout-white: 0 0 0 2px var(--color-white);

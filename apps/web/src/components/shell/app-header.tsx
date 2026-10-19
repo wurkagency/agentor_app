@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from '../logo';
+import { GearMenu, type GearCounts } from '../platform/gear-menu';
 import { CommandPalette, type PaletteEntities } from './command-palette';
 import { NotificationsPopover, type NotificationItem } from './notifications-popover';
 import { ProfileMenu, type ProfileMenuProps } from './profile-menu';
@@ -27,13 +28,16 @@ export interface AppHeaderProps extends ProfileMenuProps {
   notifications: NotificationItem[];
   /** Flows and connections for ⌘K (D1-Søg). */
   search: PaletteEntities;
+  /** Agentor staff get the gear (P1-Kunder-Menu); in a support view the chip says so (P4). */
+  staff?:
+    { role: 'superadmin' | 'supporter'; counts: GearCounts; supportView: boolean } | undefined;
 }
 
 /**
  * App shell header (App-skal-B, README decision 1): 88 px, logo, primary text navigation with a
  * 2 px dark underline, then ⌘K, the bell and the account chip. No sidebar, no help icon.
  */
-export function AppHeader({ attention, notifications, search, ...profile }: AppHeaderProps) {
+export function AppHeader({ attention, notifications, search, staff, ...profile }: AppHeaderProps) {
   const t = useTranslations('nav');
   const pathname = usePathname();
   // The editor fills the window (D3-Editor): a compact 64 px header, full width.
@@ -107,25 +111,39 @@ export function AppHeader({ attention, notifications, search, ...profile }: AppH
               </button>
             }
           />
-          <ProfileMenu
-            {...profile}
-            trigger={
-              <button
-                type="button"
-                aria-label={t('account', { user: profile.user.name, tenant: profile.tenant.name })}
-                className="ml-2 flex h-10 cursor-pointer items-center gap-2.5 rounded-full border-0 bg-surface pl-1 pr-2.5 font-sans shadow-sm"
-              >
-                <Avatar name={profile.user.name} size={32} tone="navy" />
-                <span className="flex flex-col items-start leading-tight">
-                  <span className="text-table font-semibold text-fg-1">
-                    {profile.tenant.shortName}
+          {staff && <GearMenu role={staff.role} counts={staff.counts} tone="light" />}
+          {staff?.supportView ? (
+            <span className="ml-2 flex h-10 items-center gap-2.5 rounded-full bg-surface pl-1 pr-3 shadow-sm">
+              <Avatar name={profile.user.name} size={32} tone="navy" />
+              <span className="flex flex-col items-start leading-tight">
+                <span className="text-table font-semibold text-fg-1">{profile.user.name}</span>
+                <span className="text-micro font-medium text-fg-2">{t('agentorSupport')}</span>
+              </span>
+            </span>
+          ) : (
+            <ProfileMenu
+              {...profile}
+              trigger={
+                <button
+                  type="button"
+                  aria-label={t('account', {
+                    user: profile.user.name,
+                    tenant: profile.tenant.name,
+                  })}
+                  className="ml-2 flex h-10 cursor-pointer items-center gap-2.5 rounded-full border-0 bg-surface pl-1 pr-2.5 font-sans shadow-sm"
+                >
+                  <Avatar name={profile.user.name} size={32} tone="navy" />
+                  <span className="flex flex-col items-start leading-tight">
+                    <span className="text-table font-semibold text-fg-1">
+                      {profile.tenant.shortName}
+                    </span>
+                    <span className="text-micro font-medium text-fg-2">{profile.user.name}</span>
                   </span>
-                  <span className="text-micro font-medium text-fg-2">{profile.user.name}</span>
-                </span>
-                <Icon icon={ChevronDown} size={16} className="text-fg-2" />
-              </button>
-            }
-          />
+                  <Icon icon={ChevronDown} size={16} className="text-fg-2" />
+                </button>
+              }
+            />
+          )}
         </div>
       </div>
     </header>

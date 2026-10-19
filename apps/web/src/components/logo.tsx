@@ -19,7 +19,7 @@ export function Logo({
         className,
       )}
     >
-      Agent<span className="border-b-2 border-fg-1 pb-px">or</span>
+      Agent<span className="border-b-2 border-current pb-px">or</span>
     </span>
   );
 }

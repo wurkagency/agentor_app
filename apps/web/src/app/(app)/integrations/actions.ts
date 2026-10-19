@@ -25,7 +25,7 @@ async function each(
   flowIds: unknown,
   fn: (actor: Awaited<ReturnType<typeof actorFor>>, id: string) => Promise<void>,
 ): Promise<ActionResult<{ done: number }>> {
-  const ctx = await requireRole(EDITORS);
+  const ctx = await requireRole(EDITORS, { support: true });
   const list = ids(flowIds);
   if (!list) return { ok: false, error: 'invalid' };
   const actor = await actorFor(ctx);
@@ -63,7 +63,7 @@ export async function retryFailures(
   flowId: string,
   routeId?: string,
 ): Promise<ActionResult<{ runId: string }>> {
-  const ctx = await requireRole(EDITORS);
+  const ctx = await requireRole(EDITORS, { support: true });
   if (!isUuid(flowId) || (routeId && !/^[a-z0-9-]{1,40}$/.test(routeId)))
     return { ok: false, error: 'invalid' };
   const actor = await actorFor(ctx);
@@ -83,7 +83,7 @@ export async function setRoutePause(
   routeId: string,
   paused: boolean,
 ): Promise<ActionResult> {
-  const ctx = await requireRole(EDITORS);
+  const ctx = await requireRole(EDITORS, { support: true });
   if (!isUuid(flowId)) return { ok: false, error: 'invalid' };
   try {
     await setRoutePaused(db(), await actorFor(ctx), flowId, routeId, paused);
@@ -100,7 +100,7 @@ export async function restoreVersionAction(
   flowId: string,
   versionId: string,
 ): Promise<ActionResult> {
-  const ctx = await requireRole(EDITORS);
+  const ctx = await requireRole(EDITORS, { support: true });
   if (!isUuid(flowId) || !isUuid(versionId)) return { ok: false, error: 'invalid' };
   try {
     await restoreVersion(db(), await actorFor(ctx), flowId, versionId);

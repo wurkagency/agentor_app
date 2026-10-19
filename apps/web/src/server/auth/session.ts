@@ -9,6 +9,7 @@ import { headers } from 'next/headers';
 import { forbidden, redirect } from 'next/navigation';
 import { cache } from 'react';
 import { db } from '../infra';
+import { currentSupportView, staffRole } from '../platform';
 import { auth, SESSION_ABSOLUTE_SECONDS } from './auth';
 
 export interface SessionUser {
@@ -30,6 +31,20 @@ export interface AppContext extends UserSession {
   tenant: MembershipContext;
   /** Number of tenants the user belongs to; drives "Skift virksomhed" (PLAN Q33). */
   tenantCount: number;
+  /**
+   * Set when an Agentor staff member works in the customer's app under a support grant (P4).
+   * The role is then Admin for "Se og hjælpe" and Læser for "Kun se"; requireRole() refuses
+   * everything that doesn't explicitly allow support (team, billing, settings, connections).
+   */
+  support?: {
+    grantId: string;
+    sessionId: string;
+    scope: 'view' | 'help';
+    caseId: string | null;
+    caseRef: string;
+    approvedByName: string | null;
+    expiresAt: Date;
+  };
 }
 
 /**
@@ -77,8 +92,36 @@ export async function requireUser(): Promise<UserSession> {
  */
 export const requireAppContext = cache(async (): Promise<AppContext> => {
   const s = await requireUser();
+  const view = await currentSupportView(s);
+  if (view === 'expired') redirect('/platform/support/end?expired=1');
+  if (view) {
+    const { grant } = view;
+    return {
+      ...s,
+      activeTenantId: grant.tenantId,
+      tenantCount: 1,
+      tenant: {
+        tenantId: grant.tenantId,
+        tenantName: grant.tenantName,
+        userId: s.user.id,
+        role: grant.scope === 'help' ? 'admin' : 'reader',
+        flowScope: 'all',
+        onboardingCompleted: true,
+      },
+      support: {
+        grantId: grant.grantId,
+        sessionId: view.sessionId,
+        scope: grant.scope,
+        caseId: grant.caseId,
+        caseRef: grant.caseRef,
+        approvedByName: grant.approvedByName,
+        expiresAt: grant.expiresAt,
+      },
+    };
+  }
   const own = await listOwnTenants(db(), s.user.id);
-  if (own.length === 0) redirect('/onboarding');
+  // Agentor staff without a company of their own land in the Platform.
+  if (own.length === 0) redirect((await staffRole(s.user.id)) ? '/platform' : '/onboarding');
 
   let tenantId = s.activeTenantId;
   let membership = tenantId ? await getMembership(db(), tenantId, s.user.id) : null;
@@ -105,8 +148,20 @@ export type Role = AppContext['tenant']['role'];
  * Role gate for pages and actions (produktspecifikation §6). Renders app/forbidden.tsx
  * ("Ingen adgang") for signed-in users without the role.
  */
-export async function requireRole(roles: readonly Role[]): Promise<AppContext> {
+export async function requireRole(
+  roles: readonly Role[],
+  opts: { support?: boolean } = {},
+): Promise<AppContext> {
   const ctx = await requireAppContext();
   if (!roles.includes(ctx.tenant.role)) forbidden();
+  // Support may only do what a gate explicitly allows: flows, never team, billing or keys.
+  if (ctx.support && !opts.support) forbidden();
+  return ctx;
+}
+
+/** For pages that only read: support may see them, but nothing that is team, billing or settings. */
+export async function requireCustomerArea(): Promise<AppContext> {
+  const ctx = await requireAppContext();
+  if (ctx.support) forbidden();
   return ctx;
 }

@@ -4,7 +4,7 @@ import { NOTIFICATION_EVENTS, saveNotificationSettings, type PrefMatrix } from '
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { actorFor, type ActionResult } from '@/server/actor';
-import { requireAppContext } from '@/server/auth/session';
+import { requireCustomerArea } from '@/server/auth/session';
 import { db } from '@/server/infra';
 
 const channels = z.object({
@@ -39,7 +39,7 @@ const schema = z.object({
 });
 
 export async function saveNotifications(input: unknown): Promise<ActionResult> {
-  const ctx = await requireAppContext();
+  const ctx = await requireCustomerArea();
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, error: parsed.error.issues[0]?.message ?? 'invalid' };
   const v = parsed.data;

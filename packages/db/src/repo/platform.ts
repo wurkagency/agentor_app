@@ -7,6 +7,7 @@ import {
   cases,
   customerNotes,
   flows,
+  platformAudit,
   platformSettings,
   staff,
   supportSessions,
@@ -49,6 +50,17 @@ export interface StaffActor {
 
 const asStaff = <T>(db: Database, userId: string, fn: (tx: Transaction) => Promise<T>) =>
   withoutTenant(db, fn, userId);
+
+async function platformLog(
+  tx: Transaction,
+  actor: StaffActor,
+  action: string,
+  detail: Record<string, unknown> = {},
+) {
+  await tx
+    .insert(platformAudit)
+    .values({ actorUserId: actor.userId, actorName: actor.name, action, detail });
+}
 
 const pgError = (e: unknown, code: string) =>
   e instanceof Error &&
@@ -166,6 +178,11 @@ export async function upsertStaff(
         target: staff.userId,
         set: { role: input.role, probationUntil: input.probationUntil ?? null, disabledAt: null },
       });
+    await platformLog(tx, actor, 'staff.saved', {
+      userId: u.id,
+      email: input.email,
+      role: input.role,
+    });
     return u.id;
   });
 }
@@ -182,6 +199,7 @@ export async function disableStaff(db: Database, actor: StaffActor, userId: stri
   await asStaff(db, actor.userId, async (tx) => {
     await assertNotLastSuperadmin(tx, userId);
     await tx.update(staff).set({ disabledAt: new Date() }).where(eq(staff.userId, userId));
+    await platformLog(tx, actor, 'staff.disabled', { userId });
   });
 }
 
@@ -231,6 +249,7 @@ export async function setPlatformSettings(
           set: { value, updatedByName: actor.name, updatedAt: new Date() },
         });
     }
+    await platformLog(tx, actor, 'settings.updated', values);
   });
 }
 
@@ -857,11 +876,11 @@ export async function updateCase(
   actor: StaffActor,
   caseId: string,
   patch: {
-    status?: CaseStatus;
-    priority?: CasePriority;
-    category?: string;
-    assigneeId?: string | null;
-    dueAt?: Date | null;
+    status?: CaseStatus | undefined;
+    priority?: CasePriority | undefined;
+    category?: string | undefined;
+    assigneeId?: string | null | undefined;
+    dueAt?: Date | null | undefined;
   },
 ) {
   await asStaff(db, actor.userId, async (tx) => {
@@ -910,8 +929,8 @@ export async function addCaseEvent(
   input: {
     kind: 'reply' | 'internal_note';
     body: string;
-    pinToCustomer?: boolean;
-    minutes?: number;
+    pinToCustomer?: boolean | undefined;
+    minutes?: number | undefined;
   },
 ) {
   const body = input.body.trim();
@@ -1470,3 +1489,34 @@ export async function customerReply(db: Database, ctx: CustomerCtx, caseId: stri
 }
 
 export const CASE_STATUS_LABEL = STATUS_LABEL;
+
+/* ---- Platform audit, recipients, grant counts ------------------------------------------------- */
+
+export async function listPlatformAudit(db: Database, actor: StaffActor) {
+  if (actor.role !== 'superadmin') throw new PlatformError('NOT_SUPERADMIN');
+  return asStaff(db, actor.userId, (tx) =>
+    tx.select().from(platformAudit).orderBy(desc(platformAudit.createdAt)).limit(200),
+  );
+}
+
+export async function caseRecipients(db: Database, userId: string, caseId: string) {
+  const res = await asStaff(db, userId, (tx) =>
+    tx.execute<{ user_id: string; name: string; email: string; role: string }>(
+      sql`select * from app.platform_case_recipients(${caseId})`,
+    ),
+  );
+  return res.rows.map((r) => ({ userId: r.user_id, name: r.name, email: r.email, role: r.role }));
+}
+
+export async function activeGrantsAll(db: Database, userId: string) {
+  const res = await asStaff(db, userId, (tx) =>
+    tx.execute<{ staff_user_id: string; tenant_id: string; expires_at: Date }>(
+      sql`select * from app.platform_active_grants()`,
+    ),
+  );
+  return res.rows.map((r) => ({
+    staffUserId: r.staff_user_id,
+    tenantId: r.tenant_id,
+    expiresAt: new Date(r.expires_at),
+  }));
+}

@@ -219,3 +219,17 @@ export const timers = platformSchema.table('timers', {
   caseId: uuid('case_id'),
   startedAt: ts('started_at').notNull().defaultNow(),
 });
+
+/** Platform-audit-log (P6): staff and settings changes. Superadmin reads it. */
+export const platformAudit = platformSchema.table(
+  'audit',
+  {
+    id: idColumn(),
+    actorUserId: uuid('actor_user_id').notNull(),
+    actorName: text('actor_name').notNull(),
+    action: text('action').notNull(),
+    detail: jsonb('detail').$type<Record<string, unknown>>().notNull().default({}),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.id] }), index('platform_audit_created_idx').on(t.createdAt)],
+);

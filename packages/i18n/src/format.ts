@@ -152,3 +152,20 @@ export function formatOrderNumber(n: string | number): string {
   const s = String(n);
   return s.startsWith('#') ? s : `#${s}`;
 }
+
+/** Support time (S1–S6): "42 min.", "1 t 12 min." (en: "42 min", "1 h 12 min"). */
+export function formatMinutes(minutes: number, locale: Locale = 'da'): string {
+  const m = Math.max(0, Math.round(minutes));
+  const h = Math.floor(m / 60);
+  const rest = m % 60;
+  const min = locale === 'da' ? 'min.' : 'min';
+  const hr = locale === 'da' ? 't' : 'h';
+  if (h === 0) return `${rest} ${min}`;
+  return rest === 0 ? `${h} ${hr}` : `${h} ${hr} ${String(rest).padStart(2, '0')} ${min}`;
+}
+
+/** Hours and minutes as in the week grid (S6): "1:12", "0:35". */
+export function formatHm(minutes: number): string {
+  const m = Math.max(0, Math.round(minutes));
+  return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+}

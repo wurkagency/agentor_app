@@ -176,6 +176,20 @@
       "when": 1792405176809,
       "tag": "0024_platform_security",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1792406014007,
+      "tag": "0025_platform_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1792406015739,
+      "tag": "0026_platform_functions",
+      "breakpoints": true
     }
   ]
 }

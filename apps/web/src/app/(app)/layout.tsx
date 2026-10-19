@@ -1,14 +1,17 @@
 import { manifestFor } from '@agentor/connectors';
-import { listNotifications, listOwnTenants, openFailures } from '@agentor/db';
-import { formatPercent } from '@agentor/i18n';
+import { listNotifications, listOwnTenants, myGrants, openFailures } from '@agentor/db';
+import { formatPercent, type Locale } from '@agentor/i18n';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { SupportBar } from '@/components/platform/support-bar';
 import { AppHeader } from '@/components/shell/app-header';
 import { requireAppContext } from '@/server/auth/session';
 import { billingOverview } from '@/server/billing-overview';
 import { connectionMap, viewsFor } from '@/server/flows';
 import { db } from '@/server/infra';
+import { staffRole } from '@/server/platform';
+import { gearCounts, initials } from '@/server/platform-data';
 
 /** "Nordlys Cykler ApS" → "Nordlys Cykler" for the account chip (App-skal-B). */
 function shortName(name: string): string {
@@ -35,6 +38,22 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     openFailures(db(), c),
   ]);
   const needs = notes.filter((n) => n.needsAction && !n.resolvedAt);
+  const role = await staffRole(ctx.user.id);
+  const locale = (await getLocale()) as Locale;
+  const staff = role
+    ? { role, counts: await gearCounts(ctx.user.id, locale), supportView: Boolean(ctx.support) }
+    : undefined;
+  const switcher = ctx.support
+    ? (await myGrants(db(), ctx.user.id)).map((g) => ({
+        grantId: g.grantId,
+        tenantId: g.tenantId,
+        tenantName: g.tenantName,
+        initials: initials(g.tenantName),
+        caseRef: g.caseRef,
+        state: g.state,
+        expiresAt: g.expiresAt.toISOString(),
+      }))
+    : [];
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
   return (
@@ -45,7 +64,19 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       >
         {t('skipToContent')}
       </a>
+      {ctx.support && (
+        <SupportBar
+          tenantName={ctx.tenant.tenantName}
+          initials={initials(ctx.tenant.tenantName)}
+          scope={ctx.support.scope}
+          caseRef={ctx.support.caseRef}
+          approvedBy={ctx.support.approvedByName}
+          expiresAt={ctx.support.expiresAt.toISOString()}
+          grants={switcher}
+        />
+      )}
       <AppHeader
+        staff={staff}
         user={{ name: ctx.user.name, email: ctx.user.email }}
         tenant={{
           id: ctx.tenant.tenantId,

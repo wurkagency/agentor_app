@@ -2,7 +2,7 @@ import { getSecuritySettings, listMembers, listUserSessions, maskIp } from '@age
 import { getTranslations } from 'next-intl/server';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { describeAgent } from '@/server/auth/new-device';
-import { requireAppContext } from '@/server/auth/session';
+import { requireCustomerArea } from '@/server/auth/session';
 import { db } from '@/server/infra';
 import { SecurityView } from './security-view';
 
@@ -14,7 +14,7 @@ export async function generateMetadata() {
 /** Sikkerhed (D12-Sikkerhed). Location per session needs GeoIP, which v1 doesn't have. */
 export default async function SecurityPage() {
   // Everyone manages their own MFA, passkeys and sessions; team-wide settings are for admins.
-  const ctx = await requireAppContext();
+  const ctx = await requireCustomerArea();
   const isAdmin = ctx.tenant.role === 'owner' || ctx.tenant.role === 'admin';
   const c = { tenantId: ctx.tenant.tenantId, userId: ctx.user.id };
   const [settings, sessions, members] = await Promise.all([

@@ -42,7 +42,7 @@ export async function saveDraftAction(
   definition: unknown,
   name?: string,
 ): Promise<ActionResult<{ savedAt: string }>> {
-  const ctx = await requireRole(EDITORS);
+  const ctx = await requireRole(EDITORS, { support: true });
   if (!ids(flowId, draftId)) return { ok: false, error: 'invalid' };
   const def = parse(definition);
   if (!def) return { ok: false, error: 'invalid' };
@@ -66,7 +66,7 @@ export async function startTestRun(
 ): Promise<ActionResult<{ runId: string }>> {
   const saved = await saveDraftAction(flowId, draftId, definition);
   if (!saved.ok) return saved;
-  const ctx = await requireRole(EDITORS);
+  const ctx = await requireRole(EDITORS, { support: true });
   const actor = await actorFor(ctx);
   const { runId } = await requestRun(db(), actor, flowId, 'test', draftId);
   await enqueueRun(actor.tenantId, runId);
@@ -89,7 +89,7 @@ export interface TestRunRecord {
 export async function getTestRun(
   runId: string,
 ): Promise<ActionResult<{ status: string; records: TestRunRecord[] }>> {
-  const ctx = await requireRole(EDITORS);
+  const ctx = await requireRole(EDITORS, { support: true });
   if (!isUuid(runId)) return { ok: false, error: 'invalid' };
   const r = await getRun(db(), { tenantId: ctx.tenant.tenantId, userId: ctx.user.id }, runId);
   if (!r) return { ok: false, error: 'NOT_FOUND' };
@@ -124,7 +124,7 @@ export async function publishAction(
 ): Promise<ActionResult<{ version: number; retried: boolean }>> {
   const saved = await saveDraftAction(flowId, draftId, definition);
   if (!saved.ok) return saved;
-  const ctx = await requireRole(EDITORS);
+  const ctx = await requireRole(EDITORS, { support: true });
   const c = { tenantId: ctx.tenant.tenantId, userId: ctx.user.id };
   const def = parse(definition)!;
   const [conns, lookups, billing] = await Promise.all([
@@ -162,7 +162,7 @@ export async function publishAction(
 }
 
 export async function discardDraftAction(flowId: string, draftId: string): Promise<ActionResult> {
-  const ctx = await requireRole(EDITORS);
+  const ctx = await requireRole(EDITORS, { support: true });
   if (!ids(flowId, draftId)) return { ok: false, error: 'invalid' };
   try {
     await discardDraft(db(), await actorFor(ctx), flowId, draftId);
@@ -175,6 +175,6 @@ export async function discardDraftAction(flowId: string, draftId: string): Promi
 }
 
 export async function releaseLockAction(draftId: string): Promise<void> {
-  const ctx = await requireRole(EDITORS);
+  const ctx = await requireRole(EDITORS, { support: true });
   if (isUuid(draftId)) await releaseDraftLock(db(), await actorFor(ctx), draftId);
 }

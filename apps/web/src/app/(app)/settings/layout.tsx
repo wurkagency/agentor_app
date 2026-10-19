@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { SecondaryBar, type SecondaryItem } from '@/components/shell/secondary-nav';
 import { TransactionMeter } from '@/components/shell/transaction-meter';
-import { requireAppContext } from '@/server/auth/session';
+import { requireCustomerArea } from '@/server/auth/session';
 
 /**
  * Settings (App-skal-B-Indstillinger, README decision 3): reached from the profile menu; the
@@ -10,7 +10,7 @@ import { requireAppContext } from '@/server/auth/session';
  * notifications and profile (produktspecifikation §6).
  */
 export default async function SettingsLayout({ children }: { children: ReactNode }) {
-  const ctx = await requireAppContext();
+  const ctx = await requireCustomerArea();
   const t = await getTranslations('nav');
   const admin = ctx.tenant.role === 'owner' || ctx.tenant.role === 'admin';
   const items: SecondaryItem[] = [
