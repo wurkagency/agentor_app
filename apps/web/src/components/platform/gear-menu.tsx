@@ -18,6 +18,7 @@ import {
   Settings,
   Triangle,
   UserRound,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -71,6 +72,13 @@ export function GearMenu({
         icon: Clock,
         title: t('gear.time'),
         sub: t('gear.timeSub', { time: counts.minutesToday }),
+      },
+      {
+        href: '/platform/finance',
+        icon: Wallet,
+        title: t('gear.finance'),
+        sub: t('gear.financeSub'),
+        locked: !superadmin,
       },
       {
         href: '/platform/status',

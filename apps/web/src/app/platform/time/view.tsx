@@ -6,8 +6,16 @@ import {
   type TimeEntryRow,
 } from '@agentor/db';
 import { formatDate, formatHm, formatMinutes, formatTime, type Locale } from '@agentor/i18n';
-import { Card, Icon, StatCard, Table, Td, Th, Tr, cn } from '@agentor/ui';
-import { ArrowLeft, ArrowRight, Clock, Download, TriangleAlert } from 'lucide-react';
+import { Card, HeroCurve, Icon, KpiCard, SegmentBar, Table, Td, Th, Tr, cn } from '@agentor/ui';
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  Clock,
+  Download,
+  TriangleAlert,
+  Zap,
+} from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { ButtonLink } from '@/components/button-link';
@@ -140,28 +148,69 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
         </div>
       )}
       {!team && (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-kpi-hero-3">
+          <KpiCard
+            compact
+            hero
+            icon={Clock}
             label={t('statToday')}
             value={formatMinutes(todayMinutes, locale)}
+            visual={
+              <HeroCurve
+                compact
+                data={days.map((d) =>
+                  entries
+                    .filter((e) => e.workDate === d && e.staffUserId === actor.userId)
+                    .reduce((a, e) => a + e.minutes, 0),
+                )}
+              />
+            }
             footer={t('statTodaySub', {
               pct: todayMinutes ? Math.round((todayCustomer / todayMinutes) * 100) : 0,
             })}
           />
-          <StatCard
+          <KpiCard
+            compact
+            icon={CalendarDays}
             label={t('statWeek')}
             value={formatMinutes(total, locale)}
+            visual={
+              <SegmentBar
+                compact
+                segments={[
+                  { value: total, tone: 'ink' },
+                  { value: Math.max(0, WEEK_GOAL_MINUTES - total), tone: 'muted' },
+                ]}
+              />
+            }
             footer={t('statWeekSub', { goal: formatMinutes(WEEK_GOAL_MINUTES, locale) })}
           />
-          <StatCard
+          <KpiCard
+            compact
+            icon={Zap}
             label={t('statAuto')}
             value={formatMinutes(
               autoMine.reduce((a, e) => a + e.minutes, 0),
               locale,
             )}
+            visual={
+              <SegmentBar
+                compact
+                segments={[
+                  { value: autoMine.reduce((a, e) => a + e.minutes, 0), tone: 'hatch' },
+                  {
+                    value: Math.max(0, total - autoMine.reduce((a, e) => a + e.minutes, 0)),
+                    tone: 'ink',
+                  },
+                ]}
+              />
+            }
             footer={t('statAutoSub', { count: autoMine.length })}
           />
-          <StatCard
+          <KpiCard
+            compact
+            icon={TriangleAlert}
+            iconTone={unconfirmed.length ? 'error' : 'muted'}
             label={t('statReview')}
             value={String(unconfirmed.length)}
             footer={unconfirmed.length ? t('statReviewSub') : t('statReviewNone')}

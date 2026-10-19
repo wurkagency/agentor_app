@@ -13,3 +13,4 @@ export * from './components/feedback';
 export * from './components/empty';
 export * from './components/states';
 export * from './components/data';
+export * from './components/dashboard';

@@ -224,7 +224,7 @@ export async function seedPlatform(
           t.kind,
           t.source,
           t.description,
-          t.billable ?? false,
+          t.billable ?? true,
           minutesAgo(t.min),
         ],
       );
@@ -320,6 +320,16 @@ export async function seedPlatform(
         source: 'auto',
         description: 'Supportsession',
         min: 145,
+      },
+      // Agentor's own mistake: not billed (F5 info line).
+      {
+        staff: USERS.anne,
+        minutes: 20,
+        kind: 'other',
+        source: 'manual',
+        description: 'Fejl hos Agentor',
+        billable: false,
+        min: 140,
       },
       {
         staff: USERS.anne,

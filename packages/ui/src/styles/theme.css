@@ -57,6 +57,14 @@
   --color-lime-halo: rgb(208 232 74 / 0.45);
   --color-navy-tint: rgb(19 41 58 / 0.04);
 
+  /* ---- Colour: dashboard blocks (README decision 19) ---------------------------------- */
+  --color-lime-pale: #e9f59b;
+  --color-lime-deep: #b9d63c;
+  --color-lime-stripe: #bfd93a;
+  --color-lime-light: #e6f29a;
+  --color-gauge-track: #eeebe6;
+  --color-ink-10: rgb(26 26 24 / 0.1);
+
   /* ---- Type (designspecifikation §2.4) ------------------------------------------------- */
   --font-*: initial;
   --font-sans: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
@@ -97,6 +105,14 @@
   --text-stat-compact--letter-spacing: -0.02em;
   --text-stat-compact--font-weight: 700;
   /* Health-band counters on Overblik (D1). */
+  /* Dashboard key figures (README decision 19): large 32 px, compact 24 px. */
+  --text-kpi: 32px;
+  --text-kpi--line-height: 1.1;
+  --text-kpi--letter-spacing: -0.03em;
+  --text-kpi--font-weight: 700;
+  --text-kpi-unit: 15px;
+  --text-kpi-unit--line-height: 1;
+  --text-kpi-unit--font-weight: 600;
   --text-counter: 28px;
   --text-counter--line-height: 1;
   --text-counter--font-weight: 700;
@@ -127,6 +143,7 @@
   --shadow-*: initial;
   --shadow-sm: 0 2px 12px rgb(0 0 0 / 0.06);
   --shadow-card: 0 8px 32px rgb(0 0 0 / 0.1);
+  --shadow-hero: 0 8px 32px rgb(160 190 40 / 0.28);
   --shadow-overlay: 0 16px 56px rgb(0 0 0 / 0.14);
   --shadow-ring-strong: inset 0 0 0 1.5px var(--color-border-strong);
   --shadow-ring-chip: inset 0 0 0 1px var(--color-border-strong);
@@ -287,4 +304,44 @@
 /* KeyValueList: label column 140 px (Komponenter-Data). */
 @utility grid-cols-kv {
   grid-template-columns: 140px minmax(0, 1fr);
+}
+
+/* Dashboard blocks (README decision 19): the highlighted first card, hatched lime for support
+   and forecasts, and the stroke ticks at the end of a segmented bar. */
+@utility bg-hero {
+  background: radial-gradient(
+    120% 140% at 0% 0%,
+    var(--color-lime-pale) 0%,
+    var(--color-primary) 45%,
+    var(--color-lime-deep) 100%
+  );
+}
+@utility hatch {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-primary) 0 5px,
+    var(--color-lime-stripe) 5px 7px
+  );
+}
+@utility hatch-light {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-lime-light) 0 5px,
+    var(--color-white) 5px 7px
+  );
+}
+@utility ticks {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-border-strong) 0 1.5px,
+    transparent 1.5px 6px
+  );
+}
+
+/* Key figure rows (README decision 19): the highlighted card is a little wider. */
+@utility grid-cols-kpi-hero {
+  grid-template-columns: minmax(0, 1.35fr) repeat(4, minmax(0, 1fr));
+}
+@utility grid-cols-kpi-hero-3 {
+  grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(0, 1fr));
 }

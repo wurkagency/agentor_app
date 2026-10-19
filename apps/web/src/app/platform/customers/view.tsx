@@ -1,7 +1,7 @@
 import { activeGrantsAll, listCases, myGrants } from '@agentor/db';
 import { formatRelative, type Locale } from '@agentor/i18n';
-import { Banner, Icon, StatCard } from '@agentor/ui';
-import { Download } from 'lucide-react';
+import { Banner, HeroCurve, Icon, KpiCard, SegmentBar } from '@agentor/ui';
+import { Download, Lock, MessageSquare, TriangleAlert, UserRound } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { ButtonLink } from '@/components/button-link';
 import { CustomersTable, type CustomerItem } from '@/components/platform/customers-table';
@@ -79,6 +79,13 @@ export async function CustomersView({
       c.lastRunAt.getMonth() === now.getMonth() &&
       c.lastRunAt.getFullYear() === now.getFullYear(),
   ).length;
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const newThisMonth = customers.filter((c) => c.createdAt >= monthStart).length;
+  // Customers over the last 12 months, by when they joined.
+  const growthCurve = Array.from({ length: 12 }, (_, i) => {
+    const end = new Date(now.getFullYear(), now.getMonth() - 10 + i, 1);
+    return customers.filter((c) => c.createdAt < end).length;
+  });
   const broken = customers.filter((c) => c.status === 'broken').length;
   const errors = customers.filter((c) => c.status === 'error').length;
 
@@ -95,19 +102,48 @@ export async function CustomersView({
           </ButtonLink>
         }
       />
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatCard
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-kpi-hero-3">
+        <KpiCard
+          compact
+          hero
+          icon={UserRound}
           label={t('statCustomers')}
+          {...(newThisMonth
+            ? {
+                growth: {
+                  direction: 'up',
+                  tone: 'good',
+                  text: t('statNew', { count: newThisMonth }),
+                } as const,
+              }
+            : {})}
           value={String(customers.length)}
+          visual={<HeroCurve compact data={growthCurve} />}
           footer={t('statCustomersSub', { count: activeThisMonth })}
         />
-        <StatCard
+        <KpiCard
+          compact
+          icon={TriangleAlert}
+          iconTone="error"
           label={t('statAttention')}
           value={String(broken + errors)}
+          visual={
+            <SegmentBar
+              compact
+              segments={[
+                { value: broken, tone: 'error' },
+                { value: errors, tone: 'warn' },
+                { value: Math.max(0, customers.length - broken - errors), tone: 'muted' },
+              ]}
+            />
+          }
           footer={t('statAttentionSub', { broken, errors })}
         />
-        <StatCard
+        <KpiCard
+          compact
+          icon={Lock}
           label={t('statGrants')}
+          growth={{ direction: 'down', tone: 'neutral', text: t('statMax') }}
           value={String(grants.length)}
           footer={
             nextExpiry
@@ -118,10 +154,26 @@ export async function CustomersView({
               : t('statGrantsNone')
           }
         />
-        <StatCard
+        <KpiCard
+          compact
+          icon={MessageSquare}
           label={t('statCases')}
           value={String(stats.open)}
-          footer={t('statCasesSub', { count: stats.waiting })}
+          visual={
+            <SegmentBar
+              compact
+              segments={[
+                { value: open.filter((o) => o.status === 'in_progress').length, tone: 'ink' },
+                { value: open.filter((o) => o.status === 'waiting').length, tone: 'hatch' },
+                { value: open.filter((o) => o.status === 'new').length, tone: 'navy' },
+              ]}
+            />
+          }
+          footer={t('statCasesSplit', {
+            progress: open.filter((o) => o.status === 'in_progress').length,
+            waiting: open.filter((o) => o.status === 'waiting').length,
+            fresh: open.filter((o) => o.status === 'new').length,
+          })}
         />
       </div>
       <CustomersTable items={items} initialQuery={query} />

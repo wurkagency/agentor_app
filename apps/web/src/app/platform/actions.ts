@@ -534,6 +534,7 @@ export async function saveSettingsAction(input: {
   hourlyRateKr?: number | null;
   requireCaseAndReason?: boolean;
   warnConcurrentGrants?: number;
+  bookkeeperEmail?: string | null;
 }): Promise<ActionResult> {
   const { actor } = await requireStaff(true);
   const parsed = z
@@ -541,6 +542,7 @@ export async function saveSettingsAction(input: {
       hourlyRateKr: z.number().min(0).max(100000).nullable().optional(),
       requireCaseAndReason: z.boolean().optional(),
       warnConcurrentGrants: z.number().int().min(1).max(50).optional(),
+      bookkeeperEmail: z.email().max(200).nullable().optional(),
     })
     .safeParse(input);
   if (!parsed.success) return { ok: false, error: 'invalid' };
@@ -555,6 +557,9 @@ export async function saveSettingsAction(input: {
     ...(parsed.data.requireCaseAndReason !== undefined ? { requireCaseAndReason: true } : {}),
     ...(parsed.data.warnConcurrentGrants !== undefined
       ? { warnConcurrentGrants: parsed.data.warnConcurrentGrants }
+      : {}),
+    ...(parsed.data.bookkeeperEmail !== undefined
+      ? { bookkeeperEmail: parsed.data.bookkeeperEmail }
       : {}),
   });
   revalidatePath('/platform', 'layout');

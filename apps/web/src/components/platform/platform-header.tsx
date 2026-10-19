@@ -28,7 +28,7 @@ export interface PlatformUser {
 
 /**
  * Platform header (P1): navy bar with the Platform badge, the Platform sections, search, the
- * gear menu and the staff member's chip. Platformbrugere is only shown to Superadmin.
+ * gear menu and the staff member's chip. Finans and Platformbrugere are only shown to Superadmin.
  */
 export function PlatformHeader({ user, counts }: { user: PlatformUser; counts: GearCounts }) {
   const t = useTranslations('platform');
@@ -41,6 +41,7 @@ export function PlatformHeader({ user, counts }: { user: PlatformUser; counts: G
     { href: '/platform/cases', key: 'cases' },
     { href: '/platform/errors', key: 'errors' },
     { href: '/platform/time', key: 'time' },
+    ...(user.role === 'superadmin' ? [{ href: '/platform/finance', key: 'finance' }] : []),
     { href: '/platform/status', key: 'status' },
     ...(user.role === 'superadmin' ? [{ href: '/platform/users', key: 'users' }] : []),
   ] as const;

@@ -174,10 +174,12 @@ export function RulesForm({
   warnConcurrent,
   hourlyRateKr,
   showRate,
+  bookkeeperEmail = null,
 }: {
   warnConcurrent: number;
   hourlyRateKr: number | null;
   showRate: boolean;
+  bookkeeperEmail?: string | null;
 }) {
   const t = useTranslations('platform.users');
   const tc = useTranslations('common');
@@ -185,6 +187,7 @@ export function RulesForm({
   const [warn, setWarn] = useState(warnConcurrent > 0);
   const [count, setCount] = useState(String(warnConcurrent || 3));
   const [rate, setRate] = useState(hourlyRateKr === null ? '' : String(hourlyRateKr));
+  const [bookkeeper, setBookkeeper] = useState(bookkeeperEmail ?? '');
   const [pending, start] = useTransition();
   const save = () =>
     start(async () => {
@@ -192,7 +195,10 @@ export function RulesForm({
         warnConcurrentGrants: warn ? Math.max(1, Number(count) || 3) : 50,
         requireCaseAndReason: true,
         ...(showRate
-          ? { hourlyRateKr: rate.trim() === '' ? null : Number(rate.replace(',', '.')) }
+          ? {
+              hourlyRateKr: rate.trim() === '' ? null : Number(rate.replace(',', '.')),
+              bookkeeperEmail: bookkeeper.trim() || null,
+            }
           : {}),
       });
       toast[res.ok ? 'ok' : 'error']({
@@ -237,6 +243,20 @@ export function RulesForm({
               placeholder={t('notSet')}
               value={rate}
               onChange={(e) => setRate(e.target.value.replace(/[^\d,.]/g, ''))}
+            />
+          )}
+        </Field>
+      )}
+      {showRate && (
+        <Field label={t('bookkeeper')} help={t('bookkeeperHelp')} inline>
+          {({ id, describedBy }) => (
+            <Input
+              id={id}
+              type="email"
+              aria-describedby={describedBy}
+              className="w-72"
+              value={bookkeeper}
+              onChange={(e) => setBookkeeper(e.target.value)}
             />
           )}
         </Field>

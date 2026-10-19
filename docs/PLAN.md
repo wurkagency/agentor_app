@@ -210,6 +210,25 @@ Note on the seed: the prototype path uses Dinero/WooCommerce names and logos on 
 
 **Also fixed here:** `app.due_flows()` returned nothing under FORCE RLS, so scheduled polls never ran; it now reads a private schedule index like billing does.
 
+### M9 · Finans (README decisions 18–19)
+
+**Boards:** `F1-Finans-Oversigt`, `F1-Finans-Oversigt-Dage`, `F2-Abonnementer`, `F3-Support-Afregning`, `F4-Kunde-Oekonomi`, `F5-Supportfaktura`, `F6-Betalinger`, `F7-Rapporter`.
+
+**Scope**
+- Finans under `/platform/finance`, Superadmin only: overview with revenue per month or day (F1), subscriptions with filters, export and discounts (F2), support billing per customer and case (F3), one customer's economy with invoice PDFs and statement (F4), the support invoice draft and approval (F5), invoices and payments with reminders and payment links (F6), and the monthly report as CSV, PDF and e-mail to the bookkeeper (F7).
+- Subscriptions are charged in advance, monthly or yearly (a year costs 10 months), by card or MobilePay through QuickPay; Enterprise can pay on invoice with EAN (8 days). Trials, cancellation at period end and discounts are part of the renewal. Failed card charges are retried after 2, 5 and 9 days.
+- Support is billed on its own invoice the 1st after the month of work at 640 kr. ex. VAT an hour (Superadmin can change it). **Each registration is rounded up to the next 15 minutes** (decided with Charlie, 19 Oct 2026: per registration, not per case total). Time without a case and time marked not billable is left out; support time is billable unless marked otherwise. Superadmin approves the draft; approved drafts are numbered and sent at 08:00 on the 1st.
+- Key figure cards (decision 19) on every Platform overview: large on Finans, compact on Kunder, Supportsager, Tid and Fejl.
+- Cross-customer reads and writes go through `app.platform_finance_*` functions that check the role in the database and write to the customer's audit log. The scheduler finds sends and retries in a private `app.invoice_schedule`.
+
+**Replaces the M8 default:** support time is no longer a line on the subscription invoice.
+
+**Defaults where the boards are silent (marked FOLLOW-UP):**
+- Unapproved drafts are not sent; they wait on Finans until approved.
+- "Vedhæft tidslog" and "Tilføj linje" on F5 are not built; the time log is exported from F3.
+- Payment links point to the customer's own Abonnement page, where the owner updates the card; the next retry charges it.
+- Failed-charge notices to the customer during retries are the existing in-app past-due banner; e-mail per retry is a follow-up.
+
 ### Phase 2 · First live integration (after approval)
 
 Outline only; detailed plan written at the Phase 1 gate.

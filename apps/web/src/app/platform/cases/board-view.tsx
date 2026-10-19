@@ -1,6 +1,7 @@
 import { listCases } from '@agentor/db';
 import { formatMinutes, type Locale } from '@agentor/i18n';
-import { StatCard } from '@agentor/ui';
+import { HeroCurve, KpiCard, MiniBars, SegmentBar } from '@agentor/ui';
+import { CircleCheck, Clock, Hourglass, MessageSquare, TriangleAlert } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { CaseBoard, type BoardCase } from '@/components/platform/case-board';
 import { NewCaseButton } from '@/components/platform/new-case-button';
@@ -45,6 +46,25 @@ export async function BoardView({ view }: { view: 'board' | 'list' }) {
   }));
   const customerList = customers.map((c) => ({ id: c.tenantId, name: c.name }));
   const overdueName = stats.overdueTop ? names.get(stats.overdueTop.tenantId) : null;
+  // Open cases at the end of each of the last 8 weeks, and cases resolved per week (README 19).
+  const all = [...cases, ...archived];
+  const week = 7 * 86_400_000;
+  const now = Date.now();
+  const openCurve = Array.from({ length: 8 }, (_, i) => {
+    const at = now - (7 - i) * week;
+    return all.filter(
+      (c) => c.createdAt.getTime() <= at && (!c.resolvedAt || c.resolvedAt.getTime() > at),
+    ).length;
+  });
+  const resolvedWeeks = Array.from({ length: 6 }, (_, i) => {
+    const end = now - (5 - i) * week;
+    return {
+      label: String(i),
+      value: all.filter(
+        (c) => c.resolvedAt && c.resolvedAt.getTime() <= end && c.resolvedAt.getTime() > end - week,
+      ).length,
+    };
+  });
 
   return (
     <PageBody>
@@ -53,43 +73,86 @@ export async function BoardView({ view }: { view: 'board' | 'list' }) {
         subtitle={t('intro')}
         actions={<NewCaseButton customers={customerList} />}
       />
-      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-        <StatCard
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-kpi-hero">
+        <KpiCard
+          compact
+          hero
+          icon={MessageSquare}
           label={t('statOpen')}
           value={String(stats.open)}
+          visual={<HeroCurve compact data={openCurve} />}
           footer={t('statOpenSub', { count: stats.mine })}
         />
-        <StatCard
+        <KpiCard
+          compact
+          icon={TriangleAlert}
+          iconTone={stats.overdue > 0 ? 'error' : 'muted'}
           label={t('statOverdue')}
           value={String(stats.overdue)}
+          visual={
+            <SegmentBar
+              compact
+              segments={[
+                { value: stats.overdue, tone: 'error' },
+                { value: Math.max(0, stats.open - stats.overdue), tone: 'muted' },
+              ]}
+            />
+          }
           footer={
             overdueName && stats.overdueTop
               ? `${overdueName} · ${formatMinutes(stats.overdueTop.minutes, locale)}`
               : t('statOverdueNone')
           }
-          {...(stats.overdue > 0 ? { className: 'bg-error-bg' } : {})}
         />
-        <StatCard
+        <KpiCard
+          compact
+          icon={Hourglass}
           label={t('statWaiting')}
           value={String(stats.waiting)}
+          visual={
+            <SegmentBar
+              compact
+              segments={[
+                { value: stats.waiting, tone: 'hatch' },
+                { value: Math.max(0, stats.open - stats.waiting), tone: 'muted' },
+              ]}
+            />
+          }
           footer={
             stats.oldestWaitingDays === null
               ? '–'
               : t('statWaitingSub', { count: stats.oldestWaitingDays })
           }
         />
-        <StatCard
+        <KpiCard
+          compact
+          icon={CircleCheck}
           label={t('statResolved')}
           value={String(stats.resolvedThisWeek)}
+          visual={<MiniBars compact items={resolvedWeeks} />}
           footer={
             stats.medianResolveMinutes === null
               ? '–'
               : t('statResolvedSub', { time: formatMinutes(stats.medianResolveMinutes, locale) })
           }
         />
-        <StatCard
+        <KpiCard
+          compact
+          icon={Clock}
           label={t('statTime')}
           value={formatMinutes(stats.teamMinutesToday, locale)}
+          visual={
+            <SegmentBar
+              compact
+              segments={[
+                { value: stats.teamMinutesToday, tone: 'ink' },
+                {
+                  value: Math.max(0, stats.teamSize * 450 - stats.teamMinutesToday),
+                  tone: 'muted',
+                },
+              ]}
+            />
+          }
           footer={t('statTimeSub', { count: stats.teamSize })}
         />
       </div>

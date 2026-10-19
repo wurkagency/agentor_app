@@ -1,5 +1,4 @@
 import {
-  addMonth,
   billingPeriod,
   overagePrice,
   parseEntitlements,
@@ -15,7 +14,7 @@ import {
   type Entitlements,
   type QuotaState,
 } from '@agentor/core';
-import { and, asc, count, desc, eq, gt, inArray, isNull, lt, ne, sql, sum } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, isNull, ne, sql, sum } from 'drizzle-orm';
 import { withoutTenant, withTenant, type Database, type Transaction } from '../client.js';
 import {
   addons,
@@ -29,7 +28,6 @@ import {
   tenants,
   usageCounters,
   type InvoiceLine,
-  type InvoiceStatus,
   type SubscriptionStatus,
 } from '../schema/index.js';
 import { writeAudit, writeSystemAudit, type Actor } from './audit.js';

@@ -13,8 +13,8 @@ export async function generateMetadata() {
 }
 
 /**
- * Platformindstillinger (Superadmin): the hourly rate for billable support time and the access
- * rules. Not drawn on the boards; plans are read-only here until their screen exists (FOLLOW-UP).
+ * Platformindstillinger (Superadmin): the hourly rate for billable support time (README decision
+ * 18: 640 kr. ex. VAT), the bookkeeper's e-mail for the monthly report and the access rules. Not drawn on the boards; plans are read-only here until their screen exists (FOLLOW-UP).
  */
 export default async function PlatformSettingsPage() {
   const { actor } = await requireStaff(true);
@@ -34,6 +34,7 @@ export default async function PlatformSettingsPage() {
             warnConcurrent={settings.warnConcurrentGrants}
             hourlyRateKr={settings.hourlyRateOre === null ? null : settings.hourlyRateOre / 100}
             showRate
+            bookkeeperEmail={settings.bookkeeperEmail}
           />
         </Card>
         <Card padding="none" className="overflow-x-auto">

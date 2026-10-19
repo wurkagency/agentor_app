@@ -1,7 +1,27 @@
 import { manifestFor } from '@agentor/connectors';
 import { formatDate, formatRelative, type Locale } from '@agentor/i18n';
-import { Card, ConnectorLogo, EmptyState, Icon, StatCard, Table, Td, Th, Tr } from '@agentor/ui';
-import { ArrowDownRight, ArrowRight, ArrowUpRight, CircleCheck, CircleX } from 'lucide-react';
+import {
+  Card,
+  ConnectorLogo,
+  EmptyState,
+  Icon,
+  KpiCard,
+  SegmentBar,
+  Table,
+  Td,
+  Th,
+  Tr,
+} from '@agentor/ui';
+import {
+  ArrowDownRight,
+  ArrowRight,
+  ArrowUpRight,
+  CircleCheck,
+  CircleX,
+  FileWarning,
+  FolderX,
+  Users,
+} from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { NewCaseButton } from '@/components/platform/new-case-button';
@@ -64,26 +84,71 @@ export default async function ErrorsPage({
       </SecondaryBar>
       <PageBody>
         <PageHeader title={t('title')} subtitle={t('intro')} />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-kpi-hero-3">
+          <KpiCard
+            compact
+            hero
+            icon={CircleX}
             label={t('statTypes')}
+            {...(newSince
+              ? {
+                  growth: {
+                    direction: 'up',
+                    tone: 'bad',
+                    text: t('statNew', { count: newSince }),
+                  } as const,
+                }
+              : {})}
             value={String(groups.length)}
+            visual={
+              <SegmentBar
+                compact
+                segments={groups.map((g) => ({
+                  value: g.records,
+                  tone: g.customers > 1 ? 'error' : 'ink',
+                }))}
+              />
+            }
             footer={t('statTypesSub', { count: newSince })}
           />
-          <StatCard
+          <KpiCard
+            compact
+            icon={Users}
+            iconTone={hit.size > 1 ? 'error' : 'muted'}
             label={t('statCustomers')}
             value={String(hit.size)}
+            visual={
+              <SegmentBar
+                compact
+                segments={[
+                  { value: hit.size, tone: 'error' },
+                  { value: Math.max(0, active - hit.size), tone: 'muted' },
+                ]}
+              />
+            }
             footer={t('statCustomersSub', { pct: Math.round((hit.size / active) * 100) })}
-            {...(hit.size > 1 ? { className: 'bg-error-bg' } : {})}
           />
-          <StatCard
+          <KpiCard
+            compact
+            icon={FileWarning}
             label={t('statRecords')}
             value={String(records)}
             footer={t(`window.${period}`)}
           />
-          <StatCard
+          <KpiCard
+            compact
+            icon={FolderX}
             label={t('statNoCase')}
             value={String(noCase.length)}
+            visual={
+              <SegmentBar
+                compact
+                segments={[
+                  { value: noCase.length, tone: 'warn' },
+                  { value: Math.max(0, groups.length - noCase.length), tone: 'ink' },
+                ]}
+              />
+            }
             footer={noCase.map((g) => g.code).join(', ') || '–'}
           />
         </div>

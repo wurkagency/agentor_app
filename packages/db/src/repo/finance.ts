@@ -411,3 +411,18 @@ export async function setSubscriptionDiscount(
     });
   });
 }
+
+/** Logs a Finans action that has no row of its own, e.g. a statement sent to a customer. */
+export async function logFinanceAction(
+  db: Database,
+  actor: StaffActor,
+  action: string,
+  detail: Record<string, unknown>,
+): Promise<void> {
+  requireSuperadmin(actor);
+  await asStaff(db, actor.userId, (tx) =>
+    tx
+      .insert(platformAudit)
+      .values({ actorUserId: actor.userId, actorName: actor.name, action, detail }),
+  );
+}

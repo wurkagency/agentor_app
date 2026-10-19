@@ -16,6 +16,8 @@ export interface Mail {
   to: string;
   subject: string;
   text: string;
+  /** Small generated files only (Finans CSV reports). */
+  attachments?: { filename: string; content: string; contentType: string }[];
 }
 
 export async function sendMail(mail: Mail): Promise<void> {
@@ -24,5 +26,6 @@ export async function sendMail(mail: Mail): Promise<void> {
     to: mail.to,
     subject: mail.subject,
     text: mail.text,
+    ...(mail.attachments ? { attachments: mail.attachments } : {}),
   });
 }

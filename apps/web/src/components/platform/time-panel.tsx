@@ -180,7 +180,7 @@ export function AddTimeDialog({
   const [date, setDate] = useState(today);
   const [kind, setKind] = useState('phone');
   const [description, setDescription] = useState('');
-  const [billable, setBillable] = useState(false);
+  const [billable, setBillable] = useState(true);
   const [pending, start] = useTransition();
   const m = /^(\d{1,2}):(\d{2})$/.exec(duration.trim());
   const minutes = m ? Number(m[1]) * 60 + Number(m[2]) : Number(duration) || 0;

@@ -120,8 +120,10 @@ test('subscription page: plan, meters, blocked downgrade and invoices (D13)', as
   await expect(business).toContainText('Din plan');
 
   const invoices = page.getByRole('table');
-  await expect(invoices.getByRole('row')).toHaveCount(4);
+  // Three subscription invoices and three support invoices (Finans, M9); drafts never show.
+  await expect(invoices.getByRole('row')).toHaveCount(7);
   await expect(invoices).toContainText('AG-2026-1043');
+  await expect(invoices).toContainText('Support · ');
   await expect(invoices).toContainText('198,75 kr.');
   await expect(invoices).toContainText('Betalt');
   await axe(page);

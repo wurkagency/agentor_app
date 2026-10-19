@@ -266,7 +266,7 @@ function EndSessionDialog({ onClose }: { onClose: () => void }) {
   const [caseId, setCaseId] = useState<string>('none');
   const [time, setTime] = useState('0:01');
   const [summary, setSummary] = useState('');
-  const [billable, setBillable] = useState(false);
+  const [billable, setBillable] = useState(true);
   const [endGrant, setEndGrant] = useState(false);
   const [pending, start] = useTransition();
 
