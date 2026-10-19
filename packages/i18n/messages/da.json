@@ -1000,7 +1000,10 @@
     "draftVersion": "Kladde",
     "current": "Gældende",
     "editedAt": "redigeret {when}",
-    "yesterday": "i går"
+    "yesterday": "i går",
+    "restore": "Gendan som kladde",
+    "restoreVersion": "Gendan version {n} som kladde",
+    "restoreLocked": "En anden redigerer flowet. Prøv igen om lidt."
   },
   "recordErrors": {
     "what": {
@@ -1323,7 +1326,26 @@
     },
     "guide": {
       "title": "Sådan kommer du i gang",
-      "body": "Vælg en rute, udfyld kontiene under Mapping, og testkør. Alle ruter starter i Test, så der skrives intet, før du publicerer."
+      "progress": "Trin {n} af {total}",
+      "close": "Luk guiden",
+      "steps": {
+        "route": {
+          "title": "Vælg en rute",
+          "body": "Klik på en rute på lærredet eller i listen."
+        },
+        "mapping": {
+          "title": "Udfyld kontiene",
+          "body": "Vælg, hvor salget skal bogføres, under Mapping."
+        },
+        "test": {
+          "title": "Testkør",
+          "body": "Se, hvad de seneste 10 poster ville blive til. Der skrives intet."
+        },
+        "publish": {
+          "title": "Publicér",
+          "body": "Vælg, om fakturaer oprettes som kladde eller bogføres med det samme."
+        }
+      }
     },
     "list": {
       "title": "Liste",
@@ -1447,7 +1469,8 @@
         "status": "status {op} {value}",
         "country": "land {op} {value}",
         "customerKind": "kundetype {op} {value}"
-      }
+      },
+      "expression": "Udtryk"
     },
     "run": {
       "interval": "Hent nye poster hvert",
@@ -1626,7 +1649,31 @@
       "export": "Salg uden for EU"
     },
     "undo": "Fortryd",
-    "redo": "Gentag"
+    "redo": "Gentag",
+    "minimap": "Oversigtskort",
+    "openInspector": "Vis indstillinger (])",
+    "desktopOnly": {
+      "title": "Editoren kræver en computer",
+      "body": "Åbn flowet på en skærm, der er mindst 1024 px bred, for at redigere det. Status og kørsler kan du følge herfra."
+    },
+    "flow": {
+      "eyebrow": "Flow",
+      "explainTitle": "Hvad flowet gør",
+      "noRoutes": "Flowet har ingen ruter endnu. Træk fra en port på kilden til en destination.",
+      "sentence": "{from} fra {source} bliver til {to} i {dest}.",
+      "only": "Kun når {filters}.",
+      "paused": "Ruten er pauset.",
+      "settings": "Flowets indstillinger"
+    },
+    "node": {
+      "source": "Kilde",
+      "destination": "Destination",
+      "account": "Konto",
+      "status": "Status",
+      "openConnection": "Åbn forbindelsen",
+      "remove": "Fjern fra flowet"
+    },
+    "payload": "Data der ville blive sendt"
   },
   "templates": {
     "title": "Nyt flow",

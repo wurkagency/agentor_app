@@ -1,7 +1,15 @@
 'use server';
 
-import { FlowError, isUuid, requestRun, setFlowPaused, setRoutePaused } from '@agentor/db';
+import {
+  FlowError,
+  isUuid,
+  requestRun,
+  restoreVersion,
+  setFlowPaused,
+  setRoutePaused,
+} from '@agentor/db';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 import { actorFor, type ActionResult } from '@/server/actor';
 import { requireRole } from '@/server/auth/session';
 import { db } from '@/server/infra';
@@ -85,4 +93,20 @@ export async function setRoutePause(
   }
   revalidatePath('/', 'layout');
   return { ok: true };
+}
+
+/** Gendan som kladde: an earlier version becomes the draft, then the editor opens on it. */
+export async function restoreVersionAction(
+  flowId: string,
+  versionId: string,
+): Promise<ActionResult> {
+  const ctx = await requireRole(EDITORS);
+  if (!isUuid(flowId) || !isUuid(versionId)) return { ok: false, error: 'invalid' };
+  try {
+    await restoreVersion(db(), await actorFor(ctx), flowId, versionId);
+  } catch (e) {
+    if (e instanceof FlowError) return { ok: false, error: e.code };
+    throw e;
+  }
+  redirect(`/integrations/${flowId}/editor`);
 }

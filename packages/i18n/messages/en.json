@@ -1000,7 +1000,10 @@
     "draftVersion": "Draft",
     "current": "Current",
     "editedAt": "edited {when}",
-    "yesterday": "yesterday"
+    "yesterday": "yesterday",
+    "restore": "Restore as draft",
+    "restoreVersion": "Restore version {n} as draft",
+    "restoreLocked": "Someone else is editing the flow. Try again shortly."
   },
   "recordErrors": {
     "what": {
@@ -1323,7 +1326,26 @@
     },
     "guide": {
       "title": "Getting started",
-      "body": "Pick a route, fill in the accounts under Mapping, and run a test. Every route starts in Test, so nothing is written until you publish."
+      "progress": "Step {n} of {total}",
+      "close": "Close the guide",
+      "steps": {
+        "route": {
+          "title": "Pick a route",
+          "body": "Click a route on the canvas or in the list."
+        },
+        "mapping": {
+          "title": "Fill in the accounts",
+          "body": "Choose where sales are booked, under Mapping."
+        },
+        "test": {
+          "title": "Run a test",
+          "body": "See what the latest 10 records would become. Nothing is written."
+        },
+        "publish": {
+          "title": "Publish",
+          "body": "Choose whether invoices are created as drafts or booked straight away."
+        }
+      }
     },
     "list": {
       "title": "List",
@@ -1447,7 +1469,8 @@
         "status": "status {op} {value}",
         "country": "country {op} {value}",
         "customerKind": "customer type {op} {value}"
-      }
+      },
+      "expression": "Expression"
     },
     "run": {
       "interval": "Fetch new records every",
@@ -1626,7 +1649,31 @@
       "export": "Sale outside the EU"
     },
     "undo": "Undo",
-    "redo": "Redo"
+    "redo": "Redo",
+    "minimap": "Minimap",
+    "openInspector": "Show settings (])",
+    "desktopOnly": {
+      "title": "The editor needs a computer",
+      "body": "Open the flow on a screen at least 1024 px wide to edit it. You can follow status and runs from here."
+    },
+    "flow": {
+      "eyebrow": "Flow",
+      "explainTitle": "What the flow does",
+      "noRoutes": "The flow has no routes yet. Drag from a port on the source to a destination.",
+      "sentence": "{from} from {source} become {to} in {dest}.",
+      "only": "Only when {filters}.",
+      "paused": "The route is paused.",
+      "settings": "Flow settings"
+    },
+    "node": {
+      "source": "Source",
+      "destination": "Destination",
+      "account": "Account",
+      "status": "Status",
+      "openConnection": "Open the connection",
+      "remove": "Remove from the flow"
+    },
+    "payload": "Payload that would be sent"
   },
   "templates": {
     "title": "New flow",

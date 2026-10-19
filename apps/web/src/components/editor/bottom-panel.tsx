@@ -41,6 +41,7 @@ export function BottomPanel({
   test,
   onRerun,
   sourceName,
+  developer,
 }: {
   def: FlowDefinition;
   conns: ConnMap;
@@ -54,6 +55,8 @@ export function BottomPanel({
   test: { status: 'idle' | 'running' | 'done'; records: TestRunRecord[] } | null;
   onRerun: () => void;
   sourceName: string;
+  /** Developer view: the payload that would be sent, per record. */
+  developer: boolean;
 }) {
   const t = useTranslations('editor');
   const tm = useTranslations('mode');
@@ -361,6 +364,20 @@ export function BottomPanel({
                   </table>
                 ) : (
                   <p className="m-0 text-table text-fg-2">{sel ? t('noPreview') : ''}</p>
+                )}
+                {developer && sel && (
+                  <section className="mt-3 flex flex-col gap-1.5" aria-labelledby="dev-payload">
+                    <h4 id="dev-payload" className="m-0 text-meta font-semibold">
+                      {t('payload')}
+                    </h4>
+                    <pre className="m-0 max-h-48 overflow-auto rounded-sm bg-navy p-3 font-mono text-mono text-on-navy">
+                      {JSON.stringify(
+                        sel.preview ?? { outcome: sel.outcome, skipReason: sel.skipReason },
+                        null,
+                        2,
+                      )}
+                    </pre>
+                  </section>
                 )}
               </div>
             </>

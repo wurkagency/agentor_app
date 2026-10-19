@@ -133,6 +133,30 @@ test('a second editor sees the flow locked while someone edits it', async ({ pag
   await other.close();
 });
 
+test('the flow panel explains the flow, and ] hides the inspector', async ({ page }) => {
+  await login(page, 'mette');
+  await page.goto(`/integrations/${WEBSHOP}/editor`);
+  const inspector = page.getByRole('complementary', { name: 'Rutens indstillinger' });
+  await expect(inspector.getByRole('heading', { name: 'Hvad flowet gør' })).toBeVisible({
+    timeout: 30_000,
+  });
+  await expect(inspector).toContainText('ordrer fra WooCommerce bliver til fakturaer i Dinero.');
+  await page.locator('.react-flow__pane').click();
+  await page.keyboard.press(']');
+  await expect(inspector).toHaveCount(0);
+  await page.getByRole('button', { name: 'Vis indstillinger (])' }).click();
+  await expect(inspector).toBeVisible();
+  await axe(page);
+});
+
+test('an earlier version can be restored as the draft', async ({ page }) => {
+  await login(page, 'mette');
+  await page.goto(`/integrations/${WEBSHOP}?tab=settings`);
+  await page.getByRole('button', { name: 'Gendan version 6 som kladde' }).click();
+  await expect(page).toHaveURL(new RegExp(`/integrations/${WEBSHOP}/editor`), { timeout: 30_000 });
+  await expect(page.getByText(/ændring(er)? i kladden/)).toBeVisible();
+});
+
 test('template picker creates a flow in Test and opens the editor (D4)', async ({ page }) => {
   await login(page, 'mette');
   await page.goto('/integrations/new');
@@ -149,4 +173,5 @@ test('template picker creates a flow in Test and opens the editor (D4)', async (
   await expect(page).toHaveURL(/\/integrations\/[0-9a-f-]+\/editor\?guide=1/);
   await expect(page.getByText('Sådan kommer du i gang')).toBeVisible();
   await expect(page.getByText('Aldrig publiceret')).toBeVisible();
+  await page.screenshot({ path: test.info().outputPath('guide.png') });
 });

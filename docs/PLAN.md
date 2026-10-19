@@ -182,6 +182,12 @@ Common acceptance criteria for **every** milestone (not repeated below):
 
 **Phase 1 gate:** the editor builds and publishes a flow against the mock connector, and the Playwright prototype path passes in CI on seeded data. I stop here for your approval.
 
+**Status (19. okt. 2026):** built on `m7/editor`. The prototype path passes as `e2e/editor.spec.ts` on the `gate` seed (`SEED_SCENARIO=gate`: e-conomic connected, only the stale EU B2B account fails), together with read-only (role and lock), restore-as-draft, the flow panel and the template picker. Deviations, each marked `FOLLOW-UP`:
+- Developer mode shows the raw route, the filter expression and the payload per test record, but not field-to-field **JSONata** mapping: that needs engine support and the `jsonata` dependency, so it moves to M8 with the engine work.
+- Filters combine with AND only (no OR groups yet).
+- Destinations are added from the palette by click (keyboard-friendly); drag-and-drop from the palette and the dependency chip are not built.
+- Dinero credit notes no longer ask for accounts: Dinero creates them from the original invoice (hence `INVOICE_MISSING`), so the mapping was dropped from the manifest and the seed.
+
 Note on the seed: the prototype path uses Dinero/WooCommerce names and logos on seeded connections backed by the mock adapter (`connector_id = mock`, display metadata from the catalog). That keeps the gate honest (no real API) while matching the boards.
 
 ### Phase 2 · First live integration (after approval)

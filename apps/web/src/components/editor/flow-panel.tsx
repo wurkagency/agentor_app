@@ -92,7 +92,6 @@ export function FlowPanel(p: {
                     type="button"
                     onClick={() => p.onSelectRoute(r.id)}
                     className="flex w-full cursor-pointer items-start justify-between gap-3 rounded-sm border-0 bg-bg-base px-3 py-2.5 text-left font-sans text-table text-fg-1 hover:bg-row-hover"
-                    aria-label={t('selectRoute', { route: routeLabel(p.def, p.conns, r) })}
                   >
                     <span>
                       {t('flow.sentence', {

@@ -26,7 +26,7 @@ import { PageBody } from '@/components/shell/secondary-nav';
 import { requireAppContext } from '@/server/auth/session';
 import { connectionMap, viewsFor } from '@/server/flows';
 import { db } from '@/server/infra';
-import { FlowActions, RetryButton, RouteResume } from './flow-actions';
+import { FlowActions, RestoreVersionButton, RetryButton, RouteResume } from './flow-actions';
 import { RunsView } from './runs-view';
 
 export async function generateMetadata() {
@@ -247,7 +247,12 @@ export default async function FlowPage({
       )}
 
       {tab === 'settings' && (
-        <SettingsTab flowId={id} ctx={c} pollMinutes={f.definition?.pollMinutes ?? 5} />
+        <SettingsTab
+          flowId={id}
+          ctx={c}
+          canEdit={canEdit}
+          pollMinutes={f.definition?.pollMinutes ?? 5}
+        />
       )}
     </PageBody>
   );
@@ -473,10 +478,12 @@ async function RunsTab({
 async function SettingsTab({
   flowId,
   ctx,
+  canEdit,
   pollMinutes,
 }: {
   flowId: string;
   ctx: { tenantId: string; userId: string };
+  canEdit: boolean;
   pollMinutes: number;
 }) {
   const t = await getTranslations('flows');
@@ -505,10 +512,13 @@ async function SettingsTab({
                   <span className="ml-2 text-meta font-medium text-ok-fg">{t('current')}</span>
                 )}
               </span>
-              <span className="text-meta text-fg-2">
+              <span className="flex items-center gap-3 text-meta text-fg-2">
                 {v.state === 'draft'
                   ? t('editedAt', { when: formatDate(v.updatedAt, locale) })
                   : `${v.publishedByName ?? '–'} · ${v.publishedAt ? formatDate(v.publishedAt, locale) : ''}`}
+                {canEdit && v.state === 'archived' && v.number !== null && (
+                  <RestoreVersionButton flowId={flowId} versionId={v.id} number={v.number} />
+                )}
               </span>
             </li>
           ))}

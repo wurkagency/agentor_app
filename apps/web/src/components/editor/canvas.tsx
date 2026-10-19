@@ -14,6 +14,7 @@ import {
   Position,
   ReactFlow,
   ReactFlowProvider,
+  MiniMap,
   useReactFlow,
   useStore,
   type Connection,
@@ -35,6 +36,7 @@ interface NodeData extends Record<string, unknown> {
   conns: ConnMap;
   findings: Finding[];
   selectedRouteId: string | null;
+  selected: boolean;
   readOnly: boolean;
 }
 
@@ -71,6 +73,7 @@ function FlowNodeView({ data }: NodeProps<Node<NodeData>>) {
       className={cn(
         'relative rounded-md bg-surface shadow-card box-border',
         errors > 0 && 'shadow-ring-error-2',
+        data.selected && errors === 0 && 'shadow-ring-dark-2',
       )}
       style={{ width: NODE_W }}
     >
@@ -156,6 +159,7 @@ interface EdgeData extends Record<string, unknown> {
   label: string;
   selected: boolean;
   hasError: boolean;
+  running: boolean;
   onSelect: (id: string) => void;
 }
 
@@ -189,6 +193,12 @@ function RouteEdge(props: EdgeProps<Edge<EdgeData>>) {
           opacity: r.paused ? 0.6 : 1,
         }}
       />
+      {/* A dot travels along each active route while a run is going (off with reduced motion). */}
+      {data.running && !r.paused && (
+        <circle r={3} className="fill-fg-1 motion-reduce:hidden">
+          <animateMotion dur="1.6s" repeatCount="indefinite" path={path} />
+        </circle>
+      )}
       <EdgeLabelRenderer>
         <button
           type="button"
@@ -220,8 +230,11 @@ export interface CanvasProps {
   conns: ConnMap;
   findings: Finding[];
   selectedRouteId: string | null;
+  selectedNodeId: string | null;
+  running: boolean;
   readOnly: boolean;
   onSelectRoute: (id: string | null) => void;
+  onSelectNode: (id: string) => void;
   onConnect: (from: string, entity: Entity, to: string, targetEntity: Entity) => void;
   onMoveNode: (id: string, x: number, y: number) => void;
 }
@@ -292,6 +305,9 @@ function CanvasInner(props: CanvasProps) {
     id: n.id,
     type: 'flow',
     position: n.position ?? layout[n.id] ?? { x: 0, y: 0 },
+    // Known sizes up front: the minimap and fitView don't wait for measuring.
+    width: NODE_W,
+    height: nodeHeight(props.def, props.conns, n.id),
     draggable: !props.readOnly,
     data: {
       nodeId: n.id,
@@ -301,6 +317,7 @@ function CanvasInner(props: CanvasProps) {
       conns: props.conns,
       findings: props.findings,
       selectedRouteId: props.selectedRouteId,
+      selected: n.id === props.selectedNodeId,
       readOnly: props.readOnly,
     },
   }));
@@ -316,6 +333,7 @@ function CanvasInner(props: CanvasProps) {
       label: routeLabel(props.def, props.conns, r),
       selected: r.id === props.selectedRouteId,
       hasError: props.findings.some((f) => f.routeId === r.id && f.severity === 'error'),
+      running: props.running,
       onSelect: props.onSelectRoute,
     },
   }));
@@ -350,7 +368,6 @@ function CanvasInner(props: CanvasProps) {
         edgeTypes={edgeTypes}
         minZoom={0.4}
         maxZoom={1.6}
-        proOptions={{ hideAttribution: true }}
         nodesConnectable={!props.readOnly}
         isValidConnection={isValidConnection}
         onConnect={(c) => {
@@ -363,6 +380,7 @@ function CanvasInner(props: CanvasProps) {
           );
         }}
         onEdgeClick={(_e, edge) => props.onSelectRoute(edge.id)}
+        onNodeClick={(_e, n) => props.onSelectNode(n.id)}
         onPaneClick={() => props.onSelectRoute(null)}
         onNodeDragStop={(_e, n) =>
           props.onMoveNode(n.id, Math.round(n.position.x), Math.round(n.position.y))
@@ -371,6 +389,17 @@ function CanvasInner(props: CanvasProps) {
         fitView
       >
         <Background gap={16} size={1} color="var(--color-border-strong)" />
+        <MiniMap
+          pannable
+          zoomable
+          ariaLabel={t('minimap')}
+          nodeColor="var(--color-border-strong)"
+          nodeBorderRadius={6}
+          position="bottom-left"
+          className="!rounded-md !shadow-card"
+          // Beside the zoom controls: the left side under the source is usually empty.
+          style={{ width: 160, height: 100, marginLeft: 56 }}
+        />
         <Controls showInteractive={false} position="bottom-left" aria-label={t('zoom')} />
       </ReactFlow>
       <div className="pointer-events-none absolute left-4 top-4 flex gap-4 rounded-full bg-surface px-4 py-1.5 text-micro text-fg-1 shadow-sm">

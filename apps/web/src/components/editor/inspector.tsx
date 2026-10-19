@@ -55,6 +55,23 @@ export interface InspectorProps {
 
 const FILTER_FIELDS: FilterRule['field'][] = ['total', 'status', 'country', 'customerKind'];
 const FILTER_OPS: FilterRule['op'][] = ['gt', 'gte', 'lt', 'eq', 'neq'];
+const OP_SYMBOL: Record<FilterRule['op'], string> = {
+  gt: '>',
+  gte: '>=',
+  lt: '<',
+  eq: '=',
+  neq: '!=',
+};
+
+/** Developer view of the rules, as the engine evaluates them (all must hold). */
+export function filterExpression(rules: FilterRule[]) {
+  return rules
+    .map(
+      (f) =>
+        `${f.field} ${OP_SYMBOL[f.op]} ${typeof f.value === 'number' ? f.value : JSON.stringify(f.value)}`,
+    )
+    .join(' and ');
+}
 
 export function Inspector(p: InspectorProps) {
   const t = useTranslations('editor');
@@ -438,6 +455,13 @@ export function Inspector(p: InspectorProps) {
             <p className="m-0 text-table text-fg-2">
               {r.filters.length ? describeFilters((k, q) => t(k, q), r.filters) : t('filter.none')}
             </p>
+            {p.developer && (
+              <Field label={t('filter.expression')} inline>
+                {({ id }) => (
+                  <Input id={id} readOnly mono value={filterExpression(r.filters) || 'true'} />
+                )}
+              </Field>
+            )}
             {r.filters.map((f, i) => (
               <div key={i} className="grid grid-cols-12 items-center gap-2">
                 <Select

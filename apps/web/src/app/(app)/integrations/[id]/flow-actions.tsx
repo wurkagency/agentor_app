@@ -1,12 +1,19 @@
 'use client';
 
 import { Button, Icon, Segmented, toast } from '@agentor/ui';
-import { Code, Pause, Pencil, Play, RotateCw } from 'lucide-react';
+import { Code, History, Pause, Pencil, Play, RotateCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTransition } from 'react';
-import { pauseFlows, resumeFlows, retryFailures, runFlowsNow, setRoutePause } from '../actions';
+import {
+  pauseFlows,
+  restoreVersionAction,
+  resumeFlows,
+  retryFailures,
+  runFlowsNow,
+  setRoutePause,
+} from '../actions';
 
 /** Basic | Developer, Pause/Genoptag, Kør nu and Åbn editor (D7 header). */
 export function FlowActions({
@@ -152,6 +159,42 @@ export function RouteResume({ flowId, routeId }: { flowId: string; routeId: stri
       }
     >
       {t('resume')}
+    </Button>
+  );
+}
+
+/** Gendan som kladde on an earlier version (Versioner); the editor opens on the new draft. */
+export function RestoreVersionButton({
+  flowId,
+  versionId,
+  number,
+}: {
+  flowId: string;
+  versionId: string;
+  number: number;
+}) {
+  const t = useTranslations('flows');
+  const tc = useTranslations('common');
+  const [pending, start] = useTransition();
+  return (
+    <Button
+      variant="ghost"
+      size="s"
+      loading={pending}
+      aria-label={t('restoreVersion', { n: number })}
+      onClick={() =>
+        start(async () => {
+          const res = await restoreVersionAction(flowId, versionId);
+          if (res && !res.ok)
+            toast.error({
+              title: res.error === 'LOCKED' ? t('restoreLocked') : t('actionFailed'),
+              closeLabel: tc('close'),
+            });
+        })
+      }
+    >
+      {!pending && <Icon icon={History} size={14} />}
+      {t('restore')}
     </Button>
   );
 }

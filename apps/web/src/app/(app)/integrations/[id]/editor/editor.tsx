@@ -14,6 +14,7 @@ import { formatRelative } from '@agentor/i18n';
 import {
   Banner,
   Button,
+  EmptyState,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -27,7 +28,9 @@ import {
   Check,
   Code,
   List,
+  Monitor,
   MoreHorizontal,
+  PanelRightOpen,
   Play,
   Redo2,
   Undo2,
@@ -39,6 +42,8 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { BottomPanel, type BottomTab } from '@/components/editor/bottom-panel';
 import { Canvas } from '@/components/editor/canvas';
+import { FlowPanel, NodePanel } from '@/components/editor/flow-panel';
+import { Guide } from '@/components/editor/guide';
 import { Inspector, type InspectorTab } from '@/components/editor/inspector';
 import { ListView } from '@/components/editor/list-view';
 import {
@@ -119,7 +124,17 @@ export function Editor(p: EditorProps) {
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState<'canvas' | 'list'>('canvas');
   const [developer, setDeveloper] = useState(false);
-  const [selected, setSelected] = useState<string | null>(p.focus.route);
+  const [selected, setSelectedRoute] = useState<string | null>(p.focus.route);
+  const [selectedNode, setSelectedNode] = useState<string | null>(null);
+  const setSelected = (id: string | null) => {
+    setSelectedRoute(id);
+    setSelectedNode(null);
+    setInspectorOpen(true);
+  };
+  // `]` hides the inspector down to a 48 px edge (§5.1).
+  const [inspectorOpen, setInspectorOpen] = useState(true);
+  const [guideOpen, setGuideOpen] = useState(p.guide);
+  const [visitedRoute, setVisitedRoute] = useState(Boolean(p.focus.route));
   const [tab, setTab] = useState<InspectorTab>(
     TABS.includes(p.focus.tab as InspectorTab) ? (p.focus.tab as InspectorTab) : 'mapping',
   );
@@ -223,6 +238,31 @@ export function Editor(p: EditorProps) {
         release.current = setTimeout(() => void releaseLockAction(draftId), 0);
     };
   }, [p.draft?.id, readOnly]);
+
+  useEffect(() => {
+    if (selected) setVisitedRoute(true);
+  }, [selected]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el?.closest('input, textarea, select, [contenteditable], [role="combobox"]')) return;
+      if (e.key === ']' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        e.preventDefault();
+        setInspectorOpen((o) => !o);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  // Unsaved-change guard: autosave runs after 1.5 s, so this only catches a very quick exit.
+  useEffect(() => {
+    if (!dirty || readOnly) return;
+    const onLeave = (e: BeforeUnloadEvent) => e.preventDefault();
+    window.addEventListener('beforeunload', onLeave);
+    return () => window.removeEventListener('beforeunload', onLeave);
+  }, [dirty, readOnly]);
 
   // Poll the test run until the worker has finished it.
   useEffect(() => {
@@ -363,295 +403,369 @@ export function Editor(p: EditorProps) {
   const testFailed =
     test?.status === 'done' ? test.records.some((r) => r.outcome === 'failed') : null;
 
+  const footer = (
+    <>
+      <span className="text-meta text-fg-2" aria-live="polite">
+        {readOnly ? t('readOnly') : dirty ? t('unsaved') : t('allSaved')}
+      </span>
+      {!readOnly && (
+        <span className="flex gap-2">
+          <Button variant="secondary" size="s" disabled={!dirty} onClick={() => commit(savedDef)}>
+            {t('cancel')}
+          </Button>
+          <Button
+            variant="primary"
+            size="s"
+            disabled={!dirty}
+            loading={saving}
+            onClick={() => void save()}
+          >
+            {t('save')}
+          </Button>
+        </span>
+      )}
+    </>
+  );
+  const mappingErrors = findings.some(
+    (f) => f.severity === 'error' && f.path?.startsWith('mapping'),
+  );
+  const guide =
+    guideOpen && !published ? (
+      <Guide
+        done={{
+          route: visitedRoute,
+          mapping: visitedRoute && !mappingErrors,
+          test: test?.status === 'done' && !testFailed,
+          publish: false,
+        }}
+        onClose={() => setGuideOpen(false)}
+      />
+    ) : null;
+
   return (
-    <div className="fixed inset-x-0 bottom-0 top-header z-10 flex flex-col bg-bg-base">
-      <header className="flex h-editor-header flex-none items-center gap-3 bg-surface px-4 shadow-hairline-b">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href={`/integrations/${p.flow.id}`} aria-label={t('back')}>
-            <Icon icon={ArrowLeft} size={18} />
-          </Link>
-        </Button>
-        <div className="flex min-w-0 flex-col">
-          <h1 className="m-0 truncate text-card">{p.flow.name}</h1>
-          <p className="m-0 truncate text-meta text-fg-2">
-            {statusLine.join(' · ')}
-            {errors > 0 && (
-              <span className="font-semibold text-error-fg">
-                {' '}
-                · {t('errorsToFix', { count: errors })}
-              </span>
-            )}
-          </p>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t('undo')}
-            onClick={undo}
-            disabled={!past.length || readOnly}
-          >
-            <Icon icon={Undo2} size={16} />
+    <>
+      {/* M5-Editor: the editor needs a computer; smaller screens get a pointer back. */}
+      <div className="fixed inset-x-0 bottom-0 top-header z-10 flex items-center justify-center bg-bg-base px-4 lg:hidden">
+        <EmptyState
+          icon={Monitor}
+          title={t('desktopOnly.title')}
+          action={
+            <Button variant="secondary" size="m" asChild>
+              <Link href={`/integrations/${p.flow.id}`}>{t('back')}</Link>
+            </Button>
+          }
+        >
+          {t('desktopOnly.body')}
+        </EmptyState>
+      </div>
+      <div className="fixed inset-x-0 bottom-0 top-header z-10 hidden flex-col bg-bg-base lg:flex">
+        <header className="flex h-editor-header flex-none items-center gap-3 bg-surface px-4 shadow-hairline-b">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href={`/integrations/${p.flow.id}`} aria-label={t('back')}>
+              <Icon icon={ArrowLeft} size={18} />
+            </Link>
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t('redo')}
-            onClick={redo}
-            disabled={!future.length || readOnly}
-          >
-            <Icon icon={Redo2} size={16} />
-          </Button>
-          <Segmented
-            aria-label={t('viewLabel')}
-            value={view}
-            onValueChange={setView}
-            options={[
-              { value: 'list', label: t('list.title'), icon: <Icon icon={List} size={14} /> },
-              { value: 'canvas', label: t('canvas'), icon: <Icon icon={Workflow} size={14} /> },
-            ]}
-          />
-          <Segmented
-            aria-label={t('modeLabel')}
-            tone="dark"
-            value={developer ? 'developer' : 'basic'}
-            onValueChange={(v) => setDeveloper(v === 'developer')}
-            options={[
-              { value: 'basic', label: 'Basic' },
-              { value: 'developer', label: 'Developer', icon: <Icon icon={Code} size={14} /> },
-            ]}
-          />
-          {!readOnly && (
-            <>
-              <Button
-                variant="ghost"
-                size="m"
-                onClick={() => {
-                  setValidatedAt(Date.now());
-                  setBottomTab('validation');
-                  setBottomOpen(true);
-                }}
-              >
-                <Icon icon={Check} size={16} />
-                {t('validate')}
-              </Button>
-              <Button
-                variant="secondary"
-                size="m"
-                onClick={runTest}
-                loading={test?.status === 'running'}
-              >
-                {test?.status !== 'running' && <Icon icon={Play} size={16} />}
-                {t('testRun')}
-              </Button>
-              <Button
-                variant="primary"
-                size="m"
-                disabled={errors > 0 || changes.length === 0}
-                title={errors > 0 ? t('fixFirst') : undefined}
-                onClick={async () => {
-                  if (dirty) await save();
-                  setPublishError(null);
-                  setPublishOpen(true);
-                }}
-              >
-                {t('publishButton')}
-              </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" aria-label={t('menu')}>
-                    <Icon icon={MoreHorizontal} size={16} />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem
-                    onSelect={() => router.push(`/integrations/${p.flow.id}?tab=settings`)}
-                  >
-                    {t('versions')}
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onSelect={() => {
-                      const blob = new Blob([JSON.stringify(def, null, 2)], {
-                        type: 'application/json',
-                      });
-                      const a = document.createElement('a');
-                      a.href = URL.createObjectURL(blob);
-                      a.download = `${p.flow.name}.json`;
-                      a.click();
-                      URL.revokeObjectURL(a.href);
-                    }}
-                  >
-                    {t('exportJson')}
-                  </DropdownMenuItem>
-                  {published && p.draft && (
+          <div className="flex min-w-0 flex-col">
+            <h1 className="m-0 truncate text-card">{p.flow.name}</h1>
+            <p className="m-0 truncate text-meta text-fg-2">
+              {statusLine.join(' · ')}
+              {errors > 0 && (
+                <span className="font-semibold text-error-fg">
+                  {' '}
+                  · {t('errorsToFix', { count: errors })}
+                </span>
+              )}
+            </p>
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t('undo')}
+              onClick={undo}
+              disabled={!past.length || readOnly}
+            >
+              <Icon icon={Undo2} size={16} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t('redo')}
+              onClick={redo}
+              disabled={!future.length || readOnly}
+            >
+              <Icon icon={Redo2} size={16} />
+            </Button>
+            <Segmented
+              aria-label={t('viewLabel')}
+              value={view}
+              onValueChange={setView}
+              options={[
+                { value: 'list', label: t('list.title'), icon: <Icon icon={List} size={14} /> },
+                { value: 'canvas', label: t('canvas'), icon: <Icon icon={Workflow} size={14} /> },
+              ]}
+            />
+            <Segmented
+              aria-label={t('modeLabel')}
+              tone="dark"
+              value={developer ? 'developer' : 'basic'}
+              onValueChange={(v) => setDeveloper(v === 'developer')}
+              options={[
+                { value: 'basic', label: 'Basic' },
+                { value: 'developer', label: 'Developer', icon: <Icon icon={Code} size={14} /> },
+              ]}
+            />
+            {!readOnly && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="m"
+                  onClick={() => {
+                    setValidatedAt(Date.now());
+                    setBottomTab('validation');
+                    setBottomOpen(true);
+                  }}
+                >
+                  <Icon icon={Check} size={16} />
+                  {t('validate')}
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="m"
+                  onClick={runTest}
+                  loading={test?.status === 'running'}
+                >
+                  {test?.status !== 'running' && <Icon icon={Play} size={16} />}
+                  {t('testRun')}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="m"
+                  disabled={errors > 0 || changes.length === 0}
+                  title={errors > 0 ? t('fixFirst') : undefined}
+                  onClick={async () => {
+                    if (dirty) await save();
+                    setPublishError(null);
+                    setPublishOpen(true);
+                  }}
+                >
+                  {t('publishButton')}
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" aria-label={t('menu')}>
+                      <Icon icon={MoreHorizontal} size={16} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
                     <DropdownMenuItem
-                      destructive
-                      onSelect={async () => {
-                        const res = await discardDraftAction(p.flow.id, p.draft!.id);
-                        if (res.ok) router.push(`/integrations/${p.flow.id}`);
+                      onSelect={() => router.push(`/integrations/${p.flow.id}?tab=settings`)}
+                    >
+                      {t('versions')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        const blob = new Blob([JSON.stringify(def, null, 2)], {
+                          type: 'application/json',
+                        });
+                        const a = document.createElement('a');
+                        a.href = URL.createObjectURL(blob);
+                        a.download = `${p.flow.name}.json`;
+                        a.click();
+                        URL.revokeObjectURL(a.href);
                       }}
                     >
-                      {t('discard')}
+                      {t('exportJson')}
                     </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </>
-          )}
-        </div>
-      </header>
+                    {published && p.draft && (
+                      <DropdownMenuItem
+                        destructive
+                        onSelect={async () => {
+                          const res = await discardDraftAction(p.flow.id, p.draft!.id);
+                          if (res.ok) router.push(`/integrations/${p.flow.id}`);
+                        }}
+                      >
+                        {t('discard')}
+                      </DropdownMenuItem>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
+          </div>
+        </header>
 
-      {p.readOnly && (
-        <Banner tone="info" global>
-          {p.readOnly === 'locked' ? t('lockedBy', { name: p.lockedBy ?? '' }) : t('readOnlyRole')}
-        </Banner>
-      )}
+        {p.readOnly && (
+          <Banner tone="info" global>
+            {p.readOnly === 'locked'
+              ? t('lockedBy', { name: p.lockedBy ?? '' })
+              : t('readOnlyRole')}
+          </Banner>
+        )}
 
-      <div className="flex min-h-0 flex-1">
-        <Palette
-          def={def}
-          connections={p.connections}
-          readOnly={readOnly}
-          maxDestinations={p.plan.maxDestinations}
-          planName={p.plan.name}
-          canSeePlans={p.plan.isOwner}
-          onAdd={addDestination}
-        />
-        <div className="flex min-w-0 flex-1 flex-col">
-          <div className="min-h-0 flex-1">
-            {view === 'canvas' ? (
-              <Canvas
-                def={def}
-                conns={conns}
-                findings={findings}
-                selectedRouteId={selected}
-                readOnly={readOnly}
-                onSelectRoute={(id) => {
-                  setSelected(id);
-                  setFocusField(null);
-                }}
-                onConnect={connect}
-                onMoveNode={(id, x, y) =>
-                  updateFlow((d) => {
-                    const n = d.nodes.find((q) => q.id === id);
-                    if (n) n.position = { x, y };
-                  })
-                }
-              />
-            ) : (
-              <div className="h-full overflow-y-auto">
-                <ListView
+        <div className="flex min-h-0 flex-1">
+          <Palette
+            def={def}
+            connections={p.connections}
+            readOnly={readOnly}
+            maxDestinations={p.plan.maxDestinations}
+            planName={p.plan.name}
+            canSeePlans={p.plan.isOwner}
+            onAdd={addDestination}
+          />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1">
+              {view === 'canvas' ? (
+                <Canvas
                   def={def}
                   conns={conns}
                   findings={findings}
                   selectedRouteId={selected}
-                  onSelectRoute={setSelected}
-                  routeStatus={routeStatus}
+                  selectedNodeId={selectedNode}
+                  running={test?.status === 'running'}
+                  readOnly={readOnly}
+                  onSelectRoute={(id) => {
+                    setSelected(id);
+                    setFocusField(null);
+                  }}
+                  onSelectNode={(id) => {
+                    setSelectedRoute(null);
+                    setSelectedNode(id);
+                    setInspectorOpen(true);
+                  }}
+                  onConnect={connect}
+                  onMoveNode={(id, x, y) =>
+                    updateFlow((d) => {
+                      const n = d.nodes.find((q) => q.id === id);
+                      if (n) n.position = { x, y };
+                    })
+                  }
                 />
-              </div>
-            )}
+              ) : (
+                <div className="h-full overflow-y-auto">
+                  <ListView
+                    def={def}
+                    conns={conns}
+                    findings={findings}
+                    selectedRouteId={selected}
+                    onSelectRoute={setSelected}
+                    routeStatus={routeStatus}
+                  />
+                </div>
+              )}
+            </div>
+            <BottomPanel
+              def={def}
+              conns={conns}
+              findings={findings}
+              tab={bottomTab}
+              setTab={setBottomTab}
+              open={bottomOpen}
+              setOpen={setBottomOpen}
+              onGoTo={goTo}
+              validatedAt={formatRelative(new Date(validatedAt), new Date(now), locale)}
+              test={test}
+              onRerun={runTest}
+              sourceName={sourceConn?.name ?? ''}
+              developer={developer}
+            />
           </div>
-          <BottomPanel
-            def={def}
-            conns={conns}
-            findings={findings}
-            tab={bottomTab}
-            setTab={setBottomTab}
-            open={bottomOpen}
-            setOpen={setBottomOpen}
-            onGoTo={goTo}
-            validatedAt={formatRelative(new Date(validatedAt), new Date(now), locale)}
-            test={test}
-            onRerun={runTest}
-            sourceName={sourceConn?.name ?? ''}
-          />
+          {!inspectorOpen ? (
+            <div className="flex h-full w-12 flex-none justify-center bg-surface pt-3 shadow-hairline-l">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t('openInspector')}
+                onClick={() => setInspectorOpen(true)}
+              >
+                <Icon icon={PanelRightOpen} size={16} />
+              </Button>
+            </div>
+          ) : route ? (
+            <Inspector
+              def={def}
+              route={route}
+              conns={conns}
+              lookups={p.lookups}
+              findings={findings}
+              tab={tab}
+              setTab={(x) => {
+                setTab(x);
+                setFocusField(null);
+              }}
+              update={updateRoute}
+              updateFlow={updateFlow}
+              stats={p.routeStats[route.id]}
+              history={p.history.filter((h) => h.routeId === route.id)}
+              developer={developer}
+              readOnly={readOnly}
+              focusField={focusField}
+              minPollMinutes={p.plan.minPollMinutes}
+              onDelete={() => {
+                updateFlow((d) => void (d.routes = d.routes.filter((r) => r.id !== route.id)));
+                setSelected(null);
+              }}
+              onClose={() => setSelected(null)}
+              guide={guide}
+              footer={footer}
+            />
+          ) : selectedNode ? (
+            <NodePanel
+              nodeId={selectedNode}
+              def={def}
+              conns={conns}
+              readOnly={readOnly}
+              onSelectRoute={setSelected}
+              onRemove={() => {
+                updateFlow((d) => {
+                  d.nodes = d.nodes.filter((n) => n.id !== selectedNode);
+                  d.routes = d.routes.filter((r) => r.to !== selectedNode);
+                });
+                setSelectedNode(null);
+              }}
+              onClose={() => setInspectorOpen(false)}
+            />
+          ) : (
+            <FlowPanel
+              name={p.flow.name}
+              def={def}
+              conns={conns}
+              readOnly={readOnly}
+              minPollMinutes={p.plan.minPollMinutes}
+              guide={guide}
+              footer={footer}
+              onSelectRoute={setSelected}
+              updateFlow={updateFlow}
+              onClose={() => setInspectorOpen(false)}
+            />
+          )}
         </div>
-        {route && (
-          <Inspector
-            def={def}
-            route={route}
+
+        {publishOpen && (
+          <PublishDialog
+            open={publishOpen}
+            onOpenChange={setPublishOpen}
+            flowName={p.flow.name}
+            nextVersion={(p.published?.number ?? 0) + 1}
+            published={
+              published && p.published
+                ? { number: p.published.number, definition: published }
+                : null
+            }
+            draft={def}
             conns={conns}
             lookups={p.lookups}
-            findings={findings}
-            tab={tab}
-            setTab={(x) => {
-              setTab(x);
-              setFocusField(null);
-            }}
-            update={updateRoute}
-            updateFlow={updateFlow}
-            stats={p.routeStats[route.id]}
-            history={p.history.filter((h) => h.routeId === route.id)}
-            developer={developer}
-            readOnly={readOnly}
-            focusField={focusField}
-            minPollMinutes={p.plan.minPollMinutes}
-            onDelete={() => {
-              updateFlow((d) => void (d.routes = d.routes.filter((r) => r.id !== route.id)));
-              setSelected(null);
-            }}
-            onClose={() => setSelected(null)}
-            guide={
-              p.guide && !published ? (
-                <Banner tone="info" title={t('guide.title')}>
-                  {t('guide.body')}
-                </Banner>
-              ) : null
-            }
-            footer={
-              <>
-                <span className="text-meta text-fg-2" aria-live="polite">
-                  {readOnly ? t('readOnly') : dirty ? t('unsaved') : t('allSaved')}
-                </span>
-                {!readOnly && (
-                  <span className="flex gap-2">
-                    <Button
-                      variant="secondary"
-                      size="s"
-                      disabled={!dirty}
-                      onClick={() => commit(savedDef)}
-                    >
-                      {t('cancel')}
-                    </Button>
-                    <Button
-                      variant="primary"
-                      size="s"
-                      disabled={!dirty}
-                      loading={saving}
-                      onClick={() => void save()}
-                    >
-                      {t('save')}
-                    </Button>
-                  </span>
-                )}
-              </>
-            }
+            testedClean={testFailed === null ? null : !testFailed}
+            openFailures={p.openFailures}
+            busy={publishing}
+            error={publishError}
+            onPublish={publish}
           />
         )}
+        <span className="sr-only" aria-live="polite">
+          {route ? t('selectedRoute', { route: routeLabel(def, conns, route) }) : ''}
+        </span>
       </div>
-
-      {publishOpen && (
-        <PublishDialog
-          open={publishOpen}
-          onOpenChange={setPublishOpen}
-          flowName={p.flow.name}
-          nextVersion={(p.published?.number ?? 0) + 1}
-          published={
-            published && p.published ? { number: p.published.number, definition: published } : null
-          }
-          draft={def}
-          conns={conns}
-          lookups={p.lookups}
-          testedClean={testFailed === null ? null : !testFailed}
-          openFailures={p.openFailures}
-          busy={publishing}
-          error={publishError}
-          onPublish={publish}
-        />
-      )}
-      <span className="sr-only" aria-live="polite">
-        {route ? t('selectedRoute', { route: routeLabel(def, conns, route) }) : ''}
-      </span>
-    </div>
+    </>
   );
 }
