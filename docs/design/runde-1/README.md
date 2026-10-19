@@ -61,7 +61,6 @@ Tegnefladerne henter logoer fra lærredets asset-lager (`/_blob/<id>`). Lokalt p
 | `D12-Notifikationer.dc.html` / `D12-Sikkerhed.dc.html` / `D12-Auditlog.dc.html` | D12 Indstillinger |
 | `D13-Abonnement.dc.html` | D13 Abonnement og forbrug |
 | `D14-Login.dc.html`, `D14-MFA.dc.html`, `D14-Onboarding-1..3.dc.html` | D14 Login, MFA, onboarding i 3 trin |
-| `M1`–`M7` | Mobil: Overblik, Integrationer, Fejldetalje, Notifikationer, Editor (kræver computer), installation, push-eksempler |
 
 ### Agentor Platform (interne roller)
 | Fil | Indhold |
@@ -99,6 +98,33 @@ Tegnefladerne henter logoer fra lærredets asset-lager (`/_blob/<id>`). Lokalt p
 | `F6-Betalinger.dc.html` | Fakturaer og betalinger på tværs: forfaldne, rykkere, fejlede kortbetalinger, seneste betalinger |
 | `F7-Rapporter.dc.html` | Månedsrapport: økonomiske nøgletal og supportomfang, største kunder, tid pr. supporter, tidligere måneder |
 
+### Mobile (siden "Mobile" på tegnefladen · 390 × 844)
+
+| Fil | Indhold |
+|---|---|
+| `MA01-Log-ind.dc.html` | log ind |
+| `MA02-Overblik.dc.html` | overblik, alt kører |
+| `MA03-Overblik-Problemer.dc.html` | overblik, problemer |
+| `MA04-Integrationer.dc.html` | integrationer |
+| `MA05-Flow.dc.html` | flow |
+| `MA06-Fejl.dc.html` | fejl |
+| `MA07-Aktivitet.dc.html` | aktivitet |
+| `MA08-Genforbind.dc.html` | genforbind |
+| `MA09-Notifikationer.dc.html` | notifikationer |
+| `MA10-Mere.dc.html` | mere |
+| `MA11-Notifikationsindstillinger.dc.html` | notifikationsindstillinger |
+| `MA12-Supportadgang.dc.html` | godkend supportadgang |
+| `MA13-Installer.dc.html` | føj til hjemmeskærm |
+| `MA14-Push.dc.html` | push-beskeder |
+| `MA15-Abonnement.dc.html` | abonnement |
+| `MP01-Kunder.dc.html` | kunder |
+| `MP02-Sager.dc.html` | sager |
+| `MP03-Sag.dc.html` | sag |
+| `MP04-Tid.dc.html` | registrér tid |
+| `MP05-Fejl.dc.html` | fejl på tværs |
+| `MP06-Finans.dc.html` | finans |
+| `MP07-Forfaldne.dc.html` | forfaldne |
+
 ## Beslutninger truffet under designet (afviger fra specifikationerne)
 
 Disse vinder over Designspecifikation v1 og Produktspecifikation v1.x, hvor de er i konflikt:
@@ -124,6 +150,7 @@ Disse vinder over Designspecifikation v1 og Produktspecifikation v1.x, hvor de e
 17. **Supportoverblik** (ny funktion, ikke i produktspecifikationen): Platform-navigationen har nu Kunder, Supportsager, Fejl, Tid, Systemstatus og Platformbrugere. Sager har statusserne Ny, I gang, Venter på kunde og Løst (arkiveres efter 14 dage) og prioriteterne Kritisk, Høj, Normal og Lav. Prioritet bruger ikke statusfarver. Tid logges automatisk pr. supportsession (fra første til sidste handling, pauser over 10 min. trækkes fra) og bekræftes, når sessionen afsluttes. Manuel tid og timer findes også. Interne noter er gule (#FBF0DC), markeret "Intern note" og aldrig synlige for kunden. Kundenoter kan fastgøres på kunden. "Fejl på tværs" viser kun antal og fejlkoder, aldrig kundedata. Fakturerbar tid kan markeres for alle kunder, og kundens abonnement vises ved feltet. Svarfrister er en pladsholder, til der er besluttet en supportaftale.
 18. **Finans** (ny funktion): Abonnementer og betalt support afregnes gennem Agentor Platform under fanen Finans, som kun Superadmin ser. Abonnementer opkræves forud, månedligt eller årligt, med kort eller MobilePay via QuickPay. Enterprise kan betale på faktura med EAN. Årlig pris er antaget at være 10 gange månedsprisen. Support faktureres bagud den 1. i næste måned til 800 kr. pr. time inkl. moms (640 kr. ekskl.). Tiden oprundes til nærmeste 15 min. pr. sag pr. måned. Tid uden sag og tid markeret som ikke fakturerbar kommer ikke med. Satsen kan ændres af Superadmin. Rapporter viser beløb ekskl. moms, mens fakturaer og supportafregning viser beløb inkl. moms. Mislykkede kortbetalinger forsøges igen efter 2, 5 og 9 dage.
 19. **Dashboard-blokke** (gælder alle Platform-oversigter: Kunder, Supportsager, Tid, Fejl og alle Finans-sider): Hver side starter med en række nøgletalskort. Det første kort er fremhævet (lime gradient, stort tal, vækstmærke og en kurve over tidligere perioder). De øvrige kort har ét visuelt element: en segmenteret søjle med streg-ticks i enden, en halvcirkel-måler med lime prik eller små søjler for de sidste 6 perioder, hvor den aktuelle periode er skraveret. Vækstmærker viser ↑/↓ mod forrige periode, grønt når ændringen er god, rødt når den er dårlig, gråt når den er neutral. Omsætningsgrafen kan skifte mellem Dage og Måneder: måneder som stablede, afrundede søjler (sort abonnement, skraveret lime support) med tooltip, dage som tynde søjler med en linje for samlet omsætning og en stiplet prognose. Eksempeltallene for tidligere perioder er pladsholdere. Kortene findes i to størrelser: stor (Finans) og kompakt, ca. 120 px høj (Kunder, Supportsager, Tid og Fejl), hvor grafikken står til højre for tallet og detaljerne er samlet på én linje.
+20. **Mobil og PWA** (siden "Mobile", erstatter de tidligere M1–M7, som er fjernet): Mobilen er til at følge med og handle hurtigt, ikke til at bygge. Ingen node-editor, ingen KPI-dæk og ingen tabeller. Kundens app har fire faner (Overblik, Integrationer, Aktivitet, Mere) og klokken øverst. Integrationer vises som statuskort med logoer, ruter som en liste. Det man kan på mobilen: se status og fejl med forklaring, gentage fejlede records, pause og genoptage flows, genforbinde en afbrudt forbindelse (OAuth), godkende eller afvise supportadgang, styre push og se abonnement og fakturaer. Mapping, regler, nye flows, plan og team ændres på computer, og skærmene siger det med en grå "computer"-linje og "Send link til min computer". Platform på mobil (navy header) har fanerne Kunder, Sager, Fejl og Finans (kun Superadmin): sager som liste i stedet for tavle, svar og interne noter, timer med "Stop og gem" og registrering af tid i en modal oven på sagen, fejlkoder på tværs og finans som én liste med nøgletal og forfaldne betalinger med rykker. Supportvisning af kundens app sker på computer. Login med passkey (WebAuthn), som telefonen låser op med Face ID, Touch ID eller fingeraftryk. E-mail og kode som alternativ. Push siger altid hvad der skete, åbner det rigtige sted og kan samles i stille timer (`MA14`). Under 768 px bruges disse skærme.
 
 ## Kendte pladsholdere
 
