@@ -34,5 +34,12 @@ SELECT format('CREATE DATABASE %I OWNER agentor_owner', :'db_name')
 WHERE NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = :'db_name')
 \gexec
 
+-- A database made elsewhere (e.g. in Plesk) is handed to agentor_owner, so migrations and
+-- SECURITY DEFINER functions are owned by it like everywhere else. Only do this on an empty database.
+SELECT format('ALTER DATABASE %I OWNER TO agentor_owner', :'db_name') \gexec
 SELECT format('REVOKE ALL ON DATABASE %I FROM PUBLIC', :'db_name') \gexec
 SELECT format('GRANT CONNECT ON DATABASE %I TO agentor_web, agentor_worker, agentor_support, agentor_readonly_ops', :'db_name') \gexec
+
+-- Before PostgreSQL 15 the public schema belongs to the superuser; give it to the owner too.
+\connect :db_name
+ALTER SCHEMA public OWNER TO agentor_owner;

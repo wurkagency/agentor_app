@@ -4,7 +4,9 @@
 #
 #   PGPASSWORD='<postgres admin password>' SMTP_URL='smtp://…' bash /var/www/vhosts/agentor.dk/app/repo/infra/scripts/server-setup.sh
 #
-# Optional: PGADMIN_USER (postgres), PGHOST (127.0.0.1), PGPORT (5432), REDIS_URL.
+# Optional: PGADMIN_USER (postgres), PGHOST (127.0.0.1), PGPORT (5432), REDIS_URL, and DB_NAME
+# (agentor) to use an existing, empty database, e.g. one created in Plesk. The admin is still
+# needed once: the app runs as five separate roles (infra/db/roles.sql) that only it can create.
 # Secrets are generated here and written only to root/user-owned files with mode 0400; the
 # script never prints them. Existing env files are kept (re-running doesn't rotate passwords).
 set -euo pipefail
@@ -13,7 +15,7 @@ D=/var/www/vhosts/agentor.dk/app
 DOMAIN=app.agentor.dk
 REPO=$D/repo
 : "${PGADMIN_USER:=postgres}" "${PGHOST:=127.0.0.1}" "${PGPORT:=5432}"
-: "${REDIS_URL:=redis://127.0.0.1:6379/5}"
+: "${REDIS_URL:=redis://127.0.0.1:6379/5}" "${DB_NAME:=agentor}"
 [ "$(id -u)" = 0 ] || { echo "Run as root."; exit 1; }
 [ -f "$REPO/package.json" ] || { echo "No checkout in $REPO: deploy it from Plesk → Git first."; exit 1; }
 cd /
@@ -50,14 +52,18 @@ else
   [ -n "${SMTP_URL:-}" ] || { echo "Set SMTP_URL, e.g. smtp://user%40domain:key@smtp-relay.brevo.com:587"; exit 1; }
   export PGPASSWORD
 
-  echo "== Database roles and database"
+  echo "== Database roles and database $DB_NAME"
+  psql -h "$PGHOST" -p "$PGPORT" -U "$PGADMIN_USER" -d postgres -tAc "select 1" >/dev/null ||
+    { echo "Can't log in to Postgres as $PGADMIN_USER on $PGHOST:$PGPORT. Use the admin from Plesk → Database Servers (export PGADMIN_USER=…)."; exit 1; }
+  psql -h "$PGHOST" -p "$PGPORT" -U "$PGADMIN_USER" -d postgres -tAc "select rolsuper or rolcreaterole from pg_roles where rolname = current_user" | grep -q t ||
+    { echo "$PGADMIN_USER can't create roles. Use the Postgres admin from Plesk → Database Servers, not a database user."; exit 1; }
   pw() { openssl rand -hex 24; }
   PW_OWNER=$(pw); PW_WEB=$(pw); PW_WORKER=$(pw); PW_SUPPORT=$(pw); PW_OPS=$(pw)
   psql -h "$PGHOST" -p "$PGPORT" -U "$PGADMIN_USER" -d postgres -q \
     -v owner_password="$PW_OWNER" -v web_password="$PW_WEB" -v worker_password="$PW_WORKER" \
-    -v support_password="$PW_SUPPORT" -v ops_password="$PW_OPS" -v db_name=agentor \
+    -v support_password="$PW_SUPPORT" -v ops_password="$PW_OPS" -v db_name="$DB_NAME" \
     -f "$REPO/infra/db/roles.sql"
-  url() { echo "postgresql://$1:$2@$PGHOST:$PGPORT/agentor"; }
+  url() { echo "postgresql://$1:$2@$PGHOST:$PGPORT/$DB_NAME"; }
 
   echo "== Key encryption key"
   KEK=/etc/agentor/kek.pem
