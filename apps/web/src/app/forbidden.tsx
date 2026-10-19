@@ -5,7 +5,7 @@ import { getTranslations } from 'next-intl/server';
 export default async function Forbidden() {
   const t = await getTranslations('access');
   return (
-    <main className="flex-1 px-4 pb-10 pt-6 md:px-10">
+    <main className="flex-1 px-gutter pb-12 pt-6">
       <div className="mx-auto max-w-content">
         <Card padding="none">
           <NoAccessState title={t('title')}>{t('body')}</NoAccessState>

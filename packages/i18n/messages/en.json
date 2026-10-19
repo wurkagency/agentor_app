@@ -1654,7 +1654,7 @@
     "openInspector": "Show settings (])",
     "desktopOnly": {
       "title": "The editor needs a computer",
-      "body": "Open the flow on a screen at least 1024 px wide to edit it. You can follow status and runs from here."
+      "body": "Open the flow on a screen at least 768 px wide to edit it. You can follow status and runs from here."
     },
     "flow": {
       "eyebrow": "Flow",

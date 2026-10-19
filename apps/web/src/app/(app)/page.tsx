@@ -293,7 +293,7 @@ export default async function OverviewPage({
           </ul>
         </section>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             variant="lime"
             label={t('kpi.revenue')}

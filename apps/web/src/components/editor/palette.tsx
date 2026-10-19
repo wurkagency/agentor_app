@@ -46,7 +46,7 @@ export function Palette({
   return (
     <aside
       aria-label={t('paletteLabel')}
-      className="flex h-full w-60 flex-none flex-col gap-4 overflow-y-auto bg-surface p-3 shadow-hairline-r"
+      className="hidden h-full w-60 flex-none flex-col gap-4 overflow-y-auto bg-surface p-3 shadow-hairline-r lg:flex"
     >
       <SearchInput
         aria-label={t('searchConnections')}

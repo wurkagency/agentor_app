@@ -140,7 +140,7 @@ test('the flow panel explains the flow, and ] hides the inspector', async ({ pag
   await expect(inspector.getByRole('heading', { name: 'Hvad flowet gør' })).toBeVisible({
     timeout: 30_000,
   });
-  await expect(inspector).toContainText('ordrer fra WooCommerce bliver til fakturaer i Dinero.');
+  await expect(inspector).toContainText('Ordrer fra WooCommerce bliver til fakturaer i Dinero.');
   await page.locator('.react-flow__pane').click();
   await page.keyboard.press(']');
   await expect(inspector).toHaveCount(0);

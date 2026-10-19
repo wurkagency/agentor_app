@@ -341,7 +341,7 @@ function CanvasInner(props: CanvasProps) {
   // Fit again when the layout arrives or the pane resizes (the inspector opens and closes).
   const paneWidth = useStore((s) => s.width);
   useEffect(() => {
-    const id = setTimeout(() => void fitView({ padding: 0.2, duration: 0 }), 50);
+    const id = setTimeout(() => void fitView({ padding: 0.2, duration: 0, maxZoom: 1 }), 50);
     return () => clearTimeout(id);
   }, [props.def.nodes.length, elk, paneWidth, fitView]);
 
@@ -387,6 +387,7 @@ function CanvasInner(props: CanvasProps) {
         }
         onMove={(_e, vp) => setZoom(vp.zoom)}
         fitView
+        fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
       >
         <Background gap={16} size={1} color="var(--color-border-strong)" />
         <MiniMap

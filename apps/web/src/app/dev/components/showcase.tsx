@@ -132,7 +132,7 @@ export function Showcase() {
   ] as const;
 
   return (
-    <main className="mx-auto flex max-w-content flex-col gap-8 px-10 py-12">
+    <main className="mx-auto flex max-w-content flex-col gap-8 px-gutter py-12">
       <header className="flex flex-col gap-2">
         <p className="eyebrow m-0">Komponentark</p>
         <h1 className="m-0 text-page">{t('dev.title')}</h1>

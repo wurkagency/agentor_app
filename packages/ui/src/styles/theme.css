@@ -139,6 +139,7 @@
   --shadow-hairline-b: inset 0 -1px 0 var(--color-border);
   --shadow-hairline-l: inset 1px 0 0 var(--color-border);
   --shadow-hairline-r: inset -1px 0 0 var(--color-border);
+  --shadow-hairline-y: inset 0 1px 0 var(--color-border), inset 0 -1px 0 var(--color-border);
   --shadow-tab-active: inset 0 -2px 0 var(--color-fg-1);
   --shadow-row-selected: inset 2px 0 0 var(--color-primary), inset 3px 0 0 var(--color-fg-1);
   --shadow-cutout-canvas: 0 0 0 2px var(--color-canvas);
@@ -156,18 +157,23 @@
   --spacing-mono-line: 20px;
   --spacing-header: 88px; /* app header (decision 1) */
   --spacing-subnav: 56px; /* secondary navigation row */
-  --spacing-editor-header: 64px; /* compact header in the editor */
+  --spacing-editor-header: 64px; /* compact app header in the editor (D3-Editor) */
+  --spacing-editor-toolbar: 56px; /* the editor's own toolbar under it */
+  /* Fluid layout (README decision 15): page side margin, 24 px → 43 px at 1440 → 64 px. */
+  --spacing-gutter: clamp(24px, 3vw, 64px);
 
-  /* ---- Breakpoints (designspecifikation §3.1) ---------------------------------------- */
+  /* ---- Breakpoints (README decision 15): < 768 mobile, 768–1279 tablet, 1280–1919
+     desktop, ≥ 1920 wide desktop. ---------------------------------------------------- */
   --breakpoint-*: initial;
   --breakpoint-md: 768px;
-  --breakpoint-lg: 1024px;
-  --breakpoint-xl: 1280px;
-  --breakpoint-2xl: 1440px;
+  --breakpoint-lg: 1280px;
+  --breakpoint-xl: 1920px;
 
   --container-*: initial;
-  --container-content: 1200px;
-  --container-form: 720px;
+  /* Recommended max width for lists, overview and details, centred (decision 15). */
+  --container-content: 1920px;
+  /* Forms and settings cards: at most 960 px each. */
+  --container-form: 960px;
   --container-focus: 480px;
   /* Onboarding cards (D14-Onboarding-1 and -2/-3). */
   --container-onboarding-narrow: 600px;

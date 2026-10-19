@@ -31,7 +31,7 @@ export function SecondaryBar({
 }) {
   const pathname = usePathname();
   return (
-    <div className="flex-none px-4 md:px-10">
+    <div className="flex-none px-gutter">
       <div className="mx-auto flex h-subnav max-w-content items-center justify-between gap-6 shadow-hairline-t">
         {items ? (
           <nav aria-label={label} className="flex items-center gap-1 overflow-x-auto">
@@ -69,10 +69,10 @@ export function SecondaryBar({
   );
 }
 
-/** Content area: max 1200 px on the same axis as the header (decision 1). */
+/** Content area: max 1920 px, centred on the same axis as the header (decision 15). */
 export function PageBody({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <main id="main" className={cn('flex-1 px-4 pb-8 pt-5 md:px-10', className)}>
+    <main id="main" className={cn('flex-1 px-gutter pb-12 pt-5', className)}>
       <div className="mx-auto flex max-w-content flex-col gap-5">{children}</div>
     </main>
   );

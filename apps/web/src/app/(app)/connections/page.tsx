@@ -48,7 +48,7 @@ export default async function ConnectionsPage() {
           {t('emptyBody')}
         </EmptyState>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {[...rows]
             .sort((a, b) => ORDER.indexOf(a.connectorId) - ORDER.indexOf(b.connectorId))
             .map((c) => {

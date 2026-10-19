@@ -123,6 +123,15 @@ export function Editor(p: EditorProps) {
   const [savedAt, setSavedAt] = useState<string | null>(p.draft?.updatedAt ?? null);
   const [saving, setSaving] = useState(false);
   const [view, setView] = useState<'canvas' | 'list'>('canvas');
+  // The canvas needs 1280 px (decision 15): narrower windows open in the list view, and
+  // "Lærred" in the view switch shows the canvas anyway.
+  useEffect(() => {
+    const narrow = window.matchMedia('(max-width: 1279px)');
+    const apply = () => narrow.matches && setView('list');
+    apply();
+    narrow.addEventListener('change', apply);
+    return () => narrow.removeEventListener('change', apply);
+  }, []);
   const [developer, setDeveloper] = useState(false);
   const [selected, setSelectedRoute] = useState<string | null>(p.focus.route);
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -445,7 +454,7 @@ export function Editor(p: EditorProps) {
   return (
     <>
       {/* M5-Editor: the editor needs a computer; smaller screens get a pointer back. */}
-      <div className="fixed inset-x-0 bottom-0 top-header z-10 flex items-center justify-center bg-bg-base px-4 lg:hidden">
+      <div className="fixed inset-x-0 bottom-0 top-editor-header z-10 flex items-center justify-center bg-bg-base px-4 md:hidden">
         <EmptyState
           icon={Monitor}
           title={t('desktopOnly.title')}
@@ -458,8 +467,8 @@ export function Editor(p: EditorProps) {
           {t('desktopOnly.body')}
         </EmptyState>
       </div>
-      <div className="fixed inset-x-0 bottom-0 top-header z-10 hidden flex-col bg-bg-base lg:flex">
-        <header className="flex h-editor-header flex-none items-center gap-3 bg-surface px-4 shadow-hairline-b">
+      <div className="fixed inset-x-0 bottom-0 top-editor-header z-10 hidden flex-col bg-bg-base md:flex">
+        <header className="flex h-editor-toolbar flex-none items-center gap-3 bg-surface px-4 shadow-hairline-y">
           <Button variant="ghost" size="icon" asChild>
             <Link href={`/integrations/${p.flow.id}`} aria-label={t('back')}>
               <Icon icon={ArrowLeft} size={18} />

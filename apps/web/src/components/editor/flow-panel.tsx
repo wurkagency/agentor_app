@@ -95,7 +95,7 @@ export function FlowPanel(p: {
                   >
                     <span>
                       {t('flow.sentence', {
-                        from: from.toLowerCase(),
+                        from,
                         source: srcManifest?.name ?? '',
                         to: to.toLowerCase(),
                         dest: dst?.name ?? '',

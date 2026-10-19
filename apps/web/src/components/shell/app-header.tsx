@@ -36,9 +36,16 @@ export interface AppHeaderProps extends ProfileMenuProps {
 export function AppHeader({ attention, notifications, search, ...profile }: AppHeaderProps) {
   const t = useTranslations('nav');
   const pathname = usePathname();
+  // The editor fills the window (D3-Editor): a compact 64 px header, full width.
+  const compact = /^\/integrations\/[^/]+\/editor/.test(pathname);
   return (
-    <header className="flex-none px-4 md:px-10">
-      <div className="mx-auto flex h-header max-w-content items-center gap-14">
+    <header className={cn('flex-none', compact ? 'px-6' : 'px-gutter')}>
+      <div
+        className={cn(
+          'mx-auto flex items-center',
+          compact ? 'h-editor-header gap-12' : 'h-header max-w-content gap-14',
+        )}
+      >
         <Link href="/" aria-label={t('home')} className="flex-none text-fg-1 no-underline">
           <Logo />
         </Link>

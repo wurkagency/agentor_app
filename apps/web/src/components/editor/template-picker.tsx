@@ -53,7 +53,7 @@ export function TemplatePicker({
   const pick = templates.find((x) => x.id === chosen);
 
   return (
-    <main id="main" className="flex flex-1 justify-center px-4 py-8 md:px-10">
+    <main id="main" className="flex flex-1 justify-center px-gutter py-8">
       <section
         className="flex w-full max-w-onboarding flex-col gap-5 rounded-md bg-surface p-6 shadow-card"
         aria-labelledby="tpl-title"

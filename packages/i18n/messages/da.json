@@ -1654,7 +1654,7 @@
     "openInspector": "Vis indstillinger (])",
     "desktopOnly": {
       "title": "Editoren kræver en computer",
-      "body": "Åbn flowet på en skærm, der er mindst 1024 px bred, for at redigere det. Status og kørsler kan du følge herfra."
+      "body": "Åbn flowet på en skærm, der er mindst 768 px bred, for at redigere det. Status og kørsler kan du følge herfra."
     },
     "flow": {
       "eyebrow": "Flow",

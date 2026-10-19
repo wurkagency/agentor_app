@@ -10,7 +10,7 @@ export default async function FocusLayout({ children }: { children: ReactNode })
   const t = await getTranslations('auth');
   return (
     <div className="relative flex min-h-dvh flex-col">
-      <main className="flex flex-1 flex-col items-center justify-center gap-8 px-4 py-10 md:px-10">
+      <main className="flex flex-1 flex-col items-center justify-center gap-8 px-gutter py-10">
         <Logo size="focus" />
         {children}
       </main>

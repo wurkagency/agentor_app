@@ -67,7 +67,7 @@ export function Catalogue({ items }: { items: CatalogueItem[] }) {
             </h2>
             <p className="m-0 text-meta text-fg-2">{t(`categoryHint.${c}`)}</p>
           </div>
-          <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 xl:grid-cols-4">
+          <ul className="m-0 grid list-none gap-3 p-0 md:grid-cols-2 lg:grid-cols-4">
             {items
               .filter((i) => i.category === c)
               .map((i) => (
