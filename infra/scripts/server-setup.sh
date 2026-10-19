@@ -156,14 +156,8 @@ else
   chmod 400 "$D/shared/"*.env*
 fi
 
-echo "== nginx directives for $DOMAIN"
-if plesk bin domain --update-web-server-settings "$DOMAIN" -nginx-proxy-mode false \
-     -additional-nginx-settings-file "$REPO/infra/plesk/nginx-directives.conf"; then
-  echo "nginx updated"
-else
-  echo "Plesk refused the nginx settings: paste infra/plesk/nginx-directives.conf into"
-  echo "Plesk → $DOMAIN → Apache & nginx Settings → Additional nginx directives, and turn Proxy mode off."
-fi
+# nginx: this Plesk version has no CLI option for additional directives; they are pasted in the
+# UI once (Apache & nginx Settings, Proxy mode off) from infra/plesk/nginx-directives.conf.
 
 echo "== Deploy commands and PM2 at boot"
 install -m 700 "$REPO/infra/scripts/deploy.sh" /usr/local/bin/agentor-deploy
@@ -172,4 +166,4 @@ for u in agentor-web agentor-worker; do
   pm2 startup systemd -u "$u" --hp "/var/lib/$u" >/dev/null || echo "Warning: pm2 startup for $u failed; PM2 won't start at boot."
 done
 
-echo "Done. Next: agentor-deploy"
+echo "Done. Next: agentor-deploy, and paste infra/plesk/nginx-directives.conf into Plesk → $DOMAIN → Apache & nginx Settings (Proxy mode off) if not done yet."
