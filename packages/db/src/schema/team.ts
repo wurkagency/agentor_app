@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  integer,
   boolean,
   check,
   foreignKey,
@@ -131,6 +132,13 @@ export const supportAccessGrants = pgTable(
     deniedAt: ts('denied_at'),
     expiresAt: ts('expires_at').notNull(),
     revokedAt: ts('revoked_at'),
+    /** Agentor Platform (M8): the staff member, the case, and how far the access reaches. */
+    staffUserId: uuid('staff_user_id'),
+    caseId: uuid('case_id'),
+    scope: text('scope').$type<'view' | 'help'>().notNull().default('view'),
+    hours: integer('hours').notNull().default(1),
+    endedAt: ts('ended_at'),
+    extensionRequestedAt: ts('extension_requested_at'),
   },
   (t) => [
     primaryKey({ columns: [t.tenantId, t.id] }),

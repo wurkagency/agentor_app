@@ -190,6 +190,26 @@ Common acceptance criteria for **every** milestone (not repeated below):
 
 Note on the seed: the prototype path uses Dinero/WooCommerce names and logos on seeded connections backed by the mock adapter (`connector_id = mock`, display metadata from the catalog). That keeps the gate honest (no real API) while matching the boards.
 
+### M8 · Agentor Platform (README decisions 16–17)
+
+**Boards:** `P1-Kunder`, `P1-Kunder-Menu`, `P2-Kunde`, `P3-Adgang`, `P4-Supportvisning`, `P5-Skift-Kunde`, `P6-Platformbrugere`, `S1-Sager-Tavle` to `S8-Sag-Loes`.
+
+**Scope**
+- Staff roles **Superadmin** and **Supporter** (`platform.staff`), a gear in the top bar and a Platform area at `/platform` with its own header. Staff need two-step login. Nobody, Superadmin included, has standing access to customer data: the customer list shows name, CVR, plan and counts only.
+- Support access per case (P3): reason, 1, 8 or 24 hours, scope *Kun se* or *Se og hjælpe*; customer approval when the customer requires it (D8). Under access the customer's own app opens with a navy support bar (P4), ⌘J switches customer (P5). *Se og hjælpe* acts like an Admin on flows (retry, pause, mapping); never connections, keys, team, subscription or settings. Enforced in the database: `app.support_scope()` feeds `has_flow_access()` and `can_edit_flows()`. Every action lands in the customer's audit log with the staff member's name.
+- Supportsager (S1–S3, S8): board, list and archive, case detail with timeline, replies, yellow internal notes (never shown to the customer), pinned customer notes, resolve and send the history by e-mail without internal notes. Customers open cases from the app ("Kontakt support") and follow them under "Mine sager".
+- Time (S4–S6): sessions in a customer's app are logged automatically (first to last action, gaps over 10 min removed) and confirmed when the session ends; manual time and a timer; week overview.
+- Fejl på tværs (S7): failures grouped by error code across customers, counts only.
+- Platformbrugere (P6, Superadmin): staff, roles, the rights matrix and the access rules.
+
+**Defaults where the boards are silent (marked FOLLOW-UP):**
+- *Billing:* billable support time is added as lines on the customer's next monthly Agentor invoice at an hourly rate Superadmin sets under Platformindstillinger. Until a rate is set, nothing is invoiced.
+- *Systemstatus and Platformindstillinger* are not drawn: a read-only status page (queues, worker heartbeat) and a settings page with the hourly rate and access rules.
+- *Customer side* is not drawn: "Kontakt support" and "Mine sager" reuse existing components; access requests are approved from the notification or Indstillinger → Sikkerhed.
+- The first Superadmin is created on the server with `scripts/create-staff.ts`.
+
+**Also fixed here:** `app.due_flows()` returned nothing under FORCE RLS, so scheduled polls never ran; it now reads a private schedule index like billing does.
+
 ### Phase 2 · First live integration (after approval)
 
 Outline only; detailed plan written at the Phase 1 gate.

@@ -1,5 +1,6 @@
 import { sql } from 'drizzle-orm';
 import {
+  jsonb,
   check,
   foreignKey,
   index,
@@ -113,6 +114,8 @@ export const invoices = pgTable(
     periodStart: ts('period_start').notNull(),
     periodEnd: ts('period_end').notNull(),
     description: text('description').notNull(),
+    /** Extra lines next to the plan, e.g. billable support time (M8). Amounts are net øre. */
+    lines: jsonb('lines').$type<{ text: string; amountOre: number }[]>().notNull().default([]),
     amountOre: integer('amount_ore').notNull(),
     vatOre: integer('vat_ore').notNull(),
     status: text('status').$type<InvoiceStatus>().notNull().default('open'),

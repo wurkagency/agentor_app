@@ -4,6 +4,7 @@ export * from './connections.js';
 export * from './plans.js';
 export * from './team.js';
 export * from './billing.js';
+export * from './platform.js';
 export {
   authSchema,
   users as authUsers,

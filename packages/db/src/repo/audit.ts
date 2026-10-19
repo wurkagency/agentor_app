@@ -8,6 +8,8 @@ export interface Actor {
   name: string;
   /** Client IP; stored truncated (see maskIp). */
   ip?: string | null | undefined;
+  /** 'support' when an Agentor staff member acts under a support grant (README decision 16). */
+  kind?: 'user' | 'support' | undefined;
 }
 
 /**
@@ -54,7 +56,7 @@ export async function writeAudit(tx: Transaction, actor: Actor, entry: AuditEntr
   await tx.insert(auditLog).values({
     tenantId: actor.tenantId,
     actorUserId: actor.userId,
-    actorKind: 'user',
+    actorKind: actor.kind ?? 'user',
     actorName: actor.name,
     action: entry.action,
     objectType: entry.objectType,

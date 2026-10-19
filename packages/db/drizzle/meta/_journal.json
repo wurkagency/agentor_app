@@ -162,6 +162,20 @@
       "when": 1792377172282,
       "tag": "0022_publish_flow",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1792405167571,
+      "tag": "0023_platform",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1792405176809,
+      "tag": "0024_platform_security",
+      "breakpoints": true
     }
   ]
 }
