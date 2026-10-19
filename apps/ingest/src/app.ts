@@ -7,7 +7,19 @@ export interface IngestDeps {
   quickpayPrivateKey?: string | undefined;
   /** Enqueues a verified QuickPay callback; jobId makes redelivery idempotent. */
   enqueueQuickPay?: ((body: string, jobId: string) => Promise<void>) | undefined;
+  /** Stores a webhook for a known token (app.ingest_webhook); null for unknown tokens. */
+  storeWebhook?:
+    | ((
+        token: string,
+        headers: Record<string, string>,
+        body: Buffer,
+      ) => Promise<{ eventId: string; tenantId: string } | null>)
+    | undefined;
+  enqueueWebhook?: ((tenantId: string, eventId: string) => Promise<void>) | undefined;
 }
+
+/** Headers kept with a webhook: signatures, topics and delivery ids. Nothing else is stored. */
+const KEEP_HEADERS = /^(x-wc-webhook-|x-shopify-|content-type$)/;
 
 /**
  * agentor-ingest: receives webhooks, verifies them, enqueues, answers 200 fast
@@ -50,8 +62,21 @@ export function buildApp(
     return reply.code(202).send();
   });
 
-  // Webhook endpoints are unguessable per-connection paths (M5). Until then, every hook
-  // path is unknown and answered with a plain 404 that reveals nothing.
+  // Webhooks (produktspecifikation §9.4): an unguessable token per connection. The event is
+  // stored and queued; the worker verifies the signature with the connection's secret, which
+  // this process can't read. Unknown tokens get a plain 404 that reveals nothing.
+  app.post<{ Params: { token: string } }>('/hooks/:token', async (req, reply) => {
+    const { storeWebhook, enqueueWebhook } = options;
+    const raw = Buffer.isBuffer(req.body) ? req.body : null;
+    if (!storeWebhook || !enqueueWebhook || !raw) return reply.code(404).send();
+    const headers: Record<string, string> = {};
+    for (const [k, v] of Object.entries(req.headers))
+      if (KEEP_HEADERS.test(k) && typeof v === 'string') headers[k] = v.slice(0, 512);
+    const stored = await storeWebhook(req.params.token, headers, raw);
+    if (!stored) return reply.code(404).send();
+    await enqueueWebhook(stored.tenantId, stored.eventId);
+    return reply.code(202).send();
+  });
   app.all('/hooks/*', async (_req, reply) => reply.code(404).send());
 
   app.setNotFoundHandler((_req, reply) => reply.code(404).send());

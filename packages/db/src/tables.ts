@@ -19,7 +19,11 @@ export const NON_TENANT_RLS_TABLES: Readonly<Record<string, string>> = {
 export const AUTH_SCHEMA = 'auth';
 
 /** Tables agentor_web must never be able to read (produktspecifikation §9.2). */
-export const WORKER_ONLY_READ_TABLES = ['connection_secrets', 'tenant_keys'] as const;
+export const WORKER_ONLY_READ_TABLES = [
+  'connection_secrets',
+  'tenant_keys',
+  'inbound_events',
+] as const;
 
 /** Append-only tables: no runtime role may UPDATE, DELETE or TRUNCATE. */
 export const APPEND_ONLY_TABLES = ['audit_log'] as const;

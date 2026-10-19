@@ -81,3 +81,51 @@ describe('QuickPay callbacks', () => {
     expect(res.statusCode).toBe(404);
   });
 });
+
+describe('connection webhooks', () => {
+  const stored: { token: string; headers: Record<string, string>; body: string }[] = [];
+  const queued: string[] = [];
+  const hooks = buildApp({
+    storeWebhook: async (token, headers, body) => {
+      if (token !== 'k'.repeat(43)) return null;
+      stored.push({ token, headers, body: body.toString() });
+      return { eventId: 'e1', tenantId: 't1' };
+    },
+    enqueueWebhook: async (_t, eventId) => {
+      queued.push(eventId);
+    },
+  });
+  afterAll(() => hooks.close());
+
+  it('stores and queues a webhook for a known token, keeping only signature headers', async () => {
+    const res = await hooks.inject({
+      method: 'POST',
+      url: `/hooks/${'k'.repeat(43)}`,
+      headers: {
+        'content-type': 'application/json',
+        'x-wc-webhook-signature': 'sig',
+        cookie: 'should-not-be-stored',
+      },
+      payload: '{"id":10447}',
+    });
+    expect(res.statusCode).toBe(202);
+    expect(stored[0]!.body).toBe('{"id":10447}');
+    expect(stored[0]!.headers).toEqual({
+      'content-type': 'application/json',
+      'x-wc-webhook-signature': 'sig',
+    });
+    expect(queued).toEqual(['e1']);
+  });
+
+  it('answers unknown tokens with an empty 404 and queues nothing', async () => {
+    const res = await hooks.inject({
+      method: 'POST',
+      url: `/hooks/${'x'.repeat(43)}`,
+      headers: { 'content-type': 'application/json' },
+      payload: '{}',
+    });
+    expect(res.statusCode).toBe(404);
+    expect(res.body).toBe('');
+    expect(queued).toHaveLength(1);
+  });
+});

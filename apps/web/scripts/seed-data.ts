@@ -60,3 +60,56 @@ export const FLOWS = {
   b2b: { id: '0190b000-0000-7000-8000-000000000205', name: 'B2B-ordrer' },
   kreditnotaer: { id: '0190b000-0000-7000-8000-000000000206', name: 'Kreditnotaer' },
 } as const;
+
+/** The six connections on D9-Forbindelser; e-conomic is broken (token expired yesterday). */
+export const CONNECTIONS = {
+  woo: {
+    id: '0190b000-0000-7000-8000-000000000301',
+    connectorId: 'woocommerce',
+    name: 'nordlys-cykler.dk',
+    accountId: 'nordlys-cykler.dk',
+    credentials: {
+      baseUrl: 'https://nordlys-cykler.dk',
+      consumerKey: 'ck_seed_nordlys',
+      consumerSecret: 'cs_seed_nordlys',
+    },
+  },
+  shopify: {
+    id: '0190b000-0000-7000-8000-000000000302',
+    connectorId: 'shopify',
+    name: 'Nordlys Outlet',
+    accountId: 'nordlys-outlet',
+    credentials: { accessToken: 'mock-seed-shopify' },
+  },
+  dinero: {
+    id: '0190b000-0000-7000-8000-000000000303',
+    connectorId: 'dinero',
+    name: 'Nordlys Cykler',
+    accountId: '412983',
+    credentials: { accessToken: 'mock-seed-dinero' },
+  },
+  economic: {
+    id: '0190b000-0000-7000-8000-000000000304',
+    connectorId: 'economic',
+    name: 'Nordlys Outlet',
+    accountId: '771204',
+    credentials: { grantToken: 'revoked-seed-economic' },
+  },
+  hubspot: {
+    id: '0190b000-0000-7000-8000-000000000305',
+    connectorId: 'hubspot',
+    name: 'Nordlys Cykler',
+    accountId: '24015566',
+    credentials: { accessToken: 'mock-seed-hubspot' },
+  },
+  brevo: {
+    id: '0190b000-0000-7000-8000-000000000306',
+    connectorId: 'brevo',
+    name: 'Nyhedsbrev',
+    accountId: 'nyhedsbrev',
+    credentials: { apiKey: 'xkeysib-seed-nordlys' },
+  },
+} as const;
+
+/** Webhook token for the seeded WooCommerce connection (e2e posts webhooks with it). */
+export const SEED_WOO_WEBHOOK_TOKEN = 'nordlys-seed-woocommerce-webhook-token-0001';

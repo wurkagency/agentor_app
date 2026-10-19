@@ -3,7 +3,7 @@ import { formatDate, formatTime, type Locale } from '@agentor/i18n';
 import { Avatar, Button, Card, EmptyState, Icon, Table, Td, Th, Tr, cn } from '@agentor/ui';
 import { Download, History, LifeBuoy } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
-import Link from 'next/link';
+import { ButtonLink } from '@/components/button-link';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { requireRole } from '@/server/auth/session';
 import { db } from '@/server/infra';
@@ -114,11 +114,9 @@ export default async function AuditLogPage({
       </Card>
       {nextHref && (
         <div className="flex justify-center">
-          <Button variant="secondary" asChild>
-            <Link href={nextHref} scroll={false}>
-              {t('loadMore')}
-            </Link>
-          </Button>
+          <ButtonLink variant="secondary" href={nextHref} scroll={false}>
+            {t('loadMore')}
+          </ButtonLink>
         </div>
       )}
     </PageBody>

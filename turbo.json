@@ -19,7 +19,9 @@
     "CVR_PROVIDER",
     "DATAFORDELER_*",
     "MAILPIT_API",
-    "LOG_LEVEL"
+    "LOG_LEVEL",
+    "KEK_*",
+    "CONNECTOR_MODE"
   ],
   "tasks": {
     "build": {

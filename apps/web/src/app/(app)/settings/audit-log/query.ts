@@ -6,6 +6,8 @@ export const ACTION_GROUPS = [
   'security',
   'support',
   'notifications',
+  'connection',
+  'subscription',
 ] as const;
 export const PERIODS = { '7': 7, '30': 30, '90': 90 } as const;
 

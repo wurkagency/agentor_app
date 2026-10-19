@@ -113,6 +113,20 @@
       "when": 1792369542081,
       "tag": "0015_business_integration_sets",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1792371279115,
+      "tag": "0016_connections_m5",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1792371284283,
+      "tag": "0017_connections_security",
+      "breakpoints": true
     }
   ]
 }

@@ -15,7 +15,17 @@ if (process.env.NODE_ENV === 'production') throw new Error('Refusing to seed in 
 const { symmetricEncrypt } = await import('better-auth/crypto');
 const { billingPeriod, monthStart } = await import('@agentor/core');
 const { auth } = await import('../src/server/auth/auth');
-const { FLOWS, SEED_PASSWORD, SEED_TOTP_SECRET, TENANTS, USERS } = await import('./seed-data');
+const {
+  CONNECTIONS,
+  FLOWS,
+  SEED_PASSWORD,
+  SEED_TOTP_SECRET,
+  SEED_WOO_WEBHOOK_TOKEN,
+  TENANTS,
+  USERS,
+} = await import('./seed-data');
+const { publicKeyFromBase64, seal, secretBinding } = await import('@agentor/keybox');
+const { hashWebhookToken } = await import('@agentor/db');
 
 const ownerUrl = process.env.DATABASE_URL_OWNER;
 if (!ownerUrl) throw new Error('DATABASE_URL_OWNER missing');
@@ -154,6 +164,44 @@ await inTenant(n.id, async () => {
       [n.id, num, start, end],
     );
   }
+  // Forbindelser (D9): credentials sealed to the KEK exactly as the app does it.
+  const kekPub = process.env.KEK_PUBLIC_KEY;
+  if (!kekPub) throw new Error('KEK_PUBLIC_KEY missing (node infra/scripts/dev-kek.mjs)');
+  for (const c of Object.values(CONNECTIONS)) {
+    const broken = c.connectorId === 'economic';
+    await owner.query(
+      `insert into connections (tenant_id, id, connector_id, name, status, status_reason, broken_since, account_id,
+         configured_by, configured_by_name, last_checked_at, last_webhook_at, token_expires_at, created_at)
+       values ($1, $2, $3, $4, $5, $6, $7, $8, $9, 'Mette Holm', now() - interval '2 minutes', $10, $11, '2026-09-02T10:00:00+02:00')`,
+      [
+        n.id,
+        c.id,
+        c.connectorId,
+        c.name,
+        broken ? 'broken' : 'ok',
+        broken ? 'Adgangen blev trukket tilbage i e-conomic.' : null,
+        broken ? new Date(Date.now() - 27 * 3600_000) : null,
+        c.accountId,
+        USERS.mette.id,
+        c.connectorId === 'woocommerce' ? new Date(Date.now() - 60_000) : null,
+        c.connectorId === 'dinero' ? '2027-01-14T00:00:00+01:00' : null,
+      ],
+    );
+    const env = seal(
+      JSON.stringify(c.credentials),
+      publicKeyFromBase64(kekPub),
+      secretBinding(n.id, c.id),
+    );
+    await owner.query(
+      `insert into connection_secrets (tenant_id, connection_id, format, nonce, ciphertext) values ($1, $2, $3, $4, $5)`,
+      [n.id, c.id, env.format, env.nonce, env.ciphertext],
+    );
+  }
+  await owner.query(
+    `insert into app.webhook_routes (token_hash, tenant_id, connection_id) values ($1, $2, $3)`,
+    [hashWebhookToken(SEED_WOO_WEBHOOK_TOKEN), n.id, CONNECTIONS.woo.id],
+  );
+
   // Sara Lind: external developer with access to one flow until 12. nov. 2026.
   await owner.query(
     `insert into flow_grants (tenant_id, membership_id, flow_id, expires_at) values ($1, $2, $3, '2026-11-12T23:59:59+01:00')`,

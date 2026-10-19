@@ -18,7 +18,7 @@ const config: NextConfig = {
   experimental: { authInterrupts: true },
   agentRules: false,
   // Database driver and repositories run as plain Node modules on the server.
-  serverExternalPackages: ['@agentor/db', 'pg', '@node-rs/argon2'],
+  serverExternalPackages: ['@agentor/db', '@agentor/jobs', 'bullmq', 'pg', '@node-rs/argon2'],
 };
 
 export default withNextIntl(config);

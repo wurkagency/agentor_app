@@ -31,6 +31,7 @@ env:
   QUICKPAY_MODE: mock
   QUICKPAY_PRIVATE_KEY: ci-mock-callback-signing-key
   CVR_PROVIDER: fixture
+  CONNECTOR_MODE: mock
   MAILPIT_API: http://127.0.0.1:8025/api/v1
 
 jobs:
@@ -64,6 +65,8 @@ jobs:
         run: corepack enable
       - name: Install (frozen lockfile, supply-chain policies)
         run: pnpm install --frozen-lockfile
+      - name: Throwaway key box KEK (outside the checkout)
+        run: node infra/scripts/dev-kek.mjs "$RUNNER_TEMP/kek/dev-kek.pem" >> "$GITHUB_ENV"
       - name: Format
         run: pnpm format:check
       - name: Typecheck

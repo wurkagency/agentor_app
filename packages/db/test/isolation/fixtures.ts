@@ -26,6 +26,8 @@ export const ID = {
   grantB1: '0190a000-0000-7000-8000-0000000b3001',
   connA: '0190a000-0000-7000-8000-0000000a4001',
   connB: '0190a000-0000-7000-8000-0000000b4001',
+  eventA: '0190a000-0000-7000-8000-0000000a4101',
+  eventB: '0190a000-0000-7000-8000-0000000b4101',
   keyA: '0190a000-0000-7000-8000-0000000a5001',
   keyB: '0190a000-0000-7000-8000-0000000b5001',
   secretA: '0190a000-0000-7000-8000-0000000a6001',
@@ -114,6 +116,16 @@ export async function seedFixtures(admin: pg.ClientBase): Promise<void> {
     `insert into connections (tenant_id, id, connector_id, name) values
        ($1, $3, 'mock', 'Conn A'), ($2, $4, 'mock', 'Conn B')`,
     [ID.tenantA, ID.tenantB, ID.connA, ID.connB],
+  );
+  await q(
+    `insert into inbound_events (tenant_id, id, connection_id, headers, body) values
+       ($1, $3, $5, '{}', '\\x7b7d'), ($2, $4, $6, '{}', '\\x7b7d')`,
+    [ID.tenantA, ID.tenantB, ID.eventA, ID.eventB, ID.connA, ID.connB],
+  );
+  await q(
+    `insert into app.webhook_routes (token_hash, tenant_id, connection_id) values
+       ($1, $3, $5), ($2, $4, $6)`,
+    ['A'.repeat(43), 'B'.repeat(43), ID.tenantA, ID.tenantB, ID.connA, ID.connB],
   );
   await q(
     `insert into tenant_keys (tenant_id, id, kek_id, wrapped_dek) values

@@ -1,9 +1,12 @@
 import { createQuickPay, quickPayMode } from '@agentor/billing';
+import { createHash } from 'node:crypto';
+import { loadKekFile, publicOf, publicKeyFromBase64 } from '@agentor/keybox';
 import { createDatabase } from '@agentor/db';
 import { QUEUES, redisConnection } from '@agentor/jobs';
 import { Worker } from 'bullmq';
 import pino from 'pino';
 import { processBillingJob } from './billing.js';
+import { processConnectionJob } from './connections.js';
 
 /**
  * agentor-worker: the only process with the KEK and outbound access to customer systems
@@ -37,6 +40,18 @@ const billingDeps = {
   log: log.child({ queue: QUEUES.billing }),
 };
 
+// The KEK private key is read once at start-up; the file is readable by agentor-worker only.
+const kekPrivate = loadKekFile(required('KEK_FILE'));
+const kekPublicB64 = publicOf(kekPrivate);
+const connectionDeps = {
+  db: database.db,
+  kekPrivate,
+  kekPublic: publicKeyFromBase64(kekPublicB64),
+  kekId: createHash('sha256').update(kekPublicB64).digest('hex').slice(0, 16),
+  connectorMode: (process.env.CONNECTOR_MODE === 'live' ? 'live' : 'mock') as 'mock' | 'live',
+  log: log.child({ queue: QUEUES.connections }),
+};
+
 const workers = [
   new Worker(
     QUEUES.system,
@@ -49,6 +64,11 @@ const workers = [
     connection,
     concurrency: 2,
   }),
+  new Worker(
+    QUEUES.connections,
+    (job) => processConnectionJob(connectionDeps, job.name, job.data),
+    { connection, concurrency: 4 },
+  ),
 ];
 for (const w of workers) {
   w.on('failed', (job, err) =>

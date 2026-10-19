@@ -92,3 +92,15 @@ test('M4 sign-up and onboarding', async ({ page }) => {
   await page.waitForURL(/\/onboarding\/flow$/);
   await shot(page, 'D14-Onboarding-3');
 });
+
+test('M5 connections', async ({ page }) => {
+  await login(page, 'mette');
+  await page.goto('/connections');
+  await shot(page, 'D9-Forbindelser');
+  await page.goto('/connections/new');
+  await shot(page, 'D9-Katalog', true);
+  await page.goto('/connections/0190b000-0000-7000-8000-000000000304');
+  await shot(page, 'D9-Afbrudt');
+  await page.goto('/connect/dinero');
+  await shot(page, 'D9-Login-mock');
+});

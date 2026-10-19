@@ -20,6 +20,9 @@ const schema = z.object({
   INGEST_INTERNAL_URL: z.url().default('http://127.0.0.1:3100'),
   /** Public base URL of agentor-ingest, given to QuickPay as callback host. */
   INGEST_PUBLIC_URL: z.url().default('http://127.0.0.1:3100'),
+  /** The KEK's public half; the web process can seal credentials but never open them. */
+  KEK_PUBLIC_KEY: z.string().optional(),
+  CONNECTOR_MODE: z.enum(['mock', 'live']).default('mock'),
   CVR_PROVIDER: z.enum(['fixture', 'datafordeler']).default('fixture'),
   DATAFORDELER_API_KEY: z.string().optional(),
 });

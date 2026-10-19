@@ -33,6 +33,7 @@
     "pg": "^8.0.0"
   },
   "devDependencies": {
+    "@agentor/keybox": "workspace:*",
     "@agentor/config": "workspace:*",
     "@types/pg": "^8.0.0",
     "drizzle-kit": "^0.31.0",

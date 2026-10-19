@@ -9,6 +9,7 @@ import { z } from 'zod';
 export const QUEUES = {
   system: 'agentor-system',
   billing: 'agentor-billing',
+  connections: 'agentor-connections',
 } as const;
 
 export const billingJobs = {
@@ -57,4 +58,37 @@ export function parseBillingJob<N extends BillingJobName>(
 
 export function isBillingJob(name: string): name is BillingJobName {
   return Object.hasOwn(billingJobs, name);
+}
+
+/* ---- Connections and webhooks (M5) -------------------------------------------------------------- */
+
+export const connectionJobs = {
+  /** Open sealed credentials, move them under the tenant DEK and test the connection. */
+  'connection.test': z.object({ tenantId: z.uuid(), connectionId: z.uuid() }),
+  /** A stored inbound webhook to verify; the body stays in the database. */
+  'webhook.received': z.object({ tenantId: z.uuid(), eventId: z.uuid() }),
+} as const;
+
+export type ConnectionJobName = keyof typeof connectionJobs;
+export type ConnectionJobData<N extends ConnectionJobName> = z.infer<(typeof connectionJobs)[N]>;
+
+export function connectionsQueue(connection: Redis): Queue {
+  return new Queue(QUEUES.connections, { connection, defaultJobOptions: DEFAULT_JOB_OPTIONS });
+}
+
+export async function enqueueConnectionJob<N extends ConnectionJobName>(
+  queue: Queue,
+  name: N,
+  data: ConnectionJobData<N>,
+  opts: { jobId?: string } = {},
+): Promise<void> {
+  const parsed = connectionJobs[name].parse(data);
+  await queue.add(name, parsed, opts.jobId ? { jobId: opts.jobId } : {});
+}
+
+export function parseConnectionJob<N extends ConnectionJobName>(
+  name: N,
+  data: unknown,
+): ConnectionJobData<N> {
+  return connectionJobs[name].parse(data) as ConnectionJobData<N>;
 }

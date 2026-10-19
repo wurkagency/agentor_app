@@ -199,6 +199,9 @@ importers:
       '@agentor/billing':
         specifier: workspace:*
         version: link:../../packages/billing
+      '@agentor/db':
+        specifier: workspace:*
+        version: link:../../packages/db
       '@agentor/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
@@ -249,15 +252,27 @@ importers:
       '@agentor/billing':
         specifier: workspace:*
         version: link:../../packages/billing
+      '@agentor/connectors':
+        specifier: workspace:*
+        version: link:../../packages/connectors
       '@agentor/core':
         specifier: workspace:*
         version: link:../../packages/core
       '@agentor/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@agentor/http':
+        specifier: workspace:*
+        version: link:../../packages/http
       '@agentor/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@agentor/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
+      '@agentor/keybox':
+        specifier: workspace:*
+        version: link:../../packages/keybox
       '@agentor/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -276,6 +291,9 @@ importers:
       better-auth:
         specifier: ^1.0.0
         version: 1.7.7(drizzle-kit@0.31.11)(drizzle-orm@0.45.4(@types/pg@8.23.1)(kysely@0.29.6)(pg@8.23.1))(next@16.4.0(@babel/core@7.29.7)(@playwright/test@1.64.0)(@types/node@22.20.5)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.23.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)))
+      bullmq:
+        specifier: ^5.0.0
+        version: 5.81.5
       cmdk:
         specifier: ^1.0.0
         version: 1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -361,12 +379,18 @@ importers:
       '@agentor/billing':
         specifier: workspace:*
         version: link:../../packages/billing
+      '@agentor/connectors':
+        specifier: workspace:*
+        version: link:../../packages/connectors
       '@agentor/db':
         specifier: workspace:*
         version: link:../../packages/db
       '@agentor/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
+      '@agentor/keybox':
+        specifier: workspace:*
+        version: link:../../packages/keybox
       bullmq:
         specifier: ^5.0.0
         version: 5.81.5
@@ -405,6 +429,18 @@ importers:
 
   packages/config: {}
 
+  packages/connectors:
+    devDependencies:
+      '@agentor/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
   packages/core:
     devDependencies:
       '@agentor/config':
@@ -432,6 +468,9 @@ importers:
       '@agentor/config':
         specifier: workspace:*
         version: link:../config
+      '@agentor/keybox':
+        specifier: workspace:*
+        version: link:../keybox
       '@types/pg':
         specifier: ^8.0.0
         version: 8.23.1
@@ -441,6 +480,18 @@ importers:
       tsx:
         specifier: ^4.0.0
         version: 4.23.15
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  packages/http:
+    devDependencies:
+      '@agentor/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
       vitest:
         specifier: ^4.0.0
         version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
@@ -468,6 +519,18 @@ importers:
       zod:
         specifier: ^4.0.0
         version: 4.6.6
+    devDependencies:
+      '@agentor/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  packages/keybox:
     devDependencies:
       '@agentor/config':
         specifier: workspace:*

@@ -1,6 +1,6 @@
 # ADR 0002 · How the web process stores a secret it can't read
 
-Status: proposed, to be decided in M5 · 19. okt. 2026
+Status: **accepted** (option 1) · M5, 19. okt. 2026
 
 ## Problem
 
@@ -15,3 +15,14 @@ produktspecifikation §9.2 says: secrets are encrypted with a per-tenant DEK wra
 ## Current state (M0)
 
 `connection_secrets` already has `format`, `key_id`, `key_version`, `nonce` and `ciphertext`, so either envelope fits without a migration. Only the insert-only function and the privileges are in place; no crypto code exists yet.
+
+## Decision (M5)
+
+Option 1, implemented in `packages/keybox`:
+
+- KEK = X25519 key pair. `KEK_FILE` holds the private key for the worker only (0400; the loader refuses group/other-readable files on POSIX). The web process gets only `KEK_PUBLIC_KEY`.
+- `kek-sealed-v1`: an ephemeral X25519 key, then HKDF-SHA256, then AES-256-GCM. The stored ciphertext is the ephemeral public key, the ciphertext and the tag.
+- `dek-aes256gcm-v1`: AES-256-GCM under the tenant DEK. DEKs are sealed to the KEK in `tenant_keys.wrapped_dek`.
+- Associated data binds every ciphertext to its row (`connection-secret`, tenant, connection), so a ciphertext moved to another row does not open.
+- The worker re-encrypts a sealed secret under the DEK on first use (`apps/worker/src/connections.ts`).
+- Verified by `packages/keybox/test` and `packages/db/test/isolation/keybox-flow.test.ts`, which checks the real roles: web can store a secret but cannot select it.

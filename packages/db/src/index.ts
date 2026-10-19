@@ -14,3 +14,4 @@ export {
 } from './schema/index.js';
 export * from './repo/billing.js';
 export * from './repo/onboarding.js';
+export * from './repo/connections.js';
