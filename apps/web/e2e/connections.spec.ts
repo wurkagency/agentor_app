@@ -114,9 +114,9 @@ test('webhooks: a signed delivery is accepted, a forged one is not (§9.4)', asy
   expect(unknown.status).toBe(404);
 
   // A forged signature is stored but rejected by the worker; the timestamp doesn't move.
-  expect((await post(createHmac('sha256', randomBytes(32)).update(body).digest('base64'))).status).toBe(
-    202,
-  );
+  expect(
+    (await post(createHmac('sha256', randomBytes(32)).update(body).digest('base64'))).status,
+  ).toBe(202);
   const good = createHmac('sha256', CONNECTIONS.woo.credentials.consumerSecret)
     .update(body)
     .digest('base64');
