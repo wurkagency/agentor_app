@@ -11,7 +11,6 @@ import {
   FilterChip,
   Input,
   StatusPill,
-  toast,
 } from '@agentor/ui';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -36,7 +35,6 @@ const CATEGORIES: Category[] = ['webshop', 'erp', 'crm', 'marketing', 'communica
 
 export function Catalogue({ items }: { items: CatalogueItem[] }) {
   const t = useTranslations('connections');
-  const tc = useTranslations('common');
   const router = useRouter();
   const [filter, setFilter] = useState<Category | 'all'>('all');
   const [connecting, setConnecting] = useState<CatalogueItem | null>(null);
@@ -98,21 +96,7 @@ export function Catalogue({ items }: { items: CatalogueItem[] }) {
                       >
                         {i.connected ? t('addAccount') : t('connect')}
                       </Button>
-                    ) : (
-                      <Button
-                        variant="ghost"
-                        size="s"
-                        onClick={() =>
-                          toast.info({
-                            title: t('notifyThanks', { name: i.name }),
-                            closeLabel: tc('close'),
-                          })
-                        }
-                        aria-label={`${t('notifyMe')} ${i.name}`}
-                      >
-                        {t('notifyMe')}
-                      </Button>
-                    )}
+                    ) : null}
                   </div>
                 </li>
               ))}

@@ -22,6 +22,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState, useTransition } from 'react';
 import {
   endSupportViewAction,
+  openAsSuperadminAction,
   openSupportViewAction,
   supportSessionInfoAction,
   type SessionEndInfo,
@@ -48,6 +49,7 @@ export function SupportBar({
   scope,
   caseRef,
   approvedBy,
+  superadmin = false,
   expiresAt,
   grants,
 }: {
@@ -56,6 +58,7 @@ export function SupportBar({
   scope: 'view' | 'help';
   caseRef: string;
   approvedBy: string | null;
+  superadmin?: boolean;
   expiresAt: string;
   grants: SwitcherGrant[];
 }) {
@@ -118,11 +121,13 @@ export function SupportBar({
           </PopoverContent>
         </Popover>
         <span className="text-on-navy-muted">
-          {t('context', {
-            scope: t(`scope.${scope}`),
-            case: caseRef,
-            by: approvedBy ?? t('autoApproved'),
-          })}
+          {superadmin
+            ? t('contextSuperadmin')
+            : t('context', {
+                scope: t(`scope.${scope}`),
+                case: caseRef,
+                by: approvedBy ?? t('autoApproved'),
+              })}
         </span>
         <span className="ml-auto flex flex-wrap items-center gap-4">
           <span className="flex items-center gap-1.5 font-semibold" aria-live="polite">
@@ -160,11 +165,14 @@ function Switcher({
   const [pending, start] = useTransition();
   const list = grants.filter((g) => g.tenantName.toLowerCase().includes(q.trim().toLowerCase()));
   const active = list.filter((g) => g.state === 'active');
-  const others = list.filter((g) => g.state !== 'active');
+  const others = list.filter((g) => g.state !== 'active' && g.state !== 'direct');
+  const direct = list.filter((g) => g.state === 'direct');
   const pick = (g: SwitcherGrant) =>
     g.state === 'active'
       ? start(async () => void (await openSupportViewAction(g.grantId)))
-      : (onClose(), router.push(`/platform/customers/${g.tenantId}`));
+      : g.state === 'direct'
+        ? start(async () => void (await openAsSuperadminAction(g.tenantId)))
+        : (onClose(), router.push(`/platform/customers/${g.tenantId}`));
   const row = (g: SwitcherGrant) => (
     <li key={g.grantId}>
       <button
@@ -179,7 +187,12 @@ function Switcher({
           <span className="text-meta text-fg-2">{g.caseRef}</span>
         </span>
         <span className="flex items-center gap-1 text-meta text-fg-2">
-          {g.state === 'active' ? (
+          {g.state === 'direct' ? (
+            <>
+              <Icon icon={Eye} size={14} />
+              {t('direct')}
+            </>
+          ) : g.state === 'active' ? (
             <>
               <Icon icon={Clock} size={14} />
               {formatRelative(new Date(g.expiresAt), new Date(now), locale)}
@@ -226,6 +239,14 @@ function Switcher({
           <>
             <p className="m-0 px-3 pb-1 pt-2 text-micro font-semibold text-fg-2">{t('recent')}</p>
             <ul className="m-0 list-none p-0">{others.map(row)}</ul>
+          </>
+        )}
+        {direct.length > 0 && (
+          <>
+            <p className="m-0 px-3 pb-1 pt-2 text-micro font-semibold text-fg-2">
+              {t('allCustomers')}
+            </p>
+            <ul className="m-0 list-none p-0">{direct.map(row)}</ul>
           </>
         )}
       </div>

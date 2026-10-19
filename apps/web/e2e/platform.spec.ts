@@ -122,3 +122,25 @@ test('access needs the customer’s approval', async ({ browser, page }) => {
   await page.reload();
   await expect(page.getByText('Du har supportadgang til', { exact: false })).toBeVisible();
 });
+
+test('Superadmin opens a customer app directly, without a request', async ({ browser, page }) => {
+  await login(page, 'kasper');
+  await page.goto('/platform/customers');
+  await page
+    .getByRole('row', { name: /Nordlys Cykler ApS/ })
+    .getByRole('button', { name: 'Åbn app' })
+    .click();
+  const bar = page.getByRole('region', { name: 'Supportvisning' });
+  await expect(bar).toContainText('Superadmin · direkte adgang');
+  await page.getByRole('button', { name: 'Afslut supportvisning' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Kassér tid' }).click();
+
+  // Nothing to approve and nothing in Sikkerhed: it shows in the audit log only.
+  const customer = await (await browser.newContext()).newPage();
+  await login(customer, 'jonas');
+  await customer.goto('/settings/security');
+  await expect(customer.getByText('Kasper Nyborg bad om adgang')).toHaveCount(0);
+  await customer.goto('/settings/audit-log');
+  await expect(customer.getByText('Kasper Nyborg').first()).toBeVisible();
+  await customer.context().close();
+});

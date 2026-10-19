@@ -274,6 +274,8 @@ export interface MyGrant {
   requestedAt: Date;
   approvedAt: Date | null;
   expiresAt: Date;
+  /** Opened directly by Superadmin, without a request. */
+  superadmin: boolean;
 }
 
 export interface CustomerRow {
@@ -312,8 +314,25 @@ export async function myGrants(db: Database, userId: string): Promise<MyGrant[]>
       requestedAt: new Date(r.requested_at as string),
       approvedAt: r.approved_at ? new Date(r.approved_at as string) : null,
       expiresAt: new Date(r.expires_at as string),
+      superadmin: Boolean(r.superadmin),
     }))
     .sort((a, b) => b.requestedAt.getTime() - a.requestedAt.getTime());
+}
+
+/** Superadmin opens a customer's app directly: no request, no approval, audit log only. */
+export async function superadminAccess(
+  db: Database,
+  actor: StaffActor,
+  tenantId: string,
+): Promise<string> {
+  if (actor.role !== 'superadmin') throw new PlatformError('NOT_SUPERADMIN');
+  return asStaff(db, actor.userId, async (tx) => {
+    const res = await tx.execute<{ id: string }>(
+      sql`select app.platform_superadmin_open(${tenantId}::uuid, ${actor.name}) as id`,
+    );
+    await platformLog(tx, actor, 'superadmin.opened', { tenantId });
+    return res.rows[0]!.id;
+  });
 }
 
 const statusOf = (r: {

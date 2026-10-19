@@ -7,6 +7,7 @@ const RIGHTS: [key: string, superadmin: boolean, supporter: boolean][] = [
   ['seeCustomers', true, true],
   ['requestAccess', true, true],
   ['helpInApp', true, true],
+  ['openDirect', true, false],
   ['seeKeys', false, false],
   ['changeTeam', false, false],
   ['manageStaff', true, false],

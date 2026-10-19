@@ -173,12 +173,8 @@ export async function NewCustomer({
               <span className="text-body font-semibold">{t('help')}</span>
               <span className="text-table text-fg-2">{t('helpBody')}</span>
               <div className="flex gap-2">
-                <ButtonLink
-                  variant="secondary"
-                  size="s"
-                  href="mailto:hej@agentor.dk?subject=Hj%C3%A6lp%20til%20ops%C3%A6tning"
-                >
-                  {t('book')}
+                <ButtonLink variant="secondary" size="s" href="/support/new">
+                  {t('contactSupport')}
                 </ButtonLink>
                 {['owner', 'admin'].includes(ctx.tenant.role) && (
                   <ButtonLink variant="secondary" size="s" href="/settings/team">

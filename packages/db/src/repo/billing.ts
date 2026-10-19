@@ -85,7 +85,7 @@ export interface UsageSnapshot extends CurrentUsage {
 async function currentUsage(tx: Transaction, period: string): Promise<UsageSnapshot> {
   const [seatRow] = await tx
     .select({
-      seats: sql<number>`count(*) filter (where not ${memberships.isExternal})::int`,
+      seats: sql<number>`count(*)::int`,
       external: sql<number>`count(*) filter (where ${memberships.isExternal})::int`,
     })
     .from(memberships);
@@ -201,7 +201,7 @@ export async function getInvoice(db: Database, ctx: Ctx, id: string) {
   return rows;
 }
 
-/* ---- Seats (D11): external users don't use a seat ------------------------------------------- */
+/* ---- Seats (D11): every user takes a seat, external users included ------------------------------ */
 
 export interface SeatUsage {
   /** Internal members plus open invitations for internal users. */
@@ -210,16 +210,13 @@ export interface SeatUsage {
 }
 
 export async function seatUsageTx(tx: Transaction): Promise<SeatUsage> {
-  const [members] = await tx
-    .select({ n: count() })
-    .from(memberships)
-    .where(eq(memberships.isExternal, false));
+  // Every user takes a seat, external users included (decided by Charlie, 19 Oct 2026).
+  const [members] = await tx.select({ n: count() }).from(memberships);
   const [pending] = await tx
     .select({ n: count() })
     .from(invitations)
     .where(
       and(
-        eq(invitations.isExternal, false),
         isNull(invitations.acceptedAt),
         isNull(invitations.revokedAt),
         gt(invitations.expiresAt, new Date()),

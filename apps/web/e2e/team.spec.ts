@@ -1,7 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { TENANTS } from '../scripts/seed-data';
+import globalSetup from './global-setup';
 import { latestMailTo } from './mailpit';
-import { login } from './support';
+import { login, ownerSql } from './support';
 
 /** M3 acceptance: team, invitations, settings and audit log (D11, D12). */
 
@@ -34,6 +36,8 @@ test('invite a reader by e-mail; they create an account and join (D11-Inviter)',
   browser,
 }) => {
   const email = `ny.bogholder.${Date.now()}@example.test`;
+  // The seed customer has no free seat on Business; Enterprise has room. Reset at the end.
+  await ownerSql(TENANTS.nordlys.id, `update subscriptions set plan_id = 'enterprise'`);
   await login(page, 'mette');
   await page.goto('/settings/team');
   await page.getByRole('button', { name: 'Invitér' }).click();
@@ -70,6 +74,7 @@ test('invite a reader by e-mail; they create an account and join (D11-Inviter)',
       .first()
       .getByRole('row', { name: /Ny Bogholder/ }),
   ).toContainText('Læser');
+  globalSetup();
 });
 
 test('change a role and access in one go; the audit log records it', async ({ page }) => {

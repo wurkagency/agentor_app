@@ -137,6 +137,11 @@ export const supportAccessGrants = pgTable(
     caseId: uuid('case_id'),
     scope: text('scope').$type<'view' | 'help'>().notNull().default('view'),
     hours: integer('hours').notNull().default(1),
+    /**
+     * Superadmin opened the customer's app directly (decided by Charlie, 19 Oct 2026): no
+     * request and no approval; it shows only in the customer's audit log.
+     */
+    superadmin: boolean('superadmin').notNull().default(false),
     endedAt: ts('ended_at'),
     extensionRequestedAt: ts('extension_requested_at'),
   },

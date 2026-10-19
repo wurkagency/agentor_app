@@ -29,6 +29,7 @@ import {
   GrantActions,
   NoteButton,
   OpenAppButton,
+  OpenDirectButton,
   RequestAccessButton,
 } from '@/components/platform/access-controls';
 import { CaseComposer } from '@/components/platform/case-composer';
@@ -138,6 +139,8 @@ export default async function CustomerPage({
           <NoteButton tenantId={id} />
           {active ? (
             <OpenAppButton grantId={active.grantId} />
+          ) : actor.role === 'superadmin' ? (
+            <OpenDirectButton tenantId={id} />
           ) : grant?.state !== 'pending' ? (
             <RequestAccessButton target={target} />
           ) : null}

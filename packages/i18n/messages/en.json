@@ -266,7 +266,7 @@
     "summary": "{members, plural, one {# user} other {# users}}",
     "seatsLimited": "{used} of {limit} seats used",
     "seatsUnlimited": "unlimited seats",
-    "externalNote": "External users don't count.",
+    "externalNote": "External users count towards the number of users.",
     "invite": "Invite",
     "colUser": "User",
     "colRole": "Role",
@@ -566,7 +566,7 @@
   },
   "signup": {
     "title": "Create account",
-    "intro": "Get started in minutes. You connect your systems afterwards.",
+    "intro": "Create your account. You connect your systems afterwards.",
     "name": "Your name",
     "terms": "I accept the <link>terms</link> and the data processing agreement.",
     "create": "Create account",
@@ -834,8 +834,6 @@
     "comingSoon": "Coming soon",
     "connect": "Connect",
     "addAccount": "Add account",
-    "notifyMe": "Notify me",
-    "notifyThanks": "Thanks. We will let you know when {name} is ready.",
     "missing": "Missing your system?",
     "tellUs": "Tell us which",
     "connectTitle": "Connect {name}",
@@ -1270,10 +1268,10 @@
       "done": "done",
       "company": "Create company",
       "shop": "Connect webshop",
-      "shopBody": "WooCommerce or Shopify. Takes about 2 minutes.",
+      "shopBody": "WooCommerce or Shopify.",
       "shopAction": "Connect webshop",
       "erp": "Connect accounting",
-      "erpBody": "Sign in to Dinero so Agentor can create invoices. Takes about 1 minute.",
+      "erpBody": "Sign in to Dinero so Agentor can create invoices.",
       "erpAction": "Connect Dinero",
       "flow": "Create your first flow",
       "flowBody": "Choose the template Webshop to accounting",
@@ -1293,9 +1291,9 @@
       },
       "numbersLater": "The numbers appear after the first run.",
       "help": "Need help with the setup?",
-      "helpBody": "Book 20 minutes with an adviser, or invite your developer or accountant.",
-      "book": "Book adviser",
-      "invite": "Invite"
+      "helpBody": "Write to Agentor support, or invite your developer or accountant.",
+      "invite": "Invite",
+      "contactSupport": "Contact support"
     }
   },
   "editor": {
@@ -1805,7 +1803,8 @@
       "requestAccess": "Request access",
       "statNew": "{count} this month",
       "statMax": "Max 24 h",
-      "statCasesSplit": "{progress} in progress · {waiting} waiting for the customer · {fresh} new"
+      "statCasesSplit": "{progress} in progress · {waiting} waiting for the customer · {fresh} new",
+      "openApp": "Open app"
     },
     "customer": {
       "back": "Customers",
@@ -2263,7 +2262,8 @@
         "changeTeam": "Change the customer's team or subscription",
         "manageStaff": "Manage platform users and roles",
         "changePlans": "Change plans, prices and connector versions",
-        "seeAudit": "See the platform audit log"
+        "seeAudit": "See the platform audit log",
+        "openDirect": "Open a customer's app without a request (logged at the customer)"
       },
       "rulesTitle": "Rules for support access",
       "maxDuration": "Max. duration per access",
@@ -2275,8 +2275,8 @@
       "hourlyRateHelp": "Kr. per hour ex. VAT (800 kr. incl.). Each registration is rounded up to 15 min. and billed on the 1st of the next month.",
       "notSet": "Not set",
       "approvalAlways": "Customers that require approval always have to approve. That can't be turned off here.",
-      "noStanding": "No standing access",
-      "noStandingBody": "Not even Superadmin can see customer data without approved, time-limited access. Every action is logged at the customer with the staff member's name.",
+      "noStanding": "Supporters have no standing access",
+      "noStandingBody": "Supporters need an approved, time-limited access to a customer's data. Superadmin can open any customer's app directly. Every action is logged at the customer with the staff member's name.",
       "rolesTitle": "Roles",
       "rolesIntro": "What each role may do. The database enforces it; the table explains it.",
       "auditIntro": "Changes to staff and platform settings.",
@@ -2372,7 +2372,10 @@
       "summaryHelp": "Saved on the case, not visible to the customer",
       "billable": "Billable time",
       "endGrant": "Also end the support access now",
-      "endGrantHelp": "(otherwise it expires {when})"
+      "endGrantHelp": "(otherwise it expires {when})",
+      "contextSuperadmin": "Superadmin · direct access · everything is logged in the customer's audit log",
+      "direct": "Open",
+      "allCustomers": "All customers"
     },
     "resolve": {
       "title": "Resolve case and send history",

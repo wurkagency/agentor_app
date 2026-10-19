@@ -71,7 +71,7 @@ export const memberships = pgTable(
     role: text('role').$type<MembershipRole>().notNull(),
     /** 'all' = every flow; 'selected' = only flows in flow_grants. */
     flowScope: text('flow_scope').$type<'all' | 'selected'>().notNull().default('all'),
-    /** External users (agency, accountant) are tagged "Ekstern" and don't use a seat (PLAN Q1b). */
+    /** External users (agency, accountant) are tagged "Ekstern"; they take a seat like everyone. */
     isExternal: boolean('is_external').notNull().default(false),
     createdAt: createdAt(),
   },

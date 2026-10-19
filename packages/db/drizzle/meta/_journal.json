@@ -211,6 +211,20 @@
       "when": 1792431418527,
       "tag": "0029_finance_security",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1792436420913,
+      "tag": "0030_superadmin_access",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1792436422179,
+      "tag": "0031_superadmin_access_functions",
+      "breakpoints": true
     }
   ]
 }

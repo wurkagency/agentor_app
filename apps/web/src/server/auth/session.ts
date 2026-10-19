@@ -44,6 +44,8 @@ export interface AppContext extends UserSession {
     caseRef: string;
     approvedByName: string | null;
     expiresAt: Date;
+    /** Superadmin opened the app directly, without a request. */
+    superadmin: boolean;
   };
 }
 
@@ -116,6 +118,7 @@ export const requireAppContext = cache(async (): Promise<AppContext> => {
         caseRef: grant.caseRef,
         approvedByName: grant.approvedByName,
         expiresAt: grant.expiresAt,
+        superadmin: grant.superadmin,
       },
     };
   }

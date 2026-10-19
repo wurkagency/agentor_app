@@ -1,7 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import globalSetup from './global-setup';
 import { latestMailTo } from './mailpit';
 import { base32Decode, login, totp } from './support';
 
@@ -167,11 +166,12 @@ test('the transaction meter is in the secondary bar for every member', async ({ 
   expect(res?.status()).toBe(403);
 });
 
-test('a plan with no free seats refuses further internal invitations (D11)', async ({ page }) => {
+test('a plan with no free seats refuses further invitations (D11)', async ({ page }) => {
   await login(page, 'mette');
   await page.goto('/settings/team');
-  // Business has 3 seats; Mette and Jonas use 2. One invitation fills the last seat.
-  await expect(page.getByText('2 af 3 pladser brugt')).toBeVisible();
+  // Every user takes a seat, external users included: the seed customer is over its 3 seats
+  // (Mette, Jonas, Sara and Bo), so no invitation goes through.
+  await expect(page.getByText('4 af 3 pladser brugt')).toBeVisible();
   const invite = async (email: string) => {
     await page.getByRole('button', { name: 'Invitér' }).click();
     const dialog = page.getByRole('dialog', { name: 'Invitér bruger' });
@@ -181,10 +181,6 @@ test('a plan with no free seats refuses further internal invitations (D11)', asy
     await dialog.getByRole('button', { name: 'Send invitation' }).click();
     return dialog;
   };
-  await invite(`plads.${Date.now()}@example.test`);
-  await expect(page.getByText(/Invitationen er sendt/)).toBeVisible();
   const dialog = await invite(`ingen.plads.${Date.now()}@example.test`);
   await expect(dialog.getByText('Planen har ikke flere pladser')).toBeVisible();
-  // Free the seat again for the team tests that follow.
-  globalSetup();
 });

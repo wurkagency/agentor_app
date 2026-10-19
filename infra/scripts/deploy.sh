@@ -33,6 +33,9 @@ for port in 3410 3411; do
   fi
 done
 
+echo "== Admin commands"
+install -m 700 "$R/infra/scripts/superadmin.sh" /usr/local/bin/agentor-superadmin
+
 echo "== Switch and reload"
 chown -R root:root "$R" && chmod -R a+rX "$R"
 ln -sfn "$R" "$D/current"

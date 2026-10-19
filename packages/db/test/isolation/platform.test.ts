@@ -304,3 +304,49 @@ describe('support time on invoices', () => {
     expect(r[1]!.rows![0]!.m).toBe(30);
   });
 });
+
+describe('Superadmin opens a customer directly (decision of 19 Oct 2026)', () => {
+  const superadmin: Step = {
+    as: 'admin',
+    sql: `insert into platform.staff (user_id, role) values ($1, 'superadmin')`,
+    values: [STAFF],
+  };
+  const open: Step = {
+    as: 'web',
+    user: STAFF,
+    sql: `select app.platform_superadmin_open($1, 'Kasper') as id`,
+    values: [ID.tenantA],
+  };
+
+  it('a Supporter cannot open directly', async () => {
+    const r = await steps([makeStaff('supporter'), open]);
+    expect(r[1]!.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
+  });
+
+  it('Superadmin gets help scope at once, logged at the customer, with no notification', async () => {
+    const r = await steps([
+      superadmin,
+      open,
+      open,
+      asSupport('select app.support_scope() as scope'),
+      {
+        as: 'admin',
+        sql: `select count(*)::int as n from audit_log where tenant_id = $1 and action = 'support.superadmin_opened'`,
+        values: [ID.tenantA],
+      },
+      {
+        as: 'admin',
+        sql: `select count(*)::int as n from notifications where tenant_id = $1 and event = 'support_requested'`,
+        values: [ID.tenantA],
+      },
+      asSupport('select app.support_scope() as scope', ID.tenantB),
+    ]);
+    // Opening twice reuses the same grant.
+    expect(r[1]!.rows![0]!.id).toBe(r[2]!.rows![0]!.id);
+    expect(r[3]!.rows![0]!.scope).toBe('help');
+    expect(r[4]!.rows![0]!.n).toBe(1);
+    expect(r[5]!.rows![0]!.n).toBe(0);
+    // Only the customer that was opened.
+    expect(r[6]!.rows![0]!.scope).toBeNull();
+  });
+});

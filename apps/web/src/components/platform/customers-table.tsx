@@ -20,7 +20,7 @@ import { CircleCheck, Clock, Eye, Lock, Users, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useMemo, useState, useTransition } from 'react';
-import { openSupportViewAction } from '@/app/platform/actions';
+import { openAsSuperadminAction, openSupportViewAction } from '@/app/platform/actions';
 import { FilterMenu } from '../filter-menu';
 import { RequestAccessDialog, type AccessTarget } from './request-access-dialog';
 
@@ -53,9 +53,12 @@ const SEVERITY: Record<CustomerItem['status'], number> = {
 export function CustomersTable({
   items,
   initialQuery,
+  superadmin = false,
 }: {
   items: CustomerItem[];
   initialQuery: string;
+  /** Superadmin opens any customer's app directly. */
+  superadmin?: boolean;
 }) {
   const t = useTranslations('platform.customers');
   const ts = useTranslations('status');
@@ -219,6 +222,18 @@ export function CustomersTable({
                       >
                         <Icon icon={Eye} size={14} />
                         {t('openAsSupport')}
+                      </Button>
+                    ) : superadmin ? (
+                      <Button
+                        variant="primary"
+                        size="s"
+                        loading={pending}
+                        onClick={() =>
+                          start(async () => void (await openAsSuperadminAction(i.tenantId)))
+                        }
+                      >
+                        <Icon icon={Eye} size={14} />
+                        {t('openApp')}
                       </Button>
                     ) : i.grant?.state === 'pending' ? (
                       <Button variant="secondary" size="s" disabled>

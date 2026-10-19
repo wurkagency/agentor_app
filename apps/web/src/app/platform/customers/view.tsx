@@ -185,7 +185,7 @@ export async function CustomersView({
           })}
         />
       </div>
-      <CustomersTable items={items} initialQuery={query} />
+      <CustomersTable items={items} initialQuery={query} superadmin={actor.role === 'superadmin'} />
     </PageBody>
   );
 }

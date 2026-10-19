@@ -88,3 +88,21 @@ export function base32Decode(input: string): string {
   for (let i = 0; i + 8 <= bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
   return new TextDecoder().decode(new Uint8Array(bytes));
 }
+
+/**
+ * Runs SQL as the database owner inside one customer's context, for test set-up that has no UI
+ * (e.g. giving the seed customer a bigger plan). Restore with globalSetup() afterwards.
+ */
+export async function ownerSql(tenantId: string, text: string, values: unknown[] = []) {
+  const { default: pg } = await import('pg');
+  const client = new pg.Client({ connectionString: process.env.DATABASE_URL_OWNER });
+  await client.connect();
+  try {
+    await client.query('begin');
+    await client.query(`select set_config('app.tenant_id', $1, true)`, [tenantId]);
+    await client.query(text, values);
+    await client.query('commit');
+  } finally {
+    await client.end();
+  }
+}

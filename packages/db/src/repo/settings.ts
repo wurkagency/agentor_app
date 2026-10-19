@@ -229,6 +229,8 @@ export async function getSecuritySettings(db: Database, ctx: Ctx) {
     const grants = await tx
       .select()
       .from(supportAccessGrants)
+      // Superadmin's direct access is not a request: it shows in the audit log only.
+      .where(eq(supportAccessGrants.superadmin, false))
       .orderBy(desc(supportAccessGrants.requestedAt))
       .limit(5);
     return {

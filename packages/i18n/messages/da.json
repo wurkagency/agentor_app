@@ -266,7 +266,7 @@
     "summary": "{members, plural, one {# bruger} other {# brugere}}",
     "seatsLimited": "{used} af {limit} pladser brugt",
     "seatsUnlimited": "ubegrænset antal pladser",
-    "externalNote": "Eksterne brugere tæller ikke med.",
+    "externalNote": "Eksterne brugere tæller med i antal brugere.",
     "invite": "Invitér",
     "colUser": "Bruger",
     "colRole": "Rolle",
@@ -566,7 +566,7 @@
   },
   "signup": {
     "title": "Opret konto",
-    "intro": "Kom i gang på få minutter. Du forbinder dine systemer bagefter.",
+    "intro": "Opret din konto. Du forbinder dine systemer bagefter.",
     "name": "Dit navn",
     "terms": "Jeg accepterer <link>vilkårene</link> og databehandleraftalen.",
     "create": "Opret konto",
@@ -834,8 +834,6 @@
     "comingSoon": "På vej",
     "connect": "Forbind",
     "addAccount": "Tilføj konto",
-    "notifyMe": "Giv besked",
-    "notifyThanks": "Tak. Vi giver besked, når {name} er klar.",
     "missing": "Mangler dit system?",
     "tellUs": "Fortæl os hvilket",
     "connectTitle": "Forbind {name}",
@@ -1270,10 +1268,10 @@
       "done": "færdig",
       "company": "Opret virksomhed",
       "shop": "Forbind webshop",
-      "shopBody": "WooCommerce eller Shopify. Tager ca. 2 minutter.",
+      "shopBody": "WooCommerce eller Shopify.",
       "shopAction": "Forbind webshop",
       "erp": "Forbind regnskab",
-      "erpBody": "Log ind hos Dinero, så Agentor kan oprette fakturaer. Tager ca. 1 minut.",
+      "erpBody": "Log ind hos Dinero, så Agentor kan oprette fakturaer.",
       "erpAction": "Forbind Dinero",
       "flow": "Opret dit første flow",
       "flowBody": "Vælg skabelonen Webshop til regnskab",
@@ -1293,9 +1291,9 @@
       },
       "numbersLater": "Tallene vises efter første kørsel.",
       "help": "Brug for hjælp til opsætningen?",
-      "helpBody": "Book 20 minutter med en rådgiver, eller invitér din udvikler eller revisor.",
-      "book": "Book rådgiver",
-      "invite": "Invitér"
+      "helpBody": "Skriv til Agentor support, eller invitér din udvikler eller revisor.",
+      "invite": "Invitér",
+      "contactSupport": "Kontakt support"
     }
   },
   "editor": {
@@ -1805,7 +1803,8 @@
       "requestAccess": "Anmod om adgang",
       "statNew": "{count} denne måned",
       "statMax": "Højst 24 t",
-      "statCasesSplit": "{progress} i gang · {waiting} venter på kunden · {fresh} nye"
+      "statCasesSplit": "{progress} i gang · {waiting} venter på kunden · {fresh} nye",
+      "openApp": "Åbn app"
     },
     "customer": {
       "back": "Kunder",
@@ -2263,7 +2262,8 @@
         "changeTeam": "Ændre kundens team eller abonnement",
         "manageStaff": "Administrere platformbrugere og roller",
         "changePlans": "Ændre planer, priser og connector-versioner",
-        "seeAudit": "Se platform-audit-log"
+        "seeAudit": "Se platform-audit-log",
+        "openDirect": "Åbne kundens app uden anmodning (logges hos kunden)"
       },
       "rulesTitle": "Regler for supportadgang",
       "maxDuration": "Maks. varighed pr. adgang",
@@ -2275,8 +2275,8 @@
       "hourlyRateHelp": "Kr. pr. time ekskl. moms (800 kr. inkl.). Hver registrering oprundes til 15 min. og faktureres den 1. i næste måned.",
       "notSet": "Ikke sat",
       "approvalAlways": "Kunder, der kræver godkendelse, skal altid godkende. Det kan ikke slås fra her.",
-      "noStanding": "Ingen stående adgang",
-      "noStandingBody": "Heller ikke Superadmin kan se kundedata uden en godkendt, tidsbegrænset adgang. Alle handlinger logges hos kunden med medarbejderens navn.",
+      "noStanding": "Supportere har ingen stående adgang",
+      "noStandingBody": "Supportere skal have en godkendt, tidsbegrænset adgang til kundens data. Superadmin kan åbne enhver kundes app direkte. Alle handlinger logges hos kunden med medarbejderens navn.",
       "rolesTitle": "Roller",
       "rolesIntro": "Hvad hver rolle må. Databasen håndhæver det, tabellen forklarer det.",
       "auditIntro": "Ændringer af medarbejdere og platformindstillinger.",
@@ -2372,7 +2372,10 @@
       "summaryHelp": "Gemmes på sagen, ikke synlig for kunden",
       "billable": "Fakturerbar tid",
       "endGrant": "Afslut også supportadgangen nu",
-      "endGrantHelp": "(ellers udløber den {when})"
+      "endGrantHelp": "(ellers udløber den {when})",
+      "contextSuperadmin": "Superadmin · direkte adgang · alt logges i kundens audit-log",
+      "direct": "Åbn",
+      "allCustomers": "Alle kunder"
     },
     "resolve": {
       "title": "Løs sag og send forløb",

@@ -4,14 +4,14 @@ import { formatPercent, type Locale } from '@agentor/i18n';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { SupportBar } from '@/components/platform/support-bar';
+import { SupportBar, type SwitcherGrant } from '@/components/platform/support-bar';
 import { AppHeader } from '@/components/shell/app-header';
 import { requireAppContext } from '@/server/auth/session';
 import { billingOverview } from '@/server/billing-overview';
 import { connectionMap, viewsFor } from '@/server/flows';
 import { db } from '@/server/infra';
 import { staffRole } from '@/server/platform';
-import { gearCounts, initials } from '@/server/platform-data';
+import { customersFor, gearCounts, initials } from '@/server/platform-data';
 
 /** "Nordlys Cykler ApS" → "Nordlys Cykler" for the account chip (App-skal-B). */
 function shortName(name: string): string {
@@ -43,17 +43,31 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const staff = role
     ? { role, counts: await gearCounts(ctx.user.id, locale), supportView: Boolean(ctx.support) }
     : undefined;
-  const switcher = ctx.support
-    ? (await myGrants(db(), ctx.user.id)).map((g) => ({
-        grantId: g.grantId,
-        tenantId: g.tenantId,
-        tenantName: g.tenantName,
-        initials: initials(g.tenantName),
-        caseRef: g.caseRef,
-        state: g.state,
-        expiresAt: g.expiresAt.toISOString(),
-      }))
-    : [];
+  const grants = ctx.support ? await myGrants(db(), ctx.user.id) : [];
+  const switcher: SwitcherGrant[] = grants.map((g) => ({
+    grantId: g.grantId,
+    tenantId: g.tenantId,
+    tenantName: g.tenantName,
+    initials: initials(g.tenantName),
+    caseRef: g.caseRef,
+    state: g.state,
+    expiresAt: g.expiresAt.toISOString(),
+  }));
+  // Superadmin can switch to any customer directly (decision of 19 Oct 2026).
+  if (ctx.support && role === 'superadmin') {
+    const open = new Set(grants.filter((g) => g.state === 'active').map((g) => g.tenantId));
+    for (const c of await customersFor(ctx.user.id))
+      if (!open.has(c.tenantId))
+        switcher.push({
+          grantId: c.tenantId,
+          tenantId: c.tenantId,
+          tenantName: c.name,
+          initials: initials(c.name),
+          caseRef: '',
+          state: 'direct',
+          expiresAt: new Date().toISOString(),
+        });
+  }
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
   return (
@@ -71,6 +85,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           scope={ctx.support.scope}
           caseRef={ctx.support.caseRef}
           approvedBy={ctx.support.approvedByName}
+          superadmin={ctx.support.superadmin}
           expiresAt={ctx.support.expiresAt.toISOString()}
           grants={switcher}
         />

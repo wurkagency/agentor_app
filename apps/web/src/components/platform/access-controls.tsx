@@ -8,6 +8,7 @@ import { useState, useTransition } from 'react';
 import {
   addCustomerNoteAction,
   endAccessAction,
+  openAsSuperadminAction,
   openSupportViewAction,
   requestExtensionAction,
 } from '@/app/platform/actions';
@@ -25,6 +26,23 @@ export function OpenAppButton({ grantId, size = 'l' }: { grantId: string; size?:
       onClick={() => start(async () => void (await openSupportViewAction(grantId)))}
     >
       {!pending && <Icon icon={Eye} size={16} />}
+      {size === 'l' ? t('openApp') : t('openAppShort')}
+    </Button>
+  );
+}
+
+/** Superadmin: "Åbn kundens app" without a request; it shows in the audit log only. */
+export function OpenDirectButton({ tenantId, size = 'l' }: { tenantId: string; size?: 'l' | 's' }) {
+  const t = useTranslations('platform.customer');
+  const [pending, start] = useTransition();
+  return (
+    <Button
+      variant="primary"
+      size={size}
+      loading={pending}
+      onClick={() => start(async () => void (await openAsSuperadminAction(tenantId)))}
+    >
+      {!pending && <Icon icon={Eye} size={size === 'l' ? 16 : 14} />}
       {size === 'l' ? t('openApp') : t('openAppShort')}
     </Button>
   );

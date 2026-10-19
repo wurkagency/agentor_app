@@ -23,6 +23,7 @@ import {
   setPlatformSettings,
   startTimer,
   stopTimer,
+  superadminAccess,
   updateCase,
   upsertStaff,
   type CaseEvent,
@@ -95,6 +96,19 @@ export async function openSupportViewAction(grantId: string): Promise<ActionResu
     expires: grant.expiresAt,
   });
   redirect('/');
+}
+
+/** Superadmin: open any customer's app directly, without a request (decision of 19 Oct 2026). */
+export async function openAsSuperadminAction(tenantId: string): Promise<ActionResult> {
+  const { actor } = await requireStaff(true);
+  if (!isUuid(tenantId)) return { ok: false, error: 'invalid' };
+  let grantId: string;
+  try {
+    grantId = await superadminAccess(db(), actor, tenantId);
+  } catch (e) {
+    return fail(e);
+  }
+  return openSupportViewAction(grantId);
 }
 
 export async function endAccessAction(tenantId: string, grantId: string): Promise<ActionResult> {
