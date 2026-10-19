@@ -2,11 +2,15 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { createHmac, randomBytes } from 'node:crypto';
 import { CONNECTIONS, SEED_WOO_WEBHOOK_TOKEN } from '../scripts/seed-data';
+import globalSetup from './global-setup';
 import { login } from './support';
 
 /** M5 acceptance: connections (D9), key box, webhook ingest. */
 
 test.describe.configure({ mode: 'serial' });
+
+// Start from the seeded accounts, also when CI retries the serial group after a failure.
+test.beforeAll(() => globalSetup());
 
 const INGEST = process.env.INGEST_INTERNAL_URL ?? 'http://127.0.0.1:3100';
 
@@ -63,13 +67,17 @@ test('a revoked key shows the broken state, and reconnecting fixes it (D9-Dinero
 }) => {
   await login(page, 'mette');
   await page.goto(`/connections/${CONNECTIONS.economic.id}`);
-  await expect(page.getByRole('alert')).toContainText('Forbindelsen til e-conomic er afbrudt.');
+  // Next's route announcer is an alert too (empty), so match the banner by its text.
+  const broken = page
+    .getByRole('alert')
+    .filter({ hasText: 'Forbindelsen til e-conomic er afbrudt.' });
+  await expect(broken).toBeVisible();
   await axe(page);
   await page.getByRole('button', { name: 'Genautentificér' }).click();
   const dialog = page.getByRole('dialog', { name: 'Genautentificér' });
   await dialog.getByLabel('Agreement grant token').fill('new-e2e-grant-token');
   await dialog.getByRole('button', { name: 'Gem' }).click();
-  await expect(page.getByRole('alert')).toHaveCount(0, { timeout: 20_000 });
+  await expect(broken).toHaveCount(0, { timeout: 20_000 });
   await expect(page.getByText('Aktiv', { exact: true }).first()).toBeVisible();
 });
 
