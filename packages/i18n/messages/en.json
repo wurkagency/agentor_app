@@ -2452,6 +2452,8 @@
         "subsShare": "subs.",
         "subsShort": "Subs.",
         "supportShort": "Supp.",
+        "ofForecast": "of forecast",
+        "forecastFooter": "Forecast for the month: {forecast}",
         "supportFooter": "Billed {billed} · forecast {forecast}",
         "arr": "Annual subscription revenue",
         "yoy": "{pct} % year on year",

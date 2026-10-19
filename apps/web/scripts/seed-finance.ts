@@ -163,7 +163,7 @@ export async function seedFinance(
              card_brand = coalesce($4, card_brand), card_last4 = coalesce($5, card_last4), card_expiry = coalesce($6, card_expiry),
              provider_subscription_id = case when $2 = 'invoice' or $9::timestamptz is not null then null else provider_subscription_id end,
              current_period_start = $7, current_period_end = $8, trial_ends_at = $9, cancel_at = $10,
-             status = $11`,
+             status = $11, created_at = $12`,
           [
             p.interval,
             p.method,
@@ -176,9 +176,18 @@ export async function seedFinance(
             trialEnd,
             p.cancelInDays ? new Date(now.getTime() + p.cancelInDays * DAY) : null,
             p.failedAttempts ? 'past_due' : 'active',
+            // Customers since the start of their history; the trial started this month.
+            trialEnd
+              ? new Date(now.getTime() - 6 * DAY)
+              : p.interval === 'year'
+                ? periodStart
+                : monthStart(11),
           ],
         );
-      }
+      } else
+        await owner.query(`update subscriptions set created_at = $1`, [
+          monthStart(tenantId === TENANTS.nordlys.id ? 11 : 1),
+        ]);
       await owner.query(`update tenants set billing_email = $1 where id = $2`, [
         p.billingEmail,
         tenantId,

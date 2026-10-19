@@ -319,10 +319,16 @@ export default async function FinanceOverview({
           visual={
             <Gauge percent={pct(supportRegistered, projected)} label={t('kpi.supportGauge')} />
           }
-          footer={t('kpi.supportFooter', {
-            billed: formatMinutes(supportBilled, locale),
-            forecast: formatMinutes(projected, locale),
-          })}
+          split={
+            <KpiSplit
+              left={{
+                value: `${formatNumber(pct(supportRegistered, projected), locale)} %`,
+                suffix: t('kpi.ofForecast'),
+              }}
+              right={{ value: formatMinutes(supportBilled, locale), suffix: t('kpi.billed') }}
+            />
+          }
+          footer={t('kpi.forecastFooter', { forecast: formatMinutes(projected, locale) })}
         />
         <KpiCard
           icon={TriangleAlert}

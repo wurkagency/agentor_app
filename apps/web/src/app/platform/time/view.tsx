@@ -213,6 +213,15 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
             iconTone={unconfirmed.length ? 'error' : 'muted'}
             label={t('statReview')}
             value={String(unconfirmed.length)}
+            visual={
+              <SegmentBar
+                compact
+                segments={[
+                  { value: unconfirmed.length, tone: 'warn' },
+                  { value: autoMine.length, tone: 'ink' },
+                ]}
+              />
+            }
             footer={unconfirmed.length ? t('statReviewSub') : t('statReviewNone')}
           />
         </div>

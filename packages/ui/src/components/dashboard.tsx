@@ -87,7 +87,9 @@ export function KpiCard({
   className,
 }: KpiCardProps) {
   const head = (
-    <div className="flex min-w-0 items-center justify-between gap-2">
+    <div
+      className={cn('flex min-w-0 items-center justify-between gap-2', compact ? 'h-5' : 'h-5.5')}
+    >
       <span
         className={cn(
           'flex min-w-0 items-center gap-2 font-medium',
@@ -111,11 +113,30 @@ export function KpiCard({
     </div>
   );
   const number = (
-    <span className={cn('whitespace-nowrap tabular', compact ? 'text-stat-compact' : 'text-kpi')}>
+    <span
+      className={cn(
+        'block whitespace-nowrap tabular',
+        compact ? 'flex-none' : 'truncate',
+        compact ? 'text-stat-compact' : 'text-kpi',
+      )}
+    >
       {value}
       {unit && <span className="ml-1 align-super text-kpi-unit">{unit}</span>}
     </span>
   );
+  const foot = (
+    <div
+      className={cn(
+        'h-4.5 min-w-0 truncate text-micro font-medium leading-4.5',
+        hero ? 'text-fg-1' : 'text-fg-2',
+      )}
+    >
+      {footer}
+    </div>
+  );
+  // One anatomy for every card (README decision 19): fixed rows, so cards in a row line up
+  // whatever they show. Large: header, number, split figures, visual, footer. Compact (~120 px):
+  // header, number with the visual to its right, footer.
   return (
     <section
       aria-label={label}
@@ -130,28 +151,18 @@ export function KpiCard({
       {compact ? (
         <div className="flex h-11 items-end justify-between gap-3">
           {number}
-          {visual && (
-            <div className="flex h-11 w-1/2 min-w-0 items-center justify-end">{visual}</div>
-          )}
+          <div className="flex h-11 min-w-0 max-w-1/2 flex-1 items-center justify-end">
+            {visual}
+          </div>
         </div>
       ) : (
         <>
           {number}
-          {split}
-          {visual}
+          <div className="h-5 min-w-0">{split}</div>
+          <div className="flex h-18 min-w-0 items-end">{visual}</div>
         </>
       )}
-      {footer && (
-        <div
-          className={cn(
-            'min-w-0 text-micro font-medium',
-            compact && 'truncate',
-            hero ? 'text-fg-1' : 'text-fg-2',
-          )}
-        >
-          {footer}
-        </div>
-      )}
+      {foot}
     </section>
   );
 }
@@ -165,7 +176,7 @@ export function KpiSplit({
   right?: { value: string; suffix?: string };
 }) {
   const part = (p: { value: string; suffix?: string }) => (
-    <span className="whitespace-nowrap text-body tabular">
+    <span className="min-w-0 truncate whitespace-nowrap text-body tabular">
       <strong className="font-semibold">{p.value}</strong>
       {p.suffix && <span className="ml-1 text-meta font-medium text-fg-2">{p.suffix}</span>}
     </span>
@@ -249,11 +260,13 @@ export function SegmentBar({
   label?: string;
 }) {
   const total = segments.reduce((a, s) => a + Math.max(0, s.value), 0) || 1;
+  const empty = segments.every((x) => x.value <= 0);
   return (
     <div
       className={cn('flex w-full items-stretch', compact ? 'h-3 gap-0.5' : 'h-8.5 gap-0.75')}
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >
+      {empty && <span className="flex-1 rounded-xs bg-bg-base" />}
       {segments
         .filter((s) => s.value > 0)
         .map((s, i) => (
@@ -271,7 +284,10 @@ export function SegmentBar({
   );
 }
 
-/** Half-circle gauge with a lime dot at the value (0–100). */
+/**
+ * Half-circle gauge with a lime dot at the value (0–100). It carries no number of its own: the
+ * card's figure says it, so a value is never shown twice.
+ */
 export function Gauge({ percent, label }: { percent: number; label?: string }) {
   const p = Math.max(0, Math.min(100, percent));
   const len = Math.PI * 80;
@@ -280,8 +296,8 @@ export function Gauge({ percent, label }: { percent: number; label?: string }) {
   const cy = 90 - 80 * Math.sin(a);
   return (
     <svg
-      viewBox="0 0 180 100"
-      className="mx-auto block h-auto w-full max-w-48"
+      viewBox="0 0 180 98"
+      className="mx-auto block h-full w-auto"
       {...(label ? { role: 'img', 'aria-label': label } : { 'aria-hidden': true })}
     >
       <path
@@ -307,20 +323,6 @@ export function Gauge({ percent, label }: { percent: number; label?: string }) {
         stroke="var(--color-white)"
         strokeWidth={3}
       />
-      <text
-        x="90"
-        y="80"
-        textAnchor="middle"
-        fontSize="26"
-        fontWeight="700"
-        fill="var(--color-fg-1)"
-        letterSpacing="-0.5"
-      >
-        {Math.round(p)}
-        <tspan fontSize="12" dy="-11">
-          %
-        </tspan>
-      </text>
     </svg>
   );
 }
@@ -368,7 +370,7 @@ export function MiniBars({
 /** Legend under a visual: small swatches with labels. */
 export function KpiLegend({ items }: { items: { tone: SegmentTone; label: string }[] }) {
   return (
-    <div className="flex min-w-0 flex-wrap gap-x-3 gap-y-1">
+    <div className="flex min-w-0 gap-x-3 overflow-hidden">
       {items.map((it) => (
         <span key={it.label} className="inline-flex items-center gap-1.5 whitespace-nowrap">
           <span className={cn('size-2 rounded-2xs', SEGMENT[it.tone])} />

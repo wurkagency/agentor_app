@@ -241,10 +241,15 @@ export default async function SupportBillingPage({
           visual={
             <Gauge percent={pct(totals.registered, projected)} label={t('billing.registered')} />
           }
-          footer={t('billing.registeredFooter', {
-            now: formatMinutes(totals.registered, locale),
-            forecast: formatMinutes(projected, locale),
-          })}
+          split={
+            <KpiSplit
+              left={{
+                value: `${formatNumber(pct(totals.registered, projected), locale)} %`,
+                suffix: t('kpi.ofForecast'),
+              }}
+              right={{ value: formatMinutes(projected, locale), suffix: t('kpi.forecast') }}
+            />
+          }
         />
         <KpiCard
           icon={Layers}

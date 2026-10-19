@@ -2123,7 +2123,7 @@
         "DESTINATION_ERROR": "Destinationen afviste posten",
         "CONNECTION_BROKEN": "Forbindelsen er afbrudt"
       },
-      "statNew": "{count} nye"
+      "statNew": "{count, plural, one {# ny} other {# nye}}"
     },
     "time": {
       "nav": "Tid",
@@ -2437,7 +2437,7 @@
         "mrr": "Mdl. abonnementsomsætning",
         "sinceLast": "{amount} kr. siden {month}",
         "subscriptions": "Abonnementer",
-        "new": "{count} nye",
+        "new": "{count, plural, one {# ny} other {# nye}}",
         "businessEnterprise": "Business / Enterprise",
         "support": "Support",
         "supportGauge": "Registreret tid i forhold til prognosen",
@@ -2452,6 +2452,8 @@
         "subsShare": "abn.",
         "subsShort": "Abn.",
         "supportShort": "Supp.",
+        "ofForecast": "af prognosen",
+        "forecastFooter": "Prognose for måneden: {forecast}",
         "supportFooter": "Afregnes {billed} · prognose {forecast}",
         "arr": "Årlig abonnementsomsætning",
         "yoy": "{pct} % år til år",

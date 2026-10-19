@@ -4,6 +4,7 @@ import {
   Card,
   ConnectorLogo,
   EmptyState,
+  HeroCurve,
   Icon,
   KpiCard,
   SegmentBar,
@@ -59,6 +60,13 @@ export default async function ErrorsPage({
   const hit = new Set(groups.flatMap((g) => g.tenantIds));
   const active = customers.filter((c) => c.flows > 0).length || 1;
   const records = groups.reduce((a, g) => a + g.records, 0);
+  // Failed records per day over the last week, for the curve on the first card (decision 19).
+  const windows = await Promise.all(
+    [1, 2, 3, 4, 5, 6, 7].map(async (d) =>
+      (await errorsFor(actor.userId, d)).reduce((a, g) => a + g.records, 0),
+    ),
+  );
+  const daily = windows.map((v, i) => (i === 0 ? v : v - windows[i - 1]!)).reverse();
   const newSince = groups.filter((g) => g.previousCustomers === 0).length;
   const noCase = groups.filter((g) => g.caseNumbers.length === 0);
   const rising = groups.find((g) => g.trend === 'rising' && g.customers > 1);
@@ -88,6 +96,14 @@ export default async function ErrorsPage({
           <KpiCard
             compact
             hero
+            icon={FileWarning}
+            label={t('statRecords')}
+            value={String(records)}
+            visual={<HeroCurve compact data={daily} />}
+            footer={t(`window.${period}`)}
+          />
+          <KpiCard
+            compact
             icon={CircleX}
             label={t('statTypes')}
             {...(newSince
@@ -127,13 +143,6 @@ export default async function ErrorsPage({
               />
             }
             footer={t('statCustomersSub', { pct: Math.round((hit.size / active) * 100) })}
-          />
-          <KpiCard
-            compact
-            icon={FileWarning}
-            label={t('statRecords')}
-            value={String(records)}
-            footer={t(`window.${period}`)}
           />
           <KpiCard
             compact

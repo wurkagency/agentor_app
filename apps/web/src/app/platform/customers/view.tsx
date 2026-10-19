@@ -145,6 +145,15 @@ export async function CustomersView({
           label={t('statGrants')}
           growth={{ direction: 'down', tone: 'neutral', text: t('statMax') }}
           value={String(grants.length)}
+          visual={
+            <SegmentBar
+              compact
+              segments={[
+                { value: myActive.length, tone: 'ink' },
+                { value: Math.max(0, grants.length - myActive.length), tone: 'hatch' },
+              ]}
+            />
+          }
           footer={
             nextExpiry
               ? t('statGrantsMine', {
