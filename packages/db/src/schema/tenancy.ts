@@ -9,6 +9,7 @@ import {
   pgTable,
   primaryKey,
   text,
+  timestamp,
   unique,
   uuid,
 } from 'drizzle-orm/pg-core';
@@ -25,6 +26,8 @@ export const tenants = pgTable(
     postalCode: text('postal_code'),
     city: text('city'),
     billingEmail: text('billing_email'),
+    /** Number for critical SMS alerts (D14-Onboarding-1). */
+    smsPhone: text('sms_phone'),
     locale: text('locale').notNull().default('da'),
     timeZone: text('time_zone').notNull().default('Europe/Copenhagen'),
     currency: text('currency').notNull().default('DKK'),
@@ -36,6 +39,13 @@ export const tenants = pgTable(
     /** Status thresholds (produktspecifikation §7.1), adjustable per tenant. */
     alertErrorRatePct: integer('alert_error_rate_pct').notNull().default(5),
     alertConsecutiveFailures: integer('alert_consecutive_failures').notNull().default(3),
+    /** Onboarding (D14) and activation: "første testkørsel gennemført" (produktspecifikation §7.9). */
+    ordersPerMonth: text('orders_per_month'),
+    onboardingCompletedAt: timestamp('onboarding_completed_at', {
+      withTimezone: true,
+      mode: 'date',
+    }),
+    firstTestRunAt: timestamp('first_test_run_at', { withTimezone: true, mode: 'date' }),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

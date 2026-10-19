@@ -154,5 +154,25 @@ export async function seedFixtures(admin: pg.ClientBase): Promise<void> {
        ($2, $4, '#2', 'test', 'Support B', now() + interval '1 hour')`,
     [ID.tenantA, ID.tenantB, ID.grantSupportA, ID.grantSupportB],
   );
+  await q(
+    `insert into subscriptions (tenant_id, plan_id, status, current_period_end) values
+       ($1, 'business', 'active', now() - interval '1 day'), ($2, 'startup', 'active', now() + interval '20 days')`,
+    [ID.tenantA, ID.tenantB],
+  );
+  await q(
+    `insert into usage_counters (tenant_id, period, transactions) values ($1, '2026-10', 712), ($2, '2026-10', 10)`,
+    [ID.tenantA, ID.tenantB],
+  );
+  await q(
+    `insert into addons (tenant_id, kind, quantity, period, price_ore) values
+       ($1, 'transactions', 1000, '2026-10', 10000), ($2, 'transactions', 1000, '2026-10', 10000)`,
+    [ID.tenantA, ID.tenantB],
+  );
+  await q(
+    `insert into invoices (tenant_id, number, period_start, period_end, description, amount_ore, vat_ore) values
+       ($1, 'AG-TEST-A', '2026-10-01', '2026-11-01', 'Business · månedlig', 19875, 3975),
+       ($2, 'AG-TEST-B', '2026-10-01', '2026-11-01', 'Startup · månedlig', 9875, 1975)`,
+    [ID.tenantA, ID.tenantB],
+  );
   await q('commit');
 }

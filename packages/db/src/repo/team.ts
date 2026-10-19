@@ -10,6 +10,7 @@ import {
   memberships,
   type MembershipRole,
 } from '../schema/index.js';
+import { seatUsageTx } from './billing.js';
 import { writeAudit, type Actor } from './audit.js';
 
 export class TeamError extends Error {
@@ -21,6 +22,7 @@ export class TeamError extends Error {
       | 'ALREADY_MEMBER'
       | 'ALREADY_INVITED'
       | 'INVALID_FLOWS'
+      | 'SEATS'
       | 'SELF',
   ) {
     super(code);
@@ -168,6 +170,10 @@ export async function createInvitation(
       )
       .limit(1);
     if (open.length) throw new TeamError('ALREADY_INVITED');
+    if (!input.isExternal) {
+      const seats = await seatUsageTx(tx);
+      if (seats.limit !== null && seats.used >= seats.limit) throw new TeamError('SEATS');
+    }
     const flowIds = input.flowScope === 'selected' ? [...new Set(input.flowIds)] : [];
     if (input.flowScope === 'selected') {
       if (flowIds.length === 0) throw new TeamError('INVALID_FLOWS');

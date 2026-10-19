@@ -1,0 +1,542 @@
+import {
+  addMonth,
+  billingPeriod,
+  overagePrice,
+  parseEntitlements,
+  planChangeBlockers,
+  quotaState,
+  withVat,
+  type CurrentUsage,
+  type DowngradeBlocker,
+  type Entitlements,
+  type QuotaState,
+} from '@agentor/core';
+import { and, asc, count, desc, eq, gt, isNull, sql, sum } from 'drizzle-orm';
+import { withoutTenant, withTenant, type Database, type Transaction } from '../client.js';
+import {
+  addons,
+  flows,
+  invitations,
+  invoices,
+  memberships,
+  planEntitlements,
+  plans,
+  subscriptions,
+  tenants,
+  usageCounters,
+  type InvoiceStatus,
+  type SubscriptionStatus,
+} from '../schema/index.js';
+import { writeAudit, writeSystemAudit, type Actor } from './audit.js';
+
+type Ctx = { tenantId: string; userId: string };
+
+export class BillingError extends Error {
+  constructor(
+    readonly code:
+      | 'FORBIDDEN'
+      | 'UNKNOWN_PLAN'
+      | 'SAME_PLAN'
+      | 'DOWNGRADE_BLOCKED'
+      | 'NO_SUBSCRIPTION'
+      | 'UNKNOWN_REFERENCE',
+    readonly blockers: DowngradeBlocker[] = [],
+  ) {
+    super(code);
+    this.name = 'BillingError';
+  }
+}
+
+/* ---- Plan catalogue ------------------------------------------------------------------------------ */
+
+export interface PlanInfo {
+  id: string;
+  name: string;
+  priceMonthlyOre: number;
+  sortOrder: number;
+  entitlements: Entitlements;
+}
+
+async function loadPlans(tx: Transaction): Promise<PlanInfo[]> {
+  const rows = await tx.select().from(plans).orderBy(asc(plans.sortOrder));
+  const ents = await tx.select().from(planEntitlements);
+  return rows.map((p) => ({
+    ...p,
+    entitlements: parseEntitlements(ents.filter((e) => e.planId === p.id)),
+  }));
+}
+
+export function listPlans(db: Database): Promise<PlanInfo[]> {
+  return withoutTenant(db, loadPlans);
+}
+
+/* ---- Overview (D13, secondary-bar meter) --------------------------------------------------------- */
+
+export interface UsageSnapshot extends CurrentUsage {
+  externalUsers: number;
+}
+
+async function currentUsage(tx: Transaction, period: string): Promise<UsageSnapshot> {
+  const [seatRow] = await tx
+    .select({
+      seats: sql<number>`count(*) filter (where not ${memberships.isExternal})::int`,
+      external: sql<number>`count(*) filter (where ${memberships.isExternal})::int`,
+    })
+    .from(memberships);
+  // An integration set is one flow with up to N destinations (D2). Routes arrive with the flow
+  // model (M6); until then a flow counts as one set and destinations are not yet counted.
+  const [flowRow] = await tx.select({ n: count() }).from(flows);
+  const [usageRow] = await tx
+    .select({ n: usageCounters.transactions })
+    .from(usageCounters)
+    .where(eq(usageCounters.period, period));
+  return {
+    seats: seatRow?.seats ?? 0,
+    externalUsers: seatRow?.external ?? 0,
+    integrationSets: flowRow?.n ?? 0,
+    maxDestinationsInFlow: 0,
+    transactionsThisMonth: usageRow?.n ?? 0,
+  };
+}
+
+export interface BillingOverview {
+  subscription: {
+    status: SubscriptionStatus;
+    hasCard: boolean;
+    cardBrand: string | null;
+    cardLast4: string | null;
+    cardExpiry: string | null;
+    currentPeriodEnd: Date | null;
+    pastDueSince: Date | null;
+  };
+  plan: PlanInfo;
+  plans: PlanInfo[];
+  period: string;
+  usage: UsageSnapshot;
+  quota: QuotaState;
+  /** Per plan id: why the tenant can't switch to it (empty = allowed). */
+  blockers: Record<string, DowngradeBlocker[]>;
+}
+
+export async function getBillingOverview(
+  db: Database,
+  ctx: Ctx,
+  now = new Date(),
+): Promise<BillingOverview | null> {
+  return withTenant(db, ctx, async (tx) => {
+    const [sub] = await tx.select().from(subscriptions).limit(1);
+    if (!sub) return null;
+    const [tenant] = await tx.select({ timeZone: tenants.timeZone }).from(tenants).limit(1);
+    const period = billingPeriod(now, tenant?.timeZone);
+    const all = await loadPlans(tx);
+    const plan = all.find((p) => p.id === sub.planId);
+    if (!plan) throw new BillingError('UNKNOWN_PLAN');
+    const usage = await currentUsage(tx, period);
+    const [counter] = await tx
+      .select({ exceededAt: usageCounters.exceededAt })
+      .from(usageCounters)
+      .where(eq(usageCounters.period, period));
+    const [addonRow] = await tx
+      .select({ n: sum(addons.quantity).mapWith(Number) })
+      .from(addons)
+      .where(and(eq(addons.period, period), eq(addons.kind, 'transactions')));
+    const quota = quotaState({
+      used: usage.transactionsThisMonth,
+      planLimit: plan.entitlements.transactionsPerMonth,
+      addonTransactions: addonRow?.n ?? 0,
+      exceededAt: counter?.exceededAt ?? null,
+      graceDays: plan.entitlements.quotaGraceDays,
+      now,
+    });
+    return {
+      subscription: {
+        status: sub.status,
+        hasCard: !!sub.cardLast4,
+        cardBrand: sub.cardBrand,
+        cardLast4: sub.cardLast4,
+        cardExpiry: sub.cardExpiry,
+        currentPeriodEnd: sub.currentPeriodEnd,
+        pastDueSince: sub.pastDueSince,
+      },
+      plan,
+      plans: all,
+      period,
+      usage,
+      quota,
+      blockers: Object.fromEntries(
+        all.map((p) => [p.id, p.id === plan.id ? [] : planChangeBlockers(p.entitlements, usage)]),
+      ),
+    };
+  });
+}
+
+/** Owners only (RLS returns nothing for others). */
+export function listInvoices(db: Database, ctx: Ctx) {
+  return withTenant(db, ctx, (tx) =>
+    tx.select().from(invoices).orderBy(desc(invoices.periodStart)).limit(36),
+  );
+}
+
+export async function getInvoice(db: Database, ctx: Ctx, id: string) {
+  const rows = await withTenant(db, ctx, async (tx) => {
+    const inv = await tx.select().from(invoices).where(eq(invoices.id, id)).limit(1);
+    const t = await tx.select().from(tenants).limit(1);
+    return inv[0] && t[0] ? { invoice: inv[0], tenant: t[0] } : null;
+  });
+  return rows;
+}
+
+/* ---- Seats (D11): external users don't use a seat ------------------------------------------- */
+
+export interface SeatUsage {
+  /** Internal members plus open invitations for internal users. */
+  used: number;
+  limit: number | null;
+}
+
+export async function seatUsageTx(tx: Transaction): Promise<SeatUsage> {
+  const [members] = await tx
+    .select({ n: count() })
+    .from(memberships)
+    .where(eq(memberships.isExternal, false));
+  const [pending] = await tx
+    .select({ n: count() })
+    .from(invitations)
+    .where(
+      and(
+        eq(invitations.isExternal, false),
+        isNull(invitations.acceptedAt),
+        isNull(invitations.revokedAt),
+        gt(invitations.expiresAt, new Date()),
+      ),
+    );
+  const [sub] = await tx.select({ planId: subscriptions.planId }).from(subscriptions).limit(1);
+  const plan = sub ? (await loadPlans(tx)).find((p) => p.id === sub.planId) : undefined;
+  return {
+    used: (members?.n ?? 0) + (pending?.n ?? 0),
+    // No subscription (should not happen after onboarding): fail closed at the smallest plan.
+    limit: plan ? plan.entitlements.seats : 0,
+  };
+}
+
+export function seatUsage(db: Database, ctx: Ctx): Promise<SeatUsage> {
+  return withTenant(db, ctx, seatUsageTx);
+}
+
+/* ---- Owner actions ------------------------------------------------------------------------------- */
+
+/**
+ * Plan change. Upgrades apply at once; a downgrade is refused while the tenant is above the new
+ * plan's limits, so nothing is ever deactivated to make it fit (§7.8). Price changes take effect
+ * from the next charge.
+ */
+export async function changePlan(db: Database, actor: Actor, planId: string): Promise<void> {
+  await withTenant(db, actor, async (tx) => {
+    const [sub] = await tx.select().from(subscriptions).limit(1);
+    if (!sub) throw new BillingError('NO_SUBSCRIPTION');
+    if (sub.planId === planId) throw new BillingError('SAME_PLAN');
+    const all = await loadPlans(tx);
+    const target = all.find((p) => p.id === planId);
+    if (!target) throw new BillingError('UNKNOWN_PLAN');
+    const [tenant] = await tx.select({ timeZone: tenants.timeZone }).from(tenants).limit(1);
+    const blockers = planChangeBlockers(
+      target.entitlements,
+      await currentUsage(tx, billingPeriod(new Date(), tenant?.timeZone)),
+    );
+    if (blockers.length) throw new BillingError('DOWNGRADE_BLOCKED', blockers);
+    const res = await tx
+      .update(subscriptions)
+      .set({ planId, updatedAt: new Date() })
+      .where(eq(subscriptions.id, sub.id))
+      .returning({ id: subscriptions.id });
+    if (!res.length) throw new BillingError('FORBIDDEN');
+    await writeAudit(tx, actor, {
+      action: 'subscription.plan_changed',
+      objectType: 'subscription',
+      objectId: sub.id,
+      before: { plan: sub.planId },
+      after: { plan: planId },
+    });
+  });
+}
+
+/** Extra transactions for the current period, added to the next invoice (D2). */
+export async function buyTransactionAddon(
+  db: Database,
+  actor: Actor,
+  blocks: number,
+): Promise<void> {
+  if (!Number.isInteger(blocks) || blocks < 1 || blocks > 50) throw new BillingError('FORBIDDEN');
+  await withTenant(db, actor, async (tx) => {
+    const [sub] = await tx.select().from(subscriptions).limit(1);
+    if (!sub) throw new BillingError('NO_SUBSCRIPTION');
+    const plan = (await loadPlans(tx)).find((p) => p.id === sub.planId);
+    if (!plan) throw new BillingError('UNKNOWN_PLAN');
+    const [tenant] = await tx.select({ timeZone: tenants.timeZone }).from(tenants).limit(1);
+    const quantity = blocks * 1000;
+    const [row] = await tx
+      .insert(addons)
+      .values({
+        tenantId: actor.tenantId,
+        kind: 'transactions',
+        quantity,
+        period: billingPeriod(new Date(), tenant?.timeZone),
+        priceOre: overagePrice(quantity, plan.entitlements.overagePriceOrePer1000),
+      })
+      .returning({ id: addons.id });
+    await writeAudit(tx, actor, {
+      action: 'subscription.addon_bought',
+      objectType: 'addon',
+      objectId: row?.id,
+      after: { quantity },
+    });
+  });
+}
+
+/**
+ * Links a QuickPay subscription to this tenant before the customer is sent to the card form.
+ * The order id is registered in the private index so the callback can find the tenant without
+ * trusting anything in the callback but the signature.
+ */
+export async function attachPaymentSubscription(
+  db: Database,
+  actor: Actor,
+  orderId: string,
+  providerSubscriptionId: string,
+): Promise<void> {
+  await withTenant(db, actor, async (tx) => {
+    const [sub] = await tx.select().from(subscriptions).limit(1);
+    if (!sub) throw new BillingError('NO_SUBSCRIPTION');
+    const res = await tx
+      .update(subscriptions)
+      .set({ providerSubscriptionId, updatedAt: new Date() })
+      .where(eq(subscriptions.id, sub.id))
+      .returning({ id: subscriptions.id });
+    if (!res.length) throw new BillingError('FORBIDDEN');
+    await tx.execute(sql`select app.register_billing_ref(${orderId}, 'subscription', ${sub.id})`);
+    await writeAudit(tx, actor, {
+      action: 'subscription.card_requested',
+      objectType: 'subscription',
+      objectId: sub.id,
+    });
+  });
+}
+
+/** The tenant's QuickPay subscription id, for owners starting a card change. */
+export async function getPaymentSubscription(db: Database, ctx: Ctx) {
+  const [row] = await withTenant(db, ctx, (tx) =>
+    tx
+      .select({
+        id: subscriptions.id,
+        planId: subscriptions.planId,
+        providerSubscriptionId: subscriptions.providerSubscriptionId,
+      })
+      .from(subscriptions)
+      .limit(1),
+  );
+  return row ?? null;
+}
+
+/* ---- Worker: callbacks and monthly charges ------------------------------------------------------- */
+
+export async function resolveBillingRef(
+  db: Database,
+  orderId: string,
+): Promise<{ tenantId: string; kind: 'subscription' | 'invoice'; refId: string } | null> {
+  const res = await db.execute<{ tenant_id: string; kind: string; ref_id: string }>(
+    sql`select * from app.resolve_billing_ref(${orderId})`,
+  );
+  const r = res.rows[0];
+  if (!r) return null;
+  return { tenantId: r.tenant_id, kind: r.kind as 'subscription' | 'invoice', refId: r.ref_id };
+}
+
+export interface CardDetails {
+  brand: string | null;
+  last4: string | null;
+  expiry: string | null;
+}
+
+/**
+ * Card authorised (or re-authorised) for a subscription. A first authorisation activates the
+ * subscription and makes the first month due now, so the scheduler charges it on its next run.
+ */
+export async function applySubscriptionAuthorized(
+  db: Database,
+  tenantId: string,
+  subscriptionId: string,
+  card: CardDetails,
+  now = new Date(),
+): Promise<void> {
+  await withTenant(db, { tenantId }, async (tx) => {
+    const [sub] = await tx
+      .select()
+      .from(subscriptions)
+      .where(eq(subscriptions.id, subscriptionId))
+      .limit(1);
+    if (!sub) throw new BillingError('UNKNOWN_REFERENCE');
+    const first = sub.status === 'incomplete';
+    await tx
+      .update(subscriptions)
+      .set({
+        cardBrand: card.brand,
+        cardLast4: card.last4 && /^\d{4}$/.test(card.last4) ? card.last4 : null,
+        cardExpiry: card.expiry,
+        ...(first
+          ? { status: 'active' as const, currentPeriodStart: now, currentPeriodEnd: now }
+          : {}),
+        updatedAt: now,
+      })
+      .where(eq(subscriptions.id, sub.id));
+    await writeSystemAudit(tx, tenantId, {
+      action: first ? 'subscription.activated' : 'subscription.card_changed',
+      objectType: 'subscription',
+      objectId: sub.id,
+      after: { card: card.last4 ? `•••• ${card.last4}` : null },
+    });
+  });
+}
+
+export async function dueSubscriptions(db: Database, now = new Date()): Promise<string[]> {
+  const res = await db.execute<{ due_subscriptions: string }>(
+    sql`select * from app.due_subscriptions(${now.toISOString()}::timestamptz)`,
+  );
+  return res.rows.map((r) => r.due_subscriptions);
+}
+
+export interface PendingCharge {
+  invoiceId: string;
+  number: string;
+  orderId: string;
+  amountOre: number;
+  providerSubscriptionId: string;
+  /** True when the invoice already existed: the charge was started before and is resumed. */
+  resumed: boolean;
+}
+
+/**
+ * Creates (or finds) the invoice for the subscription's current period: plan price plus add-ons
+ * bought in that period, with 25 % VAT. Idempotent per period (invoices_period_key), so a
+ * scheduler retry never bills twice.
+ */
+export async function prepareCharge(
+  db: Database,
+  tenantId: string,
+  newOrderId: () => string,
+): Promise<PendingCharge | null> {
+  return withTenant(db, { tenantId }, async (tx) => {
+    const [sub] = await tx.select().from(subscriptions).limit(1);
+    if (!sub?.providerSubscriptionId || !sub.currentPeriodEnd) return null;
+    if (sub.status !== 'active' && sub.status !== 'past_due') return null;
+    const periodStart = sub.currentPeriodEnd;
+    const [existing] = await tx
+      .select()
+      .from(invoices)
+      .where(eq(invoices.periodStart, periodStart))
+      .limit(1);
+    if (existing) {
+      if (existing.status === 'paid' || existing.status === 'void') return null;
+      const ref = await tx.execute<{ order_id: string }>(
+        sql`select order_id from app.resolve_invoice_order(${existing.id})`,
+      );
+      const orderId = ref.rows[0]?.order_id;
+      if (!orderId) return null;
+      return {
+        invoiceId: existing.id,
+        number: existing.number,
+        orderId,
+        amountOre: existing.amountOre + existing.vatOre,
+        providerSubscriptionId: sub.providerSubscriptionId,
+        resumed: true,
+      };
+    }
+    const plan = (await loadPlans(tx)).find((p) => p.id === sub.planId);
+    if (!plan) throw new BillingError('UNKNOWN_PLAN');
+    const [tenant] = await tx.select({ timeZone: tenants.timeZone }).from(tenants).limit(1);
+    const prevPeriod = billingPeriod(new Date(periodStart.getTime() - 1), tenant?.timeZone);
+    const [addonRow] = await tx
+      .select({ n: sum(addons.priceOre).mapWith(Number) })
+      .from(addons)
+      .where(eq(addons.period, prevPeriod));
+    const net = plan.priceMonthlyOre + (addonRow?.n ?? 0);
+    const { vat } = withVat(net);
+    const numRes = await tx.execute<{ n: string }>(sql`select app.next_invoice_number() as n`);
+    const number = numRes.rows[0]!.n;
+    const [inv] = await tx
+      .insert(invoices)
+      .values({
+        tenantId,
+        number,
+        periodStart,
+        periodEnd: addMonth(periodStart),
+        description: `${plan.name} · månedlig`,
+        amountOre: net,
+        vatOre: vat,
+      })
+      .returning({ id: invoices.id });
+    const orderId = newOrderId();
+    await tx.execute(sql`select app.register_billing_ref(${orderId}, 'invoice', ${inv!.id})`);
+    return {
+      invoiceId: inv!.id,
+      number,
+      orderId,
+      amountOre: net + vat,
+      providerSubscriptionId: sub.providerSubscriptionId,
+      resumed: false,
+    };
+  });
+}
+
+/**
+ * Outcome of a charge (from the synchronous recurring response or the callback). Paid moves the
+ * subscription one period on; a failure marks it past due, which the app shows as a banner.
+ * Repeated callbacks for the same outcome are no-ops.
+ */
+export async function applyChargeResult(
+  db: Database,
+  tenantId: string,
+  invoiceId: string,
+  result: { accepted: boolean; providerPaymentId: string | null },
+  now = new Date(),
+): Promise<void> {
+  await withTenant(db, { tenantId }, async (tx) => {
+    const [inv] = await tx.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
+    if (!inv) throw new BillingError('UNKNOWN_REFERENCE');
+    if (inv.status === 'paid') return;
+    const [sub] = await tx.select().from(subscriptions).limit(1);
+    if (!sub) throw new BillingError('NO_SUBSCRIPTION');
+    const status: InvoiceStatus = result.accepted ? 'paid' : 'failed';
+    if (inv.status === status) return;
+    await tx
+      .update(invoices)
+      .set({
+        status,
+        providerPaymentId: result.providerPaymentId,
+        paidAt: result.accepted ? now : null,
+      })
+      .where(eq(invoices.id, inv.id));
+    if (result.accepted) {
+      await tx
+        .update(subscriptions)
+        .set({
+          status: 'active',
+          pastDueSince: null,
+          currentPeriodStart: inv.periodStart,
+          currentPeriodEnd: inv.periodEnd,
+          updatedAt: now,
+        })
+        .where(eq(subscriptions.id, sub.id));
+    } else {
+      await tx
+        .update(subscriptions)
+        .set({ status: 'past_due', pastDueSince: sub.pastDueSince ?? now, updatedAt: now })
+        .where(eq(subscriptions.id, sub.id));
+    }
+    await writeSystemAudit(tx, tenantId, {
+      action: result.accepted ? 'invoice.paid' : 'invoice.failed',
+      objectType: 'invoice',
+      objectId: inv.id,
+      after: { number: inv.number },
+    });
+  });
+}

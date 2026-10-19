@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import { SecondaryBar, type SecondaryItem } from '@/components/shell/secondary-nav';
+import { TransactionMeter } from '@/components/shell/transaction-meter';
 import { requireAppContext } from '@/server/auth/session';
 
 /**
@@ -26,7 +27,7 @@ export default async function SettingsLayout({ children }: { children: ReactNode
   ];
   return (
     <>
-      <SecondaryBar label={t('secondary')} items={items} />
+      <SecondaryBar label={t('secondary')} items={items} right={<TransactionMeter />} />
       {children}
     </>
   );

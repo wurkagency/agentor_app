@@ -169,6 +169,9 @@
   --container-content: 1200px;
   --container-form: 720px;
   --container-focus: 480px;
+  /* Onboarding cards (D14-Onboarding-1 and -2/-3). */
+  --container-onboarding-narrow: 600px;
+  --container-onboarding: 880px;
 
   /* ---- Motion (designspecifikation §2.6) --------------------------------------------- */
   --ease-*: initial;

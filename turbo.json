@@ -13,7 +13,13 @@
     "AGENTOR_*",
     "E2E_*",
     "PLAYWRIGHT_*",
-    "ISOLATION_SABOTAGE"
+    "ISOLATION_SABOTAGE",
+    "QUICKPAY_*",
+    "INGEST_*",
+    "CVR_PROVIDER",
+    "DATAFORDELER_*",
+    "MAILPIT_API",
+    "LOG_LEVEL"
   ],
   "tasks": {
     "build": {

@@ -100,3 +100,23 @@ export async function listAudit(
       .limit(limit),
   );
 }
+
+/** Audit entry for something the platform did on its own (billing runs, callbacks). */
+export async function writeSystemAudit(
+  tx: Transaction,
+  tenantId: string,
+  entry: AuditEntry,
+): Promise<void> {
+  await tx.insert(auditLog).values({
+    tenantId,
+    actorUserId: null,
+    actorKind: 'system',
+    actorName: 'Agentor',
+    action: entry.action,
+    objectType: entry.objectType,
+    objectId: entry.objectId ?? null,
+    before: entry.before === undefined ? null : redact(entry.before),
+    after: entry.after === undefined ? null : redact(entry.after),
+    ip: null,
+  });
+}

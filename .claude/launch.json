@@ -6,6 +6,12 @@
       "runtimeExecutable": "corepack",
       "runtimeArgs": ["pnpm", "--filter", "@agentor/web", "dev"],
       "port": 3000
+    },
+    {
+      "name": "ingest",
+      "runtimeExecutable": "corepack",
+      "runtimeArgs": ["pnpm", "--filter", "@agentor/ingest", "dev"],
+      "port": 3100
     }
   ]
 }

@@ -38,6 +38,8 @@ export interface MembershipContext {
   userId: string;
   role: MembershipRole;
   flowScope: 'all' | 'selected';
+  /** False until the owner has finished /onboarding (D14). */
+  onboardingCompleted: boolean;
 }
 
 /** The user's membership in a tenant, or null. The tenant comes from the session, never input. */
@@ -53,6 +55,7 @@ export async function getMembership(
         tenantName: tenants.name,
         role: memberships.role,
         flowScope: memberships.flowScope,
+        onboardingCompletedAt: tenants.onboardingCompletedAt,
       })
       .from(memberships)
       .innerJoin(tenants, eq(tenants.id, memberships.tenantId))
@@ -60,7 +63,9 @@ export async function getMembership(
       .limit(1),
   );
   const row = rows[0];
-  return row ? { ...row, userId } : null;
+  if (!row) return null;
+  const { onboardingCompletedAt, ...rest } = row;
+  return { ...rest, userId, onboardingCompleted: onboardingCompletedAt !== null };
 }
 
 /** Stores the tenant a session works in. Only called after getMembership() confirmed access. */

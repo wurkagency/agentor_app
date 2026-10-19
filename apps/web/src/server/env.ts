@@ -12,6 +12,16 @@ const schema = z.object({
   BETTER_AUTH_SECRET: z.string().min(32, 'BETTER_AUTH_SECRET must be at least 32 characters'),
   SMTP_URL: z.string().min(1).default('smtp://127.0.0.1:51025'),
   MAIL_FROM: z.string().default('Agentor <no-reply@agentor.dk>'),
+  QUICKPAY_MODE: z.enum(['mock', 'test', 'live']).default('mock'),
+  QUICKPAY_API_KEY: z.string().optional(),
+  /** Only the mock checkout signs callbacks in the web process; real ones come from QuickPay. */
+  QUICKPAY_PRIVATE_KEY: z.string().optional(),
+  /** Where the web process reaches agentor-ingest (mock checkout only). */
+  INGEST_INTERNAL_URL: z.url().default('http://127.0.0.1:3100'),
+  /** Public base URL of agentor-ingest, given to QuickPay as callback host. */
+  INGEST_PUBLIC_URL: z.url().default('http://127.0.0.1:3100'),
+  CVR_PROVIDER: z.enum(['fixture', 'datafordeler']).default('fixture'),
+  DATAFORDELER_API_KEY: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof schema>;

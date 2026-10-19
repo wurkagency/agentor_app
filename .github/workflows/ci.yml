@@ -27,6 +27,11 @@ env:
   APP_URL: http://localhost:3000
   SMTP_URL: smtp://127.0.0.1:1025
   BETTER_AUTH_SECRET: ci-only-secret-not-used-anywhere-else-0123456789
+  # Billing runs against the mock QuickPay (no network); the key only signs mock callbacks.
+  QUICKPAY_MODE: mock
+  QUICKPAY_PRIVATE_KEY: ci-mock-callback-signing-key
+  CVR_PROVIDER: fixture
+  MAILPIT_API: http://127.0.0.1:8025/api/v1
 
 jobs:
   verify:
@@ -44,7 +49,7 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 2s --health-timeout 3s --health-retries 30
       mailpit:
         image: axllent/mailpit:latest
-        ports: ['1025:1025']
+        ports: ['1025:1025', '8025:8025']
       redis:
         image: redis:7-alpine
         ports: ['6379:6379']

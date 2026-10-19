@@ -133,7 +133,7 @@
     "or": "eller",
     "passkey": "Log ind med passkey",
     "newHere": "Ny hos Agentor?",
-    "createAccount": "Opret konto på agentor.dk",
+    "createAccount": "Opret konto",
     "errors": {
       "invalid": "E-mail eller adgangskode er forkert. Prøv igen, eller nulstil din adgangskode.",
       "locked": "Kontoen er låst i 15 minutter efter for mange forsøg. Vent lidt, eller nulstil din adgangskode.",
@@ -142,7 +142,8 @@
       "generic": "Noget gik galt. Prøv igen om lidt.",
       "codeInvalid": "Koden passer ikke. Tjek, at uret på din telefon går rigtigt, og prøv med den nye kode.",
       "codeLocked": "For mange forkerte koder. Kontoen er låst i 15 minutter.",
-      "required": "Udfyld feltet."
+      "required": "Udfyld feltet.",
+      "unverified": "Du skal bekræfte din e-mail, før du kan logge ind. Vi har sendt et nyt link."
     },
     "mfaTitle": "Bekræft, at det er dig",
     "mfaIntro": "Skriv koden fra din godkendelsesapp. Den skifter hvert 30. sekund.",
@@ -494,5 +495,219 @@
     "saving": "Gemmer…",
     "cancel": "Annullér",
     "unsaved": "Du har ændringer, der ikke er gemt."
+  },
+  "signup": {
+    "title": "Opret konto",
+    "intro": "Kom i gang på få minutter. Du forbinder dine systemer bagefter.",
+    "name": "Dit navn",
+    "terms": "Jeg accepterer <link>vilkårene</link> og databehandleraftalen.",
+    "create": "Opret konto",
+    "creating": "Opretter…",
+    "haveAccount": "Har du allerede en konto?",
+    "sent": "Vi har sendt en mail til {email}. Klik på linket for at bekræfte din e-mail. Linket virker i 24 timer.",
+    "errors": {
+      "invalid": "Tjek felterne: navn, en gyldig e-mail og en adgangskode på mindst 12 tegn.",
+      "terms": "Du skal acceptere vilkårene for at oprette en konto.",
+      "rateLimited": "For mange forsøg fra din forbindelse. Prøv igen om en time."
+    }
+  },
+  "onboarding": {
+    "steps": "Trin i opsætningen",
+    "step": {
+      "company": "Virksomhed",
+      "plan": "Plan og betaling",
+      "flow": "Første flow"
+    },
+    "stepDone": "færdig",
+    "companyTitle": "Fortæl os om virksomheden",
+    "companyIntro": "Vi henter navn og adresse fra CVR-registeret.",
+    "cvr": "CVR-nummer",
+    "lookup": "Slå op",
+    "activeSince": "aktiv siden {year}",
+    "ceased": "Virksomheden er ophørt i CVR-registeret.",
+    "notIt": "Ikke den?",
+    "enterManually": "Indtast virksomheden selv",
+    "name": "Virksomhedens navn",
+    "address": "Adresse",
+    "postalCode": "Postnr.",
+    "city": "By",
+    "billingEmail": "E-mail til fakturaer",
+    "smsPhone": "Telefon til SMS-alarmer",
+    "orders": "Ordrer pr. måned, cirka",
+    "ordersHelp": "Hjælper os med at foreslå den rigtige plan.",
+    "ordersPlaceholder": "Vælg",
+    "ordersOption": {
+      "0-200": "0–200",
+      "200-1000": "200–1.000",
+      "1000+": "Over 1.000"
+    },
+    "continue": "Fortsæt",
+    "back": "Tilbage",
+    "planTitle": "Vælg plan",
+    "planIntro": "Du kan skifte plan når som helst. Priser er ekskl. moms.",
+    "recommendedFor": "Anbefalet ved {orders} ordrer",
+    "payByCard": "Betaling med kort via QuickPay",
+    "priceLine": "{plan}: {net} + moms {vat} = {gross} pr. måned. Du betaler først, når du forlader opsætningen.",
+    "addCard": "Tilføj kort",
+    "changeCard": "Skift kort",
+    "cardAdded": "{brand} •••• {last4} er tilføjet",
+    "cardWaiting": "Venter på bekræftelse fra QuickPay…",
+    "cardCancelled": "Du afbrød kortbetalingen. Tilføj et kort for at fortsætte.",
+    "cardSlow": "Vi har ikke fået bekræftelsen fra QuickPay endnu. Opdatér siden om lidt, eller tilføj kortet igen.",
+    "flowTitle": "Hvad vil du forbinde først?",
+    "flowIntro": "Vælg en skabelon. Du forbinder dine konti i næste trin, og intet sendes, før du går Live.",
+    "skip": "Spring over",
+    "startSetup": "Start opsætning",
+    "templates": {
+      "webshop-dinero": {
+        "title": "Webshop til regnskab",
+        "body": "Ordrer bliver til fakturaer i Dinero."
+      },
+      "webshop-economic": {
+        "title": "Webshop til e-conomic",
+        "body": "Fakturaer og kunder i e-conomic."
+      },
+      "shopify-dinero": {
+        "title": "Shopify til Dinero",
+        "body": "Ordrer fra Shopify bogføres i Dinero."
+      },
+      "shopify-economic": {
+        "title": "Shopify til e-conomic",
+        "body": "Salg og kreditnotaer i e-conomic."
+      },
+      "customers-hubspot": {
+        "title": "Kunder til CRM",
+        "body": "Kunder bliver til kontakter i HubSpot."
+      },
+      "customers-brevo": {
+        "title": "Kunder til nyhedsbrev",
+        "body": "Tilmeld kunder i Brevo."
+      }
+    },
+    "errors": {
+      "cvrFormat": "Et CVR-nummer er 8 cifre.",
+      "cvrNotFound": "Vi fandt ikke CVR-nummeret. Tjek det, eller indtast virksomheden selv.",
+      "cvrUnavailable": "CVR-registeret svarer ikke lige nu. Indtast virksomheden selv, så retter vi den ikke.",
+      "lookupFirst": "Slå CVR-nummeret op, eller indtast virksomheden selv.",
+      "nameRequired": "Skriv virksomhedens navn.",
+      "email": "E-mailen til fakturaer ser ikke rigtig ud.",
+      "phone": "Telefonnummeret ser ikke rigtigt ud. Skriv fx +45 20 12 12 48.",
+      "TENANT_LIMIT": "Du ejer allerede 10 virksomheder. Kontakt os, hvis du har brug for flere.",
+      "cardRequired": "Tilføj et kort for at fortsætte.",
+      "generic": "Noget gik galt. Prøv igen om lidt."
+    }
+  },
+  "plans": {
+    "perMonthShort": "kr./md.",
+    "perMonthExVat": "kr./md. ekskl. moms",
+    "pollingEvery": "Kørsel hvert {minutes}. minut",
+    "pollingEveryMinute": "Kørsel hvert minut",
+    "transactions": "{count} transaktioner pr. md.",
+    "destinations": "Op til {count} destinationer pr. flow",
+    "tagline": {
+      "startup": "Til den første integration",
+      "business": "Til webshops med flere systemer",
+      "enterprise": "Til bureauer og større forretninger"
+    },
+    "features": {
+      "transactions": "Transaktioner pr. måned",
+      "polling": "Hyppig kørsel",
+      "destinations3": "Op til 3 destinationer pr. flow",
+      "moreDestinations": "Flere end 3 destinationer pr. flow",
+      "supportAudit": "Supportadgang og audit-log",
+      "externalUsers": "Eksterne brugere med adgang til udvalgte flows",
+      "sso": "SSO med Microsoft Entra",
+      "whiteLabel": "White-label"
+    }
+  },
+  "billing": {
+    "title": "Abonnement og forbrug",
+    "ownerOnly": "Kun ejeren kan ændre plan og betaling.",
+    "currentPlan": "Nuværende plan",
+    "perMonth": "{price} kr./md.",
+    "renews": "Fornyes {date} · betales med {card}",
+    "noCard": "intet kort",
+    "noCardYet": "Tilføj et kort for at aktivere abonnementet.",
+    "upgradeTo": "Opgradér til {plan}",
+    "upgradeTitle": "Opgradér til {plan}?",
+    "upgradeBody": "Den nye plan gælder med det samme. Prisen ændres fra næste opkrævning.",
+    "downgradeTitle": "Skift til {plan}?",
+    "changeBody": "Den nye pris er {price} pr. måned inkl. moms fra næste opkrævning.",
+    "planChanged": "Du er nu på {plan}",
+    "planChangeFailed": "Planen kunne ikke skiftes. Prøv igen.",
+    "downgradeBlocked": "Du er over den nye plans grænser. Ret det først.",
+    "transactions": "Transaktioner",
+    "transactionsHint": "{pct} · nulstilles {date}. Kun Live-skrivninger tæller.",
+    "integrationSets": "Integrationssæt",
+    "integrationSetHint": "Et sæt er 1 flow med op til {count} destinationer.",
+    "integrationSetHintUnlimited": "Et sæt er 1 flow med alle de destinationer, du har brug for.",
+    "seats": "Brugere",
+    "externalUsers": "{count, plural, =0 {Ingen eksterne brugere} one {# ekstern bruger} other {# eksterne brugere}}",
+    "retention": "Opbevaring af data",
+    "days": "{count} dage",
+    "retentionHint": "Data i kørsler slettes efter perioden. Kørselshistorik gemmes i {months} måneder.",
+    "unlimited": "alle",
+    "compare": "Sammenlign planer",
+    "yourPlan": "Din plan",
+    "currentPlanNote": "Din nuværende plan",
+    "upgrade": "Opgradér",
+    "downgrade": "Nedgradér",
+    "overLimit": "Kan ikke vælges: du er over {plan}s grænse for {what}.",
+    "blocker": {
+      "integrationSets": "integrationssæt",
+      "destinationsPerFlow": "destinationer pr. flow",
+      "seats": "brugere",
+      "transactionsPerMonth": "transaktioner denne måned"
+    },
+    "paymentMethod": "Betalingsmetode",
+    "paymentIntro": "Kortet opkræves månedligt via QuickPay. Vi gemmer aldrig kortnumre.",
+    "cardExpiry": "Udløber {expiry} · via QuickPay",
+    "viaQuickPay": "Via QuickPay",
+    "changeCard": "Skift kort",
+    "addCard": "Tilføj kort",
+    "cardFailed": "Kortformularen kunne ikke åbnes. Prøv igen.",
+    "cardUpdating": "Vi venter på bekræftelsen fra QuickPay. Siden opdateres af sig selv.",
+    "invoices": "Fakturaer",
+    "invoicesIntro": "Fakturaer for de seneste 3 år. Beløb er inkl. moms.",
+    "noInvoices": "Ingen fakturaer endnu",
+    "noInvoicesBody": "Din første faktura kommer, når abonnementet opkræves første gang.",
+    "invoiceNo": "Nr.",
+    "date": "Dato",
+    "description": "Beskrivelse",
+    "amount": "Beløb",
+    "status": "Status",
+    "pdf": "PDF",
+    "downloadPdf": "Hent faktura {number} som PDF",
+    "invoiceStatus": {
+      "paid": "Betalt",
+      "open": "Afventer",
+      "failed": "Fejlet",
+      "void": "Annulleret"
+    },
+    "pastDue": "Betalingen fejlede den {since}. Opdatér dit kort, så dine flows fortsætter.",
+    "pastDueShort": "Seneste betaling fejlede. Opdatér dit kort.",
+    "quotaWarn": "Du har brugt {pct} af månedens transaktioner. Overvej at opgradere.",
+    "quotaOver": "Du har brugt alle månedens transaktioner. Dine flows kører videre til {date}. Køb flere transaktioner eller opgradér.",
+    "quotaNeedsAddon": "Månedens transaktioner er brugt, og fristen er udløbet. Nye Live-skrivninger venter, til du køber flere transaktioner eller opgraderer.",
+    "buyAddon": "Køb 1.000 transaktioner",
+    "addonBought": "1.000 ekstra transaktioner er tilføjet denne måned",
+    "addonFailed": "Transaktionerne kunne ikke købes. Prøv igen.",
+    "pdfInvoice": "Faktura",
+    "pdfPeriod": "Periode",
+    "pdfCustomer": "Kunde",
+    "pdfNet": "Beløb ekskl. moms",
+    "pdfVat": "Moms 25 %",
+    "pdfTotal": "I alt",
+    "pdfFooter": "Betalt med kort via QuickPay. Spørgsmål til fakturaen: faktura@agentor.dk"
+  },
+  "checkout": {
+    "title": "Tilføj kort",
+    "intro": "Kortet bliver opkrævet {amount} pr. måned.",
+    "mockNotice": "Testbetaling. Denne side erstatter QuickPays kortformular under udvikling, og intet kort bliver opkrævet.",
+    "card": "Testkort",
+    "approve": "Godkend kort",
+    "decline": "Afvis kort",
+    "cancel": "Annullér",
+    "error": "Betalingen kunne ikke gennemføres. Kører agentor-ingest?"
   }
 }

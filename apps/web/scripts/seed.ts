@@ -13,6 +13,7 @@ if (existsSync(envFile)) process.loadEnvFile(envFile);
 if (process.env.NODE_ENV === 'production') throw new Error('Refusing to seed in production');
 
 const { symmetricEncrypt } = await import('better-auth/crypto');
+const { billingPeriod, monthStart } = await import('@agentor/core');
 const { auth } = await import('../src/server/auth/auth');
 const { FLOWS, SEED_PASSWORD, SEED_TOTP_SECRET, TENANTS, USERS } = await import('./seed-data');
 
@@ -46,6 +47,19 @@ const ctx = await auth().$context;
 for (const u of Object.values(USERS)) {
   const existing = await ctx.internalAdapter.findUserByEmail(u.email);
   if (existing) await ctx.internalAdapter.deleteUser(existing.user.id);
+}
+// Accounts made by e2e sign-up tests (…@e2e.agentor.test) and the companies they created.
+{
+  const adminUrl = new URL(process.env.DATABASE_ADMIN_URL ?? '');
+  adminUrl.pathname = new URL(ownerUrl).pathname;
+  const admin = new pg.Client({ connectionString: adminUrl.toString() });
+  await admin.connect();
+  await admin.query(
+    `delete from tenants t where exists (select 1 from memberships m join auth.users u on u.id = m.user_id
+      where m.tenant_id = t.id and m.role = 'owner' and u.email like '%@e2e.agentor.test')`,
+  );
+  await admin.query(`delete from auth.users where email like '%@e2e.agentor.test'`);
+  await admin.end();
 }
 
 // --- identity (auth schema) ---------------------------------------------------------------------
@@ -88,11 +102,11 @@ for (const u of Object.values(USERS)) {
 // --- tenants, memberships, flows -------------------------------------------------------------------
 const n = TENANTS.nordlys;
 await inTenant(n.id, async () => {
-  await owner.query(`insert into tenants (id, name, cvr) values ($1, $2, $3)`, [
-    n.id,
-    n.name,
-    n.cvr,
-  ]);
+  await owner.query(
+    `insert into tenants (id, name, cvr, address_line, postal_code, city, billing_email, orders_per_month, onboarding_completed_at, first_test_run_at)
+     values ($1, $2, $3, 'Cykelvej 12', '8000', 'Aarhus C', 'regnskab@nordlys-cykler.dk', '200-1000', '2026-08-01T09:00:00+02:00', '2026-08-01T10:12:00+02:00')`,
+    [n.id, n.name, n.cvr],
+  );
   const m = async (userId: string, role: string, scope = 'all', external = false) =>
     (
       await owner.query<{ id: string }>(
@@ -112,6 +126,34 @@ await inTenant(n.id, async () => {
       f.name,
     ]);
   }
+  // Abonnement (D13): Business, Visa •••• 4242, renews 1. of next month, 712 of 1.000 used.
+  const period = billingPeriod(new Date());
+  const [y, mo] = period.split('-').map(Number) as [number, number];
+  const month = (offset: number) => {
+    const d = new Date(Date.UTC(y, mo - 1 + offset, 1));
+    return monthStart(d.getUTCFullYear(), d.getUTCMonth() + 1);
+  };
+  const periodStart = month(0);
+  const periodEnd = month(1);
+  await owner.query(
+    `insert into subscriptions (tenant_id, plan_id, status, provider_subscription_id, card_brand, card_last4, card_expiry, current_period_start, current_period_end)
+     values ($1, 'business', 'active', 'mock_AGSEEDNORDLYS', 'visa', '4242', '08/28', $2, $3)`,
+    [n.id, periodStart, periodEnd],
+  );
+  await owner.query(
+    `insert into usage_counters (tenant_id, period, transactions) values ($1, $2, 712)`,
+    [n.id, period],
+  );
+  for (const [i, num] of ['AG-2026-1043', 'AG-2026-0912', 'AG-2026-0788'].entries()) {
+    // Charged in advance: the newest invoice is for the current period (D13: "1. okt.").
+    const start = month(-i);
+    const end = month(1 - i);
+    await owner.query(
+      `insert into invoices (tenant_id, number, period_start, period_end, description, amount_ore, vat_ore, status, paid_at)
+       values ($1, $2, $3, $4, 'Business · månedlig', 15900, 3975, 'paid', $3)`,
+      [n.id, num, start, end],
+    );
+  }
   // Sara Lind: external developer with access to one flow until 12. nov. 2026.
   await owner.query(
     `insert into flow_grants (tenant_id, membership_id, flow_id, expires_at) values ($1, $2, $3, '2026-11-12T23:59:59+01:00')`,
@@ -121,16 +163,30 @@ await inTenant(n.id, async () => {
 
 const o = TENANTS.outlet;
 await inTenant(o.id, async () => {
-  await owner.query(`insert into tenants (id, name, cvr) values ($1, $2, $3)`, [
-    o.id,
-    o.name,
-    o.cvr,
-  ]);
+  await owner.query(
+    `insert into tenants (id, name, cvr, address_line, postal_code, city, onboarding_completed_at)
+     values ($1, $2, $3, 'Havnegade 3', '5000', 'Odense C', '2026-09-15T09:00:00+02:00')`,
+    [o.id, o.name, o.cvr],
+  );
   await owner.query(`insert into memberships (tenant_id, user_id, role) values ($1, $2, 'owner')`, [
     o.id,
     USERS.mette.id,
   ]);
+  await owner.query(
+    `insert into subscriptions (tenant_id, plan_id, status, provider_subscription_id, card_brand, card_last4, card_expiry, current_period_start, current_period_end)
+     values ($1, 'startup', 'active', 'mock_AGSEEDOUTLET', 'mastercard', '5100', '11/27', now() - interval '10 days', now() + interval '20 days')`,
+    [o.id],
+  );
+  await owner.query(
+    `insert into usage_counters (tenant_id, period, transactions) values ($1, $2, 41)`,
+    [o.id, billingPeriod(new Date())],
+  );
 });
+
+// Seeded invoice numbers sit below the sequence, so new invoices never collide with them.
+await owner.query(
+  `select setval('app.invoice_number_seq', greatest(2000, (select last_value from app.invoice_number_seq)))`,
+);
 
 await owner.end();
 console.log(

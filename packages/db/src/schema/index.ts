@@ -3,6 +3,7 @@ export * from './flows.js';
 export * from './connections.js';
 export * from './plans.js';
 export * from './team.js';
+export * from './billing.js';
 export {
   authSchema,
   users as authUsers,

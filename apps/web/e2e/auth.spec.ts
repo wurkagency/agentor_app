@@ -2,7 +2,7 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import pg from 'pg';
 import globalSetup from './global-setup';
-import { fillPassword, fullLogin, login, totp, USERS } from './support';
+import { base32Decode, fillPassword, fullLogin, login, totp, USERS } from './support';
 
 /** M2 acceptance: authentication, MFA, roles, tenant switching and security headers. */
 
@@ -17,7 +17,7 @@ test('login page matches D14-Login and has no WCAG violations', async ({ page })
   await expect(page.getByText('Velkommen tilbage. Dine flows har kørt imens.')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Glemt adgangskode?' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Log ind med passkey' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Opret konto på agentor.dk' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Opret konto' })).toBeVisible();
   const axe = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
     .analyze();
@@ -161,14 +161,3 @@ test('log out returns to the login page and ends the session', async ({ page }) 
   await page.goto('/');
   await expect(page).toHaveURL(/\/login$/);
 });
-
-/** RFC 4648 base32 → string (the otpauth secret is the base32 of the raw secret). */
-function base32Decode(input: string): string {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  let bits = '';
-  for (const c of input.replace(/=+$/, '').toUpperCase())
-    bits += alphabet.indexOf(c).toString(2).padStart(5, '0');
-  const bytes: number[] = [];
-  for (let i = 0; i + 8 <= bits.length; i += 8) bytes.push(parseInt(bits.slice(i, i + 8), 2));
-  return new TextDecoder().decode(new Uint8Array(bytes));
-}

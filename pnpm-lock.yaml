@@ -196,6 +196,12 @@ importers:
 
   apps/ingest:
     dependencies:
+      '@agentor/billing':
+        specifier: workspace:*
+        version: link:../../packages/billing
+      '@agentor/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
       fastify:
         specifier: ^5.0.0
         version: 5.12.5
@@ -215,6 +221,12 @@ importers:
 
   apps/scheduler:
     dependencies:
+      '@agentor/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@agentor/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
       ioredis:
         specifier: ^5.0.0
         version: 5.11.1
@@ -234,6 +246,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@agentor/billing':
+        specifier: workspace:*
+        version: link:../../packages/billing
       '@agentor/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -343,6 +358,15 @@ importers:
 
   apps/worker:
     dependencies:
+      '@agentor/billing':
+        specifier: workspace:*
+        version: link:../../packages/billing
+      '@agentor/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@agentor/jobs':
+        specifier: workspace:*
+        version: link:../../packages/jobs
       bullmq:
         specifier: ^5.0.0
         version: 5.81.5
@@ -363,6 +387,22 @@ importers:
         specifier: ^4.0.0
         version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
+  packages/billing:
+    dependencies:
+      zod:
+        specifier: ^4.0.0
+        version: 4.6.6
+    devDependencies:
+      '@agentor/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
   packages/config: {}
 
   packages/core:
@@ -379,6 +419,9 @@ importers:
 
   packages/db:
     dependencies:
+      '@agentor/core':
+        specifier: workspace:*
+        version: link:../core
       drizzle-orm:
         specifier: ^0.45.0
         version: 0.45.4(@types/pg@8.23.1)(kysely@0.29.6)(pg@8.23.1)
@@ -412,6 +455,28 @@ importers:
         version: 22.20.5
       vitest:
         specifier: ^4.1.11
+        version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  packages/jobs:
+    dependencies:
+      bullmq:
+        specifier: ^5.0.0
+        version: 5.81.5
+      ioredis:
+        specifier: ^5.0.0
+        version: 5.11.1
+      zod:
+        specifier: ^4.0.0
+        version: 4.6.6
+    devDependencies:
+      '@agentor/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
+      vitest:
+        specifier: ^4.0.0
         version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
   packages/ui:

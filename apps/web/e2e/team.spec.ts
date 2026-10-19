@@ -117,7 +117,7 @@ test('company details save and appear in the audit log', async ({ page }) => {
   await page.getByLabel('CVR-nummer').blur();
   await expect(page.getByText('Et CVR-nummer har 8 cifre.')).toBeVisible();
   await page.getByLabel('CVR-nummer').fill('12345678');
-  await page.getByLabel('By', { exact: true }).fill('Aarhus C');
+  await page.getByLabel('By', { exact: true }).fill('Aarhus N');
   await page.getByRole('button', { name: 'Gem', exact: true }).click();
   await expect(page.getByText('Virksomhedens oplysninger er gemt')).toBeVisible();
   await page.goto('/settings/audit-log?group=company');

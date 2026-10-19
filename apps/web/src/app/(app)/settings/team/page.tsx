@@ -3,6 +3,7 @@ import {
   listMembers,
   listOpenInvitations,
   getSecuritySettings,
+  seatUsage,
 } from '@agentor/db';
 import { getTranslations } from 'next-intl/server';
 import { PageBody } from '@/components/shell/secondary-nav';
@@ -19,11 +20,12 @@ export async function generateMetadata() {
 export default async function TeamPage() {
   const ctx = await requireRole(['owner', 'admin']);
   const c = { tenantId: ctx.tenant.tenantId, userId: ctx.user.id };
-  const [members, invitations, flows, security] = await Promise.all([
+  const [members, invitations, flows, security, seats] = await Promise.all([
     listMembers(db(), c),
     listOpenInvitations(db(), c),
     listFlowOptions(db(), c),
     getSecuritySettings(db(), c),
+    seatUsage(db(), c),
   ]);
   return (
     <PageBody>
@@ -41,7 +43,7 @@ export default async function TeamPage() {
           createdAt: i.createdAt.toISOString(),
         }))}
         flows={flows}
-        seats={null}
+        seats={seats}
         supportRequiresApproval={security.supportRequiresApproval}
       />
     </PageBody>

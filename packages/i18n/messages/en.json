@@ -133,7 +133,7 @@
     "or": "or",
     "passkey": "Log in with a passkey",
     "newHere": "New to Agentor?",
-    "createAccount": "Create an account at agentor.dk",
+    "createAccount": "Create account",
     "errors": {
       "invalid": "Email or password is incorrect. Try again, or reset your password.",
       "locked": "The account is locked for 15 minutes after too many attempts. Wait a little, or reset your password.",
@@ -142,7 +142,8 @@
       "generic": "Something went wrong. Try again in a moment.",
       "codeInvalid": "That code doesn't match. Check that your phone's clock is right and try the new code.",
       "codeLocked": "Too many wrong codes. The account is locked for 15 minutes.",
-      "required": "Fill in this field."
+      "required": "Fill in this field.",
+      "unverified": "You need to confirm your e-mail before you can sign in. We have sent a new link."
     },
     "mfaTitle": "Confirm it's you",
     "mfaIntro": "Enter the code from your authenticator app. It changes every 30 seconds.",
@@ -494,5 +495,219 @@
     "saving": "Saving…",
     "cancel": "Cancel",
     "unsaved": "You have unsaved changes."
+  },
+  "signup": {
+    "title": "Create account",
+    "intro": "Get started in minutes. You connect your systems afterwards.",
+    "name": "Your name",
+    "terms": "I accept the <link>terms</link> and the data processing agreement.",
+    "create": "Create account",
+    "creating": "Creating…",
+    "haveAccount": "Already have an account?",
+    "sent": "We have sent an e-mail to {email}. Click the link to confirm your e-mail. The link works for 24 hours.",
+    "errors": {
+      "invalid": "Check the fields: name, a valid e-mail and a password of at least 12 characters.",
+      "terms": "You need to accept the terms to create an account.",
+      "rateLimited": "Too many attempts from your connection. Try again in an hour."
+    }
+  },
+  "onboarding": {
+    "steps": "Setup steps",
+    "step": {
+      "company": "Company",
+      "plan": "Plan and payment",
+      "flow": "First flow"
+    },
+    "stepDone": "done",
+    "companyTitle": "Tell us about your company",
+    "companyIntro": "We fetch name and address from the Danish CVR register.",
+    "cvr": "CVR number",
+    "lookup": "Look up",
+    "activeSince": "active since {year}",
+    "ceased": "The company has ceased in the CVR register.",
+    "notIt": "Not this one?",
+    "enterManually": "Enter the company yourself",
+    "name": "Company name",
+    "address": "Address",
+    "postalCode": "Postcode",
+    "city": "City",
+    "billingEmail": "E-mail for invoices",
+    "smsPhone": "Phone for SMS alerts",
+    "orders": "Orders per month, roughly",
+    "ordersHelp": "Helps us suggest the right plan.",
+    "ordersPlaceholder": "Choose",
+    "ordersOption": {
+      "0-200": "0–200",
+      "200-1000": "200–1,000",
+      "1000+": "Over 1,000"
+    },
+    "continue": "Continue",
+    "back": "Back",
+    "planTitle": "Choose plan",
+    "planIntro": "You can change plan at any time. Prices exclude VAT.",
+    "recommendedFor": "Recommended for {orders} orders",
+    "payByCard": "Pay by card via QuickPay",
+    "priceLine": "{plan}: {net} + VAT {vat} = {gross} per month. You pay when you leave the setup.",
+    "addCard": "Add card",
+    "changeCard": "Change card",
+    "cardAdded": "{brand} •••• {last4} has been added",
+    "cardWaiting": "Waiting for confirmation from QuickPay…",
+    "cardCancelled": "You cancelled the card payment. Add a card to continue.",
+    "cardSlow": "We have not received the confirmation from QuickPay yet. Refresh in a moment or add the card again.",
+    "flowTitle": "What do you want to connect first?",
+    "flowIntro": "Choose a template. You connect your accounts in the next step, and nothing is sent until you go Live.",
+    "skip": "Skip",
+    "startSetup": "Start setup",
+    "templates": {
+      "webshop-dinero": {
+        "title": "Webshop to accounting",
+        "body": "Orders become invoices in Dinero."
+      },
+      "webshop-economic": {
+        "title": "Webshop to e-conomic",
+        "body": "Invoices and customers in e-conomic."
+      },
+      "shopify-dinero": {
+        "title": "Shopify to Dinero",
+        "body": "Orders from Shopify are booked in Dinero."
+      },
+      "shopify-economic": {
+        "title": "Shopify to e-conomic",
+        "body": "Sales and credit notes in e-conomic."
+      },
+      "customers-hubspot": {
+        "title": "Customers to CRM",
+        "body": "Customers become contacts in HubSpot."
+      },
+      "customers-brevo": {
+        "title": "Customers to newsletter",
+        "body": "Subscribe customers in Brevo."
+      }
+    },
+    "errors": {
+      "cvrFormat": "A CVR number is 8 digits.",
+      "cvrNotFound": "We could not find the CVR number. Check it, or enter the company yourself.",
+      "cvrUnavailable": "The CVR register is not answering right now. Enter the company yourself.",
+      "lookupFirst": "Look up the CVR number, or enter the company yourself.",
+      "nameRequired": "Enter the company name.",
+      "email": "The invoice e-mail does not look right.",
+      "phone": "The phone number does not look right. Write e.g. +45 20 12 12 48.",
+      "TENANT_LIMIT": "You already own 10 companies. Contact us if you need more.",
+      "cardRequired": "Add a card to continue.",
+      "generic": "Something went wrong. Try again in a moment."
+    }
+  },
+  "plans": {
+    "perMonthShort": "DKK/mo.",
+    "perMonthExVat": "DKK/mo. excl. VAT",
+    "pollingEvery": "Runs every {minutes} minutes",
+    "pollingEveryMinute": "Runs every minute",
+    "transactions": "{count} transactions per month",
+    "destinations": "Up to {count} destinations per flow",
+    "tagline": {
+      "startup": "For the first integration",
+      "business": "For webshops with several systems",
+      "enterprise": "For agencies and larger businesses"
+    },
+    "features": {
+      "transactions": "Transactions per month",
+      "polling": "Frequent runs",
+      "destinations3": "Up to 3 destinations per flow",
+      "moreDestinations": "More than 3 destinations per flow",
+      "supportAudit": "Support access and audit log",
+      "externalUsers": "External users with access to selected flows",
+      "sso": "SSO with Microsoft Entra",
+      "whiteLabel": "White label"
+    }
+  },
+  "billing": {
+    "title": "Subscription and usage",
+    "ownerOnly": "Only the owner can change plan and payment.",
+    "currentPlan": "Current plan",
+    "perMonth": "DKK {price}/mo.",
+    "renews": "Renews {date} · paid with {card}",
+    "noCard": "no card",
+    "noCardYet": "Add a card to activate the subscription.",
+    "upgradeTo": "Upgrade to {plan}",
+    "upgradeTitle": "Upgrade to {plan}?",
+    "upgradeBody": "The new plan applies right away. The price changes from the next charge.",
+    "downgradeTitle": "Switch to {plan}?",
+    "changeBody": "The new price is {price} per month incl. VAT from the next charge.",
+    "planChanged": "You are now on {plan}",
+    "planChangeFailed": "The plan could not be changed. Try again.",
+    "downgradeBlocked": "You are above the new plan's limits. Fix that first.",
+    "transactions": "Transactions",
+    "transactionsHint": "{pct} · resets {date}. Only Live writes count.",
+    "integrationSets": "Integration sets",
+    "integrationSetHint": "A set is 1 flow with up to {count} destinations.",
+    "integrationSetHintUnlimited": "A set is 1 flow with all the destinations you need.",
+    "seats": "Users",
+    "externalUsers": "{count, plural, =0 {No external users} one {# external user} other {# external users}}",
+    "retention": "Data retention",
+    "days": "{count} days",
+    "retentionHint": "Data in runs is deleted after the period. Run history is kept for {months} months.",
+    "unlimited": "all",
+    "compare": "Compare plans",
+    "yourPlan": "Your plan",
+    "currentPlanNote": "Your current plan",
+    "upgrade": "Upgrade",
+    "downgrade": "Downgrade",
+    "overLimit": "Not available: you are above the {plan} limit for {what}.",
+    "blocker": {
+      "integrationSets": "integration sets",
+      "destinationsPerFlow": "destinations per flow",
+      "seats": "users",
+      "transactionsPerMonth": "transactions this month"
+    },
+    "paymentMethod": "Payment method",
+    "paymentIntro": "The card is charged monthly via QuickPay. We never store card numbers.",
+    "cardExpiry": "Expires {expiry} · via QuickPay",
+    "viaQuickPay": "Via QuickPay",
+    "changeCard": "Change card",
+    "addCard": "Add card",
+    "cardFailed": "The card form could not be opened. Try again.",
+    "cardUpdating": "Waiting for the confirmation from QuickPay. The page updates by itself.",
+    "invoices": "Invoices",
+    "invoicesIntro": "Invoices for the last 3 years. Amounts include VAT.",
+    "noInvoices": "No invoices yet",
+    "noInvoicesBody": "Your first invoice arrives when the subscription is charged for the first time.",
+    "invoiceNo": "No.",
+    "date": "Date",
+    "description": "Description",
+    "amount": "Amount",
+    "status": "Status",
+    "pdf": "PDF",
+    "downloadPdf": "Download invoice {number} as PDF",
+    "invoiceStatus": {
+      "paid": "Paid",
+      "open": "Pending",
+      "failed": "Failed",
+      "void": "Void"
+    },
+    "pastDue": "The payment failed on {since}. Update your card so your flows keep running.",
+    "pastDueShort": "The latest payment failed. Update your card.",
+    "quotaWarn": "You have used {pct} of this month's transactions. Consider upgrading.",
+    "quotaOver": "You have used all of this month's transactions. Your flows keep running until {date}. Buy more transactions or upgrade.",
+    "quotaNeedsAddon": "This month's transactions are used and the grace period has ended. New Live writes wait until you buy more transactions or upgrade.",
+    "buyAddon": "Buy 1,000 transactions",
+    "addonBought": "1,000 extra transactions have been added this month",
+    "addonFailed": "The transactions could not be bought. Try again.",
+    "pdfInvoice": "Invoice",
+    "pdfPeriod": "Period",
+    "pdfCustomer": "Customer",
+    "pdfNet": "Amount excl. VAT",
+    "pdfVat": "VAT 25%",
+    "pdfTotal": "Total",
+    "pdfFooter": "Paid by card via QuickPay. Questions about the invoice: faktura@agentor.dk"
+  },
+  "checkout": {
+    "title": "Add card",
+    "intro": "The card will be charged {amount} per month.",
+    "mockNotice": "Test payment. This page replaces QuickPay's card form during development, and no card is charged.",
+    "card": "Test card",
+    "approve": "Approve card",
+    "decline": "Decline card",
+    "cancel": "Cancel",
+    "error": "The payment could not be completed. Is agentor-ingest running?"
   }
 }

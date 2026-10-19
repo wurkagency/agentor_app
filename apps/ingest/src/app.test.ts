@@ -1,4 +1,5 @@
 import { afterAll, describe, expect, it } from 'vitest';
+import { CHECKSUM_HEADER, signCallback } from '@agentor/billing';
 import { buildApp } from './app.js';
 
 const app = buildApp();
@@ -29,5 +30,54 @@ describe('ingest server', () => {
       payload: JSON.stringify({ blob: 'x'.repeat(1024 * 1024 + 10) }),
     });
     expect(res.statusCode).toBe(413);
+  });
+});
+
+describe('QuickPay callbacks', () => {
+  const key = 'test-private-key';
+  const queued: { body: string; jobId: string }[] = [];
+  const qp = buildApp({
+    quickpayPrivateKey: key,
+    enqueueQuickPay: async (body, jobId) => {
+      queued.push({ body, jobId });
+    },
+  });
+  afterAll(() => qp.close());
+  const body = JSON.stringify({ id: 1, type: 'Subscription', order_id: 'AG1234', accepted: true });
+
+  it('enqueues a correctly signed callback, byte for byte', async () => {
+    const res = await qp.inject({
+      method: 'POST',
+      url: '/billing/quickpay',
+      headers: { 'content-type': 'application/json', [CHECKSUM_HEADER]: signCallback(body, key) },
+      payload: body,
+    });
+    expect(res.statusCode).toBe(202);
+    expect(queued).toHaveLength(1);
+    expect(queued[0]!.body).toBe(body);
+    expect(queued[0]!.jobId).toMatch(/^qp-[0-9a-f]{64}$/);
+  });
+
+  it('refuses a missing or wrong signature without enqueueing', async () => {
+    for (const sig of [undefined, signCallback(body, 'other'), 'nonsense']) {
+      const res = await qp.inject({
+        method: 'POST',
+        url: '/billing/quickpay',
+        headers: { 'content-type': 'application/json', ...(sig ? { [CHECKSUM_HEADER]: sig } : {}) },
+        payload: body,
+      });
+      expect(res.statusCode).toBe(401);
+    }
+    expect(queued).toHaveLength(1);
+  });
+
+  it('is not served when billing is not configured', async () => {
+    const res = await app.inject({
+      method: 'POST',
+      url: '/billing/quickpay',
+      headers: { 'content-type': 'application/json' },
+      payload: body,
+    });
+    expect(res.statusCode).toBe(404);
   });
 });

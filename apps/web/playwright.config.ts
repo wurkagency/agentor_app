@@ -47,13 +47,34 @@ export default defineConfig({
         ]
       : []),
   ],
+  // The web app plus the two processes the billing flow passes through (mock QuickPay callback →
+  // agentor-ingest → queue → agentor-worker), so e2e exercises the real path.
   webServer: process.env.E2E_BASE_URL
     ? undefined
-    : {
-        command: process.env.CI ? 'pnpm start' : 'pnpm dev',
-        url: `${baseURL}/dev/components`,
-        reuseExistingServer: !process.env.CI,
-        timeout: 120_000,
-        env: { AGENTOR_DEV_PAGES: '1', PORT: String(port) },
-      },
+    : [
+        {
+          command: process.env.CI ? 'pnpm start' : 'pnpm dev',
+          url: `${baseURL}/dev/components`,
+          reuseExistingServer: !process.env.CI,
+          timeout: 120_000,
+          env: { AGENTOR_DEV_PAGES: '1', PORT: String(port) },
+        },
+        {
+          command: process.env.CI
+            ? 'node ../ingest/dist/main.js'
+            : 'pnpm --filter @agentor/ingest dev',
+          url: 'http://127.0.0.1:3100/healthz',
+          reuseExistingServer: !process.env.CI,
+          timeout: 60_000,
+        },
+        {
+          command: process.env.CI
+            ? 'node ../worker/dist/main.js'
+            : 'pnpm --filter @agentor/worker dev',
+          // The worker has no port; Playwright waits for its "worker started" log line instead.
+          wait: { stdout: /worker started/ },
+          reuseExistingServer: !process.env.CI,
+          timeout: 60_000,
+        },
+      ],
 });

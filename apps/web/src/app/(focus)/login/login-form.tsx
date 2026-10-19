@@ -10,7 +10,7 @@ import { authClient } from '@/lib/auth-client';
 import { syncLocale } from '@/app/actions/session';
 import { rememberNext } from '@/lib/safe-next';
 
-type ErrorKey = 'invalid' | 'locked' | 'rateLimited' | 'passkey' | 'generic';
+type ErrorKey = 'invalid' | 'locked' | 'rateLimited' | 'passkey' | 'unverified' | 'generic';
 
 /** Maps Better Auth errors to plain Danish: what happened and what to do (§9.2). */
 function toErrorKey(
@@ -21,6 +21,8 @@ function toErrorKey(
 ): ErrorKey {
   if (!error) return 'generic';
   if (error.code === 'ACCOUNT_LOCKED' || error.message === 'ACCOUNT_LOCKED') return 'locked';
+  // Only reported after a correct password: a new verification mail has been sent.
+  if (error.code === 'EMAIL_NOT_VERIFIED') return 'unverified';
   if (error.status === 429) return 'rateLimited';
   if (error.status === 401 || error.status === 403 || error.code === 'INVALID_EMAIL_OR_PASSWORD')
     return 'invalid';
@@ -133,9 +135,9 @@ export function LoginForm({ next = '/' }: { next?: string }) {
       </Button>
       <p className="m-0 text-center text-table font-medium text-fg-2">
         {t('newHere')}{' '}
-        <a href="https://agentor.dk/opret" className="font-semibold text-fg-1">
+        <Link href="/signup" className="font-semibold text-fg-1">
           {t('createAccount')}
-        </a>
+        </Link>
       </p>
     </form>
   );

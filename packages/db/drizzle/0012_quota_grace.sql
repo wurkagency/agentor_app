@@ -1,0 +1,1 @@
+ALTER TABLE "usage_counters" ADD COLUMN "exceeded_at" timestamp with time zone;

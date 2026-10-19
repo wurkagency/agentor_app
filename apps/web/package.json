@@ -5,14 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "next dev --port 3000",
-    "build": "next build",
-    "start": "next start --port 3000",
+    "build": "next build && node scripts/copy-standalone-assets.mjs",
+    "start": "node .next/standalone/apps/web/server.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "test:e2e": "playwright test",
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
+    "@agentor/billing": "workspace:*",
     "@agentor/core": "workspace:*",
     "@agentor/db": "workspace:*",
     "@agentor/i18n": "workspace:*",

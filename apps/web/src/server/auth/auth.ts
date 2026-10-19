@@ -70,8 +70,11 @@ function createAuth() {
     },
     emailAndPassword: {
       enabled: true,
-      // Accounts are created through invitations (M3) and onboarding (M4), not open sign-up.
+      // Accounts are created through /signup (M4) and invitations (M3), both via server
+      // actions with their own checks; Better Auth's public sign-up endpoint stays closed.
       disableSignUp: true,
+      // A new account must confirm its e-mail before it can sign in (§9.5).
+      requireEmailVerification: true,
       minPasswordLength: 12,
       maxPasswordLength: 128,
       revokeSessionsOnPasswordReset: true,
@@ -88,6 +91,27 @@ function createAuth() {
         });
       },
     },
+    emailVerification: {
+      sendOnSignIn: true,
+      autoSignInAfterVerification: true,
+      expiresIn: 24 * 3600,
+      sendVerificationEmail: async ({ user, url }) => {
+        await sendMail({
+          to: user.email,
+          subject: 'Bekræft din e-mail til Agentor',
+          text: `Hej ${user.name}
+
+Bekræft din e-mail for at komme i gang med Agentor. Linket virker i 24 timer.
+
+${url}
+
+Har du ikke oprettet en konto, kan du se bort fra denne mail.
+
+Venlig hilsen
+Agentor`,
+        });
+      },
+    },
     rateLimit: {
       enabled: true,
       window: 60,
@@ -98,6 +122,7 @@ function createAuth() {
         '/two-factor/verify-totp': { window: 60, max: 5 },
         '/two-factor/verify-backup-code': { window: 60, max: 5 },
         '/request-password-reset': { window: 300, max: 3 },
+        '/send-verification-email': { window: 300, max: 3 },
       },
       customStorage: redisRateLimitStorage,
     },

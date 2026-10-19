@@ -20,7 +20,7 @@ export function MfaForm() {
   const [backupCode, setBackupCode] = useState('');
   const [trust, setTrust] = useState(true);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<'codeInvalid' | 'codeLocked' | 'generic' | null>(null);
+  const [error, setError] = useState<'codeInvalid' | 'rateLimited' | 'generic' | null>(null);
   const refs = useRef<(HTMLInputElement | null)[]>([]);
 
   function setDigit(i: number, value: string) {
@@ -61,13 +61,8 @@ export function MfaForm() {
       : await authClient.twoFactor.verifyTotp({ code: digits.join(''), trustDevice: trust });
     if (res.error) {
       setBusy(false);
-      setError(
-        res.error.status === 429
-          ? 'codeLocked'
-          : res.error.status === 401
-            ? 'codeInvalid'
-            : 'codeInvalid',
-      );
+      // 429 is the per-IP rate limit (5 codes a minute), not an account lockout.
+      setError(res.error.status === 429 ? 'rateLimited' : 'codeInvalid');
       setDigits(Array(LENGTH).fill(''));
       refs.current[0]?.focus();
       return;
