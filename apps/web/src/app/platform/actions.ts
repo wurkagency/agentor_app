@@ -43,8 +43,14 @@ const uuid = z.string().refine(isUuid);
 
 function fail(e: unknown): ActionResult<never> {
   if (e instanceof PlatformError) return { ok: false, error: e.code };
-  const msg = e instanceof Error ? `${e.message} ${String((e as { cause?: unknown }).cause ?? '')}` : '';
-  for (const code of ['SUPPORT_CASE_AND_REASON_REQUIRED', 'SUPPORT_HOURS', 'SUPPORT_SCOPE', 'NOT_STAFF'])
+  const msg =
+    e instanceof Error ? `${e.message} ${String((e as { cause?: unknown }).cause ?? '')}` : '';
+  for (const code of [
+    'SUPPORT_CASE_AND_REASON_REQUIRED',
+    'SUPPORT_HOURS',
+    'SUPPORT_SCOPE',
+    'NOT_STAFF',
+  ])
     if (msg.includes(code)) return { ok: false, error: code };
   throw e;
 }
@@ -101,7 +107,10 @@ export async function endAccessAction(tenantId: string, grantId: string): Promis
   return { ok: true };
 }
 
-export async function requestExtensionAction(tenantId: string, grantId: string): Promise<ActionResult> {
+export async function requestExtensionAction(
+  tenantId: string,
+  grantId: string,
+): Promise<ActionResult> {
   const { actor } = await requireStaff();
   if (!isUuid(tenantId) || !isUuid(grantId)) return { ok: false, error: 'invalid' };
   await requestExtension(db(), actor, tenantId, grantId);
@@ -166,7 +175,9 @@ const endSchema = z.object({
 });
 
 /** "Gem 42 min. på #2291" / "Kassér tid" (S5): leaves the support view. */
-export async function endSupportViewAction(input: z.input<typeof endSchema>): Promise<ActionResult> {
+export async function endSupportViewAction(
+  input: z.input<typeof endSchema>,
+): Promise<ActionResult> {
   const { actor } = await requireStaff();
   const parsed = endSchema.safeParse(input);
   if (!parsed.success) return { ok: false, error: 'invalid' };
@@ -199,7 +210,9 @@ export async function endSupportViewAction(input: z.input<typeof endSchema>): Pr
   jar.delete(SUPPORT_COOKIE);
   revalidatePath('/platform', 'layout');
   redirect(
-    parsed.data.caseId ? `/platform/cases/${parsed.data.caseId}` : `/platform/customers/${session.tenantId}`,
+    parsed.data.caseId
+      ? `/platform/cases/${parsed.data.caseId}`
+      : `/platform/customers/${session.tenantId}`,
   );
 }
 
@@ -207,7 +220,15 @@ export async function endSupportViewAction(input: z.input<typeof endSchema>): Pr
 
 const statusSchema = z.enum(['new', 'in_progress', 'waiting', 'resolved', 'closed']);
 const prioritySchema = z.enum(['critical', 'high', 'normal', 'low']);
-const CATEGORIES = ['error', 'mapping', 'connection', 'setup', 'subscription', 'wish', 'question'] as const;
+const CATEGORIES = [
+  'error',
+  'mapping',
+  'connection',
+  'setup',
+  'subscription',
+  'wish',
+  'question',
+] as const;
 
 export async function createCaseAction(input: {
   tenantId: string;
@@ -234,7 +255,13 @@ export async function createCaseAction(input: {
 
 export async function updateCaseAction(
   caseId: string,
-  patch: { status?: string; priority?: string; category?: string; assigneeId?: string | null; dueAt?: string | null },
+  patch: {
+    status?: string;
+    priority?: string;
+    category?: string;
+    assigneeId?: string | null;
+    dueAt?: string | null;
+  },
 ): Promise<ActionResult> {
   const { actor } = await requireStaff();
   const parsed = z
@@ -250,7 +277,12 @@ export async function updateCaseAction(
   try {
     await updateCase(db(), actor, caseId, {
       ...parsed.data,
-      dueAt: parsed.data.dueAt === undefined ? undefined : parsed.data.dueAt ? new Date(parsed.data.dueAt) : null,
+      dueAt:
+        parsed.data.dueAt === undefined
+          ? undefined
+          : parsed.data.dueAt
+            ? new Date(parsed.data.dueAt)
+            : null,
     });
   } catch (e) {
     return fail(e);
@@ -261,7 +293,12 @@ export async function updateCaseAction(
 
 export async function addCaseEventAction(
   caseId: string,
-  input: { kind: 'reply' | 'internal_note'; body: string; pinToCustomer?: boolean; minutes?: number },
+  input: {
+    kind: 'reply' | 'internal_note';
+    body: string;
+    pinToCustomer?: boolean;
+    minutes?: number;
+  },
 ): Promise<ActionResult> {
   const { actor } = await requireStaff();
   const parsed = z
@@ -321,7 +358,9 @@ export async function startTimerAction(caseId: string | null): Promise<ActionRes
   return { ok: true };
 }
 
-export async function stopTimerAction(description: string): Promise<ActionResult<{ minutes: number | null }>> {
+export async function stopTimerAction(
+  description: string,
+): Promise<ActionResult<{ minutes: number | null }>> {
   const { actor } = await requireStaff();
   const minutes = await stopTimer(db(), actor, description.slice(0, 500));
   revalidatePath('/platform', 'layout');
@@ -379,12 +418,23 @@ export async function resolveCaseAction(
   if (!isUuid(caseId) || !parsed.success) return { ok: false, error: 'invalid' };
   const p = parsed.data;
   const locale = (await getLocale()) as Locale;
-  const res = await resolveCase(db(), actor, caseId, { status: p.status, closingMessage: p.closingMessage });
+  const res = await resolveCase(db(), actor, caseId, {
+    status: p.status,
+    closingMessage: p.closingMessage,
+  });
   if (p.send && p.recipients.length) {
     const people = (await caseRecipients(db(), actor.userId, caseId)).filter((r) =>
       p.recipients.includes(r.userId),
     );
-    const text = caseEmail(res.case.number, res.case.title, p.closingMessage, res.events, res.minutes, p, locale);
+    const text = caseEmail(
+      res.case.number,
+      res.case.title,
+      p.closingMessage,
+      res.events,
+      res.minutes,
+      p,
+      locale,
+    );
     for (const person of people)
       await sendMail({
         to: person.email,
@@ -409,17 +459,29 @@ function caseEmail(
   for (const e of events) {
     if (e.kind === 'customer_message' || e.kind === 'reply') {
       if (!p.include.messages) continue;
-      lines.push(`${e.kind === 'reply' ? e.authorName : e.authorName} · ${formatDateTime(e.createdAt, locale)}`, e.body, '');
+      lines.push(
+        `${e.kind === 'reply' ? e.authorName : e.authorName} · ${formatDateTime(e.createdAt, locale)}`,
+        e.body,
+        '',
+      );
     } else if (e.kind === 'status' && p.include.status) {
       lines.push(`Status · ${formatDateTime(e.createdAt, locale)}`, e.body, '');
     } else if (e.kind === 'session' && p.include.sessions) {
       // Only what we looked at, no technical detail.
-      lines.push(`Agentor support · ${formatDateTime(e.createdAt, locale)}`, e.body || 'Vi kiggede på sagen i jeres app.', '');
+      lines.push(
+        `Agentor support · ${formatDateTime(e.createdAt, locale)}`,
+        e.body || 'Vi kiggede på sagen i jeres app.',
+        '',
+      );
     }
   }
   if (p.include.time) lines.push(`Tidsforbrug i alt: ${formatMinutes(minutes, locale)}`, '');
-  if (p.askSatisfaction) lines.push('Var du tilfreds med hjælpen? Svar Ja eller Nej på denne e-mail.', '');
-  lines.push(`Svar på denne e-mail for at genåbne sagen (#${number}).`, 'Agentor ApS · app.agentor.dk');
+  if (p.askSatisfaction)
+    lines.push('Var du tilfreds med hjælpen? Svar Ja eller Nej på denne e-mail.', '');
+  lines.push(
+    `Svar på denne e-mail for at genåbne sagen (#${number}).`,
+    'Agentor ApS · app.agentor.dk',
+  );
   return lines.join('\n');
 }
 
@@ -435,7 +497,11 @@ export async function upsertStaffAction(input: {
     .object({
       email: z.email(),
       role: z.enum(['superadmin', 'supporter']),
-      probationUntil: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+      probationUntil: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .nullable()
+        .optional(),
     })
     .safeParse(input);
   if (!parsed.success) return { ok: false, error: 'invalid' };
@@ -480,7 +546,10 @@ export async function saveSettingsAction(input: {
   if (!parsed.success) return { ok: false, error: 'invalid' };
   await setPlatformSettings(db(), actor, {
     ...(parsed.data.hourlyRateKr !== undefined
-      ? { hourlyRateOre: parsed.data.hourlyRateKr === null ? null : Math.round(parsed.data.hourlyRateKr * 100) }
+      ? {
+          hourlyRateOre:
+            parsed.data.hourlyRateKr === null ? null : Math.round(parsed.data.hourlyRateKr * 100),
+        }
       : {}),
     // Case and reason stay required by the database whatever this says (§9.7).
     ...(parsed.data.requireCaseAndReason !== undefined ? { requireCaseAndReason: true } : {}),

@@ -9,7 +9,18 @@ export async function GET(request: NextRequest) {
   const rows = await archiveRows(actor.userId, q);
   const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const lines = [
-    ['Sag', 'Titel', 'Løsning', 'Kunde', 'Kategori', 'Status', 'Supporter', 'Oprettet', 'Løst', 'Minutter']
+    [
+      'Sag',
+      'Titel',
+      'Løsning',
+      'Kunde',
+      'Kategori',
+      'Status',
+      'Supporter',
+      'Oprettet',
+      'Løst',
+      'Minutter',
+    ]
       .map(esc)
       .join(';'),
     ...rows.map((r) =>
@@ -29,7 +40,7 @@ export async function GET(request: NextRequest) {
         .join(';'),
     ),
   ];
-  return new Response(`﻿${lines.join('\r\n')}`, {
+  return new Response(`\uFEFF${lines.join('\r\n')}`, {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': `attachment; filename="sager-${new Date().toISOString().slice(0, 10)}.csv"`,

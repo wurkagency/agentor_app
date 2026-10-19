@@ -19,7 +19,13 @@ export function RegisterTimeButton() {
         {t('register')}
       </Button>
       {open && (
-        <AddTimeDialog caseId={null} caseLabel={t('noCase')} plan="–" total={0} onClose={() => setOpen(false)} />
+        <AddTimeDialog
+          caseId={null}
+          caseLabel={t('noCase')}
+          plan="–"
+          total={0}
+          onClose={() => setOpen(false)}
+        />
       )}
     </>
   );
@@ -41,7 +47,12 @@ export function LinkSessionButton({
   const [pending, start] = useTransition();
   return (
     <>
-      <Button variant="secondary" size="s" onClick={() => setOpen(true)} disabled={cases.length === 0}>
+      <Button
+        variant="secondary"
+        size="s"
+        onClick={() => setOpen(true)}
+        disabled={cases.length === 0}
+      >
         {t('link')}
       </Button>
       <Dialog
@@ -64,7 +75,8 @@ export function LinkSessionButton({
               onClick={() =>
                 start(async () => {
                   const res = await linkSessionAction(sessionId, caseId);
-                  if (!res.ok) return void toast.error({ title: t('error'), closeLabel: tc('close') });
+                  if (!res.ok)
+                    return void toast.error({ title: t('error'), closeLabel: tc('close') });
                   setOpen(false);
                   router.refresh();
                 })
@@ -77,7 +89,12 @@ export function LinkSessionButton({
       >
         <Field label={t('case')} inline>
           {({ id }) => (
-            <Select id={id} value={caseId} onValueChange={setCaseId} options={cases.map((c) => ({ value: c.id, label: c.label }))} />
+            <Select
+              id={id}
+              value={caseId}
+              onValueChange={setCaseId}
+              options={cases.map((c) => ({ value: c.id, label: c.label }))}
+            />
           )}
         </Field>
       </Dialog>

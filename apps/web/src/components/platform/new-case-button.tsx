@@ -21,7 +21,11 @@ export function NewCaseButton({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant={size === 'l' ? 'primary' : 'secondary'} size={size} onClick={() => setOpen(true)}>
+      <Button
+        variant={size === 'l' ? 'primary' : 'secondary'}
+        size={size}
+        onClick={() => setOpen(true)}
+      >
         <Icon icon={Plus} size={16} />
         {size === 'l' ? t('new') : t('createShort')}
       </Button>

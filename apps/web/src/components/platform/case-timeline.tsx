@@ -37,7 +37,9 @@ export function CaseTimeline({ events }: { events: TimelineEvent[] }) {
   const when = (iso: string) => {
     const d = new Date(iso);
     const today = d.toDateString() === new Date().toDateString();
-    return today ? t('todayAt', { time: formatTime(d, locale) }) : `${formatDate(d, locale)} ${formatTime(d, locale)}`;
+    return today
+      ? t('todayAt', { time: formatTime(d, locale) })
+      : `${formatDate(d, locale)} ${formatTime(d, locale)}`;
   };
   return (
     <section aria-labelledby="case-activity" className="flex flex-col gap-4">
@@ -121,10 +123,14 @@ export function CaseTimeline({ events }: { events: TimelineEvent[] }) {
                 ) : e.kind === 'session' ? (
                   <>
                     <p className="m-0 text-table font-semibold">
-                      {t('sessionTitle', { time: formatMinutes(Number(e.meta.minutes ?? 0), locale) })}
+                      {t('sessionTitle', {
+                        time: formatMinutes(Number(e.meta.minutes ?? 0), locale),
+                      })}
                     </p>
                     <p className="m-0 text-meta text-fg-2">
-                      {[t('sessionActions', { count: Number(e.meta.actions ?? 0) }), e.body].filter(Boolean).join(' · ')}
+                      {[t('sessionActions', { count: Number(e.meta.actions ?? 0) }), e.body]
+                        .filter(Boolean)
+                        .join(' · ')}
                     </p>
                   </>
                 ) : e.kind === 'status' ? (

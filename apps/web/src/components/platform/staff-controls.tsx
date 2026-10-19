@@ -60,7 +60,11 @@ export function InviteStaffButton() {
               onClick={() =>
                 start(async () => {
                   setError(null);
-                  const res = await upsertStaffAction({ email, role, probationUntil: probation || null });
+                  const res = await upsertStaffAction({
+                    email,
+                    role,
+                    probationUntil: probation || null,
+                  });
                   if (!res.ok) return setError(ERRORS.includes(res.error) ? res.error : 'generic');
                   setOpen(false);
                   setEmail('');
@@ -76,7 +80,9 @@ export function InviteStaffButton() {
       >
         {error && <Banner tone="error">{t(`errors.${error}`)}</Banner>}
         <Field label={t('email')}>
-          {({ id }) => <Input id={id} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />}
+          {({ id }) => (
+            <Input id={id} type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+          )}
         </Field>
         <Field label={t('role')} inline>
           {({ id }) => (
@@ -108,7 +114,17 @@ export function InviteStaffButton() {
   );
 }
 
-export function StaffRowMenu({ userId, email, role, self }: { userId: string; email: string; role: string; self: boolean }) {
+export function StaffRowMenu({
+  userId,
+  email,
+  role,
+  self,
+}: {
+  userId: string;
+  email: string;
+  role: string;
+  self: boolean;
+}) {
   const t = useTranslations('platform.users');
   const tc = useTranslations('common');
   const router = useRouter();
@@ -133,7 +149,12 @@ export function StaffRowMenu({ userId, email, role, self }: { userId: string; em
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           onSelect={() =>
-            run(() => upsertStaffAction({ email, role: role === 'superadmin' ? 'supporter' : 'superadmin' }))
+            run(() =>
+              upsertStaffAction({
+                email,
+                role: role === 'superadmin' ? 'supporter' : 'superadmin',
+              }),
+            )
           }
         >
           {role === 'superadmin' ? t('makeSupporter') : t('makeSuperadmin')}
@@ -170,9 +191,14 @@ export function RulesForm({
       const res = await saveSettingsAction({
         warnConcurrentGrants: warn ? Math.max(1, Number(count) || 3) : 50,
         requireCaseAndReason: true,
-        ...(showRate ? { hourlyRateKr: rate.trim() === '' ? null : Number(rate.replace(',', '.')) } : {}),
+        ...(showRate
+          ? { hourlyRateKr: rate.trim() === '' ? null : Number(rate.replace(',', '.')) }
+          : {}),
       });
-      toast[res.ok ? 'ok' : 'error']({ title: res.ok ? t('saved') : t('errors.generic'), closeLabel: tc('close') });
+      toast[res.ok ? 'ok' : 'error']({
+        title: res.ok ? t('saved') : t('errors.generic'),
+        closeLabel: tc('close'),
+      });
       router.refresh();
     });
   return (

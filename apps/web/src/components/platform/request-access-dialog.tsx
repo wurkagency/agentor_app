@@ -1,6 +1,18 @@
 'use client';
 
-import { Banner, Button, Dialog, Field, Icon, RadioCard, RadioGroup, Segmented, Select, Textarea, toast } from '@agentor/ui';
+import {
+  Banner,
+  Button,
+  Dialog,
+  Field,
+  Icon,
+  RadioCard,
+  RadioGroup,
+  Segmented,
+  Select,
+  Textarea,
+  toast,
+} from '@agentor/ui';
 import { Send, TriangleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -64,7 +76,10 @@ export function RequestAccessDialog({
         hours: Number(hours) as 1 | 8 | 24,
         scope,
       });
-      if (!res.ok) return setError(t(`errors.${res.error === 'SUPPORT_CASE_AND_REASON_REQUIRED' ? 'reason' : 'generic'}`));
+      if (!res.ok)
+        return setError(
+          t(`errors.${res.error === 'SUPPORT_CASE_AND_REASON_REQUIRED' ? 'reason' : 'generic'}`),
+        );
       onOpenChange(false);
       toast.ok({
         title: res.data!.autoApproved ? t('sentApproved') : t('sent', { name: target.name }),
@@ -79,7 +94,9 @@ export function RequestAccessDialog({
       onOpenChange={onOpenChange}
       width={560}
       title={t('title')}
-      description={[target.name, target.cvr ? `CVR ${target.cvr}` : null].filter(Boolean).join(' · ')}
+      description={[target.name, target.cvr ? `CVR ${target.cvr}` : null]
+        .filter(Boolean)
+        .join(' · ')}
       closeLabel={tc('close')}
       footer={
         <div className="flex w-full items-center justify-between gap-3">
@@ -90,7 +107,13 @@ export function RequestAccessDialog({
             <Button variant="secondary" size="m" onClick={() => onOpenChange(false)}>
               {t('cancel')}
             </Button>
-            <Button variant="primary" size="m" loading={pending} disabled={!reason.trim()} onClick={submit}>
+            <Button
+              variant="primary"
+              size="m"
+              loading={pending}
+              disabled={!reason.trim()}
+              onClick={submit}
+            >
               {!pending && <Icon icon={Send} size={16} />}
               {t('send')}
             </Button>

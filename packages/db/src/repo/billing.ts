@@ -11,7 +11,7 @@ import {
   type Entitlements,
   type QuotaState,
 } from '@agentor/core';
-import { and, asc, count, desc, eq, gt, isNull, sql, sum } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, inArray, isNull, lt, sql, sum } from 'drizzle-orm';
 import { withoutTenant, withTenant, type Database, type Transaction } from '../client.js';
 import {
   addons,
@@ -26,6 +26,8 @@ import {
   usageCounters,
   type InvoiceStatus,
   type SubscriptionStatus,
+  platformSettings,
+  timeEntries,
 } from '../schema/index.js';
 import { writeAudit, writeSystemAudit, type Actor } from './audit.js';
 
@@ -461,7 +463,11 @@ export async function prepareCharge(
       .select({ n: sum(addons.priceOre).mapWith(Number) })
       .from(addons)
       .where(eq(addons.period, prevPeriod));
-    const net = plan.priceMonthlyOre + (addonRow?.n ?? 0);
+    // Billable support time from before this period (README decision 17), at the hourly rate
+    // Superadmin set; without a rate nothing is billed and the time waits.
+    const support = await supportTimeLine(tx, periodStart);
+    const lines = support ? [support.line] : [];
+    const net = plan.priceMonthlyOre + (addonRow?.n ?? 0) + (support?.line.amountOre ?? 0);
     const { vat } = withVat(net);
     const numRes = await tx.execute<{ n: string }>(sql`select app.next_invoice_number() as n`);
     const number = numRes.rows[0]!.n;
@@ -473,10 +479,16 @@ export async function prepareCharge(
         periodStart,
         periodEnd: addMonth(periodStart),
         description: `${plan.name} · månedlig`,
+        lines,
         amountOre: net,
         vatOre: vat,
       })
       .returning({ id: invoices.id });
+    if (support)
+      await tx
+        .update(timeEntries)
+        .set({ invoiceId: inv!.id })
+        .where(inArray(timeEntries.id, support.entryIds));
     const orderId = newOrderId();
     await tx.execute(sql`select app.register_billing_ref(${orderId}, 'invoice', ${inv!.id})`);
     return {
@@ -488,6 +500,37 @@ export async function prepareCharge(
       resumed: false,
     };
   });
+}
+
+/** Unbilled billable support time before the period, priced at the platform hourly rate. */
+async function supportTimeLine(tx: Transaction, periodStart: Date) {
+  const [rate] = await tx
+    .select({ value: platformSettings.value })
+    .from(platformSettings)
+    .where(eq(platformSettings.key, 'hourlyRateOre'));
+  const rateOre = typeof rate?.value === 'number' ? rate.value : null;
+  if (!rateOre) return null;
+  const entries = await tx
+    .select({ id: timeEntries.id, minutes: timeEntries.minutes })
+    .from(timeEntries)
+    .where(
+      and(
+        eq(timeEntries.billable, true),
+        isNull(timeEntries.invoiceId),
+        lt(timeEntries.workDate, periodStart.toISOString().slice(0, 10)),
+      ),
+    );
+  const minutes = entries.reduce((a, e) => a + e.minutes, 0);
+  if (minutes === 0) return null;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return {
+    entryIds: entries.map((e) => e.id),
+    line: {
+      text: `Supporttid · ${h ? `${h} t ` : ''}${m ? `${m} min.` : ''}`.trim(),
+      amountOre: Math.round((minutes / 60) * rateOre),
+    },
+  };
 }
 
 /**

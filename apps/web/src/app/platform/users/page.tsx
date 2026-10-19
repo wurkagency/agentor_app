@@ -73,12 +73,16 @@ export default async function StaffPage() {
                     ? t('disabled')
                     : [
                         s.role === 'superadmin' ? t('accessAll') : t('accessSupport'),
-                        s.probationUntil ? t('probationUntil', { date: formatDate(s.probationUntil, locale) }) : null,
+                        s.probationUntil
+                          ? t('probationUntil', { date: formatDate(s.probationUntil, locale) })
+                          : null,
                       ]
                         .filter(Boolean)
                         .join(' · ')}
                 </Td>
-                <Td className="text-fg-2">{s.lastActiveAt ? formatRelative(s.lastActiveAt, now, locale) : '–'}</Td>
+                <Td className="text-fg-2">
+                  {s.lastActiveAt ? formatRelative(s.lastActiveAt, now, locale) : '–'}
+                </Td>
                 <Td>
                   <span className="inline-flex items-center gap-1.5 text-meta">
                     <Icon
@@ -91,7 +95,12 @@ export default async function StaffPage() {
                 </Td>
                 <Td numeric>{grants.filter((g) => g.staffUserId === s.userId).length}</Td>
                 <Td className="pr-5 text-right">
-                  <StaffRowMenu userId={s.userId} email={s.email} role={s.role} self={s.userId === actor.userId} />
+                  <StaffRowMenu
+                    userId={s.userId}
+                    email={s.email}
+                    role={s.role}
+                    self={s.userId === actor.userId}
+                  />
                 </Td>
               </Tr>
             ))}

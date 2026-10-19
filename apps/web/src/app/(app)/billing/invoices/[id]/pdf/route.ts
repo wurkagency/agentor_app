@@ -21,6 +21,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     date: formatDate(i.periodStart, locale),
     period: `${formatDate(i.periodStart, locale)} – ${formatDate(new Date(i.periodEnd.getTime() - 1), locale)}`,
     description: i.description,
+    planAmount: money(i.amountOre - i.lines.reduce((a, l) => a + l.amountOre, 0)),
+    extra: i.lines.map((l) => ({ text: l.text, amount: money(l.amountOre) })),
     net: money(i.amountOre),
     vat: money(i.vatOre),
     total: money(i.amountOre + i.vatOre),

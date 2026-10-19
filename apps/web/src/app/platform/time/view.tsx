@@ -41,7 +41,8 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
   const { actor } = await requireStaff();
   const t = await getTranslations('platform.time');
   const locale = (await getLocale()) as Locale;
-  const parsed = week && /^\d{4}-\d{2}-\d{2}$/.test(week) ? new Date(`${week}T12:00:00`) : new Date();
+  const parsed =
+    week && /^\d{4}-\d{2}-\d{2}$/.test(week) ? new Date(`${week}T12:00:00`) : new Date();
   const start = weekStart(parsed);
   const end = new Date(start.getTime() + 7 * 86_400_000);
   const today = iso(new Date());
@@ -57,7 +58,15 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
   const showWeekend = entries.some((e) => e.workDate === days[5] || e.workDate === days[6]);
   const cols = showWeekend ? days : days.slice(0, 5);
 
-  type Row = { key: string; title: string; sub: string; caseNumber: number | null; perDay: Map<string, number>; auto: number; manual: number };
+  type Row = {
+    key: string;
+    title: string;
+    sub: string;
+    caseNumber: number | null;
+    perDay: Map<string, number>;
+    auto: number;
+    manual: number;
+  };
   const rows = new Map<string, Row>();
   const add = (e: TimeEntryRow) => {
     const c = e.caseId ? caseById.get(e.caseId) : null;
@@ -66,7 +75,7 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
       rows.get(key) ??
       ({
         key,
-        title: c ? names.get(c.tenantId) ?? '' : t('noCase'),
+        title: c ? (names.get(c.tenantId) ?? '') : t('noCase'),
         sub: c ? c.title : e.description || t(`kind.${e.kind}`),
         caseNumber: c?.number ?? null,
         perDay: new Map(),
@@ -100,7 +109,10 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
         subtitle={t('intro')}
         actions={
           <>
-            <ButtonLink variant="secondary" href={`/platform/time/export?week=${iso(start)}${team ? '&team=1' : ''}`}>
+            <ButtonLink
+              variant="secondary"
+              href={`/platform/time/export?week=${iso(start)}${team ? '&team=1' : ''}`}
+            >
               <Icon icon={Download} size={16} />
               {t('export')}
             </ButtonLink>
@@ -132,7 +144,9 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
           <StatCard
             label={t('statToday')}
             value={formatMinutes(todayMinutes, locale)}
-            footer={t('statTodaySub', { pct: todayMinutes ? Math.round((todayCustomer / todayMinutes) * 100) : 0 })}
+            footer={t('statTodaySub', {
+              pct: todayMinutes ? Math.round((todayCustomer / todayMinutes) * 100) : 0,
+            })}
           />
           <StatCard
             label={t('statWeek')}
@@ -141,7 +155,10 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
           />
           <StatCard
             label={t('statAuto')}
-            value={formatMinutes(autoMine.reduce((a, e) => a + e.minutes, 0), locale)}
+            value={formatMinutes(
+              autoMine.reduce((a, e) => a + e.minutes, 0),
+              locale,
+            )}
             footer={t('statAutoSub', { count: autoMine.length })}
           />
           <StatCard
@@ -153,7 +170,11 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <span className="flex items-center gap-2">
-          <Link href={`${base}?week=${prev}`} aria-label={t('prevWeek')} className="grid size-9 place-items-center rounded-full text-fg-1 hover:bg-surface">
+          <Link
+            href={`${base}?week=${prev}`}
+            aria-label={t('prevWeek')}
+            className="grid size-9 place-items-center rounded-full text-fg-1 hover:bg-surface"
+          >
             <Icon icon={ArrowLeft} size={16} />
           </Link>
           <strong className="text-body">
@@ -163,11 +184,18 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
               to: formatDate(new Date(end.getTime() - 86_400_000 * (showWeekend ? 1 : 3)), locale),
             })}
           </strong>
-          <Link href={`${base}?week=${next}`} aria-label={t('nextWeek')} className="grid size-9 place-items-center rounded-full text-fg-1 hover:bg-surface">
+          <Link
+            href={`${base}?week=${next}`}
+            aria-label={t('nextWeek')}
+            className="grid size-9 place-items-center rounded-full text-fg-1 hover:bg-surface"
+          >
             <Icon icon={ArrowRight} size={16} />
           </Link>
         </span>
-        <nav aria-label={t('scope')} className="flex items-center gap-1 rounded-full bg-surface p-1 shadow-sm">
+        <nav
+          aria-label={t('scope')}
+          className="flex items-center gap-1 rounded-full bg-surface p-1 shadow-sm"
+        >
           {[
             { href: `/platform/time?week=${iso(start)}`, label: t('me'), on: !team },
             { href: `/platform/time/team?week=${iso(start)}`, label: t('team'), on: team },
@@ -176,7 +204,10 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
               key={l.href}
               href={l.href}
               aria-current={l.on ? 'page' : undefined}
-              className={cn('rounded-full px-4 py-1.5 text-table font-semibold no-underline', l.on ? 'bg-fg-1 text-white' : 'text-fg-2')}
+              className={cn(
+                'rounded-full px-4 py-1.5 text-table font-semibold no-underline',
+                l.on ? 'bg-fg-1 text-white' : 'text-fg-2',
+              )}
             >
               {l.label}
             </Link>
@@ -190,7 +221,10 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
               <Th className="pl-5">{t('colCase')}</Th>
               {cols.map((d) => (
                 <Th key={d} numeric>
-                  {new Date(`${d}T12:00:00`).toLocaleDateString(locale === 'da' ? 'da-DK' : 'en-GB', { weekday: 'short', day: 'numeric' })}
+                  {new Date(`${d}T12:00:00`).toLocaleDateString(
+                    locale === 'da' ? 'da-DK' : 'en-GB',
+                    { weekday: 'short', day: 'numeric' },
+                  )}
                 </Th>
               ))}
               <Th numeric>{t('colTotal')}</Th>
@@ -212,7 +246,9 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
                   <Td className="pl-5">
                     <span className="flex flex-col leading-tight">
                       <span>
-                        {r.caseNumber !== null && <span className="font-mono text-mono text-fg-2">#{r.caseNumber} </span>}
+                        {r.caseNumber !== null && (
+                          <span className="font-mono text-mono text-fg-2">#{r.caseNumber} </span>
+                        )}
                         <strong>{r.title}</strong>
                       </span>
                       <span className="text-meta text-fg-2">{r.sub}</span>
@@ -227,7 +263,9 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
                     {formatHm(sum)}
                   </Td>
                   <Td className="pr-5 text-meta text-fg-2">
-                    {r.auto > 0 ? t('sourceAuto', { time: formatMinutes(r.auto, locale) }) : t('sourceManual')}
+                    {r.auto > 0
+                      ? t('sourceAuto', { time: formatMinutes(r.auto, locale) })
+                      : t('sourceManual')}
                   </Td>
                 </Tr>
               );
@@ -236,7 +274,9 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
               <Tr className="bg-bg-base font-semibold">
                 <Td className="pl-5">{t('colTotal')}</Td>
                 {cols.map((d) => {
-                  const m = entries.filter((e) => e.workDate === d).reduce((a, e) => a + e.minutes, 0);
+                  const m = entries
+                    .filter((e) => e.workDate === d)
+                    .reduce((a, e) => a + e.minutes, 0);
                   return (
                     <Td key={d} numeric>
                       {m ? formatHm(m) : '–'}
@@ -252,7 +292,10 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
       </Card>
       {!team &&
         unconfirmed.map((s) => (
-          <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-warn-bg px-5 py-3 text-table">
+          <div
+            key={s.id}
+            className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-warn-bg px-5 py-3 text-table"
+          >
             <span className="flex items-center gap-2">
               <Icon icon={TriangleAlert} size={16} className="text-warn-fg" />
               <span>
@@ -266,7 +309,9 @@ export async function TimeView({ team, week }: { team: boolean; week: string | u
             </span>
             <LinkSessionButton
               sessionId={s.id}
-              cases={openCases.filter((c) => c.tenantId === s.tenant_id).map(({ id, label }) => ({ id, label }))}
+              cases={openCases
+                .filter((c) => c.tenantId === s.tenant_id)
+                .map(({ id, label }) => ({ id, label }))}
             />
           </div>
         ))}

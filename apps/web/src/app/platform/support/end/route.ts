@@ -8,7 +8,9 @@ import { SUPPORT_COOKIE } from '@/server/platform';
  */
 export function GET(request: NextRequest) {
   const expired = request.nextUrl.searchParams.get('expired') === '1';
-  const res = NextResponse.redirect(new URL(`/platform/customers${expired ? '?expired=1' : ''}`, request.url));
+  const res = NextResponse.redirect(
+    new URL(`/platform/customers${expired ? '?expired=1' : ''}`, request.url),
+  );
   res.cookies.delete(SUPPORT_COOKIE);
   return res;
 }

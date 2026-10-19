@@ -9,7 +9,14 @@ import { useRouter } from 'next/navigation';
 import { useMemo, useState, useTransition, type DragEvent } from 'react';
 import { updateCaseAction } from '@/app/platform/actions';
 import { FilterMenu } from '../filter-menu';
-import { AssigneeAvatar, DueLabel, PriorityBadge, dueText, type CaseStatusKey, type Priority } from './case-bits';
+import {
+  AssigneeAvatar,
+  DueLabel,
+  PriorityBadge,
+  dueText,
+  type CaseStatusKey,
+  type Priority,
+} from './case-bits';
 import { NewCaseDialog } from './new-case-dialog';
 
 export interface BoardCase {
@@ -76,7 +83,8 @@ export function CaseBoard({
         .map((c) => ({ ...c, status: local[c.id] ?? c.status }))
         .filter((c) => {
           const query = q.trim().toLowerCase();
-          if (query && !`#${c.number} ${c.title} ${c.tenantName}`.toLowerCase().includes(query)) return false;
+          if (query && !`#${c.number} ${c.title} ${c.tenantName}`.toLowerCase().includes(query))
+            return false;
           if (mine && c.assigneeId !== userId) return false;
           if (unassigned && c.assigneeId) return false;
           if (priority && c.priority !== priority) return false;
@@ -84,7 +92,11 @@ export function CaseBoard({
           if (category && c.category !== category) return false;
           return true;
         })
-        .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority] || (a.dueAt ?? '9').localeCompare(b.dueAt ?? '9')),
+        .sort(
+          (a, b) =>
+            PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority] ||
+            (a.dueAt ?? '9').localeCompare(b.dueAt ?? '9'),
+        ),
     [cases, local, q, mine, unassigned, priority, customer, category, userId],
   );
   const unassignedCount = cases.filter((c) => !c.assigneeId && c.status !== 'resolved').length;
@@ -132,7 +144,10 @@ export function CaseBoard({
           <span className="font-mono text-mono text-fg-2">#{c.number}</span>
           <PriorityBadge priority={c.priority} />
         </div>
-        <Link href={`/platform/cases/${c.id}`} className="text-body font-semibold text-fg-1 no-underline hover:underline">
+        <Link
+          href={`/platform/cases/${c.id}`}
+          className="text-body font-semibold text-fg-1 no-underline hover:underline"
+        >
           {c.title}
         </Link>
         <span className="flex items-center gap-2 text-meta text-fg-2">
@@ -149,7 +164,10 @@ export function CaseBoard({
               {t('errors', { count: c.errors })}
             </span>
           )}
-          <span className="inline-flex items-center gap-1 text-meta text-fg-2" title={t('notesTitle')}>
+          <span
+            className="inline-flex items-center gap-1 text-meta text-fg-2"
+            title={t('notesTitle')}
+          >
             <Icon icon={MessageCircle} size={14} />
             {c.notes}
           </span>
@@ -187,7 +205,10 @@ export function CaseBoard({
           allLabel={t('all')}
           value={priority}
           onChange={setPriority}
-          options={(['critical', 'high', 'normal', 'low'] as Priority[]).map((p) => ({ value: p, label: tc(`priority.${p}`) }))}
+          options={(['critical', 'high', 'normal', 'low'] as Priority[]).map((p) => ({
+            value: p,
+            label: tc(`priority.${p}`),
+          }))}
         />
         <FilterMenu
           label={t('customer')}
@@ -201,7 +222,15 @@ export function CaseBoard({
           allLabel={t('all')}
           value={category}
           onChange={setCategory}
-          options={['error', 'mapping', 'connection', 'setup', 'subscription', 'wish', 'question'].map((k) => ({
+          options={[
+            'error',
+            'mapping',
+            'connection',
+            'setup',
+            'subscription',
+            'wish',
+            'question',
+          ].map((k) => ({
             value: k,
             label: tc(`category.${k}`),
           }))}
@@ -235,7 +264,8 @@ export function CaseBoard({
               >
                 <div className="flex items-center justify-between px-1">
                   <h2 className="m-0 text-table font-semibold">
-                    {tc(`status.${col}`)} <span className="font-normal text-fg-2">{items.length}</span>
+                    {tc(`status.${col}`)}{' '}
+                    <span className="font-normal text-fg-2">{items.length}</span>
                   </h2>
                   {col === 'new' ? (
                     <button
@@ -257,7 +287,9 @@ export function CaseBoard({
                     className="flex h-10 items-center justify-center gap-2 rounded-full text-table font-semibold text-fg-1 no-underline shadow-ring-chip"
                   >
                     <Icon icon={Archive} size={16} />
-                    {t('moreArchive', { count: Math.max(0, items.length - shown.length) + archived })}
+                    {t('moreArchive', {
+                      count: Math.max(0, items.length - shown.length) + archived,
+                    })}
                   </Link>
                 )}
               </section>
@@ -265,7 +297,9 @@ export function CaseBoard({
           })}
         </div>
       ) : (
-        <ul className="m-0 flex list-none flex-col gap-2 p-0">{list.filter((c) => c.status !== 'resolved').map(card)}</ul>
+        <ul className="m-0 flex list-none flex-col gap-2 p-0">
+          {list.filter((c) => c.status !== 'resolved').map(card)}
+        </ul>
       )}
       {newOpen && <NewCaseDialog customers={customers} onClose={() => setNewOpen(false)} />}
     </>

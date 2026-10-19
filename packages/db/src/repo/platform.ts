@@ -689,7 +689,7 @@ export async function listCases(
         ? or(
             sql`${cases.title} ilike ${'%' + filter.q + '%'}`,
             sql`${cases.resolution} ilike ${'%' + filter.q + '%'}`,
-            sql`exists (select 1 from platform.case_events e where e.case_id = ${cases.id}
+            sql`exists (select 1 from platform.case_events e where e.case_id = "cases"."id"
                           and e.body ilike ${'%' + filter.q + '%'})`,
             sql`${cases.number}::text = ${filter.q.replace(/^#/, '')}`,
           )
@@ -698,9 +698,9 @@ export async function listCases(
     const rows = await tx
       .select({
         c: cases,
-        notes: sql<number>`(select count(*)::int from platform.case_events e where e.case_id = ${cases.id} and e.kind = 'internal_note')`,
-        minutes: sql<number>`(select coalesce(sum(t.minutes), 0)::int from platform.time_entries t where t.case_id = ${cases.id})`,
-        lastCustomerAt: sql<Date | null>`(select max(e.created_at) from platform.case_events e where e.case_id = ${cases.id} and e.kind = 'customer_message')`,
+        notes: sql<number>`(select count(*)::int from platform.case_events e where e.case_id = "cases"."id" and e.kind = 'internal_note')`,
+        minutes: sql<number>`(select coalesce(sum(t.minutes), 0)::int from platform.time_entries t where t.case_id = "cases"."id")`,
+        lastCustomerAt: sql<Date | null>`(select max(e.created_at) from platform.case_events e where e.case_id = "cases"."id" and e.kind = 'customer_message')`,
       })
       .from(cases)
       .where(where)

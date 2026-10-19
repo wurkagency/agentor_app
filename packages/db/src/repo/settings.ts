@@ -1,4 +1,4 @@
-import { and, desc, eq, isNull, ne } from 'drizzle-orm';
+import { and, desc, eq, isNull, ne, sql } from 'drizzle-orm';
 import { withTenant, type Database } from '../client.js';
 import {
   authSessions,
@@ -274,7 +274,12 @@ export async function decideSupportGrant(
     const now = new Date();
     const set =
       decision === 'approve'
-        ? { approvedAt: now, approvedBy: actor.userId }
+        ? {
+            approvedAt: now,
+            approvedBy: actor.userId,
+            // Access starts when the customer approves (P3): the full duration from now.
+            expiresAt: sql`now() + make_interval(hours => ${supportAccessGrants.hours})`,
+          }
         : decision === 'deny'
           ? { deniedAt: now }
           : { revokedAt: now };
@@ -285,6 +290,8 @@ export async function decideSupportGrant(
             eq(supportAccessGrants.id, grantId),
             isNull(supportAccessGrants.approvedAt),
             isNull(supportAccessGrants.deniedAt),
+            // An unanswered request lapses after 24 hours; it can't be approved later.
+            sql`${supportAccessGrants.requestedAt} > now() - interval '24 hours'`,
           );
     const res = await tx
       .update(supportAccessGrants)

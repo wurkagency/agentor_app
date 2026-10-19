@@ -1,10 +1,4 @@
-import {
-  caseStats,
-  errorGroups,
-  listCustomers,
-  listPlans,
-  type CustomerRow,
-} from '@agentor/db';
+import { caseStats, errorGroups, listCustomers, listPlans, type CustomerRow } from '@agentor/db';
 import { formatMinutes, type Locale } from '@agentor/i18n';
 import { cache } from 'react';
 import { db } from './infra';
@@ -15,8 +9,8 @@ export const customersFor = cache(async (userId: string): Promise<CustomerRow[]>
 );
 
 /** tenantId → name, for cases and time rows. */
-export const tenantNames = cache(async (userId: string) =>
-  new Map((await customersFor(userId)).map((c) => [c.tenantId, c.name])),
+export const tenantNames = cache(
+  async (userId: string) => new Map((await customersFor(userId)).map((c) => [c.tenantId, c.name])),
 );
 
 export const planNames = cache(async () => {

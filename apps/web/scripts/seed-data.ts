@@ -50,6 +50,84 @@ export const USERS = {
     email: 'bo@dahl-revision.dk',
     mfa: false,
   },
+  // Agentor Platform staff (P6). A .test domain, so nothing can ever be mailed to them.
+  kasper: {
+    id: '0190b000-0000-7000-8000-000000000111',
+    name: 'Kasper Nyborg',
+    email: 'kasper@agentor.test',
+    mfa: true,
+  },
+  anne: {
+    id: '0190b000-0000-7000-8000-000000000112',
+    name: 'Anne Sørensen',
+    email: 'anne@agentor.test',
+    mfa: true,
+  },
+  line: {
+    id: '0190b000-0000-7000-8000-000000000113',
+    name: 'Line Ravn',
+    email: 'line@agentor.test',
+    mfa: true,
+  },
+  mads: {
+    id: '0190b000-0000-7000-8000-000000000114',
+    name: 'Mads Brink',
+    email: 'mads@agentor.test',
+    mfa: true,
+  },
+} as const;
+
+/** Further fictional customers for the Platform's customer list (P1). */
+export const PLATFORM_TENANTS = {
+  molle: {
+    id: '0190b000-0000-7000-8000-000000000003',
+    name: 'Mølle Sport ApS',
+    cvr: '23456789',
+    plan: 'startup',
+    flows: 2,
+  },
+  hav: {
+    id: '0190b000-0000-7000-8000-000000000004',
+    name: 'Hav Hudpleje IVS',
+    cvr: '34567890',
+    plan: 'business',
+    flows: 3,
+  },
+  bjerg: {
+    id: '0190b000-0000-7000-8000-000000000005',
+    name: 'Bjerg & Søn Byg A/S',
+    cvr: '45678901',
+    plan: 'enterprise',
+    flows: 11,
+  },
+  kvist: {
+    id: '0190b000-0000-7000-8000-000000000006',
+    name: 'Kvist Møbler A/S',
+    cvr: '56789012',
+    plan: 'business',
+    flows: 4,
+  },
+  fjord: {
+    id: '0190b000-0000-7000-8000-000000000007',
+    name: 'Fjordkaffe ApS',
+    cvr: '67890123',
+    plan: 'startup',
+    flows: 1,
+  },
+  osterbro: {
+    id: '0190b000-0000-7000-8000-000000000008',
+    name: 'Østerbro Vin ApS',
+    cvr: '78901234',
+    plan: 'business',
+    flows: 2,
+  },
+  lyngby: {
+    id: '0190b000-0000-7000-8000-000000000009',
+    name: 'Lyngby Legetøj ApS',
+    cvr: '89012345',
+    plan: 'startup',
+    flows: 1,
+  },
 } as const;
 
 export const FLOWS = {

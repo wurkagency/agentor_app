@@ -25,6 +25,10 @@ interface Grant {
   id: string;
   caseRef: string;
   supportName: string;
+  reason: string;
+  scope: 'view' | 'help';
+  hours: number;
+  endedAt: string | null;
   requestedAt: string;
   approvedAt: string | null;
   deniedAt: string | null;
@@ -52,13 +56,15 @@ function Section({
   title,
   action,
   children,
+  id,
 }: {
   title: string;
   action?: ReactNode;
   children: ReactNode;
+  id?: string;
 }) {
   return (
-    <Card className="flex flex-col gap-4">
+    <Card className="flex flex-col gap-4" {...(id ? { id } : {})}>
       <div className="flex items-center justify-between gap-4">
         <h2 className="m-0 text-card">{title}</h2>
         {action}
@@ -198,7 +204,7 @@ export function SecurityView({
       </Section>
 
       {isAdmin && (
-        <Section title={t('support')}>
+        <Section title={t('support')} id="support">
           <label className="flex items-center justify-between gap-4 text-table font-semibold">
             {t('supportRequire')}
             <Switch
@@ -220,15 +226,16 @@ export function SecurityView({
               grants.map((g) => {
                 const now = Date.now();
                 const expired = new Date(g.expiresAt).getTime() <= now;
-                const state = g.revokedAt
-                  ? 'revoked'
-                  : g.deniedAt
-                    ? 'denied'
-                    : expired
-                      ? 'expired'
-                      : g.approvedAt
-                        ? 'active'
-                        : 'pending';
+                const state =
+                  g.revokedAt || g.endedAt
+                    ? 'revoked'
+                    : g.deniedAt
+                      ? 'denied'
+                      : expired
+                        ? 'expired'
+                        : g.approvedAt
+                          ? 'active'
+                          : 'pending';
                 return (
                   <div key={g.id} className="flex flex-col gap-2 text-table">
                     <p className="m-0">
@@ -237,6 +244,13 @@ export function SecurityView({
                         name: g.supportName,
                         date: formatDateTime(new Date(g.requestedAt), locale),
                         case: g.caseRef,
+                      })}
+                    </p>
+                    <p className="m-0 text-fg-2">
+                      {t('requestDetail', {
+                        reason: g.reason,
+                        scope: t(g.scope === 'help' ? 'scopeHelp' : 'scopeView'),
+                        hours: g.hours,
                       })}
                     </p>
                     <div className="flex flex-wrap items-center gap-2">

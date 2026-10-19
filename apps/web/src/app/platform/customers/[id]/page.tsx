@@ -6,13 +6,7 @@ import {
   listCases,
   listCustomerNotes,
 } from '@agentor/db';
-import {
-  formatDate,
-  formatDateTime,
-  formatRelative,
-  formatTime,
-  type Locale,
-} from '@agentor/i18n';
+import { formatDate, formatDateTime, formatRelative, formatTime, type Locale } from '@agentor/i18n';
 import {
   Card,
   CardHeader,
@@ -63,7 +57,9 @@ export default async function CustomerPage({
   const customer = (await customersFor(actor.userId)).find((c) => c.tenantId === id);
   if (!customer) notFound();
   const sp = await searchParams;
-  const tab = TABS.includes(sp.tab as (typeof TABS)[number]) ? (sp.tab as (typeof TABS)[number]) : 'overview';
+  const tab = TABS.includes(sp.tab as (typeof TABS)[number])
+    ? (sp.tab as (typeof TABS)[number])
+    : 'overview';
   const t = await getTranslations('platform.customer');
   const ts = await getTranslations('status');
   const tcase = await getTranslations('platform.case');
@@ -78,7 +74,9 @@ export default async function CustomerPage({
     listCustomerNotes(db(), actor.userId, id),
   ]);
   const cases = await listCases(db(), actor.userId, names, { tenantId: id });
-  const openCases = cases.filter((c) => c.status === 'new' || c.status === 'in_progress' || c.status === 'waiting');
+  const openCases = cases.filter(
+    (c) => c.status === 'new' || c.status === 'in_progress' || c.status === 'waiting',
+  );
   const contacts = active ? await customerContacts(db(), actor.userId, id) : [];
   const views = active ? await flowViews(id, actor.userId, 7) : [];
   const conns = active ? await connectionMap(id, actor.userId) : new Map();
@@ -106,7 +104,10 @@ export default async function CustomerPage({
 
   return (
     <PageBody>
-      <Link href="/platform/customers" className="inline-flex items-center gap-1.5 text-table text-fg-2 no-underline">
+      <Link
+        href="/platform/customers"
+        className="inline-flex items-center gap-1.5 text-table text-fg-2 no-underline"
+      >
         <Icon icon={ArrowLeft} size={16} />
         {t('back')}
       </Link>
@@ -148,7 +149,9 @@ export default async function CustomerPage({
           <span className="flex items-start gap-2.5">
             <Icon icon={CircleCheck} size={16} className="mt-0.5 text-ok-fg" />
             <span>
-              <strong>{t('grantActive', { when: formatDateTime(active.expiresAt, locale) })}</strong>{' '}
+              <strong>
+                {t('grantActive', { when: formatDateTime(active.expiresAt, locale) })}
+              </strong>{' '}
               {t('grantDetail', {
                 left: formatRelative(active.expiresAt, now, locale),
                 by: active.approvedByName ?? t('autoApproved'),
@@ -216,13 +219,19 @@ export default async function CustomerPage({
             ) : (
               <ul className="m-0 flex list-none flex-col p-0">
                 {broken.map((c) => (
-                  <li key={c.id} className="flex flex-col gap-0.5 border-t border-border py-3 first:border-0">
+                  <li
+                    key={c.id}
+                    className="flex flex-col gap-0.5 border-t border-border py-3 first:border-0"
+                  >
                     <span className="font-semibold">{t('connectionBroken', { name: c.name })}</span>
                     <span className="text-meta text-fg-2">{t('onlyCustomer')}</span>
                   </li>
                 ))}
                 {needing.map((v) => (
-                  <li key={v.id} className="flex flex-col gap-0.5 border-t border-border py-3 first:border-0">
+                  <li
+                    key={v.id}
+                    className="flex flex-col gap-0.5 border-t border-border py-3 first:border-0"
+                  >
                     <span className="flex items-center gap-2 font-semibold">
                       <StatusPill status={v.status} compact>
                         {ts(v.status)}
@@ -247,7 +256,11 @@ export default async function CustomerPage({
                     </Link>
                   }
                   meta={latest.title}
-                  action={<span className="text-meta font-semibold">{tcase(`status.${latest.status}`)}</span>}
+                  action={
+                    <span className="text-meta font-semibold">
+                      {tcase(`status.${latest.status}`)}
+                    </span>
+                  }
                 />
                 <CaseComposer caseId={latest.id} compact />
               </>
@@ -325,11 +338,17 @@ export default async function CustomerPage({
                     </Td>
                     <Td>
                       {r.actorName}
-                      {r.actorKind !== 'support' && <span className="text-fg-2"> ({t('customerRole')})</span>}
+                      {r.actorKind !== 'support' && (
+                        <span className="text-fg-2"> ({t('customerRole')})</span>
+                      )}
                     </Td>
                     <Td>{actionLabel(r.action)}</Td>
                     <Td className="whitespace-normal pr-5 text-fg-2">
-                      {[r.after?.caseRef, r.after?.reason, r.after?.hours ? t('hoursShort', { count: Number(r.after.hours) }) : null]
+                      {[
+                        r.after?.caseRef,
+                        r.after?.reason,
+                        r.after?.hours ? t('hoursShort', { count: Number(r.after.hours) }) : null,
+                      ]
                         .filter(Boolean)
                         .map(String)
                         .join(' · ')}

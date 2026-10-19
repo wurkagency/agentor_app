@@ -14,7 +14,15 @@ import {
   DropdownMenuTrigger,
   Icon,
 } from '@agentor/ui';
-import { Building2, CreditCard, Languages, LogOut, Settings, UserRound } from 'lucide-react';
+import {
+  Building2,
+  CreditCard,
+  Languages,
+  LifeBuoy,
+  LogOut,
+  Settings,
+  UserRound,
+} from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useTransition, type ReactNode } from 'react';
@@ -102,6 +110,12 @@ export function ProfileMenu({
           onSelect={() => router.push('/settings/profile')}
         >
           {t('myProfile')}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          icon={<Icon icon={LifeBuoy} size={16} />}
+          onSelect={() => router.push('/support')}
+        >
+          {t('support')}
         </DropdownMenuItem>
         {canSeeSettings && (
           <DropdownMenuItem

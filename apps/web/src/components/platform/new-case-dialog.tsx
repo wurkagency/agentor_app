@@ -73,11 +73,19 @@ export function NewCaseDialog({
         )}
       </Field>
       <Field label={t('titleField')}>
-        {({ id }) => <Input id={id} maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} />}
+        {({ id }) => (
+          <Input id={id} maxLength={200} value={title} onChange={(e) => setTitle(e.target.value)} />
+        )}
       </Field>
       <Field label={t('firstNote')} help={t('firstNoteHelp')}>
         {({ id, describedBy }) => (
-          <Textarea id={id} aria-describedby={describedBy} rows={3} value={body} onChange={(e) => setBody(e.target.value)} />
+          <Textarea
+            id={id}
+            aria-describedby={describedBy}
+            rows={3}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+          />
         )}
       </Field>
       <Field label={t('priority')} inline>
@@ -86,7 +94,10 @@ export function NewCaseDialog({
             id={id}
             value={priority}
             onValueChange={setPriority}
-            options={['critical', 'high', 'normal', 'low'].map((p) => ({ value: p, label: tc(`priority.${p}`) }))}
+            options={['critical', 'high', 'normal', 'low'].map((p) => ({
+              value: p,
+              label: tc(`priority.${p}`),
+            }))}
           />
         )}
       </Field>
@@ -96,7 +107,15 @@ export function NewCaseDialog({
             id={id}
             value={category}
             onValueChange={setCategory}
-            options={['error', 'mapping', 'connection', 'setup', 'subscription', 'wish', 'question'].map((k) => ({
+            options={[
+              'error',
+              'mapping',
+              'connection',
+              'setup',
+              'subscription',
+              'wish',
+              'question',
+            ].map((k) => ({
               value: k,
               label: tc(`category.${k}`),
             }))}

@@ -52,12 +52,15 @@ export function PlatformHeader({ user, counts }: { user: PlatformUser; counts: G
           aria-label={t('home')}
           className="flex flex-none items-center gap-2.5 text-on-navy no-underline"
         >
-          <Logo />
+          <Logo className="text-on-navy" />
           <span className="rounded-full bg-primary px-2.5 py-0.5 text-micro font-semibold text-fg-1">
             {t('badge')}
           </span>
         </Link>
-        <nav aria-label={t('nav')} className="flex min-w-0 flex-1 items-center gap-7 overflow-x-auto">
+        <nav
+          aria-label={t('nav')}
+          className="flex min-w-0 flex-1 items-center gap-7 overflow-x-auto"
+        >
           {items.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
@@ -85,7 +88,11 @@ export function PlatformHeader({ user, counts }: { user: PlatformUser; counts: G
         >
           <label className="relative flex items-center">
             <span className="sr-only">{t('search')}</span>
-            <Icon icon={Search} size={18} className="pointer-events-none absolute left-2.5 text-on-navy" />
+            <Icon
+              icon={Search}
+              size={18}
+              className="pointer-events-none absolute left-2.5 text-on-navy"
+            />
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}

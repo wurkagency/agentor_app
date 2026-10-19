@@ -30,7 +30,10 @@ export default async function ResolvePage({ params }: { params: Promise<{ id: st
   const minutes = data.time.reduce((a, e) => a + e.minutes, 0);
   return (
     <PageBody>
-      <Link href={`/platform/cases/${c.id}`} className="inline-flex items-center gap-1.5 text-table text-fg-2 no-underline">
+      <Link
+        href={`/platform/cases/${c.id}`}
+        className="inline-flex items-center gap-1.5 text-table text-fg-2 no-underline"
+      >
         <Icon icon={ArrowLeft} size={16} />
         {t('back', { n: c.number })}
       </Link>
@@ -46,7 +49,13 @@ export default async function ResolvePage({ params }: { params: Promise<{ id: st
             : null
         }
         events={data.events
-          .filter((e) => e.kind === 'customer_message' || e.kind === 'reply' || e.kind === 'status' || e.kind === 'session')
+          .filter(
+            (e) =>
+              e.kind === 'customer_message' ||
+              e.kind === 'reply' ||
+              e.kind === 'status' ||
+              e.kind === 'session',
+          )
           .map((e) => ({
             kind: e.kind as 'reply',
             authorName: e.authorName,

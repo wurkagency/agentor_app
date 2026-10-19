@@ -18,7 +18,11 @@ export async function generateMetadata() {
 }
 
 /** Arkiv (S2): resolved and closed cases, searchable in title, resolution and notes. */
-export default async function ArchivePage({ searchParams }: { searchParams: Promise<ArchiveQuery> }) {
+export default async function ArchivePage({
+  searchParams,
+}: {
+  searchParams: Promise<ArchiveQuery>;
+}) {
   const { actor } = await requireStaff();
   const q = await searchParams;
   const t = await getTranslations('platform.archive');
@@ -60,7 +64,15 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
             key: 'category',
             label: t('category'),
             allLabel: t('all'),
-            options: ['error', 'mapping', 'connection', 'setup', 'subscription', 'wish', 'question'].map((k) => ({
+            options: [
+              'error',
+              'mapping',
+              'connection',
+              'setup',
+              'subscription',
+              'wish',
+              'question',
+            ].map((k) => ({
               value: k,
               label: tc(`category.${k}`),
             })),
@@ -110,7 +122,10 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
                 <Tr key={r.id}>
                   <Td className="pl-5 font-mono text-mono">#{r.number}</Td>
                   <Td className="whitespace-normal">
-                    <Link href={`/platform/cases/${r.id}`} className="flex flex-col text-fg-1 no-underline">
+                    <Link
+                      href={`/platform/cases/${r.id}`}
+                      className="flex flex-col text-fg-1 no-underline"
+                    >
                       <span className="font-semibold">{r.title}</span>
                       {r.resolution && <span className="text-meta text-fg-2">{r.resolution}</span>}
                     </Link>
@@ -130,8 +145,12 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
                       {tc(`status.${r.status}`)}
                     </span>
                   </Td>
-                  <Td>{r.assigneeName ? <Avatar name={r.assigneeName} size={28} tone="navy" /> : '–'}</Td>
-                  <Td className="text-fg-2">{formatDate(r.createdAt, locale).replace(/ \d{4}$/, '')}</Td>
+                  <Td>
+                    {r.assigneeName ? <Avatar name={r.assigneeName} size={28} tone="navy" /> : '–'}
+                  </Td>
+                  <Td className="text-fg-2">
+                    {formatDate(r.createdAt, locale).replace(/ \d{4}$/, '')}
+                  </Td>
                   <Td className="text-fg-2">
                     {r.resolvedAt ? formatDate(r.resolvedAt, locale).replace(/ \d{4}$/, '') : '–'}
                   </Td>
@@ -144,7 +163,11 @@ export default async function ArchivePage({ searchParams }: { searchParams: Prom
           </Table>
         )}
         <p className="m-0 border-t border-border px-5 py-3 text-meta text-fg-2">
-          {t('footer', { shown: shown.length, total: rows.length, time: formatMinutes(total, locale) })}
+          {t('footer', {
+            shown: shown.length,
+            total: rows.length,
+            time: formatMinutes(total, locale),
+          })}
         </p>
       </Card>
     </PageBody>

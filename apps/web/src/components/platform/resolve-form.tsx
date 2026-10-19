@@ -45,7 +45,12 @@ export function ResolveForm({
   const [to, setTo] = useState<string[]>(
     defaultRecipient ? [defaultRecipient] : recipients[0] ? [recipients[0].userId] : [],
   );
-  const [include, setInclude] = useState({ messages: true, status: true, sessions: true, time: false });
+  const [include, setInclude] = useState({
+    messages: true,
+    status: true,
+    sessions: true,
+    time: false,
+  });
   const [closing, setClosing] = useState('');
   const [status, setStatus] = useState<'resolved' | 'closed'>('resolved');
   const [satisfaction, setSatisfaction] = useState(true);
@@ -90,7 +95,13 @@ export function ResolveForm({
           <Button variant="secondary" size="m" disabled={pending} onClick={() => submit(false)}>
             {t('resolveOnly')}
           </Button>
-          <Button variant="primary" size="l" loading={pending} disabled={to.length === 0} onClick={() => submit(true)}>
+          <Button
+            variant="primary"
+            size="l"
+            loading={pending}
+            disabled={to.length === 0}
+            onClick={() => submit(true)}
+          >
             {!pending && <Icon icon={Mail} size={16} />}
             {t('resolveSend')}
           </Button>
@@ -108,7 +119,9 @@ export function ResolveForm({
                     <button
                       type="button"
                       aria-pressed={on}
-                      onClick={() => setTo(on ? to.filter((x) => x !== r.userId) : [...to, r.userId])}
+                      onClick={() =>
+                        setTo(on ? to.filter((x) => x !== r.userId) : [...to, r.userId])
+                      }
                       className={cn(
                         'inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border-0 pl-1 pr-3 font-sans text-table',
                         on ? 'bg-fg-1 text-white' : 'bg-surface text-fg-1 shadow-ring-chip',
@@ -135,7 +148,10 @@ export function ResolveForm({
                 ['time', t('incTime'), t('incTimeSub', { time: formatMinutes(minutes, locale) })],
               ] as const
             ).map(([key, label, sub]) => (
-              <label key={key} className="flex items-start gap-3 border-t border-border py-3 first:border-0">
+              <label
+                key={key}
+                className="flex items-start gap-3 border-t border-border py-3 first:border-0"
+              >
                 <Checkbox
                   checked={include[key]}
                   onCheckedChange={(v) => setInclude({ ...include, [key]: v === true })}
@@ -181,7 +197,10 @@ export function ResolveForm({
                 />
               </span>
               <label className="flex items-center gap-2 text-table">
-                <Checkbox checked={satisfaction} onCheckedChange={(v) => setSatisfaction(v === true)} />
+                <Checkbox
+                  checked={satisfaction}
+                  onCheckedChange={(v) => setSatisfaction(v === true)}
+                />
                 {t('askSatisfaction')}
               </label>
             </div>
@@ -203,7 +222,12 @@ export function ResolveForm({
             />
           </div>
           <div className="flex justify-center bg-bg-base p-6">
-            <article className={cn('flex w-full flex-col gap-4 rounded-md bg-surface p-6 shadow-sm', device === 'mobile' ? 'max-w-sm' : 'max-w-xl')}>
+            <article
+              className={cn(
+                'flex w-full flex-col gap-4 rounded-md bg-surface p-6 shadow-sm',
+                device === 'mobile' ? 'max-w-sm' : 'max-w-xl',
+              )}
+            >
               <p className="m-0 text-meta text-fg-2">
                 <strong className="text-fg-1">{t('to')}</strong>{' '}
                 {recipients
@@ -211,7 +235,8 @@ export function ResolveForm({
                   .map((r) => `${r.name} <${r.email}>`)
                   .join(', ') || '–'}
                 <br />
-                <strong className="text-fg-1">{t('subject')}</strong> {t('subjectLine', { title, n: number })}
+                <strong className="text-fg-1">{t('subject')}</strong>{' '}
+                {t('subjectLine', { title, n: number })}
               </p>
               <Logo />
               <p className="m-0 flex items-center gap-2 rounded-sm bg-ok-bg px-3 py-2 text-table font-semibold">
@@ -225,8 +250,16 @@ export function ResolveForm({
                   {preview.map((e, i) => (
                     <div key={i} className="border-t border-border py-2.5 text-table">
                       <p className="m-0 text-meta">
-                        <strong>{e.kind === 'session' ? t('agentorSupport') : e.kind === 'status' ? t('statusLabel') : e.authorName}</strong>{' '}
-                        <span className="text-fg-2">{formatTime(new Date(e.createdAt), locale)}</span>
+                        <strong>
+                          {e.kind === 'session'
+                            ? t('agentorSupport')
+                            : e.kind === 'status'
+                              ? t('statusLabel')
+                              : e.authorName}
+                        </strong>{' '}
+                        <span className="text-fg-2">
+                          {formatTime(new Date(e.createdAt), locale)}
+                        </span>
                       </p>
                       <p className="m-0 whitespace-pre-wrap">
                         {e.kind === 'session' ? e.body || t('sessionDefault') : e.body}
@@ -236,7 +269,9 @@ export function ResolveForm({
                 </div>
               )}
               {include.time && (
-                <p className="m-0 text-meta text-fg-2">{t('timeLine', { time: formatMinutes(minutes, locale) })}</p>
+                <p className="m-0 text-meta text-fg-2">
+                  {t('timeLine', { time: formatMinutes(minutes, locale) })}
+                </p>
               )}
               {satisfaction && (
                 <p className="m-0 text-table">

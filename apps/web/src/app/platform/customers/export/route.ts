@@ -22,7 +22,7 @@ export async function GET() {
         .join(';'),
     ),
   ];
-  return new Response(`﻿${lines.join('\r\n')}`, {
+  return new Response(`\uFEFF${lines.join('\r\n')}`, {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': `attachment; filename="kunder-${new Date().toISOString().slice(0, 10)}.csv"`,

@@ -14,7 +14,8 @@ export async function generateMetadata() {
   return { title: t('perCustomer') };
 }
 
-const monthStartIso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
+const monthStartIso = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`;
 
 /**
  * Tid pr. kunde: this month's support time per customer, and what will be invoiced. Billable
@@ -78,14 +79,21 @@ export default async function TimePerCustomerPage() {
               {rows.map(({ c, minutes, billable, invoiced }) => (
                 <Tr key={c.tenantId}>
                   <Td className="pl-5">
-                    <Link href={`/platform/customers/${c.tenantId}`} className="font-semibold text-fg-1">
+                    <Link
+                      href={`/platform/customers/${c.tenantId}`}
+                      className="font-semibold text-fg-1"
+                    >
                       {c.name}
                     </Link>
                   </Td>
                   <Td>{(c.planId && plans.get(c.planId)) || '–'}</Td>
                   <Td numeric>{formatMinutes(minutes, locale)}</Td>
                   <Td numeric>{formatMinutes(billable, locale)}</Td>
-                  <Td numeric>{rate === null ? '–' : formatMoney(Math.round((billable / 60) * rate) / 100, locale)}</Td>
+                  <Td numeric>
+                    {rate === null
+                      ? '–'
+                      : formatMoney(Math.round((billable / 60) * rate) / 100, locale)}
+                  </Td>
                   <Td numeric className="pr-5">
                     {formatMinutes(invoiced, locale)}
                   </Td>

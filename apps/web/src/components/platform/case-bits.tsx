@@ -55,7 +55,10 @@ export function dueText(
   }
   if (c.status === 'waiting') {
     const days = Math.floor((now.getTime() - new Date(c.updatedAt).getTime()) / 86_400_000);
-    return { text: days < 1 ? t('waitingToday') : t('waitingDays', { count: days }), overdue: false };
+    return {
+      text: days < 1 ? t('waitingToday') : t('waitingDays', { count: days }),
+      overdue: false,
+    };
   }
   if (!c.dueAt) return { text: t('noDue'), overdue: false };
   const due = new Date(c.dueAt);
@@ -88,7 +91,12 @@ function dayTime(
 
 export function DueLabel({ text, overdue }: { text: string; overdue: boolean }) {
   return (
-    <span className={cn('inline-flex items-center gap-1 text-meta', overdue ? 'font-semibold text-error-fg' : 'text-fg-2')}>
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 text-meta',
+        overdue ? 'font-semibold text-error-fg' : 'text-fg-2',
+      )}
+    >
       <Icon icon={Clock} size={14} />
       {text}
     </span>

@@ -18,7 +18,19 @@ export async function GET(request: NextRequest) {
   ]);
   const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
   const lines = [
-    ['Dato', 'Medarbejder', 'Kunde', 'Sag', 'Type', 'Kilde', 'Minutter', 'Fakturerbar', 'Beskrivelse'].map(esc).join(';'),
+    [
+      'Dato',
+      'Medarbejder',
+      'Kunde',
+      'Sag',
+      'Type',
+      'Kilde',
+      'Minutter',
+      'Fakturerbar',
+      'Beskrivelse',
+    ]
+      .map(esc)
+      .join(';'),
     ...rows.map((r) =>
       [
         r.workDate,
@@ -35,7 +47,7 @@ export async function GET(request: NextRequest) {
         .join(';'),
     ),
   ];
-  return new Response(`﻿${lines.join('\r\n')}`, {
+  return new Response(`\uFEFF${lines.join('\r\n')}`, {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': `attachment; filename="tid-${week}.csv"`,

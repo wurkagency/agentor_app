@@ -43,7 +43,11 @@ export function RequestAccessButton({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant={variant} size={variant === 'primary' ? 'l' : 's'} onClick={() => setOpen(true)}>
+      <Button
+        variant={variant}
+        size={variant === 'primary' ? 'l' : 's'}
+        onClick={() => setOpen(true)}
+      >
         <Icon icon={Plus} size={16} />
         {t('requestAccess')}
       </Button>

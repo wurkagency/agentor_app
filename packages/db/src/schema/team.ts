@@ -143,7 +143,12 @@ export const supportAccessGrants = pgTable(
   (t) => [
     primaryKey({ columns: [t.tenantId, t.id] }),
     foreignKey({ columns: [t.tenantId], foreignColumns: [tenants.id] }).onDelete('cascade'),
-    check('support_grant_max_24h', sql`${t.expiresAt} <= ${t.requestedAt} + interval '24 hours'`),
+    // At most 24 hours of access, counted from when it starts (approval, or the request when
+    // the customer doesn't require approval).
+    check(
+      'support_grant_max_24h',
+      sql`${t.expiresAt} <= coalesce(${t.approvedAt}, ${t.requestedAt}) + interval '24 hours'`,
+    ),
   ],
 );
 

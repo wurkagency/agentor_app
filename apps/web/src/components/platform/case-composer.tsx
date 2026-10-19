@@ -51,14 +51,23 @@ export function CaseComposer({
     });
 
   return (
-    <div className={cn('flex flex-col gap-3 rounded-md p-3 shadow-ring-chip', note ? 'bg-note-bg' : 'bg-surface')}>
+    <div
+      className={cn(
+        'flex flex-col gap-3 rounded-md p-3 shadow-ring-chip',
+        note ? 'bg-note-bg' : 'bg-surface',
+      )}
+    >
       <Segmented
         aria-label={t('composerKind')}
         value={kind}
         onValueChange={(v) => setKind(v as 'reply' | 'internal_note')}
         options={[
           { value: 'reply', label: t('replyToCustomer') },
-          { value: 'internal_note', label: t('internalNote'), icon: <Icon icon={Lock} size={14} /> },
+          {
+            value: 'internal_note',
+            label: t('internalNote'),
+            icon: <Icon icon={Lock} size={14} />,
+          },
         ]}
       />
       <Textarea
@@ -92,7 +101,13 @@ export function CaseComposer({
         ) : (
           <span className="text-meta text-fg-2">{t('replyHelp')}</span>
         )}
-        <Button variant="primary" size="s" loading={pending} disabled={!body.trim()} onClick={submit}>
+        <Button
+          variant="primary"
+          size="s"
+          loading={pending}
+          disabled={!body.trim()}
+          onClick={submit}
+        >
           {!pending && <Icon icon={Send} size={14} />}
           {note ? t('saveNote') : t('send')}
         </Button>

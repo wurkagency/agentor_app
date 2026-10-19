@@ -23,7 +23,7 @@ export async function archiveRows(userId: string, q: ArchiveQuery): Promise<Case
     ...(q.customer ? { tenantId: q.customer } : {}),
   });
   return rows.filter(
-    (r) => (!q.category || r.category === q.category) && (!q.supporter || r.assigneeId === q.supporter),
+    (r) =>
+      (!q.category || r.category === q.category) && (!q.supporter || r.assigneeId === q.supporter),
   );
 }
-

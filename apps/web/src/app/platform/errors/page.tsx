@@ -21,13 +21,20 @@ export async function generateMetadata() {
  * Fejl på tværs (S7): failures grouped by error code across customers. When the same code hits
  * many customers it is usually a change at the system, not at the customer. Counts only.
  */
-export default async function ErrorsPage({ searchParams }: { searchParams: Promise<{ period?: string }> }) {
+export default async function ErrorsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ period?: string }>;
+}) {
   const { actor } = await requireStaff();
   const sp = await searchParams;
   const period = (sp.period && sp.period in DAYS ? sp.period : '24h') as keyof typeof DAYS;
   const t = await getTranslations('platform.errors');
   const locale = (await getLocale()) as Locale;
-  const [groups, customers] = await Promise.all([errorsFor(actor.userId, DAYS[period]), customersFor(actor.userId)]);
+  const [groups, customers] = await Promise.all([
+    errorsFor(actor.userId, DAYS[period]),
+    customersFor(actor.userId),
+  ]);
   const now = new Date();
   const hit = new Set(groups.flatMap((g) => g.tenantIds));
   const active = customers.filter((c) => c.flows > 0).length || 1;
@@ -35,7 +42,10 @@ export default async function ErrorsPage({ searchParams }: { searchParams: Promi
   const newSince = groups.filter((g) => g.previousCustomers === 0).length;
   const noCase = groups.filter((g) => g.caseNumbers.length === 0);
   const rising = groups.find((g) => g.trend === 'rising' && g.customers > 1);
-  const describe = (code: string) => (t.has(`codes.${code}` as 'codes.ACCOUNT_NOT_FOUND') ? t(`codes.${code}` as 'codes.ACCOUNT_NOT_FOUND') : '');
+  const describe = (code: string) =>
+    t.has(`codes.${code}` as 'codes.ACCOUNT_NOT_FOUND')
+      ? t(`codes.${code}` as 'codes.ACCOUNT_NOT_FOUND')
+      : '';
   const customerList = customers.map((c) => ({ id: c.tenantId, name: c.name }));
 
   return (
@@ -55,14 +65,22 @@ export default async function ErrorsPage({ searchParams }: { searchParams: Promi
       <PageBody>
         <PageHeader title={t('title')} subtitle={t('intro')} />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <StatCard label={t('statTypes')} value={String(groups.length)} footer={t('statTypesSub', { count: newSince })} />
+          <StatCard
+            label={t('statTypes')}
+            value={String(groups.length)}
+            footer={t('statTypesSub', { count: newSince })}
+          />
           <StatCard
             label={t('statCustomers')}
             value={String(hit.size)}
             footer={t('statCustomersSub', { pct: Math.round((hit.size / active) * 100) })}
             {...(hit.size > 1 ? { className: 'bg-error-bg' } : {})}
           />
-          <StatCard label={t('statRecords')} value={String(records)} footer={t(`window.${period}`)} />
+          <StatCard
+            label={t('statRecords')}
+            value={String(records)}
+            footer={t(`window.${period}`)}
+          />
           <StatCard
             label={t('statNoCase')}
             value={String(noCase.length)}
@@ -74,7 +92,11 @@ export default async function ErrorsPage({ searchParams }: { searchParams: Promi
             <Icon icon={CircleX} size={16} className="text-error-fg" />
             <span>
               <strong>
-                {t('risingTitle', { code: rising.code, from: rising.previousCustomers, to: rising.customers })}
+                {t('risingTitle', {
+                  code: rising.code,
+                  from: rising.previousCustomers,
+                  to: rising.customers,
+                })}
               </strong>{' '}
               {t('risingBody')}
             </span>
@@ -112,7 +134,10 @@ export default async function ErrorsPage({ searchParams }: { searchParams: Promi
                       <Td>
                         {m ? (
                           <span className="flex items-center gap-2">
-                            <ConnectorLogo connector={{ name: m.name, logoUrl: m.logo }} size={24} />
+                            <ConnectorLogo
+                              connector={{ name: m.name, logoUrl: m.logo }}
+                              size={24}
+                            />
                             {m.name}
                           </span>
                         ) : (
@@ -131,7 +156,13 @@ export default async function ErrorsPage({ searchParams }: { searchParams: Promi
                       <Td>
                         <span className="inline-flex items-center gap-1.5">
                           <Icon
-                            icon={g.trend === 'rising' ? ArrowUpRight : g.trend === 'falling' ? ArrowDownRight : ArrowRight}
+                            icon={
+                              g.trend === 'rising'
+                                ? ArrowUpRight
+                                : g.trend === 'falling'
+                                  ? ArrowDownRight
+                                  : ArrowRight
+                            }
                             size={14}
                             className={g.trend === 'rising' ? 'text-error-fg' : 'text-fg-2'}
                           />

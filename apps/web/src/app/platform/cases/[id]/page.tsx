@@ -49,14 +49,21 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
 
   return (
     <PageBody>
-      <Link href="/platform/cases" className="inline-flex items-center gap-1.5 text-table text-fg-2 no-underline">
+      <Link
+        href="/platform/cases"
+        className="inline-flex items-center gap-1.5 text-table text-fg-2 no-underline"
+      >
         <Icon icon={ArrowLeft} size={16} />
         {t('back')}
       </Link>
       <div className="flex flex-wrap items-end justify-between gap-6">
         <div className="flex flex-col gap-1">
           <p className="m-0 font-mono text-mono text-fg-2">
-            #{c.number} · {t('created', { when: `${formatDate(created, locale)} ${formatTime(created, locale)}`, by: creator })}
+            #{c.number} ·{' '}
+            {t('created', {
+              when: `${formatDate(created, locale)} ${formatTime(created, locale)}`,
+              by: creator,
+            })}
           </p>
           <h1 className="m-0 text-page">{c.title}</h1>
         </div>
@@ -110,7 +117,9 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
             caseId={c.id}
             caseLabel={`#${c.number} · ${customer?.name ?? ''}`}
             plan={plan}
-            timer={timer ? { caseId: timer.caseId, startedAt: timer.startedAt.toISOString() } : null}
+            timer={
+              timer ? { caseId: timer.caseId, startedAt: timer.startedAt.toISOString() } : null
+            }
             entries={data.time.map((e) => ({
               id: e.id,
               kind: e.kind,
@@ -127,7 +136,10 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
               <CardHeader
                 title={t('customer')}
                 action={
-                  <Link href={`/platform/customers/${customer.tenantId}`} className="text-table font-semibold text-fg-1">
+                  <Link
+                    href={`/platform/customers/${customer.tenantId}`}
+                    className="text-table font-semibold text-fg-1"
+                  >
                     {t('open')}
                   </Link>
                 }
@@ -146,14 +158,18 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
                   <StatusPill status={customer.status as Status}>{ts(customer.status)}</StatusPill>
                 )}
                 {customer.openFailures > 0 && (
-                  <StatusPill status="error">{t('failures', { count: customer.openFailures })}</StatusPill>
+                  <StatusPill status="error">
+                    {t('failures', { count: customer.openFailures })}
+                  </StatusPill>
                 )}
               </span>
               {active ? (
                 <div className="flex items-center justify-between gap-3 rounded-sm bg-ok-bg px-3 py-2 text-table">
                   <span className="flex items-center gap-2">
                     <Icon icon={CircleCheck} size={16} className="text-ok-fg" />
-                    {t('grantUntil', { when: `${formatDate(active.expiresAt, locale)} ${formatTime(active.expiresAt, locale)}` })}
+                    {t('grantUntil', {
+                      when: `${formatDate(active.expiresAt, locale)} ${formatTime(active.expiresAt, locale)}`,
+                    })}
                   </span>
                   <OpenAppButton grantId={active.grantId} size="s" />
                 </div>

@@ -81,7 +81,8 @@ export function CustomersTable({
           if (plan !== 'all' && i.plan !== plan) return false;
           if (access === 'active' && i.grant?.state !== 'active') return false;
           if (access === 'pending' && i.grant?.state !== 'pending') return false;
-          if (access === 'none' && (i.grant?.state === 'active' || i.grant?.state === 'pending')) return false;
+          if (access === 'none' && (i.grant?.state === 'active' || i.grant?.state === 'pending'))
+            return false;
           if (mine && !i.mineCases) return false;
           return true;
         })
@@ -177,7 +178,10 @@ export function CustomersTable({
               {rows.map((i) => (
                 <Tr key={i.tenantId}>
                   <Td className="pl-5">
-                    <Link href={`/platform/customers/${i.tenantId}`} className="flex items-center gap-3 text-fg-1 no-underline">
+                    <Link
+                      href={`/platform/customers/${i.tenantId}`}
+                      className="flex items-center gap-3 text-fg-1 no-underline"
+                    >
                       <span className="grid size-8 flex-none place-items-center rounded-sm bg-bg-base text-micro font-semibold shadow-ring-chip">
                         {i.initials}
                       </span>
@@ -209,7 +213,9 @@ export function CustomersTable({
                         variant="primary"
                         size="s"
                         loading={pending}
-                        onClick={() => start(async () => void (await openSupportViewAction(i.grant!.id)))}
+                        onClick={() =>
+                          start(async () => void (await openSupportViewAction(i.grant!.id)))
+                        }
                       >
                         <Icon icon={Eye} size={14} />
                         {t('openAsSupport')}
@@ -253,4 +259,3 @@ export function CustomersTable({
     </>
   );
 }
-

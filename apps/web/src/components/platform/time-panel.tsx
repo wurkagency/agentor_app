@@ -19,7 +19,14 @@ export interface TimeRow {
   billable: boolean;
 }
 
-const KIND_ICON = { session: Eye, phone: Phone, email: Mail, clarification: Pencil, meeting: Users, other: Pencil };
+const KIND_ICON = {
+  session: Eye,
+  phone: Phone,
+  email: Mail,
+  clarification: Pencil,
+  meeting: Users,
+  other: Pencil,
+};
 
 /** Tid på sagen (S3) with "Tilføj tid" (S4) and the timer. */
 export function TimePanel({
@@ -61,7 +68,10 @@ export function TimePanel({
         {entries.map((e) => {
           const KindIcon = KIND_ICON[e.kind as keyof typeof KIND_ICON] ?? Pencil;
           return (
-            <li key={e.id} className="flex items-start gap-3 border-t border-border py-3 first:border-0">
+            <li
+              key={e.id}
+              className="flex items-start gap-3 border-t border-border py-3 first:border-0"
+            >
               <Icon icon={KindIcon} size={16} className="mt-0.5 text-fg-2" />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="flex flex-wrap items-center gap-2 text-table font-medium">
@@ -75,7 +85,9 @@ export function TimePanel({
                   >
                     {t(`source.${e.source}`)}
                   </span>
-                  {e.billable && <span className="text-micro font-semibold text-fg-2">{t('billableShort')}</span>}
+                  {e.billable && (
+                    <span className="text-micro font-semibold text-fg-2">{t('billableShort')}</span>
+                  )}
                 </span>
                 <span className="text-meta text-fg-2">
                   {e.staffName.split(' ')[0]} · {formatTime(new Date(e.createdAt), locale)}
@@ -100,13 +112,19 @@ export function TimePanel({
               start(async () => {
                 const res = await stopTimerAction(caseLabel);
                 if (res.ok && res.data?.minutes)
-                  toast.ok({ title: t('timerSaved', { time: formatMinutes(res.data.minutes, locale) }), closeLabel: tc('close') });
+                  toast.ok({
+                    title: t('timerSaved', { time: formatMinutes(res.data.minutes, locale) }),
+                    closeLabel: tc('close'),
+                  });
                 router.refresh();
               })
             }
           >
             <Icon icon={Square} size={14} />
-            {t('stopTimer', { time: formatHm(Math.floor(elapsed / 60)) + `:${String(elapsed % 60).padStart(2, '0')}` })}
+            {t('stopTimer', {
+              time:
+                formatHm(Math.floor(elapsed / 60)) + `:${String(elapsed % 60).padStart(2, '0')}`,
+            })}
           </Button>
         ) : (
           <Button
@@ -200,7 +218,8 @@ export function AddTimeDialog({
                     description,
                     billable,
                   });
-                  if (!res.ok) return void toast.error({ title: t('error'), closeLabel: tc('close') });
+                  if (!res.ok)
+                    return void toast.error({ title: t('error'), closeLabel: tc('close') });
                   onClose();
                   router.refresh();
                 })
@@ -215,7 +234,12 @@ export function AddTimeDialog({
       <Field label={t('duration')} inline>
         {({ id }) => (
           <span className="flex flex-wrap items-center gap-2">
-            <Input id={id} className="w-24 tabular" value={duration} onChange={(e) => setDuration(e.target.value)} />
+            <Input
+              id={id}
+              className="w-24 tabular"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+            />
             {[15, 30, 60].map((q) => (
               <Button
                 key={q}
@@ -250,7 +274,11 @@ export function AddTimeDialog({
             options={[
               { value: 'phone', label: t('kind.phone'), icon: <Icon icon={Phone} size={14} /> },
               { value: 'email', label: t('kind.email'), icon: <Icon icon={Mail} size={14} /> },
-              { value: 'clarification', label: t('kind.clarification'), icon: <Icon icon={Pencil} size={14} /> },
+              {
+                value: 'clarification',
+                label: t('kind.clarification'),
+                icon: <Icon icon={Pencil} size={14} />,
+              },
               { value: 'other', label: t('kind.other') },
             ]}
           />
@@ -258,7 +286,12 @@ export function AddTimeDialog({
       </Field>
       <Field label={t('description')}>
         {({ id }) => (
-          <Input id={id} maxLength={500} value={description} onChange={(e) => setDescription(e.target.value)} />
+          <Input
+            id={id}
+            maxLength={500}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
         )}
       </Field>
       <label className="flex items-center justify-between gap-3 text-table">

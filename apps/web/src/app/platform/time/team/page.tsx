@@ -6,6 +6,10 @@ export async function generateMetadata() {
   return { title: t('teamTitle') };
 }
 
-export default async function TeamTimePage({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
+export default async function TeamTimePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ week?: string }>;
+}) {
   return <TimeView team week={(await searchParams).week} />;
 }

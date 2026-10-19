@@ -1,0 +1,2 @@
+ALTER TABLE "support_access_grants" DROP CONSTRAINT "support_grant_max_24h";--> statement-breakpoint
+ALTER TABLE "support_access_grants" ADD CONSTRAINT "support_grant_max_24h" CHECK ("support_access_grants"."expires_at" <= coalesce("support_access_grants"."approved_at", "support_access_grants"."created_at") + interval '24 hours');

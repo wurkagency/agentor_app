@@ -84,6 +84,9 @@ export interface InvoicePdfInput {
   date: string;
   period: string;
   description: string;
+  /** The plan line's own amount; extra lines (support time) follow it. */
+  planAmount: string;
+  extra: { text: string; amount: string }[];
   net: string;
   vat: string;
   total: string;
@@ -109,6 +112,7 @@ const SELLER = ['Agentor', 'app.agentor.dk', 'faktura@agentor.dk'];
 
 export function invoicePdf(i: InvoicePdfInput): Buffer {
   const L = i.labels;
+  const shift = i.extra.length * 16;
   const lines: PdfLine[] = [
     { text: 'Agentor', x: 56, y: 780, size: 22, bold: true },
     { text: `${L.invoice} ${i.number}`, x: 539, y: 784, size: 14, bold: true, align: 'right' },
@@ -131,19 +135,21 @@ export function invoicePdf(i: InvoicePdfInput): Buffer {
     { text: `${L.status}: ${i.status}`, x: 539, y: 662, size: 10, align: 'right' },
     { text: L.description, x: 56, y: 590, size: 9, bold: true },
     { text: L.amount, x: 539, y: 590, size: 9, bold: true, align: 'right' },
-    { text: i.description, x: 56, y: 568, size: 10 },
-    { text: i.net, x: 539, y: 568, size: 10, align: 'right' },
-    { text: L.net, x: 360, y: 530, size: 10 },
-    { text: i.net, x: 539, y: 530, size: 10, align: 'right' },
-    { text: L.vat, x: 360, y: 514, size: 10 },
-    { text: i.vat, x: 539, y: 514, size: 10, align: 'right' },
-    { text: L.total, x: 360, y: 492, size: 11, bold: true },
-    { text: i.total, x: 539, y: 492, size: 11, bold: true, align: 'right' },
+    ...[{ text: i.description, amount: i.planAmount }, ...i.extra].flatMap((row, n) => [
+      { text: row.text, x: 56, y: 568 - n * 16, size: 10 },
+      { text: row.amount, x: 539, y: 568 - n * 16, size: 10, align: 'right' as const },
+    ]),
+    { text: L.net, x: 360, y: 530 - shift, size: 10 },
+    { text: i.net, x: 539, y: 530 - shift, size: 10, align: 'right' },
+    { text: L.vat, x: 360, y: 514 - shift, size: 10 },
+    { text: i.vat, x: 539, y: 514 - shift, size: 10, align: 'right' },
+    { text: L.total, x: 360, y: 492 - shift, size: 11, bold: true },
+    { text: i.total, x: 539, y: 492 - shift, size: 11, bold: true, align: 'right' },
     { text: L.footer, x: 56, y: 80, size: 8 },
   ];
   return renderPdf(lines, [
     { y: 582, x1: 56, x2: 539 },
-    { y: 548, x1: 56, x2: 539 },
-    { y: 504, x1: 360, x2: 539 },
+    { y: 548 - shift, x1: 56, x2: 539 },
+    { y: 504 - shift, x1: 360, x2: 539 },
   ]);
 }

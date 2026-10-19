@@ -57,17 +57,22 @@ export function CaseMetaBar({
     </label>
   );
   return (
-    <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-md bg-surface px-5 py-3 shadow-sm" aria-busy={pending}>
+    <div
+      className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-md bg-surface px-5 py-3 shadow-sm"
+      aria-busy={pending}
+    >
       {field(
         t('statusLabel'),
         <Select
           aria-label={t('statusLabel')}
           value={status}
           onValueChange={(v) => patch({ status: v })}
-          options={(['new', 'in_progress', 'waiting', 'resolved', 'closed'] as CaseStatusKey[]).map((s) => ({
-            value: s,
-            label: t(`status.${s}`),
-          }))}
+          options={(['new', 'in_progress', 'waiting', 'resolved', 'closed'] as CaseStatusKey[]).map(
+            (s) => ({
+              value: s,
+              label: t(`status.${s}`),
+            }),
+          )}
         />,
       )}
       {field(
@@ -76,7 +81,10 @@ export function CaseMetaBar({
           aria-label={t('priorityLabel')}
           value={priority}
           onValueChange={(v) => patch({ priority: v })}
-          options={(['critical', 'high', 'normal', 'low'] as Priority[]).map((p) => ({ value: p, label: t(`priority.${p}`) }))}
+          options={(['critical', 'high', 'normal', 'low'] as Priority[]).map((p) => ({
+            value: p,
+            label: t(`priority.${p}`),
+          }))}
         />,
       )}
       {field(
@@ -97,7 +105,15 @@ export function CaseMetaBar({
           aria-label={t('categoryLabel')}
           value={category}
           onValueChange={(v) => patch({ category: v })}
-          options={['error', 'mapping', 'connection', 'setup', 'subscription', 'wish', 'question'].map((k) => ({
+          options={[
+            'error',
+            'mapping',
+            'connection',
+            'setup',
+            'subscription',
+            'wish',
+            'question',
+          ].map((k) => ({
             value: k,
             label: t(`category.${k}`),
           }))}

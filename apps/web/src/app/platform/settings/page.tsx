@@ -20,7 +20,10 @@ export default async function PlatformSettingsPage() {
   const { actor } = await requireStaff(true);
   const t = await getTranslations('platform.settings');
   const locale = (await getLocale()) as Locale;
-  const [settings, plans] = await Promise.all([getPlatformSettings(db(), actor.userId), listPlans(db())]);
+  const [settings, plans] = await Promise.all([
+    getPlatformSettings(db(), actor.userId),
+    listPlans(db()),
+  ]);
   return (
     <PageBody>
       <PageHeader title={t('title')} subtitle={t('intro')} />

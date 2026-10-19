@@ -41,7 +41,8 @@ export async function login(page: Page, user: keyof typeof USERS) {
     await page.context().addCookies(cached);
     await page.goto('/');
     if (!/\/login/.test(page.url())) {
-      await expect(page).toHaveURL(/\/$/);
+      // Staff without a company of their own land in Agentor Platform.
+      await expect(page).toHaveURL(/\/$|\/platform\//);
       return;
     }
     await page.context().clearCookies();

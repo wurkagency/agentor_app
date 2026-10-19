@@ -27,6 +27,7 @@ const {
 const { publicKeyFromBase64, seal, secretBinding } = await import('@agentor/keybox');
 const { hashWebhookToken } = await import('@agentor/db');
 const { seedFlows } = await import('./seed-flows');
+const { seedPlatform } = await import('./seed-platform');
 const { DINERO_ACCOUNTS } = await import('@agentor/connectors');
 /** board (default): what the boards show; gate: the Phase 1 prototype path (scripts/seed-flows.ts). */
 const SCENARIO = process.env.SEED_SCENARIO === 'gate' ? 'gate' : 'board';
@@ -242,6 +243,9 @@ await inTenant(o.id, async () => {
     [o.id, billingPeriod(new Date())],
   );
 });
+
+// Agentor Platform: staff, more fictional customers, cases and support time (M8).
+await seedPlatform(owner, inTenant);
 
 // Seeded invoice numbers sit below the sequence, so new invoices never collide with them.
 await owner.query(

@@ -109,7 +109,12 @@ export function SupportBar({
             </button>
           </PopoverTrigger>
           <PopoverContent align="start" className="w-96 p-0">
-            <Switcher grants={grants} now={now} locale={locale} onClose={() => setSwitcher(false)} />
+            <Switcher
+              grants={grants}
+              now={now}
+              locale={locale}
+              onClose={() => setSwitcher(false)}
+            />
           </PopoverContent>
         </Popover>
         <span className="text-on-navy-muted">
@@ -122,7 +127,9 @@ export function SupportBar({
         <span className="ml-auto flex flex-wrap items-center gap-4">
           <span className="flex items-center gap-1.5 font-semibold" aria-live="polite">
             <Icon icon={Clock} size={16} />
-            {hoursLeft > 0 ? t('leftHours', { h: hoursLeft }) : t('leftMinutes', { m: minutesLeft })}
+            {hoursLeft > 0
+              ? t('leftHours', { h: hoursLeft })
+              : t('leftMinutes', { m: minutesLeft })}
           </span>
           <span className="text-on-navy-muted">{t('logged')}</span>
           <Button variant="primary" size="s" onClick={() => setEnding(true)}>
@@ -209,7 +216,9 @@ function Switcher({
       <div className="max-h-96 overflow-y-auto p-1.5">
         {active.length > 0 && (
           <>
-            <p className="m-0 px-3 pb-1 pt-2 text-micro font-semibold text-fg-2">{t('activeGrants')}</p>
+            <p className="m-0 px-3 pb-1 pt-2 text-micro font-semibold text-fg-2">
+              {t('activeGrants')}
+            </p>
             <ul className="m-0 list-none p-0">{active.map(row)}</ul>
           </>
         )}
@@ -305,12 +314,26 @@ function EndSessionDialog({ onClose }: { onClose: () => void }) {
             {t('continue')}
           </Button>
           <span className="flex gap-2">
-            <Button variant="ghost" size="m" disabled={pending || !info} onClick={() => submit(true)}>
+            <Button
+              variant="ghost"
+              size="m"
+              disabled={pending || !info}
+              onClick={() => submit(true)}
+            >
               {t('discard')}
             </Button>
-            <Button variant="primary" size="m" loading={pending} disabled={!info || !valid} onClick={() => submit(false)}>
+            <Button
+              variant="primary"
+              size="m"
+              loading={pending}
+              disabled={!info || !valid}
+              onClick={() => submit(false)}
+            >
               {caseLabel
-                ? t('saveOnCase', { time: formatMinutes(valid ? minutes : 0, locale), case: caseLabel })
+                ? t('saveOnCase', {
+                    time: formatMinutes(valid ? minutes : 0, locale),
+                    case: caseLabel,
+                  })
                 : t('save', { time: formatMinutes(valid ? minutes : 0, locale) })}
             </Button>
           </span>
@@ -328,20 +351,33 @@ function EndSessionDialog({ onClose }: { onClose: () => void }) {
             </span>
           </div>
           <div className="flex flex-col gap-1">
-            <p className="m-0 text-table font-semibold">{t('actions', { count: info.actions.length })}</p>
+            <p className="m-0 text-table font-semibold">
+              {t('actions', { count: info.actions.length })}
+            </p>
             <ul className="m-0 list-none p-0">
               {actions.map((a, i) => (
-                <li key={i} className="flex items-center justify-between gap-3 border-t border-border py-1.5 text-table first:border-0">
+                <li
+                  key={i}
+                  className="flex items-center justify-between gap-3 border-t border-border py-1.5 text-table first:border-0"
+                >
                   <span className="flex items-center gap-2">
-                    <Icon icon={a.label.includes('editor') ? Pencil : Eye} size={14} className="text-fg-2" />
+                    <Icon
+                      icon={a.label.includes('editor') ? Pencil : Eye}
+                      size={14}
+                      className="text-fg-2"
+                    />
                     {actionLabel(t, a.label)}
                   </span>
-                  <span className="tabular text-meta text-fg-2">{formatTime(new Date(a.at), locale)}</span>
+                  <span className="tabular text-meta text-fg-2">
+                    {formatTime(new Date(a.at), locale)}
+                  </span>
                 </li>
               ))}
             </ul>
             {info.actions.length > actions.length && (
-              <p className="m-0 text-meta text-fg-2">{t('more', { count: info.actions.length - actions.length })}</p>
+              <p className="m-0 text-meta text-fg-2">
+                {t('more', { count: info.actions.length - actions.length })}
+              </p>
             )}
           </div>
           <Field label={t('linkCase')} inline>
@@ -388,7 +424,9 @@ function EndSessionDialog({ onClose }: { onClose: () => void }) {
             <span>
               {t('endGrant')}{' '}
               <span className="text-fg-2">
-                {t('endGrantHelp', { when: formatRelative(new Date(info.expiresAt), new Date(), locale) })}
+                {t('endGrantHelp', {
+                  when: formatRelative(new Date(info.expiresAt), new Date(), locale),
+                })}
               </span>
             </span>
           </label>

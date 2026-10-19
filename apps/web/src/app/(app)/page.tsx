@@ -218,7 +218,11 @@ export default async function OverviewPage({
       {header}
       <PageBody>
         <PageHeader
-          title={tp(greetingKey(now), { name: firstName })}
+          title={
+            ctx.support
+              ? tp('supportOverview', { company: ctx.tenant.tenantName })
+              : tp(greetingKey(now), { name: firstName })
+          }
           subtitle={t('subtitle', {
             company: ctx.tenant.tenantName,
             period: t(`period.${period}`),

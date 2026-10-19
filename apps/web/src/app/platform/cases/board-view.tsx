@@ -54,7 +54,11 @@ export async function BoardView({ view }: { view: 'board' | 'list' }) {
         actions={<NewCaseButton customers={customerList} />}
       />
       <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
-        <StatCard label={t('statOpen')} value={String(stats.open)} footer={t('statOpenSub', { count: stats.mine })} />
+        <StatCard
+          label={t('statOpen')}
+          value={String(stats.open)}
+          footer={t('statOpenSub', { count: stats.mine })}
+        />
         <StatCard
           label={t('statOverdue')}
           value={String(stats.overdue)}
@@ -68,7 +72,11 @@ export async function BoardView({ view }: { view: 'board' | 'list' }) {
         <StatCard
           label={t('statWaiting')}
           value={String(stats.waiting)}
-          footer={stats.oldestWaitingDays === null ? '–' : t('statWaitingSub', { count: stats.oldestWaitingDays })}
+          footer={
+            stats.oldestWaitingDays === null
+              ? '–'
+              : t('statWaitingSub', { count: stats.oldestWaitingDays })
+          }
         />
         <StatCard
           label={t('statResolved')}
