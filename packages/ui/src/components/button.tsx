@@ -66,8 +66,23 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   },
   ref,
 ) {
-  const Comp = asChild ? Slot.Root : 'button';
   const iconSize = size === 'l' || size === 'icon' ? 18 : 16;
+  if (asChild) {
+    // The child (e.g. a link) gets the button's styles and props. It renders its own content,
+    // so icon and spinner are not added here: Slot needs exactly one element child.
+    return (
+      <Slot.Root
+        ref={ref}
+        className={cn(buttonVariants({ variant, size }), className)}
+        aria-disabled={disabled ? true : undefined}
+        aria-busy={loading || undefined}
+        onClick={loading ? (e) => e.preventDefault() : onClick}
+        {...props}
+      >
+        {children}
+      </Slot.Root>
+    );
+  }
   const content = (
     <>
       {loading ? (
@@ -75,21 +90,20 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       ) : icon ? (
         <Icon icon={icon} size={iconSize} />
       ) : null}
-      {asChild ? <Slot.Slottable>{children}</Slot.Slottable> : children}
+      {children}
     </>
   );
   return (
-    <Comp
+    <button
       ref={ref}
       className={cn(buttonVariants({ variant, size }), className)}
-      disabled={asChild ? undefined : disabled}
-      aria-disabled={asChild && disabled ? true : undefined}
+      disabled={disabled}
       aria-busy={loading || undefined}
-      type={asChild ? undefined : (type ?? 'button')}
+      type={type ?? 'button'}
       onClick={loading ? (e) => e.preventDefault() : onClick}
       {...props}
     >
       {content}
-    </Comp>
+    </button>
   );
 });

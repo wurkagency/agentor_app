@@ -10,6 +10,7 @@ export const QUEUES = {
   system: 'agentor-system',
   billing: 'agentor-billing',
   connections: 'agentor-connections',
+  flows: 'agentor-flows',
 } as const;
 
 export const billingJobs = {
@@ -91,4 +92,33 @@ export function parseConnectionJob<N extends ConnectionJobName>(
   data: unknown,
 ): ConnectionJobData<N> {
   return connectionJobs[name].parse(data) as ConnectionJobData<N>;
+}
+
+/* ---- Flow runs (M6) -------------------------------------------------------------------------------- */
+
+export const flowJobs = {
+  /** Execute a queued run (scheduled, manual, retry or test). */
+  'flow.run': z.object({
+    tenantId: z.uuid(),
+    runId: z.uuid(),
+    /** Retry: only open failures (optionally on one route). */
+    retry: z.object({ routeId: z.string().max(40).optional() }).optional(),
+  }),
+} as const;
+
+export type FlowJobData = z.infer<(typeof flowJobs)['flow.run']>;
+
+export function flowsQueue(connection: Redis): Queue {
+  return new Queue(QUEUES.flows, {
+    connection,
+    defaultJobOptions: { ...DEFAULT_JOB_OPTIONS, attempts: 3 },
+  });
+}
+
+export async function enqueueFlowRun(queue: Queue, data: FlowJobData): Promise<void> {
+  await queue.add('flow.run', flowJobs['flow.run'].parse(data), { jobId: data.runId });
+}
+
+export function parseFlowJob(data: unknown): FlowJobData {
+  return flowJobs['flow.run'].parse(data);
 }

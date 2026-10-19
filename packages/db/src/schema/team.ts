@@ -4,6 +4,7 @@ import {
   check,
   foreignKey,
   index,
+  jsonb,
   pgTable,
   primaryKey,
   text,
@@ -135,5 +136,35 @@ export const supportAccessGrants = pgTable(
     primaryKey({ columns: [t.tenantId, t.id] }),
     foreignKey({ columns: [t.tenantId], foreignColumns: [tenants.id] }).onDelete('cascade'),
     check('support_grant_max_24h', sql`${t.expiresAt} <= ${t.requestedAt} + interval '24 hours'`),
+  ],
+);
+
+/**
+ * In-app notifications (bell, D2-Notifikationer), one row per recipient. Written by the worker
+ * after the recipient's preferences are applied; each user sees only their own.
+ */
+export const notifications = pgTable(
+  'notifications',
+  {
+    tenantId: tenantIdColumn(),
+    id: idColumn(),
+    userId: uuid('user_id').notNull(),
+    event: text('event').notNull(),
+    /** Needs the customer to act (Kraever handling) or just information. */
+    needsAction: boolean('needs_action').notNull().default(false),
+    /** i18n key under notificationsPanel.items and its parameters. */
+    messageKey: text('message_key').notNull(),
+    params: jsonb('params').$type<Record<string, string | number>>().notNull().default({}),
+    href: text('href'),
+    flowId: uuid('flow_id'),
+    connectionId: uuid('connection_id'),
+    readAt: ts('read_at'),
+    resolvedAt: ts('resolved_at'),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.id] }),
+    foreignKey({ columns: [t.tenantId], foreignColumns: [tenants.id] }).onDelete('cascade'),
+    index('notifications_user_idx').on(t.tenantId, t.userId, t.createdAt),
   ],
 );

@@ -26,6 +26,10 @@ const {
 } = await import('./seed-data');
 const { publicKeyFromBase64, seal, secretBinding } = await import('@agentor/keybox');
 const { hashWebhookToken } = await import('@agentor/db');
+const { seedFlows } = await import('./seed-flows');
+const { DINERO_ACCOUNTS } = await import('@agentor/connectors');
+/** board (default): what the boards show; gate: the Phase 1 prototype path (scripts/seed-flows.ts). */
+const SCENARIO = process.env.SEED_SCENARIO === 'gate' ? 'gate' : 'board';
 
 const ownerUrl = process.env.DATABASE_URL_OWNER;
 if (!ownerUrl) throw new Error('DATABASE_URL_OWNER missing');
@@ -187,20 +191,27 @@ await inTenant(n.id, async () => {
         c.connectorId === 'dinero' ? '2027-01-14T00:00:00+01:00' : null,
       ],
     );
-    const env = seal(
-      JSON.stringify(c.credentials),
-      publicKeyFromBase64(kekPub),
-      secretBinding(n.id, c.id),
-    );
+    const creds =
+      broken || c.connectorId !== 'economic' ? c.credentials : { grantToken: 'seed-economic' };
+    const env = seal(JSON.stringify(creds), publicKeyFromBase64(kekPub), secretBinding(n.id, c.id));
     await owner.query(
       `insert into connection_secrets (tenant_id, connection_id, format, nonce, ciphertext) values ($1, $2, $3, $4, $5)`,
       [n.id, c.id, env.format, env.nonce, env.ciphertext],
     );
   }
+  // The chart of accounts as the worker caches it after a connection test (D3 lookups).
+  for (const id of [CONNECTIONS.dinero.id, CONNECTIONS.economic.id])
+    await owner.query(
+      `insert into connection_lookups (tenant_id, connection_id, list, options) values ($1, $2, 'accounts', $3)`,
+      [n.id, id, JSON.stringify(DINERO_ACCOUNTS)],
+    );
   await owner.query(
     `insert into app.webhook_routes (token_hash, tenant_id, connection_id) values ($1, $2, $3)`,
     [hashWebhookToken(SEED_WOO_WEBHOOK_TOKEN), n.id, CONNECTIONS.woo.id],
   );
+
+  // Flows, versions and run history (D1, D2, D7, D8, D10).
+  await seedFlows(owner, n.id, SCENARIO);
 
   // Sara Lind: external developer with access to one flow until 12. nov. 2026.
   await owner.query(

@@ -66,6 +66,9 @@ async function loadPlans(tx: Transaction): Promise<PlanInfo[]> {
   }));
 }
 
+/** For other repositories working inside a transaction. */
+export const loadPlansTx = loadPlans;
+
 export function listPlans(db: Database): Promise<PlanInfo[]> {
   return withoutTenant(db, loadPlans);
 }

@@ -7,6 +7,7 @@ import { Worker } from 'bullmq';
 import pino from 'pino';
 import { processBillingJob } from './billing.js';
 import { processConnectionJob } from './connections.js';
+import { processFlowJob } from './flows.js';
 
 /**
  * agentor-worker: the only process with the KEK and outbound access to customer systems
@@ -63,6 +64,10 @@ const workers = [
   new Worker(QUEUES.billing, (job) => processBillingJob(billingDeps, job.name, job.data), {
     connection,
     concurrency: 2,
+  }),
+  new Worker(QUEUES.flows, (job) => processFlowJob(connectionDeps, job.data), {
+    connection,
+    concurrency: 4,
   }),
   new Worker(
     QUEUES.connections,

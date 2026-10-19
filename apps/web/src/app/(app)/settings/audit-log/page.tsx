@@ -54,8 +54,11 @@ export default async function AuditLogPage({
         title={t('title')}
         subtitle={t('intro')}
         actions={
-          <Button variant="secondary" icon={Download} asChild>
-            <a href={`/settings/audit-log/export?${params}`}>{t('export')}</a>
+          <Button variant="secondary" asChild>
+            <a href={`/settings/audit-log/export?${params}`}>
+              <Icon icon={Download} size={16} />
+              {t('export')}
+            </a>
           </Button>
         }
       />

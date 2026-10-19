@@ -12,12 +12,11 @@ import {
   Field,
   Icon,
   Input,
-  cn,
   toast,
 } from '@agentor/ui';
 import { Unplug } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { LinkTabs } from '@/components/link-tabs';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { disconnect, newWebhookAddress, reconnectWithKey, testConnection } from '../actions';
@@ -185,7 +184,6 @@ export function BrokenBanner({
   );
 }
 
-/** Overview / history as links: each is its own URL, so no tab panels to wire up. */
 export function ConnectionTabs({
   active,
   showHistory,
@@ -195,29 +193,17 @@ export function ConnectionTabs({
 }) {
   const t = useTranslations('connections');
   const pathname = usePathname();
-  const items = [
-    { key: 'overview', href: pathname, label: t('overview') },
-    ...(showHistory
-      ? [{ key: 'history', href: `${pathname}?tab=history`, label: t('historyTab') }]
-      : []),
-  ];
   return (
-    <nav aria-label={t('tabsLabel')} className="flex items-end gap-6 shadow-hairline-b">
-      {items.map((i) => (
-        <Link
-          key={i.key}
-          href={i.href}
-          replace
-          aria-current={active === i.key ? 'page' : undefined}
-          className={cn(
-            'pb-2.5 text-body font-semibold text-fg-2 no-underline hover:text-fg-1',
-            active === i.key && 'text-fg-1 shadow-tab-active',
-          )}
-        >
-          {i.label}
-        </Link>
-      ))}
-    </nav>
+    <LinkTabs
+      label={t('tabsLabel')}
+      active={active}
+      items={[
+        { key: 'overview', href: pathname, label: t('overview') },
+        ...(showHistory
+          ? [{ key: 'history', href: `${pathname}?tab=history`, label: t('historyTab') }]
+          : []),
+      ]}
+    />
   );
 }
 

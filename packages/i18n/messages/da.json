@@ -205,7 +205,23 @@
     "newFlow": "Nyt flow",
     "hintMove": "flyt",
     "hintOpen": "åbn",
-    "hintClose": "luk"
+    "hintClose": "luk",
+    "records": "Ordrer",
+    "flowsAndConnections": "Flows og forbindelser",
+    "newFlowDetail": "Vælg en skabelon",
+    "retryAll": "Gentag alle fejlede records",
+    "failuresToday": "{count} i dag",
+    "flowDetail": "Flow · {count, plural, one {# rute} other {# ruter}}",
+    "connectionDetail": "Forbindelse",
+    "outcome": {
+      "created": "Oprettet",
+      "updated": "Opdateret",
+      "skipped": "Sprunget over",
+      "failed": "Fejlet",
+      "would_create": "Test",
+      "would_update": "Test",
+      "waiting": "Venter"
+    }
   },
   "notificationsPanel": {
     "title": "Notifikationer",
@@ -213,7 +229,21 @@
     "all": "Alle",
     "emptyTitle": "Intet kræver handling",
     "emptyBody": "Når noget går galt, ser du det her og på Overblik.",
-    "settings": "Indstillinger for notifikationer"
+    "settings": "Indstillinger for notifikationer",
+    "items": {
+      "connectionBroken": "{connector}-forbindelsen er afbrudt · genautentificér",
+      "recordsFailed": "{count, plural, one {# record} other {# records}} fejlede i {flow}",
+      "creditNotesFailed": "{count} kreditnotaer kunne ikke oprettes i {system}",
+      "published": "{name} publicerede v{number}"
+    },
+    "actions": {
+      "connection_broken": "Genautentificér",
+      "record_failed": "Se fejl",
+      "systematic_error": "Se fejl",
+      "connector_update": "Se"
+    },
+    "resolved": "løst",
+    "channels": "Push, e-mail og SMS"
   },
   "period": {
     "label": "Periode",
@@ -494,7 +524,13 @@
       "connection_deleted": "Afbrød en forbindelse",
       "connection_broken": "Forbindelse afbrudt",
       "connection_restored": "Forbindelse virker igen",
-      "connection_webhook_rotated": "Lavede ny webhook-adresse"
+      "connection_webhook_rotated": "Lavede ny webhook-adresse",
+      "flow_paused": "Satte et flow på pause",
+      "flow_resumed": "Genoptog et flow",
+      "flow_route_paused": "Satte en rute på pause",
+      "flow_route_resumed": "Genoptog en rute",
+      "flow_retried": "Gentog fejlede records",
+      "flow_run_requested": "Startede en kørsel"
     },
     "groups": {
       "member": "Team",
@@ -504,7 +540,8 @@
       "support": "Support",
       "notifications": "Notifikationer",
       "connection": "Forbindelser",
-      "subscription": "Abonnement"
+      "subscription": "Abonnement",
+      "flow": "Flows"
     }
   },
   "form": {
@@ -849,6 +886,398 @@
       "httpsRequired": "Adressen skal starte med https://.",
       "badUrl": "Adressen kan ikke bruges. Den skal være offentlig og bruge HTTPS.",
       "generic": "Noget gik galt. Prøv igen om lidt."
+    }
+  },
+  "flows": {
+    "title": "Integrationer",
+    "count": "{count, plural, one {# flow} other {# flows}}",
+    "withErrors": "{count} med fejl",
+    "broken": "{count} afbrudt",
+    "paused": "{count} pauset",
+    "noneYet": "Ingen flows endnu · {connections, plural, one {# forbindelse} other {# forbindelser}} klar",
+    "newFlow": "Nyt flow",
+    "allSetsUsed": "Alle integrationssæt i din plan er i brug",
+    "limitTitle": "Du bruger alle integrationssæt i {plan}.",
+    "limitBody": "Eksisterende flows kører videre som normalt. Nye flows kræver en større plan.",
+    "seePlans": "Se planer",
+    "never": "Aldrig",
+    "notPublished": "ikke publiceret",
+    "records": "{count, plural, one {# record} other {# records}}",
+    "writesNothing": "skriver intet",
+    "pausedBy": "Pauset af {name}",
+    "searchLabel": "Søg i flows",
+    "searchPlaceholder": "Søg i flows, ruter og forbindelser",
+    "filter": {
+      "status": "Status",
+      "source": "Kilde",
+      "destination": "Destination",
+      "mode": "Tilstand",
+      "all": "Alle"
+    },
+    "mixed": "Blandet",
+    "viewLabel": "Visning",
+    "basic": "Basic",
+    "developer": "Developer",
+    "collapseAll": "Fold alle ind",
+    "expandAll": "Fold alle ud",
+    "bulkLabel": "Handlinger for valgte flows",
+    "selected": "{count, plural, one {# flow valgt} other {# flows valgt}}",
+    "pause": "Pause",
+    "resume": "Genoptag",
+    "runNow": "Kør nu",
+    "clearSelection": "Fjern valg",
+    "tableLabel": "Flows",
+    "selectAll": "Vælg alle flows",
+    "expand": "Fold ud",
+    "col": {
+      "flow": "Flow",
+      "connections": "Forbindelser",
+      "status": "Status",
+      "mode": "Tilstand",
+      "records": "Records 7 dage",
+      "lastRun": "Sidst kørt",
+      "actions": "Handlinger"
+    },
+    "selectFlow": "Vælg {name}",
+    "collapseFlow": "Fold {name} ind",
+    "expandFlow": "Fold {name} ud",
+    "routes": "{count, plural, one {# rute} other {# ruter}}",
+    "retry": "Gentag {count}",
+    "retryOne": "Gentag",
+    "noMatches": "Ingen flows passer til filtrene.",
+    "actionFailed": "Handlingen mislykkedes. Prøv igen.",
+    "retryStarted": "Agentor prøver de fejlede records igen",
+    "pausedToast": "{count, plural, one {Flowet er sat på pause} other {# flows er sat på pause}}",
+    "resumedToast": "{count, plural, one {Flowet kører igen} other {# flows kører igen}}",
+    "runToast": "{count, plural, one {Kørslen er startet} other {# kørsler er startet}}",
+    "reconnect": "Genautentificér",
+    "openEditor": "Åbn editor",
+    "continueSetup": "Fortsæt opsætning",
+    "moreFor": "Flere handlinger for {name}",
+    "open": "Åbn",
+    "emptyTitle": "Du har ingen flows endnu",
+    "emptyBodyConnected": "{names} er forbundet. Start med en skabelon, så står ruterne klar i Test, og du skal kun udfylde konti.",
+    "emptyBody": "Forbind din webshop og dit regnskab, og start med en skabelon.",
+    "allTemplates": "Se alle skabeloner",
+    "startBlank": "Start fra blankt",
+    "allRoutesRunning": "Aktiv · alle ruter kører",
+    "publishedBy": "publiceret v{number} af {name} {date}",
+    "tabsLabel": "Flow",
+    "tab": {
+      "overview": "Oversigt",
+      "runs": "Kørsler",
+      "routes": "Ruter",
+      "settings": "Indstillinger"
+    },
+    "seeErrors": "Se fejl",
+    "howItWorks": "Sådan virker flowet",
+    "destRoutes": "{name} · {count} ruter",
+    "sentence": {
+      "live": "{source} sendes til {destination}.",
+      "draft": "{source} lægges som kladder i {destination}.",
+      "test": "{source} afprøves mod {destination} uden at skrive.",
+      "paused": "{source} til {destination} er sat på pause af {name}."
+    },
+    "kpi": {
+      "records": "Records · 7 dage",
+      "revenue": "Synkroniseret omsætning",
+      "errorRate": "Fejlrate",
+      "nextRun": "Næste kørsel"
+    },
+    "inMinutes": "om {count} min.",
+    "everyMinutes": "{count, plural, one {Kører hvert minut} other {Kører hvert {count}. minut}}",
+    "lastRun": "sidst kørt {when}",
+    "routesTitle": "Ruter",
+    "rollUpNote": "Status rulles op: den værste rute bestemmer flowets status",
+    "records7d": "records · 7 dage",
+    "settingsTitle": "Kørsel",
+    "settingsNote": "Navn, ruter og interval ændres i editoren og gælder fra næste publicering.",
+    "versions": "Versioner",
+    "draftVersion": "Kladde",
+    "current": "Gældende",
+    "editedAt": "redigeret {when}",
+    "yesterday": "i går"
+  },
+  "recordErrors": {
+    "what": {
+      "order": "Ordre {label} blev ikke bogført i {system}",
+      "creditNote": "Kreditnota {label} blev ikke oprettet i {system}",
+      "record": "{label} blev ikke sendt til {system}"
+    },
+    "why": {
+      "accountNotFound": "Kontoen {value} findes ikke længere i {system}. Ruten sender {field} til den konto.",
+      "accountMissing": "Der er ikke valgt en konto for {field} i {system}.",
+      "invoiceMissing": "Den oprindelige faktura mangler for ordre {order}, så {system} afviser kreditnotaen.",
+      "connectionBroken": "Forbindelsen til {connector} er afbrudt, så intet kan skrives.",
+      "generic": "{system} afviste recordet. Prøv igen om lidt."
+    },
+    "fix": {
+      "openMapping": "Åbn mappingen for ruten.",
+      "chooseAccount": "Vælg en ny konto for {field}, fx 1015 Salg EU.",
+      "publishRetry": "Publicér og gentag de fejlede records.",
+      "bookInvoice": "Bogfør den oprindelige faktura i {system}.",
+      "retryLater": "Gentag, når årsagen er rettet.",
+      "reconnect": "Log ind på {connector} igen."
+    },
+    "short": {
+      "accountMissing": "Konto mangler.",
+      "invoiceMissing": "Den oprindelige faktura mangler.",
+      "waiting": "Venter på forbindelsen.",
+      "generic": "Afvist af systemet.",
+      "accountNotFound": "Konto {value} findes ikke i {system}."
+    },
+    "summary": {
+      "order": "{count, plural, one {# ordre kunne ikke bogføres i {system}.} other {# ordrer kunne ikke bogføres i {system}.}}",
+      "creditNote": "{count, plural, one {# kreditnota kunne ikke oprettes i {system}.} other {# kreditnotaer kunne ikke oprettes i {system}.}}",
+      "record": "{count, plural, one {# record fejlede.} other {# records fejlede.}}"
+    },
+    "notDone": {
+      "order": "{count, plural, one {# ordre blev ikke bogført.} other {# ordrer blev ikke bogført.}}",
+      "creditNote": "{count, plural, one {# kreditnota fejlede.} other {# kreditnotaer fejlede.}}",
+      "record": "{count, plural, one {# record fejlede.} other {# records fejlede.}}"
+    }
+  },
+  "runs": {
+    "noneToday": "Ingen kørsler det seneste døgn.",
+    "today": "I dag",
+    "listLabel": "Kørsler",
+    "records": "{count, plural, one {# record} other {# records}}",
+    "failedCount": "{count} fejl",
+    "runAt": "Kørsel {time}",
+    "summary": "{total} records · {ok} OK · {failed} fejlet",
+    "seconds": "{s} sek.",
+    "col": {
+      "record": "Record",
+      "route": "Rute",
+      "outcome": "Udfald",
+      "amount": "Beløb"
+    },
+    "outcome": {
+      "created": "Oprettet",
+      "updated": "Opdateret",
+      "skipped": "Sprunget over",
+      "failed": "Fejlet",
+      "would_create": "Ville oprette",
+      "would_update": "Ville opdatere",
+      "waiting": "Venter"
+    },
+    "outcomeEntity": {
+      "created": {
+        "order": "Faktura oprettet",
+        "creditNote": "Kreditnota oprettet",
+        "customer": "Kunde oprettet",
+        "product": "Produkt oprettet",
+        "stock": "Lager opdateret"
+      },
+      "updated": {
+        "order": "Faktura opdateret",
+        "creditNote": "Kreditnota opdateret",
+        "customer": "Kunde opdateret",
+        "product": "Produkt opdateret",
+        "stock": "Lager opdateret"
+      },
+      "would_create": {
+        "order": "Ville oprette faktura",
+        "creditNote": "Ville oprette kreditnota",
+        "customer": "Ville oprette kunde",
+        "product": "Ville oprette produkt",
+        "stock": "Ville opdatere lager"
+      },
+      "would_update": {
+        "order": "Ville opdatere faktura",
+        "creditNote": "Ville opdatere kreditnota",
+        "customer": "Ville opdatere kunde",
+        "product": "Ville opdatere produkt",
+        "stock": "Ville opdatere lager"
+      },
+      "skipped": {
+        "order": "Sprunget over",
+        "creditNote": "Sprunget over",
+        "customer": "Sprunget over",
+        "product": "Sprunget over",
+        "stock": "Sprunget over"
+      },
+      "failed": {
+        "order": "Fejlet",
+        "creditNote": "Fejlet",
+        "customer": "Fejlet",
+        "product": "Fejlet",
+        "stock": "Fejlet"
+      },
+      "waiting": {
+        "order": "Venter",
+        "creditNote": "Venter",
+        "customer": "Venter",
+        "product": "Venter",
+        "stock": "Venter"
+      }
+    },
+    "errorAt": "Fejl · {time}",
+    "why": "Hvorfor",
+    "howToFix": "Sådan løser du det",
+    "openSetting": "Åbn indstilling",
+    "technical": "Tekniske detaljer",
+    "technicalHint": "Vises i Developer-visning.",
+    "skippedZero": "Sprunget over · total 0 kr.",
+    "waitingBroken": "Venter · forbindelse afbrudt",
+    "testWould": "Test · ville oprette"
+  },
+  "activity": {
+    "title": "Aktivitet",
+    "intro": "Hvert record, Agentor har behandlet. Data gemmes i {days} dage på {plan}.",
+    "export": "Eksportér CSV",
+    "summary": "{count} records · {failed} fejlet",
+    "tableLabel": "Aktivitet",
+    "col": {
+      "time": "Tid",
+      "flowRoute": "Flow · rute",
+      "record": "Record",
+      "outcome": "Udfald",
+      "amount": "Beløb",
+      "duration": "Varighed",
+      "actions": "Handlinger",
+      "flow": "Flow",
+      "route": "Rute"
+    },
+    "empty": "Ingen records passer til filtrene.",
+    "loadMore": "Indlæs flere",
+    "searchLabel": "Søg efter ordrenummer eller navn",
+    "searchPlaceholder": "Ordrenummer, navn eller e-mail",
+    "filter": {
+      "flow": "Flow",
+      "entity": "Entitet",
+      "outcome": "Udfald",
+      "all": "Alle"
+    },
+    "entity": {
+      "order": "Ordrer",
+      "creditNote": "Kreditnotaer",
+      "customer": "Kunder",
+      "product": "Produkter",
+      "stock": "Lager"
+    },
+    "outcome": {
+      "failed": "Fejlet",
+      "ok": "OK",
+      "skipped": "Sprunget over",
+      "test": "Test"
+    }
+  },
+  "reconciliation": {
+    "title": "Afstemning",
+    "intro": "Sammenlign ordrer i webshoppen med fakturaer i regnskabet, dag for dag.",
+    "emptyTitle": "Intet at afstemme endnu",
+    "emptyBody": "Afstemning vises, når et publiceret flow sender ordrer til regnskabet.",
+    "last7": "Sidste 7 dage",
+    "ordersIn": "Ordrer i {system}",
+    "invoicesIn": "Fakturaer i {system}",
+    "difference": "Afvigelse",
+    "ordersCount": "{count, plural, one {# ordre} other {# ordrer}}",
+    "none": "Ingen",
+    "tableLabel": "Afstemning pr. dag",
+    "col": {
+      "date": "Dato",
+      "source": "Ordrer i kilde",
+      "dest": "Fakturaer i {system}",
+      "difference": "Afvigelse",
+      "sourceAmount": "Beløb i kilde",
+      "destAmount": "Beløb i {system}",
+      "actions": "Handlinger"
+    },
+    "today": "i dag",
+    "seeOrders": "Se {count, plural, one {# ordre} other {# ordrer}}",
+    "explanation": "Afvigelsen {date} er {count, plural, one {den ordre} other {de # ordrer}}, der fejlede ({list}). {count, plural, one {Den forsvinder} other {De forsvinder}}, når ordrerne er gentaget.",
+    "flowLabel": "Flow"
+  },
+  "overview": {
+    "subtitle": "{company} · {period} · opdateret lige nu",
+    "period": {
+      "today": "i dag",
+      "7d": "sidste 7 dage",
+      "30d": "sidste 30 dage"
+    },
+    "seeActivity": "Se aktivitet",
+    "newFlow": "Nyt flow",
+    "statusLabel": "Status",
+    "needsAction": "{count, plural, one {# flow kræver handling} other {# flows kræver handling}}",
+    "allRunning": "Alt kører",
+    "withErrors": "{count} med fejl",
+    "brokenConnections": "{count, plural, one {# afbrudt forbindelse} other {# afbrudte forbindelser}}",
+    "withWarnings": "{count} med advarsel",
+    "since": "siden {time}",
+    "nothingNeeded": "{count, plural, one {# flow} other {# flows}} · intet kræver handling",
+    "kpi": {
+      "revenue": "Synkroniseret omsætning",
+      "revenueTip": "Beløb på ordrer, Agentor har sendt til regnskabet. Det er ikke det samme som bogført omsætning.",
+      "vsPrevious": "mod forrige periode",
+      "orders": "Ordrer",
+      "records": "Records synkroniseret",
+      "errorRate": "Fejlrate"
+    },
+    "points": "{value} point",
+    "needsActionTitle": "Kræver handling",
+    "nothingTitle": "Intet kræver handling",
+    "nothingBody": "Vi giver besked her og på klokken, hvis noget går i stå.",
+    "recent": "Seneste aktivitet",
+    "seeAllRuns": "Se alle kørsler",
+    "col": {
+      "time": "Tid",
+      "flowRoute": "Flow · rute",
+      "records": "Records",
+      "outcome": "Udfald"
+    },
+    "failedCount": "{count} fejl",
+    "usage": "Forbrug",
+    "transactions": "Transaktioner",
+    "unlimited": "alle",
+    "resets": "{pct} · nulstilles {date}",
+    "integrationSets": "Integrationssæt",
+    "noLimit": "{plan} · ingen grænse",
+    "limitOf": "{plan} · plads til {count}",
+    "perMonth": "{price} kr./md.",
+    "subscription": "Abonnement",
+    "issue": {
+      "broken": "{name} er afbrudt.",
+      "brokenSince": "Adgangen udløb {when}."
+    },
+    "notRunning": "kører ikke",
+    "reconnect": "Forbind",
+    "fixAccount": "Ret konto",
+    "seeErrors": "Se fejl",
+    "newCustomer": {
+      "title": "Velkommen til Agentor, {name}",
+      "subtitle": "{company} · {plan} · {count, plural, =0 {klar} one {# trin tilbage, før dit første flow kører} other {# trin tilbage, før dit første flow kører}}",
+      "heading": "Kom i gang",
+      "progress": "{done} af {total}",
+      "done": "færdig",
+      "company": "Opret virksomhed",
+      "shop": "Forbind webshop",
+      "shopBody": "WooCommerce eller Shopify. Tager ca. 2 minutter.",
+      "shopAction": "Forbind webshop",
+      "erp": "Forbind regnskab",
+      "erpBody": "Log ind hos Dinero, så Agentor kan oprette fakturaer. Tager ca. 1 minut.",
+      "erpAction": "Forbind Dinero",
+      "flow": "Opret dit første flow",
+      "flowBody": "Vælg skabelonen Webshop til regnskab",
+      "flowAction": "Vælg skabelon",
+      "live": "Testkør og gå Live",
+      "liveBody": "Prøv på dine seneste 10 ordrer, før noget skrives",
+      "liveAction": "Åbn editor",
+      "status": "Status",
+      "noFlows": "Ingen flows endnu",
+      "noFlowsBody": "Her ser du, om alt kører, når dit første flow er Live.",
+      "numbers": "Nøgletal",
+      "kpi": {
+        "revenue": "Synk. omsætning",
+        "orders": "Ordrer",
+        "records": "Records",
+        "errorRate": "Fejlrate"
+      },
+      "numbersLater": "Tallene vises efter første kørsel.",
+      "help": "Brug for hjælp til opsætningen?",
+      "helpBody": "Book 20 minutter med en rådgiver, eller invitér din udvikler eller revisor.",
+      "book": "Book rådgiver",
+      "invite": "Invitér"
     }
   }
 }

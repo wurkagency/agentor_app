@@ -308,3 +308,14 @@ export async function tenantRequiresMfa(db: Database, ctx: Ctx): Promise<boolean
   );
   return rows[0]?.v ?? false;
 }
+
+/** Alert thresholds (D2: error rate 5 %, 3 failures in a row), stored per tenant. */
+export async function getTenantThresholds(db: Database, ctx: Ctx) {
+  const [t] = await withTenant(db, ctx, (tx) =>
+    tx
+      .select({ rate: tenants.alertErrorRatePct, failures: tenants.alertConsecutiveFailures })
+      .from(tenants)
+      .limit(1),
+  );
+  return { errorRatePct: t?.rate ?? 5, consecutiveFailures: t?.failures ?? 3 };
+}

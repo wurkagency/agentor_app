@@ -205,7 +205,23 @@
     "newFlow": "New flow",
     "hintMove": "move",
     "hintOpen": "open",
-    "hintClose": "close"
+    "hintClose": "close",
+    "records": "Orders",
+    "flowsAndConnections": "Flows and connections",
+    "newFlowDetail": "Choose a template",
+    "retryAll": "Retry all failed records",
+    "failuresToday": "{count} today",
+    "flowDetail": "Flow · {count, plural, one {# route} other {# routes}}",
+    "connectionDetail": "Connection",
+    "outcome": {
+      "created": "Created",
+      "updated": "Updated",
+      "skipped": "Skipped",
+      "failed": "Failed",
+      "would_create": "Test",
+      "would_update": "Test",
+      "waiting": "Waiting"
+    }
   },
   "notificationsPanel": {
     "title": "Notifications",
@@ -213,7 +229,21 @@
     "all": "All",
     "emptyTitle": "Nothing needs action",
     "emptyBody": "When something goes wrong, you'll see it here and on Overview.",
-    "settings": "Notification settings"
+    "settings": "Notification settings",
+    "items": {
+      "connectionBroken": "The {connector} connection is broken · reconnect",
+      "recordsFailed": "{count, plural, one {# record} other {# records}} failed in {flow}",
+      "creditNotesFailed": "{count} credit notes could not be created in {system}",
+      "published": "{name} published v{number}"
+    },
+    "actions": {
+      "connection_broken": "Reconnect",
+      "record_failed": "See errors",
+      "systematic_error": "See errors",
+      "connector_update": "See"
+    },
+    "resolved": "resolved",
+    "channels": "Push, e-mail and SMS"
   },
   "period": {
     "label": "Period",
@@ -494,7 +524,13 @@
       "connection_deleted": "Disconnected a connection",
       "connection_broken": "Connection broke",
       "connection_restored": "Connection works again",
-      "connection_webhook_rotated": "Made a new webhook address"
+      "connection_webhook_rotated": "Made a new webhook address",
+      "flow_paused": "Paused a flow",
+      "flow_resumed": "Resumed a flow",
+      "flow_route_paused": "Paused a route",
+      "flow_route_resumed": "Resumed a route",
+      "flow_retried": "Retried failed records",
+      "flow_run_requested": "Started a run"
     },
     "groups": {
       "member": "Team",
@@ -504,7 +540,8 @@
       "support": "Support",
       "notifications": "Notifications",
       "connection": "Connections",
-      "subscription": "Subscription"
+      "subscription": "Subscription",
+      "flow": "Flows"
     }
   },
   "form": {
@@ -849,6 +886,398 @@
       "httpsRequired": "The address must start with https://.",
       "badUrl": "The address cannot be used. It must be public and use HTTPS.",
       "generic": "Something went wrong. Try again in a moment."
+    }
+  },
+  "flows": {
+    "title": "Integrations",
+    "count": "{count, plural, one {# flow} other {# flows}}",
+    "withErrors": "{count} with errors",
+    "broken": "{count} broken",
+    "paused": "{count} paused",
+    "noneYet": "No flows yet · {connections, plural, one {# connection} other {# connections}} ready",
+    "newFlow": "New flow",
+    "allSetsUsed": "All integration sets in your plan are in use",
+    "limitTitle": "You are using all integration sets in {plan}.",
+    "limitBody": "Existing flows keep running as normal. New flows need a bigger plan.",
+    "seePlans": "See plans",
+    "never": "Never",
+    "notPublished": "not published",
+    "records": "{count, plural, one {# record} other {# records}}",
+    "writesNothing": "writes nothing",
+    "pausedBy": "Paused by {name}",
+    "searchLabel": "Search flows",
+    "searchPlaceholder": "Search flows, routes and connections",
+    "filter": {
+      "status": "Status",
+      "source": "Source",
+      "destination": "Destination",
+      "mode": "Mode",
+      "all": "All"
+    },
+    "mixed": "Mixed",
+    "viewLabel": "View",
+    "basic": "Basic",
+    "developer": "Developer",
+    "collapseAll": "Collapse all",
+    "expandAll": "Expand all",
+    "bulkLabel": "Actions for selected flows",
+    "selected": "{count, plural, one {# flow selected} other {# flows selected}}",
+    "pause": "Pause",
+    "resume": "Resume",
+    "runNow": "Run now",
+    "clearSelection": "Clear selection",
+    "tableLabel": "Flows",
+    "selectAll": "Select all flows",
+    "expand": "Expand",
+    "col": {
+      "flow": "Flow",
+      "connections": "Connections",
+      "status": "Status",
+      "mode": "Mode",
+      "records": "Records 7 days",
+      "lastRun": "Last run",
+      "actions": "Actions"
+    },
+    "selectFlow": "Select {name}",
+    "collapseFlow": "Collapse {name}",
+    "expandFlow": "Expand {name}",
+    "routes": "{count, plural, one {# route} other {# routes}}",
+    "retry": "Retry {count}",
+    "retryOne": "Retry",
+    "noMatches": "No flows match the filters.",
+    "actionFailed": "The action failed. Try again.",
+    "retryStarted": "Agentor is retrying the failed records",
+    "pausedToast": "{count, plural, one {The flow is paused} other {# flows are paused}}",
+    "resumedToast": "{count, plural, one {The flow is running again} other {# flows are running again}}",
+    "runToast": "{count, plural, one {The run has started} other {# runs have started}}",
+    "reconnect": "Reconnect",
+    "openEditor": "Open editor",
+    "continueSetup": "Continue setup",
+    "moreFor": "More actions for {name}",
+    "open": "Open",
+    "emptyTitle": "You have no flows yet",
+    "emptyBodyConnected": "{names} are connected. Start with a template so the routes are ready in Test and you only fill in accounts.",
+    "emptyBody": "Connect your webshop and accounting, and start with a template.",
+    "allTemplates": "See all templates",
+    "startBlank": "Start from scratch",
+    "allRoutesRunning": "Active · all routes running",
+    "publishedBy": "published v{number} by {name} {date}",
+    "tabsLabel": "Flow",
+    "tab": {
+      "overview": "Overview",
+      "runs": "Runs",
+      "routes": "Routes",
+      "settings": "Settings"
+    },
+    "seeErrors": "See errors",
+    "howItWorks": "How the flow works",
+    "destRoutes": "{name} · {count} routes",
+    "sentence": {
+      "live": "{source} are sent to {destination}.",
+      "draft": "{source} are placed as drafts in {destination}.",
+      "test": "{source} are tried against {destination} without writing.",
+      "paused": "{source} to {destination} is paused by {name}."
+    },
+    "kpi": {
+      "records": "Records · 7 days",
+      "revenue": "Synced revenue",
+      "errorRate": "Error rate",
+      "nextRun": "Next run"
+    },
+    "inMinutes": "in {count} min.",
+    "everyMinutes": "{count, plural, one {Runs every minute} other {Runs every {count} minutes}}",
+    "lastRun": "last run {when}",
+    "routesTitle": "Routes",
+    "rollUpNote": "Status rolls up: the worst route decides the flow status",
+    "records7d": "records · 7 days",
+    "settingsTitle": "Runs",
+    "settingsNote": "Name, routes and interval are changed in the editor and apply from the next publish.",
+    "versions": "Versions",
+    "draftVersion": "Draft",
+    "current": "Current",
+    "editedAt": "edited {when}",
+    "yesterday": "yesterday"
+  },
+  "recordErrors": {
+    "what": {
+      "order": "Order {label} was not booked in {system}",
+      "creditNote": "Credit note {label} was not created in {system}",
+      "record": "{label} was not sent to {system}"
+    },
+    "why": {
+      "accountNotFound": "Account {value} no longer exists in {system}. The route sends {field} to that account.",
+      "accountMissing": "No account has been chosen for {field} in {system}.",
+      "invoiceMissing": "The original invoice is missing for order {order}, so {system} rejects the credit note.",
+      "connectionBroken": "The connection to {connector} is broken, so nothing can be written.",
+      "generic": "{system} rejected the record. Try again in a moment."
+    },
+    "fix": {
+      "openMapping": "Open the route’s mapping.",
+      "chooseAccount": "Choose a new account for {field}, e.g. 1015 Salg EU.",
+      "publishRetry": "Publish and retry the failed records.",
+      "bookInvoice": "Book the original invoice in {system}.",
+      "retryLater": "Retry once the cause is fixed.",
+      "reconnect": "Sign in to {connector} again."
+    },
+    "short": {
+      "accountMissing": "Account missing.",
+      "invoiceMissing": "The original invoice is missing.",
+      "waiting": "Waiting for the connection.",
+      "generic": "Rejected by the system.",
+      "accountNotFound": "Account {value} does not exist in {system}."
+    },
+    "summary": {
+      "order": "{count, plural, one {# order could not be booked in {system}.} other {# orders could not be booked in {system}.}}",
+      "creditNote": "{count, plural, one {# credit note could not be created in {system}.} other {# credit notes could not be created in {system}.}}",
+      "record": "{count, plural, one {# record failed.} other {# records failed.}}"
+    },
+    "notDone": {
+      "order": "{count, plural, one {# order was not booked.} other {# orders were not booked.}}",
+      "creditNote": "{count, plural, one {# credit note failed.} other {# credit notes failed.}}",
+      "record": "{count, plural, one {# record failed.} other {# records failed.}}"
+    }
+  },
+  "runs": {
+    "noneToday": "No runs in the last day.",
+    "today": "Today",
+    "listLabel": "Runs",
+    "records": "{count, plural, one {# record} other {# records}}",
+    "failedCount": "{count} errors",
+    "runAt": "Run {time}",
+    "summary": "{total} records · {ok} OK · {failed} failed",
+    "seconds": "{s} sec.",
+    "col": {
+      "record": "Record",
+      "route": "Route",
+      "outcome": "Outcome",
+      "amount": "Amount"
+    },
+    "outcome": {
+      "created": "Created",
+      "updated": "Updated",
+      "skipped": "Skipped",
+      "failed": "Failed",
+      "would_create": "Would create",
+      "would_update": "Would update",
+      "waiting": "Waiting"
+    },
+    "outcomeEntity": {
+      "created": {
+        "order": "Invoice created",
+        "creditNote": "Credit note created",
+        "customer": "Customer created",
+        "product": "Product created",
+        "stock": "Stock updated"
+      },
+      "updated": {
+        "order": "Invoice updated",
+        "creditNote": "Credit note updated",
+        "customer": "Customer updated",
+        "product": "Product updated",
+        "stock": "Stock updated"
+      },
+      "would_create": {
+        "order": "Would create invoice",
+        "creditNote": "Would create credit note",
+        "customer": "Would create customer",
+        "product": "Would create product",
+        "stock": "Would update stock"
+      },
+      "would_update": {
+        "order": "Would update invoice",
+        "creditNote": "Would update credit note",
+        "customer": "Would update customer",
+        "product": "Would update product",
+        "stock": "Would update stock"
+      },
+      "skipped": {
+        "order": "Skipped",
+        "creditNote": "Skipped",
+        "customer": "Skipped",
+        "product": "Skipped",
+        "stock": "Skipped"
+      },
+      "failed": {
+        "order": "Failed",
+        "creditNote": "Failed",
+        "customer": "Failed",
+        "product": "Failed",
+        "stock": "Failed"
+      },
+      "waiting": {
+        "order": "Waiting",
+        "creditNote": "Waiting",
+        "customer": "Waiting",
+        "product": "Waiting",
+        "stock": "Waiting"
+      }
+    },
+    "errorAt": "Error · {time}",
+    "why": "Why",
+    "howToFix": "How to fix it",
+    "openSetting": "Open setting",
+    "technical": "Technical details",
+    "technicalHint": "Shown in Developer view.",
+    "skippedZero": "Skipped · total 0 kr.",
+    "waitingBroken": "Waiting · connection broken",
+    "testWould": "Test · would create"
+  },
+  "activity": {
+    "title": "Activity",
+    "intro": "Every record Agentor has handled. Data is kept for {days} days on {plan}.",
+    "export": "Export CSV",
+    "summary": "{count} records · {failed} failed",
+    "tableLabel": "Activity",
+    "col": {
+      "time": "Time",
+      "flowRoute": "Flow · route",
+      "record": "Record",
+      "outcome": "Outcome",
+      "amount": "Amount",
+      "duration": "Duration",
+      "actions": "Actions",
+      "flow": "Flow",
+      "route": "Route"
+    },
+    "empty": "No records match the filters.",
+    "loadMore": "Load more",
+    "searchLabel": "Search by order number or name",
+    "searchPlaceholder": "Order number, name or e-mail",
+    "filter": {
+      "flow": "Flow",
+      "entity": "Entity",
+      "outcome": "Outcome",
+      "all": "All"
+    },
+    "entity": {
+      "order": "Orders",
+      "creditNote": "Credit notes",
+      "customer": "Customers",
+      "product": "Products",
+      "stock": "Stock"
+    },
+    "outcome": {
+      "failed": "Failed",
+      "ok": "OK",
+      "skipped": "Skipped",
+      "test": "Test"
+    }
+  },
+  "reconciliation": {
+    "title": "Reconciliation",
+    "intro": "Compare orders in the webshop with invoices in accounting, day by day.",
+    "emptyTitle": "Nothing to reconcile yet",
+    "emptyBody": "Reconciliation appears when a published flow sends orders to accounting.",
+    "last7": "Last 7 days",
+    "ordersIn": "Orders in {system}",
+    "invoicesIn": "Invoices in {system}",
+    "difference": "Difference",
+    "ordersCount": "{count, plural, one {# order} other {# orders}}",
+    "none": "None",
+    "tableLabel": "Reconciliation per day",
+    "col": {
+      "date": "Date",
+      "source": "Orders in source",
+      "dest": "Invoices in {system}",
+      "difference": "Difference",
+      "sourceAmount": "Amount in source",
+      "destAmount": "Amount in {system}",
+      "actions": "Actions"
+    },
+    "today": "today",
+    "seeOrders": "See {count, plural, one {# order} other {# orders}}",
+    "explanation": "The difference on {date} is the {count, plural, one {order} other {# orders}} that failed ({list}). {count, plural, one {It disappears} other {They disappear}} once retried.",
+    "flowLabel": "Flow"
+  },
+  "overview": {
+    "subtitle": "{company} · {period} · updated just now",
+    "period": {
+      "today": "today",
+      "7d": "last 7 days",
+      "30d": "last 30 days"
+    },
+    "seeActivity": "See activity",
+    "newFlow": "New flow",
+    "statusLabel": "Status",
+    "needsAction": "{count, plural, one {# flow needs action} other {# flows need action}}",
+    "allRunning": "Everything is running",
+    "withErrors": "{count} with errors",
+    "brokenConnections": "{count, plural, one {# broken connection} other {# broken connections}}",
+    "withWarnings": "{count} with warnings",
+    "since": "since {time}",
+    "nothingNeeded": "{count, plural, one {# flow} other {# flows}} · nothing needs action",
+    "kpi": {
+      "revenue": "Synced revenue",
+      "revenueTip": "Amounts on orders Agentor has sent to accounting. Not the same as booked revenue.",
+      "vsPrevious": "vs previous period",
+      "orders": "Orders",
+      "records": "Records synced",
+      "errorRate": "Error rate"
+    },
+    "points": "{value} points",
+    "needsActionTitle": "Needs action",
+    "nothingTitle": "Nothing needs action",
+    "nothingBody": "We will tell you here and on the bell if something stops.",
+    "recent": "Latest activity",
+    "seeAllRuns": "See all runs",
+    "col": {
+      "time": "Time",
+      "flowRoute": "Flow · route",
+      "records": "Records",
+      "outcome": "Outcome"
+    },
+    "failedCount": "{count} errors",
+    "usage": "Usage",
+    "transactions": "Transactions",
+    "unlimited": "all",
+    "resets": "{pct} · resets {date}",
+    "integrationSets": "Integration sets",
+    "noLimit": "{plan} · no limit",
+    "limitOf": "{plan} · room for {count}",
+    "perMonth": "DKK {price}/mo.",
+    "subscription": "Subscription",
+    "issue": {
+      "broken": "{name} is disconnected.",
+      "brokenSince": "Access expired {when}."
+    },
+    "notRunning": "not running",
+    "reconnect": "Connect",
+    "fixAccount": "Fix account",
+    "seeErrors": "See errors",
+    "newCustomer": {
+      "title": "Welcome to Agentor, {name}",
+      "subtitle": "{company} · {plan} · {count, plural, =0 {ready} one {# step left before your first flow runs} other {# steps left before your first flow runs}}",
+      "heading": "Get started",
+      "progress": "{done} of {total}",
+      "done": "done",
+      "company": "Create company",
+      "shop": "Connect webshop",
+      "shopBody": "WooCommerce or Shopify. Takes about 2 minutes.",
+      "shopAction": "Connect webshop",
+      "erp": "Connect accounting",
+      "erpBody": "Sign in to Dinero so Agentor can create invoices. Takes about 1 minute.",
+      "erpAction": "Connect Dinero",
+      "flow": "Create your first flow",
+      "flowBody": "Choose the template Webshop to accounting",
+      "flowAction": "Choose template",
+      "live": "Test run and go Live",
+      "liveBody": "Try on your latest 10 orders before anything is written",
+      "liveAction": "Open editor",
+      "status": "Status",
+      "noFlows": "No flows yet",
+      "noFlowsBody": "Here you see whether everything runs once your first flow is Live.",
+      "numbers": "Key figures",
+      "kpi": {
+        "revenue": "Synced revenue",
+        "orders": "Orders",
+        "records": "Records",
+        "errorRate": "Error rate"
+      },
+      "numbersLater": "The numbers appear after the first run.",
+      "help": "Need help with the setup?",
+      "helpBody": "Book 20 minutes with an adviser, or invite your developer or accountant.",
+      "book": "Book adviser",
+      "invite": "Invite"
     }
   }
 }

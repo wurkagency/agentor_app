@@ -1,6 +1,9 @@
 import { adapterFor, manifestFor, verifyWebhookSignature } from '@agentor/connectors';
 import {
   loadConnectionForWorker,
+  notify,
+  resolveNotifications,
+  saveLookup,
   loadInboundEvent,
   markInboundEvent,
   recordConnectionTest,
@@ -37,7 +40,7 @@ export interface ConnectionDeps {
  * KEK is moved under the tenant DEK on first use, so the KEK private key is needed only to
  * unwrap DEKs from then on.
  */
-async function credentials(
+export async function credentials(
   deps: ConnectionDeps,
   tenantId: string,
   connectionId: string,
@@ -92,6 +95,33 @@ async function testConnection(deps: ConnectionDeps, tenantId: string, connection
       ? { ok: true, accountId: result.account.id, accountName: result.account.name }
       : { ok: false, reason: REASONS[result.reason] },
   );
+  const manifest = manifestFor(conn.connectorId);
+  if (result.ok) {
+    // Live lookups the editor maps against (chart of accounts, §4.5), cached per connection.
+    const lists = new Set(
+      Object.values(manifest?.mapping ?? {})
+        .flat()
+        .flatMap((g) => g!.fields.map((f) => f.lookup))
+        .filter((x): x is 'accounts' | 'vatCodes' | 'templates' => Boolean(x)),
+    );
+    const adapter = adapterFor({
+      connectorId: conn.connectorId,
+      credentials: creds,
+      mode: deps.connectorMode,
+    });
+    for (const list of lists)
+      await saveLookup(deps.db, tenantId, connectionId, list, await adapter.lookup(list));
+    await resolveNotifications(deps.db, tenantId, { connectionId });
+  } else {
+    await notify(deps.db, tenantId, {
+      event: 'connection_broken',
+      messageKey: 'connectionBroken',
+      params: { connector: manifest?.name ?? conn.connectorId, name: conn.name },
+      href: `/connections/${connectionId}`,
+      needsAction: true,
+      connectionId,
+    });
+  }
   deps.log.info({ tenantId, connectionId, ok: result.ok }, 'connection tested');
 }
 

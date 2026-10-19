@@ -14,6 +14,7 @@
     "@agentor/billing": "workspace:*",
     "@agentor/connectors": "workspace:*",
     "@agentor/db": "workspace:*",
+    "@agentor/flows": "workspace:*",
     "@agentor/jobs": "workspace:*",
     "@agentor/keybox": "workspace:*",
     "bullmq": "^5.0.0",

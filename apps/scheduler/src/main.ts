@@ -1,8 +1,9 @@
-import { createDatabase, dueSubscriptions } from '@agentor/db';
-import { billingQueue, enqueueBilling } from '@agentor/jobs';
+import { createDatabase, createScheduledRun, dueFlows, dueSubscriptions } from '@agentor/db';
+import { billingQueue, enqueueBilling, enqueueFlowRun, flowsQueue } from '@agentor/jobs';
 import { Redis } from 'ioredis';
 import pino from 'pino';
 import { BILLING_INTERVAL_MS, billingTick } from './billing.js';
+import { FLOW_INTERVAL_MS, flowTick } from './flows.js';
 import { LeaderLock } from './leader-lock.js';
 
 const log = pino({
@@ -41,9 +42,25 @@ const runBilling = () =>
 const billingTimer = setInterval(runBilling, BILLING_INTERVAL_MS);
 setTimeout(runBilling, 5_000);
 
+const runQueue = flowsQueue(redis);
+const runFlows = () =>
+  flowTick({
+    isLeader: () => lock.isLeader,
+    dueFlows: (now) => dueFlows(database.db, now),
+    createRun: (tenantId, flowId) => createScheduledRun(database.db, tenantId, flowId),
+    enqueue: (tenantId, runId) => enqueueFlowRun(runQueue, { tenantId, runId }),
+  })
+    .then((n) => n && log.info({ runs: n }, 'flow runs queued'))
+    .catch((err: unknown) =>
+      log.error({ err: err instanceof Error ? err.message : err }, 'flow tick failed'),
+    );
+const flowTimer = setInterval(runFlows, FLOW_INTERVAL_MS);
+
 const shutdown = async (signal: string) => {
   log.info({ signal }, 'shutting down');
   clearInterval(billingTimer);
+  clearInterval(flowTimer);
+  await runQueue.close();
   await lock.stop();
   await queue.close();
   await database.close();

@@ -108,8 +108,11 @@ export function SecurityView({
               {t('newCodes')}
             </Button>
           ) : (
-            <Button size="s" variant="primary" icon={ShieldCheck} asChild>
-              <Link href="/login/mfa/setup">{t('mfaSetup')}</Link>
+            <Button size="s" variant="primary" asChild>
+              <Link href="/login/mfa/setup">
+                <Icon icon={ShieldCheck} size={16} />
+                {t('mfaSetup')}
+              </Link>
             </Button>
           )}
         </div>

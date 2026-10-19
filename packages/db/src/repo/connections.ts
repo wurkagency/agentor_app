@@ -61,9 +61,13 @@ const columns = {
   tokenExpiresAt: connections.tokenExpiresAt,
 };
 
-/** How many flows use a connection (flow nodes reference connections from M6 on). */
-async function countUsage(_tx: Transaction, _connectionId: string): Promise<number> {
-  return 0;
+/** How many flows use a connection in their published version or draft (D9 "Bruges i N flows"). */
+async function countUsage(tx: Transaction, connectionId: string): Promise<number> {
+  const res = await tx.execute<{ n: number }>(sql`
+    select count(distinct v.flow_id)::int as n from flow_versions v
+     where v.state in ('published', 'draft')
+       and v.definition -> 'nodes' @> ${JSON.stringify([{ connectionId }])}::jsonb`);
+  return res.rows[0]?.n ?? 0;
 }
 
 export async function listConnections(db: Database, ctx: Ctx): Promise<ConnectionRow[]> {

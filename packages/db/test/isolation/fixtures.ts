@@ -34,6 +34,23 @@ export const ID = {
   secretB: '0190a000-0000-7000-8000-0000000b6001',
   auditA: '0190a000-0000-7000-8000-0000000a7001',
   auditB: '0190a000-0000-7000-8000-0000000b7001',
+  versionA1: '0190a000-0000-7000-8000-0000000a2101',
+  versionA2: '0190a000-0000-7000-8000-0000000a2102',
+  versionB1: '0190a000-0000-7000-8000-0000000b2101',
+  draftA1: '0190a000-0000-7000-8000-0000000a2103',
+  draftB1: '0190a000-0000-7000-8000-0000000b2103',
+  runA1: '0190a000-0000-7000-8000-0000000a2201',
+  runA2: '0190a000-0000-7000-8000-0000000a2202',
+  runB1: '0190a000-0000-7000-8000-0000000b2201',
+  recordA1: '0190a000-0000-7000-8000-0000000a2301',
+  recordA2: '0190a000-0000-7000-8000-0000000a2302',
+  recordB1: '0190a000-0000-7000-8000-0000000b2301',
+  linkA1: '0190a000-0000-7000-8000-0000000a2401',
+  linkB1: '0190a000-0000-7000-8000-0000000b2401',
+  lookupA: '0190a000-0000-7000-8000-0000000a4201',
+  lookupB: '0190a000-0000-7000-8000-0000000b4201',
+  noteA: '0190a000-0000-7000-8000-0000000a7101',
+  noteB: '0190a000-0000-7000-8000-0000000b7101',
   inviteA: '0190a000-0000-7000-8000-0000000a8001',
   inviteB: '0190a000-0000-7000-8000-0000000b8001',
   grantSupportA: '0190a000-0000-7000-8000-0000000a9001',
@@ -185,6 +202,79 @@ export async function seedFixtures(admin: pg.ClientBase): Promise<void> {
        ($1, 'AG-TEST-A', '2026-10-01', '2026-11-01', 'Business · månedlig', 19875, 3975),
        ($2, 'AG-TEST-B', '2026-10-01', '2026-11-01', 'Startup · månedlig', 9875, 1975)`,
     [ID.tenantA, ID.tenantB],
+  );
+  // M6: flows, runs, records, links, lookups, notifications. Flow A2 is not granted to the
+  // restricted developer, so its version, run and record must stay invisible to them.
+  await q(
+    `insert into flow_versions (tenant_id, id, flow_id, number, state, definition) values
+       ($1, $3, $5, 1, 'published', '{}'), ($1, $4, $6, 1, 'published', '{}'), ($2, $7, $8, 1, 'published', '{}')`,
+    [
+      ID.tenantA,
+      ID.tenantB,
+      ID.versionA1,
+      ID.versionA2,
+      ID.flowA1,
+      ID.flowA2,
+      ID.versionB1,
+      ID.flowB1,
+    ],
+  );
+  await q(
+    `insert into flow_versions (tenant_id, id, flow_id, state, definition) values
+       ($1, $3, $5, 'draft', '{}'), ($2, $4, $6, 'draft', '{}')`,
+    [ID.tenantA, ID.tenantB, ID.draftA1, ID.draftB1, ID.flowA1, ID.flowB1],
+  );
+  await q(
+    `insert into runs (tenant_id, id, flow_id, version_id, kind, status) values
+       ($1, $3, $5, $6, 'scheduled', 'ok'), ($1, $4, $7, $8, 'scheduled', 'ok'),
+       ($2, $9, $10, $11, 'scheduled', 'ok')`,
+    [
+      ID.tenantA,
+      ID.tenantB,
+      ID.runA1,
+      ID.runA2,
+      ID.flowA1,
+      ID.versionA1,
+      ID.flowA2,
+      ID.versionA2,
+      ID.runB1,
+      ID.flowB1,
+      ID.versionB1,
+    ],
+  );
+  await q(
+    `insert into run_records (tenant_id, id, run_id, flow_id, route_id, entity, source_id, label, outcome, mode) values
+       ($1, $3, $5, $6, 'r1', 'order', 'o-1', '#1', 'created', 'live'),
+       ($1, $4, $7, $8, 'r1', 'order', 'o-2', '#2', 'failed', 'live'),
+       ($2, $9, $10, $11, 'r1', 'order', 'o-3', '#3', 'created', 'live')`,
+    [
+      ID.tenantA,
+      ID.tenantB,
+      ID.recordA1,
+      ID.recordA2,
+      ID.runA1,
+      ID.flowA1,
+      ID.runA2,
+      ID.flowA2,
+      ID.recordB1,
+      ID.runB1,
+      ID.flowB1,
+    ],
+  );
+  await q(
+    `insert into record_links (tenant_id, id, flow_id, route_id, source_id, destination_id) values
+       ($1, $3, $5, 'r1', 'o-1', 'd-1'), ($2, $4, $6, 'r1', 'o-3', 'd-3')`,
+    [ID.tenantA, ID.tenantB, ID.linkA1, ID.linkB1, ID.flowA1, ID.flowB1],
+  );
+  await q(
+    `insert into connection_lookups (tenant_id, id, connection_id, list, options) values
+       ($1, $3, $5, 'accounts', '[]'), ($2, $4, $6, 'accounts', '[]')`,
+    [ID.tenantA, ID.tenantB, ID.lookupA, ID.lookupB, ID.connA, ID.connB],
+  );
+  await q(
+    `insert into notifications (tenant_id, id, user_id, event, message_key) values
+       ($1, $3, $5, 'systematic_error', 'test'), ($2, $4, $6, 'systematic_error', 'test')`,
+    [ID.tenantA, ID.tenantB, ID.noteA, ID.noteB, ID.userAOwner, ID.userBOwner],
   );
   await q('commit');
 }

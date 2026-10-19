@@ -8,6 +8,7 @@ export const ACTION_GROUPS = [
   'notifications',
   'connection',
   'subscription',
+  'flow',
 ] as const;
 export const PERIODS = { '7': 7, '30': 30, '90': 90 } as const;
 

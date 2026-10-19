@@ -40,6 +40,24 @@ export const CUSTOMERS: Customer[] = [
     vatNumber: 'DE811000001',
     address: { line1: 'Radweg 4', postalCode: '20095', city: 'Hamburg', country: 'DE' },
   },
+  {
+    sourceId: 'c-907',
+    kind: 'company',
+    name: 'Cykelhuset Malmö AB',
+    email: 'inkop@cykelhuset.example',
+    phone: null,
+    vatNumber: 'SE556000000101',
+    address: { line1: 'Storgatan 8', postalCode: '21142', city: 'Malmö', country: 'SE' },
+  },
+  {
+    sourceId: 'c-908',
+    kind: 'company',
+    name: 'Fietsen de Vries B.V.',
+    email: 'inkoop@devries.example',
+    phone: null,
+    vatNumber: 'NL800000001B01',
+    address: { line1: 'Kanaalweg 2', postalCode: '1012', city: 'Amsterdam', country: 'NL' },
+  },
   person('c-902', 'Line Kjær', 'line.kjaer@example.dk', dk('Søndergade 12', '8000', 'Aarhus C')),
   person('c-903', 'Mads Holt', 'mads.holt@example.dk', dk('Vestergade 3', '5000', 'Odense C')),
   person('c-904', 'Ane Bruun', 'ane.bruun@example.dk', dk('Nørregade 40', '1165', 'København K')),
@@ -157,9 +175,18 @@ export const ORDERS: Order[] = [
   order(10444, 'c-904', [line('p-6')], { minutesAgo: 63, total: 0 }),
   order(10443, 'c-905', [line('p-4')], { minutesAgo: 80 }),
   order(10442, 'c-906', [line('p-6', 2)], { shipping: kr(39.2), minutesAgo: 95 }),
-  order(10441, 'c-902', [line('p-7')], { minutesAgo: 130 }),
+  // Two more EU B2B sales: with the stale EU account they fail like #10447 (D1-Problemer).
+  order(10441, 'c-907', [line('p-2', 1, 0)], {
+    shipping: kr(149),
+    shippingVatRate: 0,
+    minutesAgo: 130,
+  }),
   order(10440, 'c-903', [line('p-4'), line('p-6')], { shipping: kr(39.2), minutesAgo: 170 }),
-  order(10439, 'c-905', [line('p-5')], { minutesAgo: 205 }),
+  order(10439, 'c-908', [line('p-4', 2, 0)], {
+    shipping: kr(99),
+    shippingVatRate: 0,
+    minutesAgo: 205,
+  }),
   order(10438, 'c-906', [line('p-3'), line('p-6')], { shipping: kr(39.2), minutesAgo: 240 }),
 ];
 

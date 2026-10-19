@@ -90,7 +90,11 @@ export const dinero: ConnectorManifest = {
     scopes: ['read', 'write', 'dineropublicapi:read', 'dineropublicapi:write'],
   },
   accountHint: 'Virksomhed i Dinero',
-  outputs: [{ entity: 'customer', label: 'Kontakter', trigger: { kind: 'poll', minMinutes: 15 } }],
+  outputs: [
+    { entity: 'customer', label: 'Kontakter', trigger: { kind: 'poll', minMinutes: 15 } },
+    // Retur-flows (§4.2): stock counts from the ERP back to the shops.
+    { entity: 'stock', label: 'Lagerantal', trigger: { kind: 'poll', minMinutes: 15 } },
+  ],
   inputs: [
     { entity: 'order', label: 'Fakturaer', modes: [...ORDER_MODES] },
     { entity: 'creditNote', label: 'Kreditnotaer', modes: [...ORDER_MODES] },

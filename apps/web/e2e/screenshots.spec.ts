@@ -106,3 +106,39 @@ test('M5 connections', async ({ page }) => {
   await page.goto('/connect/dinero');
   await shot(page, 'D9-Login-mock');
 });
+
+test('M6 overview, integrations, flow, activity', async ({ page }) => {
+  test.setTimeout(120_000);
+  await login(page, 'mette');
+  await page.goto('/');
+  await shot(page, 'D1-Overblik-Problemer', true);
+  await page.goto('/integrations');
+  await shot(page, 'D2-Integrationer', true);
+  await page
+    .getByRole('button', { name: 'Notifikationer' })
+    .first()
+    .click()
+    .catch(() => undefined);
+  await page
+    .locator('[aria-label^="Notifikationer"]')
+    .first()
+    .click()
+    .catch(() => undefined);
+  await shot(page, 'D2-Notifikationer');
+  await page.keyboard.press('Escape');
+  await page.goto('/integrations/0190b000-0000-7000-8000-000000000201');
+  await shot(page, 'D7-Flow-Fejl', true);
+  await page.goto('/integrations/0190b000-0000-7000-8000-000000000201?tab=runs');
+  await shot(page, 'D8-Koersler-Forretning', true);
+  await page.goto('/integrations/0190b000-0000-7000-8000-000000000201?tab=runs&view=developer');
+  await shot(page, 'D8-Koersler-Udvikler', true);
+  await page.goto('/activity');
+  await shot(page, 'D10-Aktivitet-Log', true);
+  await page.goto('/activity/reconciliation');
+  await shot(page, 'D10-Afstemning', true);
+  await page.goto('/');
+  await page.keyboard.press('Control+k');
+  await page.keyboard.type('10447');
+  await page.waitForTimeout(800);
+  await shot(page, 'D1-Soeg');
+});

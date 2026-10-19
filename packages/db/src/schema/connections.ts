@@ -9,6 +9,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core';
 import { bytea, createdAt, idColumn, tenantIdColumn, updatedAt } from './columns.js';
@@ -127,5 +128,26 @@ export const connectionSecrets = pgTable(
       foreignColumns: [connections.tenantId, connections.id],
     }).onDelete('cascade'),
     check('connection_secrets_format_check', sql`length(${t.format}) between 1 and 64`),
+  ],
+);
+
+/** Live lookup lists from a destination (chart of accounts, VAT codes), fetched by the worker. */
+export const connectionLookups = pgTable(
+  'connection_lookups',
+  {
+    tenantId: tenantIdColumn(),
+    id: idColumn(),
+    connectionId: uuid('connection_id').notNull(),
+    list: text('list').$type<'accounts' | 'vatCodes' | 'templates'>().notNull(),
+    options: jsonb('options').$type<{ value: string; label: string }[]>().notNull(),
+    fetchedAt: ts('fetched_at').notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.id] }),
+    foreignKey({
+      columns: [t.tenantId, t.connectionId],
+      foreignColumns: [connections.tenantId, connections.id],
+    }).onDelete('cascade'),
+    uniqueIndex('connection_lookups_list_key').on(t.tenantId, t.connectionId, t.list),
   ],
 );

@@ -6,8 +6,8 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Logo } from '../logo';
-import { CommandPalette } from './command-palette';
-import { NotificationsPopover } from './notifications-popover';
+import { CommandPalette, type PaletteEntities } from './command-palette';
+import { NotificationsPopover, type NotificationItem } from './notifications-popover';
 import { ProfileMenu, type ProfileMenuProps } from './profile-menu';
 
 const PRIMARY = [
@@ -24,13 +24,16 @@ const PRIMARY = [
 export interface AppHeaderProps extends ProfileMenuProps {
   /** Items that need action; red badge when any of them is an error or broken connection. */
   attention: { count: number; severe: boolean };
+  notifications: NotificationItem[];
+  /** Flows and connections for ⌘K (D1-Søg). */
+  search: PaletteEntities;
 }
 
 /**
  * App shell header (App-skal-B, README decision 1): 88 px, logo, primary text navigation with a
  * 2 px dark underline, then ⌘K, the bell and the account chip. No sidebar, no help icon.
  */
-export function AppHeader({ attention, ...profile }: AppHeaderProps) {
+export function AppHeader({ attention, notifications, search, ...profile }: AppHeaderProps) {
   const t = useTranslations('nav');
   const pathname = usePathname();
   return (
@@ -59,6 +62,7 @@ export function AppHeader({ attention, ...profile }: AppHeaderProps) {
         </nav>
         <div className="flex flex-none items-center gap-1">
           <CommandPalette
+            entities={search}
             trigger={
               <button
                 type="button"
@@ -70,6 +74,7 @@ export function AppHeader({ attention, ...profile }: AppHeaderProps) {
             }
           />
           <NotificationsPopover
+            items={notifications}
             trigger={
               <button
                 type="button"

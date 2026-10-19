@@ -261,6 +261,9 @@ importers:
       '@agentor/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@agentor/flows':
+        specifier: workspace:*
+        version: link:../../packages/flows
       '@agentor/http':
         specifier: workspace:*
         version: link:../../packages/http
@@ -385,6 +388,9 @@ importers:
       '@agentor/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@agentor/flows':
+        specifier: workspace:*
+        version: link:../../packages/flows
       '@agentor/jobs':
         specifier: workspace:*
         version: link:../../packages/jobs
@@ -480,6 +486,28 @@ importers:
       tsx:
         specifier: ^4.0.0
         version: 4.23.15
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  packages/flows:
+    dependencies:
+      '@agentor/connectors':
+        specifier: workspace:*
+        version: link:../connectors
+      '@agentor/core':
+        specifier: workspace:*
+        version: link:../core
+      zod:
+        specifier: ^4.0.0
+        version: 4.6.6
+    devDependencies:
+      '@agentor/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
       vitest:
         specifier: ^4.0.0
         version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
