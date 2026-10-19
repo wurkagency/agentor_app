@@ -20,7 +20,7 @@ import { requireRole } from '@/server/auth/session';
 import { billingOverview } from '@/server/billing-overview';
 import { connectionMap, viewsFor } from '@/server/flows';
 import { db } from '@/server/infra';
-import { enqueueRun } from '@/server/runs';
+import { enqueueRun, previewExpression } from '@/server/runs';
 
 const EDITORS = ['owner', 'admin', 'developer'] as const;
 
@@ -177,4 +177,27 @@ export async function discardDraftAction(flowId: string, draftId: string): Promi
 export async function releaseLockAction(draftId: string): Promise<void> {
   const ctx = await requireRole(EDITORS, { support: true });
   if (isUuid(draftId)) await releaseDraftLock(db(), await actorFor(ctx), draftId);
+}
+
+/**
+ * Live preview of a developer expression (D6 Developer-visning): evaluated in the same sandbox
+ * thread as the engine, against a fictional sample record of the route's source entity.
+ */
+export async function previewExpressionAction(
+  entity: string,
+  source: string,
+): Promise<ActionResult<{ value: string }>> {
+  await requireRole(EDITORS, { support: true });
+  const kinds = ['order', 'creditNote', 'customer', 'product', 'stock'] as const;
+  const kind = kinds.find((k) => k === entity);
+  if (!kind || typeof source !== 'string' || source.length > 2000)
+    return { ok: false, error: 'invalid' };
+  try {
+    const res = await previewExpression(kind, source);
+    return res.ok
+      ? { ok: true, data: { value: res.value ?? 'null' } }
+      : { ok: false, error: res.error ?? 'invalid' };
+  } catch {
+    return { ok: false, error: 'timeout' };
+  }
 }

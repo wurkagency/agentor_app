@@ -63,6 +63,30 @@ export function explain(t: (k: string, p?: Record<string, string>) => string, e:
         short: t('short.waiting'),
         mappingField: null,
       };
+    case 'DESTINATION_REJECTED':
+      return {
+        what,
+        why: t('why.rejected', { system: e.system, message: p.message ?? '' }),
+        steps: [t('fix.checkData', { system: e.system }), t('fix.publishRetry')],
+        short: t('short.rejected'),
+        mappingField: null,
+      };
+    case 'DEPENDENCY_MISSING':
+      return {
+        what,
+        why: t('why.dependency', { system: e.system, entity: t(`entity.${p.entity ?? 'record'}`) }),
+        steps: [t('fix.checkSource'), t('fix.retryLater')],
+        short: t('short.dependency', { entity: t(`entity.${p.entity ?? 'record'}`) }),
+        mappingField: null,
+      };
+    case 'EXPRESSION_ERROR':
+      return {
+        what,
+        why: t('why.expression', { field: p.field ?? '' }),
+        steps: [t('fix.openMapping'), t('fix.publishRetry')],
+        short: t('short.expression', { field: p.field ?? '' }),
+        mappingField: null,
+      };
     default:
       return {
         what,

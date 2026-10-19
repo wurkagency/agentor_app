@@ -156,14 +156,21 @@ export function describeFilters(
   t: (k: string, p?: Record<string, string | number>) => string,
   rules: Route['filters'],
 ): string {
-  return rules
-    .map((r) =>
-      t(`filter.sentence.${r.field}`, {
-        op: t(`filter.ops.${r.op}`),
-        value: String(r.value),
-      }),
-    )
-    .join(' og ');
+  const groups = [...new Set(rules.map((r) => r.group ?? 0))].sort();
+  const sentence = (rs: Route['filters']) =>
+    rs
+      .map((r) =>
+        t(`filter.sentence.${r.field}`, {
+          op: t(`filter.ops.${r.op}`),
+          value: String(r.value),
+        }),
+      )
+      .join(` ${t('filter.and')} `);
+  if (groups.length <= 1) return sentence(rules);
+  // OR groups: "(a og b) eller (c)".
+  return groups
+    .map((g) => `(${sentence(rules.filter((r) => (r.group ?? 0) === g))})`)
+    .join(` ${t('filter.or')} `);
 }
 
 /** Routes that write invoices to an ERP: the publish dialog asks how (D5 "Som kladde"). */

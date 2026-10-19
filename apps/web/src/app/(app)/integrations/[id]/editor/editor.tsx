@@ -350,7 +350,7 @@ export function Editor(p: EditorProps) {
     } else if (f.path?.startsWith('general')) setTab('general');
   };
 
-  const addDestination = (connectionId: string) =>
+  const addDestination = (connectionId: string, at?: { x: number; y: number }) =>
     updateFlow((d) => {
       const c = conns[connectionId];
       if (!c) return;
@@ -362,7 +362,7 @@ export function Editor(p: EditorProps) {
         id,
         role: 'destination',
         connectionId,
-        position: { x: 520, y: Math.max(0, ...ys) },
+        position: at ?? { x: 520, y: Math.max(0, ...ys) },
       });
     });
 
@@ -390,6 +390,7 @@ export function Editor(p: EditorProps) {
         categoryAccounts: [],
         filters: [],
         updateExisting: true,
+        expressions: {},
       });
       setTimeout(() => {
         setSelected(id);
@@ -643,6 +644,19 @@ export function Editor(p: EditorProps) {
                     setInspectorOpen(true);
                   }}
                   onConnect={connect}
+                  onDropConnection={(id, x, y) => {
+                    const c = conns[id];
+                    // Only what the palette would add: an unused, working destination.
+                    const dests = def.nodes.filter((n) => n.role === 'destination').length;
+                    if (
+                      !c ||
+                      c.status === 'broken' ||
+                      def.nodes.some((n) => n.connectionId === id) ||
+                      (p.plan.maxDestinations !== null && dests >= p.plan.maxDestinations)
+                    )
+                      return;
+                    addDestination(id, { x, y });
+                  }}
                   onMoveNode={(id, x, y) =>
                     updateFlow((d) => {
                       const n = d.nodes.find((q) => q.id === id);

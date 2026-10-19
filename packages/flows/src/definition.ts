@@ -17,6 +17,8 @@ export const filterRuleSchema = z.object({
   field: z.enum(['total', 'status', 'country', 'customerKind']),
   op: z.enum(['gt', 'gte', 'lt', 'eq', 'neq']),
   value: z.union([z.string().max(64), z.number()]),
+  /** OR groups: a record passes when every rule of at least one group passes. */
+  group: z.number().int().min(0).max(9).default(0),
 });
 export type FilterRule = z.infer<typeof filterRuleSchema>;
 
@@ -45,6 +47,10 @@ export const routeSchema = z.object({
     )
     .default([]),
   filters: z.array(filterRuleSchema).default([]),
+  /** Developer mapping: JSONata expression per target field, e.g. "customer.name". */
+  expressions: z
+    .record(z.string().regex(/^[A-Za-z][\w.]{0,79}$/), z.string().max(2000))
+    .default({}),
   /** Update existing records in the destination (matched via the cross-reference). */
   updateExisting: z.boolean().default(true),
 });

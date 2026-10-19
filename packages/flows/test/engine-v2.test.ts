@@ -1,6 +1,7 @@
 import { adapterFor, MOCK_ORDERS, WriteError, type ConnectorAdapter } from '@agentor/connectors';
 import { describe, expect, it } from 'vitest';
 import { runRoute } from '../src/engine.js';
+import { applyExpressions } from '../src/expressions.js';
 import { parseDefinition } from '../src/definition.js';
 
 /** The engine's failure classes and dependency hook (produktspecifikation §4.1). */
@@ -119,5 +120,66 @@ describe('dependencies and rate limits', () => {
       },
     });
     expect(called).toBe(false);
+  });
+});
+
+describe('OR groups and developer mapping', () => {
+  const order = MOCK_ORDERS[0]!; // #10447, Hamburg, company, total 4.395 kr.
+  const base = def.routes[0]!;
+
+  it('passes when any group passes and every rule of that group passes', async () => {
+    const { failedFilter } = await import('../src/engine.js');
+    const route = {
+      ...base,
+      entity: 'order' as const,
+      filters: [
+        { field: 'country' as const, op: 'eq' as const, value: 'DK', group: 0 },
+        { field: 'customerKind' as const, op: 'eq' as const, value: 'company', group: 1 },
+        { field: 'total' as const, op: 'gt' as const, value: 1000, group: 1 },
+      ],
+    };
+    expect(failedFilter(route, order)).toBeNull();
+    const strict = { ...route, filters: route.filters.map((f) => ({ ...f, group: 0 })) };
+    expect(failedFilter(strict, order)?.field).toBe('country');
+  });
+
+  it('shapes the record with JSONata before writing', async () => {
+    const seen: unknown[] = [];
+    const base2 = adapterFor({ connectorId: 'dinero', credentials: {}, mode: 'mock' });
+    const destination = {
+      ...base2,
+      connectorId: base2.connectorId,
+      write: async (_e: string, r: unknown) => {
+        seen.push(r);
+        return { action: 'create' as const, destinationId: 'x' };
+      },
+    } as unknown as ConnectorAdapter;
+    await runRoute({
+      def,
+      route: { ...base, expressions: { name: '$uppercase(name) & " (web)"' } },
+      applyExpressions,
+      records: [customer],
+      destination,
+      dryRun: false,
+      existingId: () => null,
+    });
+    expect((seen[0] as { name: string }).name).toBe(`${customer.name.toUpperCase()} (web)`);
+  });
+
+  it('a runaway expression fails the record instead of holding the worker', async () => {
+    const [r] = await runRoute({
+      def,
+      route: { ...base, expressions: { name: '($f := function($n) { $f($n + 1) }; $f(0))' } },
+      applyExpressions,
+      records: [customer],
+      destination: adapterFor({ connectorId: 'dinero', credentials: {}, mode: 'mock' }),
+      dryRun: false,
+      existingId: () => null,
+    });
+    expect(r).toMatchObject({
+      outcome: 'failed',
+      errorCode: 'EXPRESSION_ERROR',
+      failure: 'mapping',
+    });
   });
 });

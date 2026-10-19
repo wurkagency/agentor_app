@@ -112,6 +112,14 @@ export const flowJobs = {
   'flow.route': z.object({ tenantId: z.uuid(), runId: z.uuid(), routeId: z.string().max(40) }),
   /** Runs when every route job of a run is done: totals, status and notifications. */
   'flow.finish': z.object({ tenantId: z.uuid(), runId: z.uuid() }),
+  /**
+   * Live preview of a developer expression against a fictional sample record. The web never
+   * evaluates expressions itself; the worker runs them in the same sandbox as the engine.
+   */
+  'expression.preview': z.object({
+    entity: z.enum(['order', 'creditNote', 'customer', 'product', 'stock']),
+    source: z.string().max(2000),
+  }),
 } as const;
 
 export type FlowJobName = keyof typeof flowJobs;

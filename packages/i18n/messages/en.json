@@ -1025,7 +1025,10 @@
       "accountMissing": "No account has been chosen for {field} in {system}.",
       "invoiceMissing": "The original invoice is missing for order {order}, so {system} rejects the credit note.",
       "connectionBroken": "The connection to {connector} is broken, so nothing can be written.",
-      "generic": "{system} rejected the record. Try again in a moment."
+      "generic": "{system} rejected the record. Try again in a moment.",
+      "rejected": "{system} rejected the data in the record: {message}",
+      "dependency": "{system} needs {entity} first, and it could not be created.",
+      "expression": "The expression for the field {field} could not run."
     },
     "fix": {
       "openMapping": "Open the route’s mapping.",
@@ -1033,14 +1036,19 @@
       "publishRetry": "Publish and retry the failed records.",
       "bookInvoice": "Book the original invoice in {system}.",
       "retryLater": "Retry once the cause is fixed.",
-      "reconnect": "Sign in to {connector} again."
+      "reconnect": "Sign in to {connector} again.",
+      "checkData": "Correct the record at the source, or check the mapping to {system}.",
+      "checkSource": "Check that it exists at the source."
     },
     "short": {
       "accountMissing": "Account missing.",
       "invoiceMissing": "The original invoice is missing.",
       "waiting": "Waiting for the connection.",
       "generic": "Rejected by the system.",
-      "accountNotFound": "Account {value} does not exist in {system}."
+      "accountNotFound": "Account {value} does not exist in {system}.",
+      "rejected": "Rejected: the data needs fixing.",
+      "dependency": "{entity} is missing.",
+      "expression": "Error in the expression for {field}."
     },
     "summary": {
       "order": "{count, plural, one {# order could not be booked in {system}.} other {# orders could not be booked in {system}.}}",
@@ -1051,6 +1059,12 @@
       "order": "{count, plural, one {# order was not booked.} other {# orders were not booked.}}",
       "creditNote": "{count, plural, one {# credit note failed.} other {# credit notes failed.}}",
       "record": "{count, plural, one {# record failed.} other {# records failed.}}"
+    },
+    "entity": {
+      "customer": "the customer",
+      "product": "the product",
+      "order": "the order",
+      "record": "a related record"
     }
   },
   "runs": {
@@ -1479,7 +1493,12 @@
         "country": "country {op} {value}",
         "customerKind": "customer type {op} {value}"
       },
-      "expression": "Expression"
+      "expression": "Expression",
+      "and": "and",
+      "or": "or",
+      "group": "Group {n}",
+      "orGroup": "or",
+      "addOr": "Add or-group"
     },
     "run": {
       "interval": "Fetch new records every",
@@ -1682,7 +1701,17 @@
       "openConnection": "Open the connection",
       "remove": "Remove from the flow"
     },
-    "payload": "Payload that would be sent"
+    "payload": "Payload that would be sent",
+    "expr": {
+      "title": "Fields with JSONata",
+      "help": "Set a destination field with a JSONata expression over the source record. It runs isolated and is stopped if it takes too long.",
+      "add": "Add field",
+      "field": "Destination field",
+      "remove": "Remove {field}",
+      "expression": "Expression for {field}",
+      "preview": "Show result",
+      "error": "The expression could not run."
+    }
   },
   "templates": {
     "title": "New flow",

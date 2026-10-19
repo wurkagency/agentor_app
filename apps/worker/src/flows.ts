@@ -39,6 +39,7 @@ import {
   type RouteRecordInsert,
 } from '@agentor/db';
 import { parseDefinition, runRoute, type FlowDefinition, type Route } from '@agentor/flows';
+import { applyExpressions, evaluateSandboxed } from '@agentor/flows/sandbox';
 import {
   enqueueRouteJobs,
   parseFlowJob,
@@ -111,6 +112,22 @@ export async function processFlowJobByName(deps: FlowDeps, name: string, data: u
         return await processRouteJob(deps, parseFlowJobOf('flow.route', data));
       case 'flow.finish':
         return await processFinishJob(deps, parseFlowJobOf('flow.finish', data));
+      case 'expression.preview': {
+        const d = parseFlowJobOf('expression.preview', data);
+        const [order] = await adapterFor({
+          connectorId: 'woocommerce',
+          credentials: {},
+          mode: 'mock',
+        }).fetch('order', { limit: 1 });
+        const sample =
+          d.entity === 'customer' ? order?.customer : d.entity === 'order' ? order : {};
+        try {
+          const value = await evaluateSandboxed(d.source, sample ?? {});
+          return { ok: true, value: JSON.stringify(value, null, 1)?.slice(0, 400) ?? 'null' };
+        } catch (e) {
+          return { ok: false, error: e instanceof Error ? e.message.slice(0, 200) : 'invalid' };
+        }
+      }
       default:
         throw new Error(`unknown flow job ${name}`);
     }
@@ -379,6 +396,7 @@ async function processRouteJob(
       existingId: (id) => links.get(id) ?? null,
       resolveDependencies,
       beforeWrite,
+      applyExpressions,
     });
     results = [];
     for (const r of out) {
@@ -483,6 +501,7 @@ async function testRun(
         accounts: lookups.accounts,
         dryRun: true,
         existingId: (id) => links.get(id) ?? null,
+        applyExpressions,
       });
       for (const r of out)
         results.push({

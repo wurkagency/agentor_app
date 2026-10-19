@@ -53,6 +53,7 @@ export async function createFromTemplate(
       categoryAccounts: [],
       filters: [],
       updateExisting: true,
+      expressions: {},
     });
   const id = await createFlow(db(), await actorFor(ctx), {
     name: name.trim().slice(0, 120) || 'Nyt flow',

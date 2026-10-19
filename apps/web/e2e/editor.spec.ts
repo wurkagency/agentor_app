@@ -149,6 +149,30 @@ test('the flow panel explains the flow, and ] hides the inspector', async ({ pag
   await axe(page);
 });
 
+test('OR groups and JSONata fields in developer view', async ({ page }) => {
+  await login(page, 'mette');
+  await page.goto(`/integrations/${WEBSHOP}/editor`);
+  await page
+    .getByRole('button', { name: 'Vælg ruten Ordrer → Dinero Fakturaer' })
+    .click({ timeout: 30_000 });
+  const inspector = page.getByRole('complementary', { name: 'Rutens indstillinger' });
+
+  // Filters: a second group is OR'ed with the first.
+  await inspector.getByRole('tab', { name: 'Filtre' }).click();
+  await inspector.getByRole('button', { name: 'Tilføj filter' }).click();
+  await inspector.getByRole('button', { name: 'Tilføj eller-gruppe' }).click();
+  await expect(inspector.getByText('eller', { exact: true }).first()).toBeVisible();
+  await page.getByRole('radio', { name: 'Developer' }).click();
+  await expect(inspector.getByRole('textbox', { name: 'Udtryk' })).toHaveValue(/\) or \(/);
+
+  // Developer mapping: a JSONata field with a live preview from the sandbox.
+  await inspector.getByRole('tab', { name: 'Mapping' }).click();
+  await inspector.getByRole('button', { name: 'Tilføj felt' }).click();
+  await inspector.getByRole('textbox', { name: 'Udtryk for field1' }).fill('"#" & number');
+  await inspector.getByRole('button', { name: 'Vis resultat' }).click();
+  await expect(inspector.getByText('"#10447"')).toBeVisible();
+});
+
 test('an earlier version can be restored as the draft', async ({ page }) => {
   await login(page, 'mette');
   await page.goto(`/integrations/${WEBSHOP}?tab=settings`);
@@ -173,5 +197,11 @@ test('template picker creates a flow in Test and opens the editor (D4)', async (
   await expect(page).toHaveURL(/\/integrations\/[0-9a-f-]+\/editor\?guide=1/);
   await expect(page.getByText('Sådan kommer du i gang')).toBeVisible();
   await expect(page.getByText('Aldrig publiceret')).toBeVisible();
+
+  // A destination can be dragged from the palette onto the canvas.
+  const before = await page.locator('.react-flow__node').count();
+  const item = page.getByRole('button', { name: /^Tilføj .+ til flowet$/ }).first();
+  await item.dragTo(page.locator('.react-flow__pane'), { targetPosition: { x: 200, y: 360 } });
+  await expect(page.locator('.react-flow__node')).toHaveCount(before + 1);
   await page.screenshot({ path: test.info().outputPath('guide.png') });
 });

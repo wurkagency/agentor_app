@@ -27,6 +27,7 @@ import { CircleAlert } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { routeLabel, type ConnMap } from './model';
+import { DRAG_TYPE } from './palette';
 
 interface NodeData extends Record<string, unknown> {
   nodeId: string;
@@ -237,6 +238,8 @@ export interface CanvasProps {
   onSelectNode: (id: string) => void;
   onConnect: (from: string, entity: Entity, to: string, targetEntity: Entity) => void;
   onMoveNode: (id: string, x: number, y: number) => void;
+  /** A connection dropped from the palette, at canvas coordinates. */
+  onDropConnection?: (connectionId: string, x: number, y: number) => void;
 }
 
 /** Default layout: the source left, destinations stacked on the right (auto-layout, §5.1). */
@@ -280,7 +283,7 @@ async function elkLayout(def: FlowDefinition, conns: ConnMap) {
 
 function CanvasInner(props: CanvasProps) {
   const t = useTranslations('editor');
-  const { fitView } = useReactFlow();
+  const { fitView, screenToFlowPosition } = useReactFlow();
   const fallback = useMemo(() => autoLayout(props.def, props.conns), [props.def, props.conns]);
   const [elk, setElk] = useState<Record<string, { x: number; y: number }> | null>(null);
   const shape =
@@ -386,6 +389,18 @@ function CanvasInner(props: CanvasProps) {
           props.onMoveNode(n.id, Math.round(n.position.x), Math.round(n.position.y))
         }
         onMove={(_e, vp) => setZoom(vp.zoom)}
+        onDragOver={(e) => {
+          if (props.readOnly || !e.dataTransfer.types.includes(DRAG_TYPE)) return;
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'copy';
+        }}
+        onDrop={(e) => {
+          const id = e.dataTransfer.getData(DRAG_TYPE);
+          if (!id || props.readOnly || !props.onDropConnection) return;
+          e.preventDefault();
+          const p = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+          props.onDropConnection(id, Math.round(p.x), Math.round(p.y));
+        }}
         fitView
         fitViewOptions={{ padding: 0.2, maxZoom: 1 }}
       >

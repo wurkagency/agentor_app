@@ -23,6 +23,7 @@ import {
 import { MoreHorizontal, PanelRightClose, Plus, Trash2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, type ReactNode } from 'react';
+import { ExpressionEditor } from './expressions';
 import { describeFilters, nodeManifest, routeLabel, type ConnMap } from './model';
 
 export type InspectorTab = 'general' | 'mapping' | 'filters' | 'run' | 'history';
@@ -63,14 +64,21 @@ const OP_SYMBOL: Record<FilterRule['op'], string> = {
   neq: '!=',
 };
 
-/** Developer view of the rules, as the engine evaluates them (all must hold). */
+/** Developer view of the rules, as the engine evaluates them: AND inside a group, OR between. */
 export function filterExpression(rules: FilterRule[]) {
-  return rules
+  const one = (f: FilterRule) =>
+    `${f.field} ${OP_SYMBOL[f.op]} ${typeof f.value === 'number' ? f.value : JSON.stringify(f.value)}`;
+  const groups = [...new Set(rules.map((r) => r.group ?? 0))].sort();
+  if (groups.length <= 1) return rules.map(one).join(' and ');
+  return groups
     .map(
-      (f) =>
-        `${f.field} ${OP_SYMBOL[f.op]} ${typeof f.value === 'number' ? f.value : JSON.stringify(f.value)}`,
+      (g) =>
+        `(${rules
+          .filter((r) => (r.group ?? 0) === g)
+          .map(one)
+          .join(' and ')})`,
     )
-    .join(' and ');
+    .join(' or ');
 }
 
 export function Inspector(p: InspectorProps) {
@@ -450,6 +458,10 @@ export function Inspector(p: InspectorProps) {
           </>
         )}
 
+        {p.tab === 'mapping' && p.developer && (
+          <ExpressionEditor route={r} readOnly={ro} update={p.update} />
+        )}
+
         {p.tab === 'filters' && (
           <section className="flex flex-col gap-3">
             <p className="m-0 text-table text-fg-2">
@@ -463,68 +475,101 @@ export function Inspector(p: InspectorProps) {
               </Field>
             )}
             {r.filters.map((f, i) => (
-              <div key={i} className="grid grid-cols-12 items-center gap-2">
-                <Select
-                  className="col-span-5"
-                  aria-label={t('filter.field')}
-                  density="compact"
-                  disabled={ro}
-                  value={f.field}
-                  onValueChange={(v) =>
-                    p.update((x) => void (x.filters[i]!.field = v as FilterRule['field']))
-                  }
-                  options={FILTER_FIELDS.map((v) => ({ value: v, label: t(`filter.fields.${v}`) }))}
-                />
-                <Select
-                  className="col-span-3"
-                  aria-label={t('filter.op')}
-                  density="compact"
-                  disabled={ro}
-                  value={f.op}
-                  onValueChange={(v) =>
-                    p.update((x) => void (x.filters[i]!.op = v as FilterRule['op']))
-                  }
-                  options={FILTER_OPS.map((v) => ({ value: v, label: t(`filter.ops.${v}`) }))}
-                />
-                <Input
-                  className="col-span-3"
-                  aria-label={t('filter.value')}
-                  density="compact"
-                  disabled={ro}
-                  value={String(f.value)}
-                  onChange={(e) =>
-                    p.update((x) => {
-                      const v = e.target.value;
-                      x.filters[i]!.value =
-                        f.field === 'total' && v !== '' && !Number.isNaN(Number(v)) ? Number(v) : v;
-                    })
-                  }
-                />
-                {!ro && (
-                  <Button
-                    className="col-span-1"
-                    variant="ghost"
-                    size="icon"
-                    aria-label={t('filter.remove')}
-                    onClick={() => p.update((x) => void x.filters.splice(i, 1))}
-                  >
-                    <Icon icon={X} size={14} />
-                  </Button>
-                )}
+              <div key={i} className="flex flex-col gap-2">
+                {(i === 0 || (r.filters[i - 1]!.group ?? 0) !== (f.group ?? 0)) &&
+                  [...new Set(r.filters.map((x) => x.group ?? 0))].length > 1 && (
+                    <span className="eyebrow">
+                      {i === 0 ? t('filter.group', { n: 1 }) : t('filter.orGroup')}
+                    </span>
+                  )}
+                <div className="grid grid-cols-12 items-center gap-2">
+                  <Select
+                    className="col-span-5"
+                    aria-label={t('filter.field')}
+                    density="compact"
+                    disabled={ro}
+                    value={f.field}
+                    onValueChange={(v) =>
+                      p.update((x) => void (x.filters[i]!.field = v as FilterRule['field']))
+                    }
+                    options={FILTER_FIELDS.map((v) => ({
+                      value: v,
+                      label: t(`filter.fields.${v}`),
+                    }))}
+                  />
+                  <Select
+                    className="col-span-3"
+                    aria-label={t('filter.op')}
+                    density="compact"
+                    disabled={ro}
+                    value={f.op}
+                    onValueChange={(v) =>
+                      p.update((x) => void (x.filters[i]!.op = v as FilterRule['op']))
+                    }
+                    options={FILTER_OPS.map((v) => ({ value: v, label: t(`filter.ops.${v}`) }))}
+                  />
+                  <Input
+                    className="col-span-3"
+                    aria-label={t('filter.value')}
+                    density="compact"
+                    disabled={ro}
+                    value={String(f.value)}
+                    onChange={(e) =>
+                      p.update((x) => {
+                        const v = e.target.value;
+                        x.filters[i]!.value =
+                          f.field === 'total' && v !== '' && !Number.isNaN(Number(v))
+                            ? Number(v)
+                            : v;
+                      })
+                    }
+                  />
+                  {!ro && (
+                    <Button
+                      className="col-span-1"
+                      variant="ghost"
+                      size="icon"
+                      aria-label={t('filter.remove')}
+                      onClick={() => p.update((x) => void x.filters.splice(i, 1))}
+                    >
+                      <Icon icon={X} size={14} />
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
             {!ro && (
-              <div>
+              <div className="flex flex-wrap gap-2">
                 <Button
                   variant="secondary"
                   size="s"
                   onClick={() =>
-                    p.update((x) => void x.filters.push({ field: 'total', op: 'gt', value: 0 }))
+                    p.update((x) => {
+                      // A new rule joins the last group (AND).
+                      const g = x.filters.at(-1)?.group ?? 0;
+                      x.filters.push({ field: 'total', op: 'gt', value: 0, group: g });
+                    })
                   }
                 >
                   <Icon icon={Plus} size={14} />
                   {t('filter.add')}
                 </Button>
+                {r.filters.length > 0 && (
+                  <Button
+                    variant="ghost"
+                    size="s"
+                    onClick={() =>
+                      p.update((x) => {
+                        const g = Math.max(...x.filters.map((f) => f.group ?? 0)) + 1;
+                        if (g <= 9)
+                          x.filters.push({ field: 'total', op: 'gt', value: 0, group: g });
+                      })
+                    }
+                  >
+                    <Icon icon={Plus} size={14} />
+                    {t('filter.addOr')}
+                  </Button>
+                )}
               </div>
             )}
           </section>

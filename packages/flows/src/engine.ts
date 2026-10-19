@@ -74,12 +74,8 @@ function fieldValue(
   }
 }
 
-/** Returns the first rule the record fails, or null when it passes. */
-export function failedFilter(
-  route: Route,
-  rec: EntityRecord[keyof EntityRecord],
-): FilterRule | null {
-  for (const rule of route.filters) {
+function failedIn(rules: FilterRule[], rec: EntityRecord[keyof EntityRecord]): FilterRule | null {
+  for (const rule of rules) {
     const v = fieldValue(rule, rec);
     if (v === null) return rule;
     const a = typeof rule.value === 'number' ? Number(v) : String(v);
@@ -97,6 +93,28 @@ export function failedFilter(
     if (!ok) return rule;
   }
   return null;
+}
+
+/**
+ * Returns the rule that stopped the record, or null when it passes. Rules in a group must all
+ * pass (AND); the record passes when any group does (OR). Without OR groups this is plain AND.
+ */
+export function failedFilter(
+  route: Route,
+  rec: EntityRecord[keyof EntityRecord],
+): FilterRule | null {
+  if (route.filters.length === 0) return null;
+  const groups = [...new Set(route.filters.map((r) => r.group ?? 0))].sort();
+  let first: FilterRule | null = null;
+  for (const g of groups) {
+    const failed = failedIn(
+      route.filters.filter((r) => (r.group ?? 0) === g),
+      rec,
+    );
+    if (!failed) return null;
+    first ??= failed;
+  }
+  return first;
 }
 
 const accountKey = (o: Order, vatRate: number) => {
@@ -188,6 +206,11 @@ export interface RouteRunInput {
   ) => Promise<{ refs: Record<string, string> } | { missing: string; reason: string }>;
   /** Waits for the destination's rate limit before each write. */
   beforeWrite?: () => Promise<void>;
+  /**
+   * Evaluates the route's developer expressions (JSONata) in a sandbox. Server-only, so it is
+   * passed in by the worker (`@agentor/flows/sandbox`) and never bundled into the browser.
+   */
+  applyExpressions?: <T>(record: T, expressions: Record<string, string>) => Promise<T>;
   now?: () => number;
 }
 
@@ -258,6 +281,28 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         continue;
       }
     }
+    // Developer mapping: JSONata expressions shape the record before it is written.
+    let shaped = rec;
+    if (Object.keys(route.expressions ?? {}).length) {
+      try {
+        if (!input.applyExpressions) throw new Error('expressions are not available here');
+        shaped = await input.applyExpressions(rec, route.expressions);
+      } catch (e) {
+        out.push({
+          ...base,
+          preview,
+          outcome: 'failed',
+          errorCode: 'EXPRESSION_ERROR',
+          errorParams: {
+            field: (e as { field?: string }).field ?? '',
+            message: e instanceof Error ? e.message : 'invalid expression',
+          },
+          durationMs: now() - started,
+          failure: 'mapping',
+        });
+        continue;
+      }
+    }
     const existing = input.existingId(base.sourceId);
     if (existing && !route.updateExisting) {
       out.push({ ...base, preview, outcome: 'skipped', skipReason: 'exists', durationMs: 0 });
@@ -282,7 +327,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         refs = deps.refs;
       }
       if (!dry) await input.beforeWrite?.();
-      const res = await destination.write(route.targetEntity, rec as never, {
+      const res = await destination.write(route.targetEntity, shaped as never, {
         mode: dry ? 'dry_run' : MODE[route.mode],
         existingId: existing,
         ...(refs ? { refs } : {}),

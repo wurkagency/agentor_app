@@ -1025,7 +1025,10 @@
       "accountMissing": "Der er ikke valgt en konto for {field} i {system}.",
       "invoiceMissing": "Den oprindelige faktura mangler for ordre {order}, så {system} afviser kreditnotaen.",
       "connectionBroken": "Forbindelsen til {connector} er afbrudt, så intet kan skrives.",
-      "generic": "{system} afviste recordet. Prøv igen om lidt."
+      "generic": "{system} afviste recordet. Prøv igen om lidt.",
+      "rejected": "{system} afviste data i recordet: {message}",
+      "dependency": "{system} skal have {entity} først, og den kunne ikke oprettes.",
+      "expression": "Udtrykket for feltet {field} kunne ikke køres."
     },
     "fix": {
       "openMapping": "Åbn mappingen for ruten.",
@@ -1033,14 +1036,19 @@
       "publishRetry": "Publicér og gentag de fejlede records.",
       "bookInvoice": "Bogfør den oprindelige faktura i {system}.",
       "retryLater": "Gentag, når årsagen er rettet.",
-      "reconnect": "Log ind på {connector} igen."
+      "reconnect": "Log ind på {connector} igen.",
+      "checkData": "Ret recordet i kilden, eller tjek mappingen til {system}.",
+      "checkSource": "Tjek, at den findes i kilden."
     },
     "short": {
       "accountMissing": "Konto mangler.",
       "invoiceMissing": "Den oprindelige faktura mangler.",
       "waiting": "Venter på forbindelsen.",
       "generic": "Afvist af systemet.",
-      "accountNotFound": "Konto {value} findes ikke i {system}."
+      "accountNotFound": "Konto {value} findes ikke i {system}.",
+      "rejected": "Afvist: data skal rettes.",
+      "dependency": "{entity} mangler.",
+      "expression": "Fejl i udtryk for {field}."
     },
     "summary": {
       "order": "{count, plural, one {# ordre kunne ikke bogføres i {system}.} other {# ordrer kunne ikke bogføres i {system}.}}",
@@ -1051,6 +1059,12 @@
       "order": "{count, plural, one {# ordre blev ikke bogført.} other {# ordrer blev ikke bogført.}}",
       "creditNote": "{count, plural, one {# kreditnota fejlede.} other {# kreditnotaer fejlede.}}",
       "record": "{count, plural, one {# record fejlede.} other {# records fejlede.}}"
+    },
+    "entity": {
+      "customer": "kunden",
+      "product": "produktet",
+      "order": "ordren",
+      "record": "en relateret post"
     }
   },
   "runs": {
@@ -1479,7 +1493,12 @@
         "country": "land {op} {value}",
         "customerKind": "kundetype {op} {value}"
       },
-      "expression": "Udtryk"
+      "expression": "Udtryk",
+      "and": "og",
+      "or": "eller",
+      "group": "Gruppe {n}",
+      "orGroup": "eller",
+      "addOr": "Tilføj eller-gruppe"
     },
     "run": {
       "interval": "Hent nye poster hvert",
@@ -1682,7 +1701,17 @@
       "openConnection": "Åbn forbindelsen",
       "remove": "Fjern fra flowet"
     },
-    "payload": "Data der ville blive sendt"
+    "payload": "Data der ville blive sendt",
+    "expr": {
+      "title": "Felter med JSONata",
+      "help": "Sæt et felt i destinationen med et JSONata-udtryk over kildens record. Det køres isoleret og stoppes, hvis det tager for lang tid.",
+      "add": "Tilføj felt",
+      "field": "Felt i destinationen",
+      "remove": "Fjern {field}",
+      "expression": "Udtryk for {field}",
+      "preview": "Vis resultat",
+      "error": "Udtrykket kunne ikke køres."
+    }
   },
   "templates": {
     "title": "Nyt flow",

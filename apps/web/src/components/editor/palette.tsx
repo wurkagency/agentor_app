@@ -13,6 +13,9 @@ import type { EditorConnection } from './model';
  * Left palette (§5.1): the tenant's connections by category. Clicking one that can receive
  * data adds it as a destination; the plan's destination limit is shown at the bottom.
  */
+/** Drag data type for a connection dragged from the palette onto the canvas. */
+export const DRAG_TYPE = 'application/x-agentor-connection';
+
 export function Palette({
   def,
   connections,
@@ -80,6 +83,12 @@ export function Palette({
                   type="button"
                   disabled={!canAdd}
                   onClick={() => onAdd(c.id)}
+                  // Drag onto the canvas to place it there; a click adds it below the others.
+                  draggable={canAdd}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData(DRAG_TYPE, c.id);
+                    e.dataTransfer.effectAllowed = 'copy';
+                  }}
                   aria-label={
                     canAdd
                       ? t('palette.add', { name: `${m.name} · ${c.name}` })
