@@ -3,6 +3,7 @@
 # PM2 for both service users (produktspecifikation §10.5). Installed as /usr/local/bin/agentor-deploy
 # by server-setup.sh; run as root after each pull in Plesk.
 set -euo pipefail
+trap 'echo "Deploy failed at line $LINENO (see the output above)."' ERR
 
 D=/var/www/vhosts/agentor.dk/app
 R=$D/releases/$(date +%Y%m%d%H%M%S)
@@ -32,9 +33,17 @@ as agentor-web pm2 save >/dev/null
 as agentor-worker pm2 save >/dev/null
 
 echo "== Health"
-sleep 5
-curl -fsS -o /dev/null http://127.0.0.1:3000/login && echo "web ok"
-curl -fsS http://127.0.0.1:3100/healthz && echo " ingest ok"
+ok=0
+for _ in $(seq 1 20); do
+  if curl -fsS -o /dev/null http://127.0.0.1:3000/login && curl -fsS -o /dev/null http://127.0.0.1:3100/healthz; then ok=1; break; fi
+  sleep 3
+done
+if [ "$ok" != 1 ]; then
+  echo "Health check failed. Logs: sudo -u agentor-web -H pm2 logs --lines 50 --nostream"
+  echo "Undo with: agentor-rollback"
+  exit 1
+fi
+echo "web and ingest ok"
 
 # Keep the five newest releases.
 ls -1d "$D"/releases/* | sort | head -n -5 | xargs -r rm -rf
