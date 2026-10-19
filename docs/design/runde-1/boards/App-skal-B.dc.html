@@ -13,7 +13,7 @@
 body{margin:0;background:#F7F5F1}
 .ds{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1A1A18;font-size:14px;line-height:1.55}
 .i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.wrap{width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box}
+.wrap{width:100%;max-width:1920px;margin:0 auto;box-sizing:border-box}
 .pl{position:relative;font-size:15px;font-weight:500;color:#6B6B67;text-decoration:none;padding:4px 0;white-space:nowrap}
 .pl:hover{color:#1A1A18}
 .pl.on{color:#1A1A18;font-weight:600;box-shadow:inset 0 -2px 0 #1A1A18}
@@ -34,7 +34,7 @@ body{margin:0;background:#F7F5F1}
 .seg button.on{background:#1A1A18;color:#FFFFFF}
 </style>
 </helmet>
-<div class="ds" style="width: 1440px; height: 900px; background: #F7F5F1; display: flex; flex-direction: column; overflow: hidden">
+<div class="ds" style="width: 100%; min-height: 100vh; background: #F7F5F1; display: flex; flex-direction: column">
 <svg width="0" height="0" style="position: absolute" aria-hidden="true">
 <symbol id="sr" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></symbol>
 <symbol id="hp" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></symbol>
@@ -52,7 +52,7 @@ body{margin:0;background:#F7F5F1}
 <symbol id="pu" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></symbol>
 </svg>
 
-<header style="flex: none; padding: 0 40px">
+<header style="flex: none; padding: 0 clamp(24px, 3vw, 64px)">
 <div class="wrap" style="height: 88px; display: flex; align-items: center; gap: 56px; position: relative; z-index: 2">
 <a href="#" aria-label="Agentor, gå til Overblik" style="text-decoration: none; color: #1A1A18; flex: none; font-size: 24px; font-weight: 700; letter-spacing: -0.02em">Agent<span style="border-bottom: 2px solid #1A1A18; padding-bottom: 1px">or</span></a>
 <nav aria-label="Primær navigation" style="display: flex; align-items: center; gap: 36px; flex: 1; min-width: 0">
@@ -86,7 +86,7 @@ body{margin:0;background:#F7F5F1}
 </div>
 </header>
 
-<div style="flex: none; padding: 0 40px">
+<div style="flex: none; padding: 0 clamp(24px, 3vw, 64px)">
 <div class="wrap" style="height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: inset 0 1px 0 #E4E1DB">
 <nav aria-label="Sekundær navigation · Integrationer" style="display: flex; align-items: center; gap: 4px">
 <a class="sl on" href="#" aria-current="page">Flows <span style="font-size: 11px; font-weight: 600; background: #F0EDE8; border-radius: 9999px; padding: 1px 7px">6</span></a>
@@ -101,7 +101,7 @@ body{margin:0;background:#F7F5F1}
 </div>
 </div>
 
-<main style="flex: 1; min-height: 0; padding: 24px 40px 40px; display: flex; flex-direction: column">
+<main style="flex: 1; min-height: 0; padding: 24px clamp(24px, 3vw, 64px) 48px; display: flex; flex-direction: column">
 <div class="wrap" style="display: flex; flex-direction: column; gap: 24px; flex: 1">
 <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px">
 <div style="display: flex; flex-direction: column; gap: 4px">

@@ -61,6 +61,29 @@ Tegnefladerne henter logoer fra lærredets asset-lager (`/_blob/<id>`). Lokalt p
 | `D14-Login.dc.html`, `D14-MFA.dc.html`, `D14-Onboarding-1..3.dc.html` | D14 Login, MFA, onboarding i 3 trin |
 | `M1`–`M7` | Mobil: Overblik, Integrationer, Fejldetalje, Notifikationer, Editor (kræver computer), installation, push-eksempler |
 
+### Agentor Platform (interne roller)
+| Fil | Indhold |
+| --- | --- |
+| `P1-Kunder.dc.html` | Kundeliste for Supporter: plan, samlet status, fejl i dag, supportadgang og handling (Åbn som support / Anmod om adgang) |
+| `P1-Kunder-Menu.dc.html` | Tandhjulsmenuen åben: Kunder, Supportsager, Systemstatus. Platformbrugere og Platformindstillinger er låst til Superadmin |
+| `P2-Kunde.dc.html` | Kundedetalje med aktiv adgang (nedtælling, bed om forlængelse, afslut), kundeinfo, kundens "Kræver handling", supportsag med intern note, adgangslog |
+| `P3-Adgang.dc.html` | Anmod om supportadgang: sag, begrundelse, varighed (1, 8 eller 24 timer), omfang (Kun se / Se og hjælpe) |
+| `P4-Supportvisning.dc.html` | Kundens app med navy supportbjælke: kunde-skifter (⌘J), sag, godkender, nedtælling, "Afslut supportvisning" |
+| `P5-Skift-Kunde.dc.html` | Kunde-skifteren åben: aktive adgange, seneste kunder, søgning |
+| `P6-Platformbrugere.dc.html` | Superadmin: medarbejdere, roller, rettighedsmatrix, regler for supportadgang |
+
+### Supportoverblik (Platform)
+| Fil | Indhold |
+| --- | --- |
+| `S1-Sager-Tavle.dc.html` | Sager som tavle (Ny · I gang · Venter på kunde · Løst) med nøgletal, filtre og kort med prioritet, svarfrist, fejl, noter, tid og ansvarlig |
+| `S2-Sager-Arkiv.dc.html` | Arkiv og listevisning: søgning i titel, løsning og noter, tid pr. sag, eksport |
+| `S3-Sag.dc.html` | Sagsdetalje: status, prioritet, tildelt, kategori, frist, følgere, tidslinje (kundebeskeder, svar, interne noter, auto-loggede sessioner), komponist med "Intern note", tid på sagen, kunde med fastgjort kundenote, tidligere sager |
+| `S4-Tid-Tilfoej.dc.html` | Manuel tid: varighed med hurtigvalg, dato, type (telefon, e-mail, afklaring), beskrivelse, fakturerbar |
+| `S5-Session-Slut.dc.html` | Når supportvisningen afsluttes: auto-logget tid, handlinger i sessionen, knyt til sag, ret tid, opsummering som intern note |
+| `S6-Min-Tid.dc.html` | Ugeoversigt over tid pr. sag og dag, igangværende session, sessioner uden sag |
+| `S7-Fejl.dc.html` | Fejl på tværs af kunder grupperet efter fejlkode, med antal kunder, udvikling og sag |
+| `S8-Sag-Loes.dc.html` | Løs sag og send forløbet til kunden på e-mail: modtagere, hvad der kommer med, interne noter udelades altid, valgfri afsluttende besked, forhåndsvisning |
+
 ## Beslutninger truffet under designet (afviger fra specifikationerne)
 
 Disse vinder over Designspecifikation v1 og Produktspecifikation v1.x, hvor de er i konflikt:
@@ -79,6 +102,11 @@ Disse vinder over Designspecifikation v1 og Produktspecifikation v1.x, hvor de e
 12. **D2 viser 5 ruter** for flowet "Webshop → regnskab og CRM", så det stemmer med editoren (Kunder → Dinero, HubSpot og Brevo).
 13. **Fokusflows** (login, MFA, onboarding) er centrerede kort på canvas uden app-skal.
 14. Connector-katalog (`D9-Katalog`) viser 23 systemer i 5 grupper med tilstandene Forbundet, Tilgængelig og På vej.
+15. **Fluid layout** (se `Layout.dc.html` og de tre `*-2560.dc.html`): alle app-sider fylder vinduet (`width: 100%; min-height: 100vh`). Sidemargen er `clamp(24px, 3vw, 64px)`, og indholdet har en anbefalet maksbredde på **1920 px**, centreret på samme akse som header og sekundær navigation. Formularkort er højst 960 px. Editoren fylder altid hele vinduet (`100vw × 100vh`, minimum 1280 × 720): palet 240 px og inspektør 440 px er faste, lærredet vokser, og noderne centreres. Brudpunkter: < 768 (mobil), 768–1279 (tablet, editor i listevisning), 1280–1919 (desktop), ≥ 1920 (bred). Tegnefladerne er vist ved 1440 px. Rækken "Fluid layout" viser de samme skærme ved 2560 px.
+
+16. **Agentor Platform i app'en** (afviger fra produktspecifikationen, der placerer support i manage.agentor.dk): Agentor-medarbejdere med rollen **Superadmin** eller **Supporter** får et tandhjul i topbjælken. Det åbner Platform-området med egen header (Platform-mærke og navigation: Kunder, Supportsager, Systemstatus, Platformbrugere). Reglerne fra produktspecifikation §9.7 gælder uændret: ingen stående adgang, adgang pr. sag med begrundelse i højst 24 timer (afviger fra produktspecifikationens 60 minutter), kundens godkendelse når kunden kræver det (D8), aldrig nøgler, team eller abonnement, og hver handling i kundens audit-log med medarbejderens navn. Under adgang vises kundens egen app med en navy supportbjælke, der ikke kan skjules, og kunden kan skiftes med ⌘J. Superadmin har heller ingen stående adgang til kundedata.
+
+17. **Supportoverblik** (ny funktion, ikke i produktspecifikationen): Platform-navigationen har nu Kunder, Supportsager, Fejl, Tid, Systemstatus og Platformbrugere. Sager har statusserne Ny, I gang, Venter på kunde og Løst (arkiveres efter 14 dage) og prioriteterne Kritisk, Høj, Normal og Lav. Prioritet bruger ikke statusfarver. Tid logges automatisk pr. supportsession (fra første til sidste handling, pauser over 10 min. trækkes fra) og bekræftes, når sessionen afsluttes. Manuel tid og timer findes også. Interne noter er gule (#FBF0DC), markeret "Intern note" og aldrig synlige for kunden. Kundenoter kan fastgøres på kunden. "Fejl på tværs" viser kun antal og fejlkoder, aldrig kundedata. Fakturerbar tid kan markeres for alle kunder, og kundens abonnement vises ved feltet. Svarfrister er en pladsholder, til der er besluttet en supportaftale.
 
 ## Kendte pladsholdere
 

@@ -13,7 +13,7 @@
 body{margin:0;background:#F7F5F1}
 .ds{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1A1A18;font-size:14px;line-height:1.55}
 .i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.wrap{width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box}
+.wrap{width:100%;max-width:1920px;margin:0 auto;box-sizing:border-box}
 .pl{position:relative;font-size:15px;font-weight:500;color:#6B6B67;text-decoration:none;padding:4px 0;white-space:nowrap}
 .pl.on{color:#1A1A18;font-weight:600;box-shadow:inset 0 -2px 0 #1A1A18}
 .sl{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:9999px;font-size:13px;font-weight:500;color:#6B6B67;text-decoration:none;white-space:nowrap}
@@ -55,7 +55,7 @@ body{margin:0;background:#F7F5F1}
 .logo img{width:72%;height:72%;object-fit:contain;display:block}
 </style>
 </helmet>
-<div class="ds" style="width: 1440px; height: 900px; background: #F7F5F1; display: flex; flex-direction: column; overflow: hidden">
+<div class="ds" style="width: 100%; min-height: 100vh; background: #F7F5F1; display: flex; flex-direction: column">
 <svg width="0" height="0" style="position: absolute" aria-hidden="true">
 <symbol id="wf" viewBox="0 0 24 24"><rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect></symbol>
 <symbol id="sr" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></symbol>
@@ -79,7 +79,7 @@ body{margin:0;background:#F7F5F1}
 <symbol id="rf" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></symbol>
 </svg>
 
-<header style="flex: none; padding: 0 40px">
+<header style="flex: none; padding: 0 clamp(24px, 3vw, 64px)">
 <div class="wrap" style="height: 88px; display: flex; align-items: center; gap: 56px">
 <a href="D1-Overblik.dc.html" aria-label="Agentor, gå til Overblik" style="text-decoration: none; color: #1A1A18; flex: none; font-size: 24px; font-weight: 700; letter-spacing: -0.02em">Agent<span style="border-bottom: 2px solid #1A1A18; padding-bottom: 1px">or</span></a>
 <nav aria-label="Primær navigation" style="display: flex; align-items: center; gap: 36px; flex: 1; min-width: 0">
@@ -100,7 +100,7 @@ body{margin:0;background:#F7F5F1}
 </div>
 </header>
 
-<div style="flex: none; padding: 0 40px">
+<div style="flex: none; padding: 0 clamp(24px, 3vw, 64px)">
 <div class="wrap" style="height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: inset 0 1px 0 #E4E1DB">
 <nav aria-label="Sekundær navigation · Integrationer" style="display: flex; align-items: center; gap: 4px">
 <a class="sl on" href="#" aria-current="page">Flows <span style="font-size: 11px; font-weight: 600; background: #F0EDE8; border-radius: 9999px; padding: 1px 7px">0</span></a>
@@ -115,7 +115,7 @@ body{margin:0;background:#F7F5F1}
 </div>
 </div>
 
-<main style="flex: 1; min-height: 0; padding: 20px 40px 32px">
+<main style="flex: 1; min-height: 0; padding: 20px clamp(24px, 3vw, 64px) 48px">
 <div class="wrap" style="display: flex; flex-direction: column; gap: 20px">
 <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px">
 <div style="display: flex; flex-direction: column; gap: 4px">
