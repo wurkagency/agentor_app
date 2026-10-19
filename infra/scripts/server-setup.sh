@@ -130,6 +130,13 @@ else
   trap - EXIT
   url() { echo "postgresql://$1:$2@$PGHOST:$PGPORT/$DB_NAME"; }
   check_app_login "$(url agentor_owner "$PW_OWNER")"
+  # gen_random_uuid() is built in from PostgreSQL 13; older servers get it from pgcrypto, in the
+  # app schema so other sites' databases are untouched. deploy.sh points app.uuid_v7() at it.
+  if [ "$(admin_psql -d "$DB_NAME" -tAc 'show server_version_num')" -lt 130000 ]; then
+    admin_psql -d "$DB_NAME" -q -c 'create schema if not exists app authorization agentor_owner' \
+      -c 'create extension if not exists pgcrypto with schema app'
+    echo "Warning: PostgreSQL is older than 13; Agentor is built and tested on 16."
+  fi
   echo "database ok"
 
   echo "== Key encryption key"
@@ -141,19 +148,27 @@ else
   AUTH_SECRET=$(openssl rand -base64 48 | tr -d '\n')
   common() {
     printf '%s\n' "APP_URL=https://$DOMAIN" "REDIS_URL=$REDIS_URL" "BETTER_AUTH_SECRET=$AUTH_SECRET" \
-      "CONNECTOR_MODE=mock" "QUICKPAY_MODE=mock" "CVR_PROVIDER=fixture" \
+      "CONNECTOR_MODE=mock" "QUICKPAY_MODE=${QUICKPAY_MODE:-test}" "CVR_PROVIDER=fixture" \
       "INGEST_PUBLIC_URL=https://$DOMAIN" "INGEST_INTERNAL_URL=http://127.0.0.1:3411" "LOG_LEVEL=info"
     # Only when given: an empty value is invalid, and without it mail goes nowhere.
     if [ -n "${SMTP_URL:-}" ]; then echo "SMTP_URL=$SMTP_URL"; fi
+    # The worker refuses QUICKPAY_MODE=mock in production; test or live needs the API key.
+    if [ -n "${QUICKPAY_API_KEY:-}" ]; then echo "QUICKPAY_API_KEY=$QUICKPAY_API_KEY"; fi
   }
   umask 077
-  { common; echo "DATABASE_URL_WEB=$(url agentor_web "$PW_WEB")"; echo "KEK_PUBLIC_KEY=$KEK_PUBLIC_KEY"; } > "$D/shared/web.env.production"
+  { common; echo "DATABASE_URL_WEB=$(url agentor_web "$PW_WEB")"; echo "KEK_PUBLIC_KEY=$KEK_PUBLIC_KEY"
+    if [ -n "${QUICKPAY_PRIVATE_KEY:-}" ]; then echo "QUICKPAY_PRIVATE_KEY=$QUICKPAY_PRIVATE_KEY"; fi
+  } > "$D/shared/web.env.production"
   { common; echo "DATABASE_URL_WORKER=$(url agentor_worker "$PW_WORKER")"; echo "KEK_FILE=$KEK"; } > "$D/shared/worker.env.production"
   echo "DATABASE_URL_OWNER=$(url agentor_owner "$PW_OWNER")" > "$D/shared/deploy.env"
   umask 022
   chown agentor-web "$D/shared/web.env.production"
   chown agentor-worker "$D/shared/worker.env.production"
   chmod 400 "$D/shared/"*.env*
+  if [ -z "${QUICKPAY_API_KEY:-}" ] || [ -z "${QUICKPAY_PRIVATE_KEY:-}" ]; then
+    echo "Warning: no QuickPay keys given. The worker won't start until QUICKPAY_API_KEY is in"
+    echo "worker.env.production and web.env.production, and QUICKPAY_PRIVATE_KEY in web.env.production."
+  fi
 fi
 
 # nginx: this Plesk version has no CLI option for additional directives; they are pasted in the

@@ -90,6 +90,7 @@ if (existing) {
 const client = new pg.Client({ connectionString: ownerUrl });
 await client.connect();
 try {
+  await client.query('begin');
   await client.query(
     `insert into platform.staff (user_id, role, created_by_name) values ($1, 'superadmin', 'create-superadmin')
      on conflict (user_id) do update set role = 'superadmin', disabled_at = null`,
@@ -99,6 +100,10 @@ try {
     `insert into platform.audit (actor_user_id, actor_name, action, detail) values ($1, 'create-superadmin', 'staff.saved', $2)`,
     [userId, { email, role: 'superadmin' }],
   );
+  await client.query('commit');
+} catch (err) {
+  await client.query('rollback').catch(() => undefined);
+  throw err;
 } finally {
   await client.end();
 }

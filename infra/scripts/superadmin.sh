@@ -10,6 +10,15 @@ if [ "$#" -ne 2 ]; then
   exit 1
 fi
 export PATH="/usr/local/bin:$PATH"
+# Ask in bash: Node's hidden readline prompt can come back empty in some server terminals.
+if [ -z "${SUPERADMIN_PASSWORD:-}" ]; then
+  read -rsp 'Password (at least 12 characters): ' p1; echo
+  read -rsp 'Repeat password: ' p2; echo
+  if [ "$p1" != "$p2" ]; then echo 'The passwords are not the same.'; exit 1; fi
+  if [ "${#p1}" -lt 12 ]; then echo "The password is ${#p1} characters; at least 12 are needed."; exit 1; fi
+  export SUPERADMIN_PASSWORD="$p1"
+  unset p1 p2
+fi
 cd "$D/current/apps/web"
 SUPERADMIN_EMAIL="$1" SUPERADMIN_NAME="$2" node \
   --env-file="$D/shared/web.env.production" \

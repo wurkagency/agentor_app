@@ -24,8 +24,8 @@ function toErrorKey(
   // Only reported after a correct password: a new verification mail has been sent.
   if (error.code === 'EMAIL_NOT_VERIFIED') return 'unverified';
   if (error.status === 429) return 'rateLimited';
-  if (error.status === 401 || error.status === 403 || error.code === 'INVALID_EMAIL_OR_PASSWORD')
-    return 'invalid';
+  // Only a real credential mismatch says "forkert"; a 403 (e.g. INVALID_ORIGIN) is a setup fault.
+  if (error.status === 401 || error.code === 'INVALID_EMAIL_OR_PASSWORD') return 'invalid';
   return 'generic';
 }
 

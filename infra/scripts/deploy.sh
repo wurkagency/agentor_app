@@ -21,6 +21,17 @@ set -a
 . "$D/shared/deploy.env"
 set +a
 pnpm db:migrate
+# PostgreSQL 12 has no built-in gen_random_uuid(); server-setup.sh installs pgcrypto in the app
+# schema, and app.uuid_v7() must look there. Stop before the switch if IDs can't be made.
+if ! psql "$DATABASE_URL_OWNER" -XAtqc 'select app.uuid_v7()' >/dev/null 2>&1; then
+  if [ "$(psql "$DATABASE_URL_OWNER" -XAtc "select to_regproc('app.gen_random_uuid') is not null")" = t ]; then
+    psql "$DATABASE_URL_OWNER" -Xqc 'alter function app.uuid_v7() set search_path = pg_catalog, app'
+  else
+    echo "The database can't make IDs: gen_random_uuid() is missing (PostgreSQL older than 13)."
+    echo "As the PostgreSQL superuser, in Agentor's database: create extension pgcrypto with schema app;"
+    exit 1
+  fi
+fi
 unset DATABASE_URL_OWNER
 
 echo "== Ports"
