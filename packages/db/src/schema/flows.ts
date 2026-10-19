@@ -14,6 +14,7 @@ import {
   uuid,
 } from 'drizzle-orm/pg-core';
 import { createdAt, idColumn, tenantIdColumn, updatedAt } from './columns.js';
+import { connections } from './connections.js';
 import { memberships, tenants } from './tenancy.js';
 
 const ts = (name: string) => timestamp(name, { withTimezone: true, mode: 'date' });
@@ -41,6 +42,8 @@ export const flows = pgTable(
     /** Next scheduled poll, set by the worker after each run. */
     nextRunAt: ts('next_run_at'),
     lastRunAt: ts('last_run_at'),
+    /** Earliest automatic retry of a failed record (1 min → 6 h backoff, at most 8 tries). */
+    nextRetryAt: ts('next_retry_at'),
     /** Template the flow was created from (D4), if any. */
     template: text('template'),
     createdAt: createdAt(),
@@ -112,6 +115,8 @@ export const runs = pgTable(
     recordsSkipped: integer('records_skipped').notNull().default(0),
     durationMs: integer('duration_ms'),
     requestedByName: text('requested_by_name'),
+    /** Source ids a webhook named; the run reads just these. */
+    sourceIds: jsonb('source_ids').$type<{ entity: string; ids: string[] }>(),
   },
   (t) => [
     primaryKey({ columns: [t.tenantId, t.id] }),
@@ -159,6 +164,13 @@ export const runRecords = pgTable(
     durationMs: integer('duration_ms'),
     /** Set when a later attempt for the same record and route succeeded. */
     resolvedAt: ts('resolved_at'),
+    /** Which try this was (1 = first). */
+    attempts: integer('attempts').notNull().default(1),
+    /** Why it failed: invalid, mapping and dependency need the customer; the rest retry. */
+    failure: text('failure'),
+    /** When it is tried again automatically; null when it isn't (needs action, or 8 tries). */
+    nextRetryAt: ts('next_retry_at'),
+    sourceVersion: text('source_version'),
     createdAt: createdAt(),
   },
   (t) => [
@@ -172,6 +184,126 @@ export const runRecords = pgTable(
       .on(t.tenantId, t.flowId, t.routeId)
       .where(sql`outcome = 'failed' and resolved_at is null`),
     index('run_records_label_idx').on(t.tenantId, t.label),
+    index('run_records_retry_idx')
+      .on(t.tenantId, t.flowId, t.nextRetryAt)
+      .where(sql`next_retry_at is not null and resolved_at is null`),
+  ],
+);
+
+/**
+ * Idempotency key (produktspecifikation §4.1): a source record version is processed once per
+ * flow. A changed record has a new version and runs again; an unchanged one never does.
+ */
+export const syncItems = pgTable(
+  'sync_items',
+  {
+    tenantId: tenantIdColumn(),
+    id: idColumn(),
+    flowId: uuid('flow_id').notNull(),
+    connectionId: uuid('connection_id').notNull(),
+    entity: text('entity').notNull(),
+    sourceId: text('source_id').notNull(),
+    sourceVersion: text('source_version').notNull(),
+    runId: uuid('run_id').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.id] }),
+    foreignKey({
+      columns: [t.tenantId, t.flowId],
+      foreignColumns: [flows.tenantId, flows.id],
+    }).onDelete('cascade'),
+    unique('sync_items_key').on(
+      t.tenantId,
+      t.flowId,
+      t.connectionId,
+      t.entity,
+      t.sourceId,
+      t.sourceVersion,
+    ),
+    index('sync_items_created_idx').on(t.tenantId, t.createdAt),
+  ],
+);
+
+/** Polling cursor per flow, connection and entity: read again from here minus 2 minutes. */
+export const syncCursors = pgTable(
+  'sync_cursors',
+  {
+    tenantId: tenantIdColumn(),
+    id: idColumn(),
+    flowId: uuid('flow_id').notNull(),
+    connectionId: uuid('connection_id').notNull(),
+    entity: text('entity').notNull(),
+    cursor: ts('cursor').notNull(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.id] }),
+    foreignKey({
+      columns: [t.tenantId, t.flowId],
+      foreignColumns: [flows.tenantId, flows.id],
+    }).onDelete('cascade'),
+    unique('sync_cursors_key').on(t.tenantId, t.flowId, t.connectionId, t.entity),
+  ],
+);
+
+/**
+ * Fetched source records of a run, so route jobs carry ids only (§4.1: job payloads never hold
+ * personal data). Deleted when the run finishes; the retention sweep removes leftovers.
+ */
+export const syncPayloads = pgTable(
+  'sync_payloads',
+  {
+    tenantId: tenantIdColumn(),
+    id: idColumn(),
+    runId: uuid('run_id').notNull(),
+    entity: text('entity').notNull(),
+    sourceId: text('source_id').notNull(),
+    sourceVersion: text('source_version').notNull(),
+    payload: jsonb('payload').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.id] }),
+    foreignKey({
+      columns: [t.tenantId, t.runId],
+      foreignColumns: [runs.tenantId, runs.id],
+    }).onDelete('cascade'),
+    unique('sync_payloads_key').on(t.tenantId, t.runId, t.entity, t.sourceId),
+  ],
+);
+
+/**
+ * What Agentor wrote where, per destination connection: dependency resolution (is the customer
+ * already in Dinero?) and echo suppression (a change we made ourselves coming back as an event).
+ */
+export const entityLinks = pgTable(
+  'entity_links',
+  {
+    tenantId: tenantIdColumn(),
+    id: idColumn(),
+    connectionId: uuid('connection_id').notNull(),
+    entity: text('entity').notNull(),
+    sourceConnectionId: uuid('source_connection_id').notNull(),
+    sourceId: text('source_id').notNull(),
+    destinationId: text('destination_id').notNull(),
+    writtenAt: ts('written_at').notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.id] }),
+    foreignKey({ columns: [t.tenantId], foreignColumns: [tenants.id] }).onDelete('cascade'),
+    foreignKey({
+      columns: [t.tenantId, t.connectionId],
+      foreignColumns: [connections.tenantId, connections.id],
+    }).onDelete('cascade'),
+    unique('entity_links_key').on(
+      t.tenantId,
+      t.connectionId,
+      t.entity,
+      t.sourceConnectionId,
+      t.sourceId,
+    ),
+    index('entity_links_destination_idx').on(t.tenantId, t.connectionId, t.destinationId),
   ],
 );
 

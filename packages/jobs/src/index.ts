@@ -1,4 +1,4 @@
-import { Queue, type JobsOptions } from 'bullmq';
+import { Queue, type FlowProducer, type JobsOptions } from 'bullmq';
 import { Redis } from 'ioredis';
 import { z } from 'zod';
 
@@ -108,9 +108,87 @@ export const flowJobs = {
     /** Retry: only open failures (optionally on one route). */
     retry: z.object({ routeId: z.string().max(40).optional() }).optional(),
   }),
+  /** One route of a run (fan-out): the records are read from the run's stored payloads. */
+  'flow.route': z.object({ tenantId: z.uuid(), runId: z.uuid(), routeId: z.string().max(40) }),
+  /** Runs when every route job of a run is done: totals, status and notifications. */
+  'flow.finish': z.object({ tenantId: z.uuid(), runId: z.uuid() }),
 } as const;
 
+export type FlowJobName = keyof typeof flowJobs;
 export type FlowJobData = z.infer<(typeof flowJobs)['flow.run']>;
+
+export function parseFlowJobOf<N extends FlowJobName>(
+  name: N,
+  data: unknown,
+): z.infer<(typeof flowJobs)[N]> {
+  return flowJobs[name].parse(data) as z.infer<(typeof flowJobs)[N]>;
+}
+
+/**
+ * Fans a run out to one job per route, with a finishing job that runs when they are all done
+ * (BullMQ flow). Job ids are derived from the run, so a repeated fan-out adds nothing.
+ */
+export async function enqueueRouteJobs(
+  producer: FlowProducer,
+  data: { tenantId: string; runId: string; routeIds: string[] },
+): Promise<void> {
+  await producer.add({
+    name: 'flow.finish',
+    queueName: QUEUES.flows,
+    data: flowJobs['flow.finish'].parse({ tenantId: data.tenantId, runId: data.runId }),
+    opts: { jobId: `finish-${data.runId}`, ...FLOW_JOB_OPTIONS },
+    children: data.routeIds.map((routeId) => ({
+      name: 'flow.route',
+      queueName: QUEUES.flows,
+      data: flowJobs['flow.route'].parse({ tenantId: data.tenantId, runId: data.runId, routeId }),
+      opts: { jobId: `route-${data.runId}-${routeId}`, ...FLOW_JOB_OPTIONS },
+    })),
+  });
+}
+
+const FLOW_JOB_OPTIONS = {
+  attempts: 3,
+  backoff: { type: 'exponential', delay: 10_000 },
+  removeOnComplete: { age: 7 * 24 * 3600, count: 10_000 },
+  removeOnFail: { age: 30 * 24 * 3600 },
+} as const;
+
+/* ---- Rate limits: token buckets in Redis (produktspecifikation §4.1) ---------------------------- */
+
+const TAKE = `
+local key = KEYS[1]
+local capacity = tonumber(ARGV[1])
+local refill_per_ms = capacity / 60000
+local now = tonumber(ARGV[2])
+local b = redis.call('HMGET', key, 'tokens', 'at')
+local tokens = tonumber(b[1]) or capacity
+local at = tonumber(b[2]) or now
+tokens = math.min(capacity, tokens + (now - at) * refill_per_ms)
+local wait = 0
+if tokens >= 1 then
+  tokens = tokens - 1
+else
+  wait = math.ceil((1 - tokens) / refill_per_ms)
+end
+redis.call('HSET', key, 'tokens', tokens, 'at', now)
+redis.call('PEXPIRE', key, 120000)
+return wait
+`;
+
+/**
+ * Takes one token from a per-minute bucket; returns 0, or how many ms to wait before trying
+ * again. Buckets are per destination connection and per tenant, shared by every worker.
+ */
+export async function takeToken(redis: Redis, key: string, perMinute: number): Promise<number> {
+  const wait = await redis.eval(
+    TAKE,
+    1,
+    `agentor:tb:${key}`,
+    String(perMinute),
+    String(Date.now()),
+  );
+  return Number(wait);
+}
 
 export function flowsQueue(connection: Redis): Queue {
   return new Queue(QUEUES.flows, {

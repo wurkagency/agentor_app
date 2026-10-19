@@ -1,5 +1,6 @@
 import {
   saleKind,
+  WriteError,
   type ConnectorAdapter,
   type EntityRecord,
   type LookupOption,
@@ -47,6 +48,13 @@ export interface RecordResult {
     vatFree: boolean;
   } | null;
   durationMs: number;
+  /**
+   * Why a failed record failed, which decides what happens next: `invalid` and `mapping` need
+   * the customer (never retried automatically), `transient` and `rate_limited` are retried with
+   * backoff, `unauthorized` waits for the connection.
+   */
+  failure?: 'invalid' | 'transient' | 'rate_limited' | 'unauthorized' | 'mapping' | 'dependency';
+  retryAfterMs?: number;
 }
 
 function fieldValue(
@@ -170,6 +178,16 @@ export interface RouteRunInput {
   dryRun: boolean;
   /** Cross-reference: the record's id in the destination, if it was written before. */
   existingId: (sourceId: string) => string | null;
+  /**
+   * Resolves the record's dependencies in the destination before it is written (manifest
+   * `dependencies`, e.g. Dinero needs the customer before the invoice). Returns their
+   * destination ids, or the dependency that could not be created.
+   */
+  resolveDependencies?: (
+    record: EntityRecord[keyof EntityRecord],
+  ) => Promise<{ refs: Record<string, string> } | { missing: string; reason: string }>;
+  /** Waits for the destination's rate limit before each write. */
+  beforeWrite?: () => Promise<void>;
   now?: () => number;
 }
 
@@ -235,6 +253,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
           errorCode: plan.missing.value ? 'ACCOUNT_NOT_FOUND' : 'ACCOUNT_MISSING',
           errorParams: { field: plan.missing.key, value: plan.missing.value ?? '' },
           durationMs: now() - started,
+          failure: 'mapping',
         });
         continue;
       }
@@ -245,9 +264,28 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
       continue;
     }
     try {
+      let refs: Record<string, string> | undefined;
+      if (!dry && input.resolveDependencies) {
+        const deps = await input.resolveDependencies(rec);
+        if ('missing' in deps) {
+          out.push({
+            ...base,
+            preview,
+            outcome: 'failed',
+            errorCode: 'DEPENDENCY_MISSING',
+            errorParams: { entity: deps.missing, message: deps.reason.slice(0, 200) },
+            durationMs: now() - started,
+            failure: 'dependency',
+          });
+          continue;
+        }
+        refs = deps.refs;
+      }
+      if (!dry) await input.beforeWrite?.();
       const res = await destination.write(route.targetEntity, rec as never, {
         mode: dry ? 'dry_run' : MODE[route.mode],
         existingId: existing,
+        ...(refs ? { refs } : {}),
       });
       out.push({
         ...base,
@@ -265,13 +303,21 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         durationMs: now() - started,
       });
     } catch (e) {
+      const kind = e instanceof WriteError ? e.kind : 'transient';
       out.push({
         ...base,
         preview,
         outcome: 'failed',
-        errorCode: 'DESTINATION_ERROR',
+        errorCode:
+          kind === 'invalid'
+            ? 'DESTINATION_REJECTED'
+            : kind === 'unauthorized'
+              ? 'CONNECTION_BROKEN'
+              : 'DESTINATION_ERROR',
         errorParams: { message: e instanceof Error ? e.message.slice(0, 200) : 'unknown' },
         durationMs: now() - started,
+        failure: kind,
+        ...(e instanceof WriteError && e.retryAfterMs ? { retryAfterMs: e.retryAfterMs } : {}),
       });
     }
   }

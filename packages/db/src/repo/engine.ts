@@ -207,7 +207,8 @@ export interface RecordInsert {
   durationMs: number;
 }
 
-async function addUsage(tx: Transaction, tenantId: string, n: number, now: Date) {
+/** Counts successful Live writes towards the month's transactions (D2). */
+export async function addUsageTx(tx: Transaction, tenantId: string, n: number, now: Date) {
   if (n <= 0) return;
   const [t] = await tx.select({ tz: tenants.timeZone }).from(tenants).limit(1);
   const period = billingPeriod(now, t?.tz);
@@ -306,7 +307,7 @@ export async function completeRun(
             ),
           );
       }
-      await addUsage(tx, tenantId, written.length, now);
+      await addUsageTx(tx, tenantId, written.length, now);
       await tx
         .update(flows)
         .set({ lastRunAt: now, nextRunAt: new Date(now.getTime() + opts.pollMinutes * 60_000) })
@@ -420,8 +421,8 @@ export async function resolveNotifications(
 
 /** Published, unpaused flows whose next poll is due, across tenants (scheduler). */
 export async function dueFlows(db: Database, now = new Date()) {
-  const res = await db.execute<{ tenant_id: string; flow_id: string }>(
+  const res = await db.execute<{ tenant_id: string; flow_id: string; kind: 'scheduled' | 'retry' }>(
     sql`select * from app.due_flows(${now.toISOString()}::timestamptz)`,
   );
-  return res.rows.map((r) => ({ tenantId: r.tenant_id, flowId: r.flow_id }));
+  return res.rows.map((r) => ({ tenantId: r.tenant_id, flowId: r.flow_id, kind: r.kind }));
 }

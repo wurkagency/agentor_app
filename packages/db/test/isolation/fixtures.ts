@@ -271,6 +271,27 @@ export async function seedFixtures(admin: pg.ClientBase): Promise<void> {
        ($1, $3, $5, 'accounts', '[]'), ($2, $4, $6, 'accounts', '[]')`,
     [ID.tenantA, ID.tenantB, ID.lookupA, ID.lookupB, ID.connA, ID.connB],
   );
+  // Sync engine (M10): idempotency keys, cursors, payloads and Agentor's own writes.
+  await q(
+    `insert into sync_items (tenant_id, flow_id, connection_id, entity, source_id, source_version, run_id) values
+       ($1, $3, $5, 'order', 'o-1', 'v1', $7), ($2, $4, $6, 'order', 'o-3', 'v1', $8)`,
+    [ID.tenantA, ID.tenantB, ID.flowA1, ID.flowB1, ID.connA, ID.connB, ID.runA1, ID.runB1],
+  );
+  await q(
+    `insert into sync_cursors (tenant_id, flow_id, connection_id, entity, cursor) values
+       ($1, $3, $5, 'order', now()), ($2, $4, $6, 'order', now())`,
+    [ID.tenantA, ID.tenantB, ID.flowA1, ID.flowB1, ID.connA, ID.connB],
+  );
+  await q(
+    `insert into sync_payloads (tenant_id, run_id, entity, source_id, source_version, payload) values
+       ($1, $3, 'order', 'o-1', 'v1', '{"sourceId":"o-1"}'), ($2, $4, 'order', 'o-3', 'v1', '{"sourceId":"o-3"}')`,
+    [ID.tenantA, ID.tenantB, ID.runA1, ID.runB1],
+  );
+  await q(
+    `insert into entity_links (tenant_id, connection_id, entity, source_connection_id, source_id, destination_id) values
+       ($1, $3, 'customer', $3, 'c-1', 'd-1'), ($2, $4, 'customer', $4, 'c-3', 'd-3')`,
+    [ID.tenantA, ID.tenantB, ID.connA, ID.connB],
+  );
   await q(
     `insert into notifications (tenant_id, id, user_id, event, message_key) values
        ($1, $3, $5, 'systematic_error', 'test'), ($2, $4, $6, 'systematic_error', 'test')`,

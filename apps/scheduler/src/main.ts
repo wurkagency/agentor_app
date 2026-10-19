@@ -1,15 +1,24 @@
 import {
   createDatabase,
+  createEngineRun,
   createScheduledRun,
   dueFlows,
   dueInvoiceJobs,
   dueSubscriptions,
+  failStaleRuns,
+  retentionSweep,
 } from '@agentor/db';
 import { billingQueue, enqueueBilling, enqueueFlowRun, flowsQueue } from '@agentor/jobs';
 import { Redis } from 'ioredis';
 import pino from 'pino';
 import { BILLING_INTERVAL_MS, billingTick, invoiceTick } from './billing.js';
-import { FLOW_INTERVAL_MS, flowTick } from './flows.js';
+import {
+  FLOW_INTERVAL_MS,
+  flowTick,
+  HOUSEKEEPING_INTERVAL_MS,
+  RETENTION_INTERVAL_MS,
+  STALE_RUN_MS,
+} from './flows.js';
 import { LeaderLock } from './leader-lock.js';
 
 const log = pino({
@@ -64,7 +73,10 @@ const runFlows = () =>
   flowTick({
     isLeader: () => lock.isLeader,
     dueFlows: (now) => dueFlows(database.db, now),
-    createRun: (tenantId, flowId) => createScheduledRun(database.db, tenantId, flowId),
+    createRun: (tenantId, flowId, kind) =>
+      kind === 'retry'
+        ? createEngineRun(database.db, tenantId, flowId, 'retry')
+        : createScheduledRun(database.db, tenantId, flowId),
     enqueue: (tenantId, runId) => enqueueFlowRun(runQueue, { tenantId, runId }),
   })
     .then((n) => n && log.info({ runs: n }, 'flow runs queued'))
@@ -73,10 +85,33 @@ const runFlows = () =>
     );
 const flowTimer = setInterval(runFlows, FLOW_INTERVAL_MS);
 
+// Housekeeping on the leader: runs a dead worker left behind, and retention once a day.
+const runStale = () =>
+  lock.isLeader
+    ? failStaleRuns(database.db, new Date(Date.now() - STALE_RUN_MS))
+        .then((n) => n && log.warn({ runs: n }, 'stale runs failed'))
+        .catch((err: unknown) =>
+          log.error({ err: err instanceof Error ? err.message : err }, 'stale sweep failed'),
+        )
+    : undefined;
+const runRetention = () =>
+  lock.isLeader
+    ? retentionSweep(database.db)
+        .then((r) => log.info(r, 'retention sweep'))
+        .catch((err: unknown) =>
+          log.error({ err: err instanceof Error ? err.message : err }, 'retention sweep failed'),
+        )
+    : undefined;
+const staleTimer = setInterval(runStale, HOUSEKEEPING_INTERVAL_MS);
+const retentionTimer = setInterval(runRetention, RETENTION_INTERVAL_MS);
+setTimeout(runRetention, 60_000);
+
 const shutdown = async (signal: string) => {
   log.info({ signal }, 'shutting down');
   clearInterval(billingTimer);
   clearInterval(flowTimer);
+  clearInterval(staleTimer);
+  clearInterval(retentionTimer);
   await runQueue.close();
   await lock.stop();
   await queue.close();

@@ -71,6 +71,8 @@ export const inboundEvents = pgTable(
     body: bytea('body').notNull(),
     status: text('status').$type<'queued' | 'accepted' | 'rejected'>().notNull().default('queued'),
     reason: text('reason'),
+    /** The sender's delivery id; a repeated delivery is dropped. */
+    deliveryId: text('delivery_id'),
   },
   (t) => [
     primaryKey({ columns: [t.tenantId, t.id] }),
@@ -79,6 +81,9 @@ export const inboundEvents = pgTable(
       foreignColumns: [connections.tenantId, connections.id],
     }).onDelete('cascade'),
     index('inbound_events_received_idx').on(t.tenantId, t.receivedAt),
+    uniqueIndex('inbound_events_delivery_key')
+      .on(t.tenantId, t.connectionId, t.deliveryId)
+      .where(sql`delivery_id is not null`),
     check('inbound_events_status_check', sql`${t.status} in ('queued', 'accepted', 'rejected')`),
   ],
 );

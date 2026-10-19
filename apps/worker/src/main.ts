@@ -2,12 +2,13 @@ import { createQuickPay, quickPayMode } from '@agentor/billing';
 import { createHash } from 'node:crypto';
 import { loadKekFile, publicOf, publicKeyFromBase64 } from '@agentor/keybox';
 import { createDatabase } from '@agentor/db';
-import { QUEUES, redisConnection } from '@agentor/jobs';
-import { Worker } from 'bullmq';
+import { flowsQueue, QUEUES, redisConnection } from '@agentor/jobs';
+import { FlowProducer, Worker } from 'bullmq';
 import pino from 'pino';
 import { processBillingJob } from './billing.js';
 import { processConnectionJob } from './connections.js';
-import { processFlowJob } from './flows.js';
+import { processFlowJobByName } from './flows.js';
+import { metrics, serveMetrics } from './metrics.js';
 
 /**
  * agentor-worker: the only process with the KEK and outbound access to customer systems
@@ -53,6 +54,18 @@ const connectionDeps = {
   log: log.child({ queue: QUEUES.connections }),
 };
 
+const producer = new FlowProducer({ connection });
+const flowDeps = {
+  ...connectionDeps,
+  producer,
+  redis: connection,
+  flowQueue: flowsQueue(connection),
+};
+// Prometheus scrapes this on the server (localhost only); off unless METRICS_PORT is set.
+const metricsServer = process.env.METRICS_PORT
+  ? serveMetrics(metrics, Number(process.env.METRICS_PORT))
+  : null;
+
 const workers = [
   new Worker(
     QUEUES.system,
@@ -65,15 +78,14 @@ const workers = [
     connection,
     concurrency: 2,
   }),
-  new Worker(QUEUES.flows, (job) => processFlowJob(connectionDeps, job.data), {
+  new Worker(QUEUES.flows, (job) => processFlowJobByName(flowDeps, job.name, job.data), {
     connection,
     concurrency: 4,
   }),
-  new Worker(
-    QUEUES.connections,
-    (job) => processConnectionJob(connectionDeps, job.name, job.data),
-    { connection, concurrency: 4 },
-  ),
+  new Worker(QUEUES.connections, (job) => processConnectionJob(flowDeps, job.name, job.data), {
+    connection,
+    concurrency: 4,
+  }),
 ];
 for (const w of workers) {
   w.on('failed', (job, err) =>
@@ -87,6 +99,8 @@ const shutdown = async (signal: string) => {
   log.info({ signal }, 'shutting down');
   const timeout = setTimeout(() => process.exit(1), 60_000);
   await Promise.all(workers.map((w) => w.close()));
+  await producer.close();
+  metricsServer?.close();
   clearTimeout(timeout);
   await database.close();
   connection.disconnect();

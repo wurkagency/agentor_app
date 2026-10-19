@@ -391,6 +391,9 @@ importers:
       '@agentor/connectors':
         specifier: workspace:*
         version: link:../../packages/connectors
+      '@agentor/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@agentor/db':
         specifier: workspace:*
         version: link:../../packages/db

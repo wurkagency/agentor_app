@@ -1,6 +1,9 @@
 import { adapterFor, manifestFor, verifyWebhookSignature } from '@agentor/connectors';
 import {
+  createEngineRun,
+  flowsReading,
   loadConnectionForWorker,
+  markDelivery,
   notify,
   resolveNotifications,
   saveLookup,
@@ -11,7 +14,9 @@ import {
   tenantDek,
   type Database,
 } from '@agentor/db';
-import { parseConnectionJob, type ConnectionJobName } from '@agentor/jobs';
+import { parseDefinition } from '@agentor/flows';
+import { enqueueFlowRun, parseConnectionJob, type ConnectionJobName } from '@agentor/jobs';
+import type { Queue } from 'bullmq';
 import {
   DEK_FORMAT,
   dekDecrypt,
@@ -33,6 +38,8 @@ export interface ConnectionDeps {
   kekId: string;
   connectorMode: 'mock' | 'live';
   log: Logger;
+  /** Webhooks start runs on the flows queue. */
+  flowQueue?: Queue;
 }
 
 /**
@@ -126,9 +133,9 @@ async function testConnection(deps: ConnectionDeps, tenantId: string, connection
 }
 
 /**
- * Verifies a stored webhook against the connection's signing secret. Processing into runs
- * follows with the engine (M6/M7); here the event is accepted or rejected and the connection's
- * "Webhook modtaget" time is updated.
+ * Verifies a stored webhook against the connection's signing secret, drops a repeated delivery,
+ * and starts a run of every published flow that reads the changed entity from this connection.
+ * The run reads just the named records; the idempotency key drops versions already handled.
  */
 async function verifyWebhook(deps: ConnectionDeps, tenantId: string, eventId: string) {
   const event = await loadInboundEvent(deps.db, tenantId, eventId);
@@ -153,7 +160,31 @@ async function verifyWebhook(deps: ConnectionDeps, tenantId: string, eventId: st
     ok ? 'accepted' : 'rejected',
     ok ? null : 'bad signature',
   );
-  if (!ok) deps.log.warn({ tenantId, connectionId: conn.id }, 'webhook signature rejected');
+  if (!ok) {
+    deps.log.warn({ tenantId, connectionId: conn.id }, 'webhook signature rejected');
+    return;
+  }
+  const adapter = adapterFor({
+    connectorId: conn.connectorId,
+    credentials: creds ?? {},
+    mode: deps.connectorMode,
+  });
+  const change = adapter.parseWebhook(event.body.toString('utf8'), event.headers);
+  if (!change || change.sourceIds.length === 0) return;
+  if (change.deliveryId && !(await markDelivery(deps.db, tenantId, eventId, change.deliveryId))) {
+    deps.log.info({ tenantId, connectionId: conn.id }, 'duplicate webhook delivery dropped');
+    return;
+  }
+  if (!deps.flowQueue) return;
+  for (const f of await flowsReading(deps.db, tenantId, conn.id)) {
+    const def = parseDefinition(f.definition);
+    if (!def.routes.some((r) => r.entity === change.entity && !r.paused)) continue;
+    const runId = await createEngineRun(deps.db, tenantId, f.flowId, 'webhook', {
+      entity: change.entity,
+      ids: change.sourceIds,
+    });
+    if (runId) await enqueueFlowRun(deps.flowQueue, { tenantId, runId });
+  }
 }
 
 export async function processConnectionJob(deps: ConnectionDeps, name: string, data: unknown) {

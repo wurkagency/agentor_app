@@ -13,6 +13,7 @@
   "dependencies": {
     "@agentor/billing": "workspace:*",
     "@agentor/connectors": "workspace:*",
+    "@agentor/core": "workspace:*",
     "@agentor/db": "workspace:*",
     "@agentor/flows": "workspace:*",
     "@agentor/jobs": "workspace:*",

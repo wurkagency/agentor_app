@@ -17,6 +17,7 @@ export * from './repo/onboarding.js';
 export * from './repo/connections.js';
 export * from './repo/flows.js';
 export * from './repo/engine.js';
+export * from './repo/sync.js';
 export * from './repo/notifications.js';
 export * from './repo/editor.js';
 export * from './repo/platform.js';
