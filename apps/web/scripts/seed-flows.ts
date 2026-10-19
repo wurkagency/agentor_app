@@ -88,9 +88,7 @@ export const WEBSHOP_V7 = {
       categoryAccounts: CATEGORY_ACCOUNTS,
       settings: { 'invoice.bookAutomatically': false, 'invoice.language': 'da' },
     }),
-    route('creditnotes-dinero', 'src', 'dinero', 'creditNote', 'creditNote', 'live', {
-      mapping: WEBSHOP_ACCOUNTS,
-    }),
+    route('creditnotes-dinero', 'src', 'dinero', 'creditNote', 'creditNote', 'live'),
     route('customers-dinero', 'src', 'dinero', 'customer', 'customer', 'live'),
     route('customers-hubspot', 'src', 'hubspot', 'customer', 'customer', 'test'),
     route('customers-brevo', 'src', 'brevo', 'customer', 'customer', 'live'),
@@ -124,11 +122,7 @@ const KREDITNOTAER = {
   defaultMode: 'live',
   pollMinutes: 5,
   nodes: nodes(C.woo, [['dinero', C.dinero]]),
-  routes: [
-    route('creditnotes-dinero', 'src', 'dinero', 'creditNote', 'creditNote', 'live', {
-      mapping: { ...WEBSHOP_ACCOUNTS, 'accounts.euB2b': '1015' },
-    }),
-  ],
+  routes: [route('creditnotes-dinero', 'src', 'dinero', 'creditNote', 'creditNote', 'live')],
 };
 
 const NYHEDSBREV = {

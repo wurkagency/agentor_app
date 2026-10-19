@@ -530,7 +530,11 @@
       "flow_route_paused": "Paused a route",
       "flow_route_resumed": "Resumed a route",
       "flow_retried": "Retried failed records",
-      "flow_run_requested": "Started a run"
+      "flow_run_requested": "Started a run",
+      "flow_published": "Published a flow",
+      "flow_draft_discarded": "Discarded a draft",
+      "flow_created": "Created a flow",
+      "flow_version_restored": "Restored a version as draft"
     },
     "groups": {
       "member": "Team",
@@ -1278,6 +1282,379 @@
       "helpBody": "Book 20 minutes with an adviser, or invite your developer or accountant.",
       "book": "Book adviser",
       "invite": "Invite"
+    }
+  },
+  "editor": {
+    "title": "Editor",
+    "back": "Back to the flow",
+    "viewLabel": "View",
+    "canvas": "Canvas",
+    "modeLabel": "Mode",
+    "validate": "Validate",
+    "testRun": "Test run",
+    "publishButton": "Publish",
+    "fixFirst": "Fix the errors before publishing",
+    "menu": "More actions",
+    "versions": "Versions",
+    "exportJson": "Export as JSON",
+    "discard": "Discard draft",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "saving": "Saving …",
+    "savedAgo": "Saved {when}",
+    "unsaved": "Unsaved changes",
+    "allSaved": "All changes saved",
+    "readOnly": "Read only",
+    "readOnlyRole": "Your role can view this flow but not edit it.",
+    "lockedBy": "{name} is editing this flow right now. You're viewing it read-only.",
+    "publishedV": "Published v{n}",
+    "neverPublished": "Never published",
+    "draftChanges": "{count, plural, one {# change in the draft} other {# changes in the draft}}",
+    "noChanges": "No changes",
+    "published": "Version {n} is published",
+    "retrying": "The failed records are being retried.",
+    "selectedRoute": "Selected route: {route}",
+    "errorsToFix": "{count, plural, one {# error to fix} other {# errors to fix}}",
+    "errors": {
+      "test": "The test run couldn't start. Try again.",
+      "locked": "Someone else is editing the flow. Your changes were not saved.",
+      "save": "The draft couldn't be saved. Try again."
+    },
+    "guide": {
+      "title": "Getting started",
+      "body": "Pick a route, fill in the accounts under Mapping, and run a test. Every route starts in Test, so nothing is written until you publish."
+    },
+    "list": {
+      "title": "List",
+      "route": "Route",
+      "mode": "Mode",
+      "status": "Status",
+      "filters": "Filters",
+      "all": "All records",
+      "keyboard": "Use the arrow keys to move between routes and Enter to open one."
+    },
+    "sourceTitle": "From {name}",
+    "routesTo": "{routes, plural, one {# route} other {# routes}} to {destinations, plural, one {# system} other {# systems}}",
+    "needsFix": "Needs fixing",
+    "canvasLabel": "Flow canvas",
+    "connectionOk": "Connection works",
+    "connectionBroken": "Connection is broken",
+    "pausedShort": "Paused",
+    "free": "Free",
+    "zoom": "Zoom",
+    "zoomLevel": "{pct}%",
+    "routesCount": "{count, plural, one {# route} other {# routes}}",
+    "nodeFindings": "{count, plural, one {# finding} other {# findings}}",
+    "selectRoute": "Select route {route}",
+    "legend": {
+      "live": "Live",
+      "test": "Test",
+      "paused": "Paused"
+    },
+    "paletteLabel": "Connections",
+    "searchConnections": "Search connections",
+    "palette": {
+      "source": "Source: {name}",
+      "inFlow": "In the flow: {name}",
+      "broken": "Broken: {name}",
+      "add": "Add {name} to the flow",
+      "addConnection": "Add connection",
+      "destinations": "Destinations",
+      "unlimited": "{count} of unlimited",
+      "of": "{count} of {max}",
+      "moreNeedEnterprise": "More destinations need a bigger plan than {plan}.",
+      "seePlans": "See plans"
+    },
+    "inspectorLabel": "Route settings",
+    "inspectorTabs": "Route tabs",
+    "closeInspector": "Close settings",
+    "route": "Route",
+    "routeMenu": "Route actions",
+    "deleteRoute": "Delete route",
+    "hasErrors": "Has errors",
+    "tabs": {
+      "general": "General",
+      "mapping": "Mapping",
+      "filters": "Filters",
+      "run": "Schedule",
+      "history": "History"
+    },
+    "general": {
+      "mode": "Mode",
+      "sendWhen": "Send when the order is",
+      "updateExisting": "Update existing",
+      "updateExistingHelp": "Changes in the source update the record that was already created.",
+      "conflict": "On conflict, keep",
+      "idempotency": "Duplicate key",
+      "idempotencyHelp": "The same record is never created twice."
+    },
+    "modeHelp": {
+      "test": "Dry run. Nothing is written to {system}.",
+      "draft": "Created as a draft in {system}, not booked.",
+      "live": "Created and booked in {system} straight away."
+    },
+    "orderStatus": {
+      "completed": "Completed",
+      "processing": "Processing"
+    },
+    "conflict": {
+      "source": "The source",
+      "destination": "The destination",
+      "skip": "Skip"
+    },
+    "advanced": "Advanced",
+    "account": "Account",
+    "accounts": "Accounts",
+    "chooseAccount": "Choose account",
+    "required": "Required",
+    "accountGone": "Account {value} no longer exists in {system}.",
+    "lookupNote": "Accounts are fetched from {system}.",
+    "noMapping": "{system} has no fields to map.",
+    "mappingMissing": "{count, plural, one {# field missing} other {# fields missing}}",
+    "categoryTitle": "Accounts by category",
+    "categoryHint": "Exceptions for specific products or categories.",
+    "exception": "Add exception",
+    "newProduct": "New product",
+    "category": "Category or product",
+    "productName": "Product name",
+    "productException": "Product exception",
+    "remove": "Remove",
+    "removeRow": "Remove {name}",
+    "accountFor": "Account for {name}",
+    "filter": {
+      "none": "All records are sent.",
+      "field": "Field",
+      "op": "Condition",
+      "value": "Value",
+      "add": "Add filter",
+      "remove": "Remove filter",
+      "fields": {
+        "total": "Amount",
+        "status": "Status",
+        "country": "Country",
+        "customerKind": "Customer type"
+      },
+      "ops": {
+        "gt": "greater than",
+        "gte": "at least",
+        "lt": "less than",
+        "eq": "is",
+        "neq": "is not"
+      },
+      "sentence": {
+        "total": "amount {op} {value}",
+        "status": "status {op} {value}",
+        "country": "country {op} {value}",
+        "customerKind": "customer type {op} {value}"
+      }
+    },
+    "run": {
+      "interval": "Fetch new records every",
+      "every": "{count, plural, one {# minute} other {# minutes}}",
+      "intervalHelp": "Your plan allows down to {min} minutes.",
+      "note": "Webhooks are sent straight away, whatever the interval."
+    },
+    "recordsWeek": "{count, plural, one {# record in the last 7 days} other {# records in the last 7 days}}",
+    "history": {
+      "none": "No runs yet.",
+      "outcome": {
+        "created": "Created",
+        "updated": "Updated",
+        "skipped": "Skipped",
+        "failed": "Failed",
+        "would_create": "Would create",
+        "would_update": "Would update"
+      }
+    },
+    "bottomLabel": "Validation and test",
+    "bottom": {
+      "validation": "Validation",
+      "test": "Test run"
+    },
+    "expandPanel": "Expand panel",
+    "collapsePanel": "Collapse panel",
+    "noFindings": "No errors. The flow is ready for a test run.",
+    "validatedAt": "Validated {when}",
+    "goToField": "Go to field",
+    "showRoute": "Show route",
+    "severity": {
+      "error": "Error",
+      "warning": "Warning"
+    },
+    "findings": {
+      "NO_SOURCE": {
+        "title": "The flow has no source",
+        "body": "Add the webshop to fetch data from."
+      },
+      "NO_DESTINATION": {
+        "title": "The flow has no destination",
+        "body": "Add at least one system to send data to."
+      },
+      "TOO_MANY_DESTINATIONS": {
+        "title": "Too many destinations",
+        "body": "Your plan allows {max} destinations. Remove one or change plan."
+      },
+      "UNKNOWN_CONNECTION": {
+        "title": "Unknown connection",
+        "body": "The connection no longer exists. Choose another."
+      },
+      "CONNECTION_BROKEN": {
+        "title": "{name} is disconnected",
+        "body": "Reconnect {name} before the flow can run."
+      },
+      "PORT_UNSUPPORTED": {
+        "title": "{route} can't be received",
+        "body": "The destination doesn't support this kind of data."
+      },
+      "MODE_UNSUPPORTED": {
+        "title": "{route} doesn't support this mode",
+        "body": "Choose another mode for the route."
+      },
+      "MAPPING_REQUIRED": {
+        "title": "{field} is missing",
+        "body": "Choose a value for {field} on the route {route}."
+      },
+      "ACCOUNT_NOT_FOUND": {
+        "title": "Account {value} doesn't exist in {system}",
+        "body": "{field} on the route {route} points to an account that doesn't exist. Choose another account."
+      },
+      "ROUTE_IN_TEST": {
+        "title": "{route} is in Test",
+        "body": "The route writes nothing to {system} until you change its mode."
+      }
+    },
+    "testIntro": "A test run fetches the latest records from the source and shows what would happen. Nothing is written.",
+    "testRunning": "Running test …",
+    "dryRun": "Dry run",
+    "runAgain": "Run again",
+    "latestFrom": "The latest {count} records from {source}",
+    "testRoutes": "Routes in the test run",
+    "testRecords": "Records in the test run",
+    "wouldCreate": "Would create",
+    "wouldUpdate": "Would update",
+    "wouldSkip": "Skipped",
+    "wouldFail": "{count, plural, one {# would fail} other {# would fail}}",
+    "skippedZero": "Skipped: 0 kr.",
+    "before": "{label} in {source}",
+    "after": "After",
+    "beforeAfter": "Before and after for {label}",
+    "customer": "Customer",
+    "country": "Country",
+    "vatNo": "VAT no.",
+    "line": "Line {n}",
+    "shipping": "Shipping",
+    "noAccount": "No account",
+    "total": "Total",
+    "withoutVat": "excl. VAT",
+    "noPreview": "No preview for this record.",
+    "mode": "Mode",
+    "modes": {
+      "test": "Test",
+      "draft": "Draft",
+      "live": "Live"
+    },
+    "change": {
+      "added": "New route",
+      "removed": "Route removed",
+      "mode": "{before} → {after}",
+      "mapping": "Mapping changed",
+      "settings": "Settings changed",
+      "filtersTitle": "Filters on {route}",
+      "filters": "Now: {rules}",
+      "noFilters": "no filters"
+    },
+    "publish": {
+      "title": "Publish version {n}",
+      "first": "First version",
+      "changesSince": "{count, plural, one {# change} other {# changes}} since v{n}",
+      "notTested": "Not tested",
+      "testedClean": "Tested without errors",
+      "testedErrors": "Tested with errors",
+      "changes": "Changes",
+      "noChanges": "No changes since the published version.",
+      "all": "Show all changes",
+      "fewer": "Show fewer",
+      "inDraft": "In the draft",
+      "retry": "{count, plural, one {Retry the # failed record after publishing} other {Retry the # failed records after publishing}}",
+      "howInvoices": "How should invoices be created in {system}?",
+      "draftTitle": "As drafts, not booked",
+      "draftBody": "Invoices are added as drafts in {system}. You book them yourselves.",
+      "liveTitle": "Book straight away",
+      "liveBody": "Invoices are booked automatically when the order is completed.",
+      "confirm": "I understand that the flow writes to {system}",
+      "confirmDraftHelp": "Drafts can be deleted in {system} before they're booked.",
+      "confirmLiveHelp": "Booked invoices can only be corrected with a credit note.",
+      "asDraft": "Publish as draft",
+      "publish": "Publish",
+      "errors": {
+        "VALIDATION": "The flow has errors that must be fixed before it can be published.",
+        "LOCKED": "Someone else is editing the flow. Try again shortly.",
+        "generic": "The flow couldn't be published. Try again."
+      }
+    },
+    "testOutcome": {
+      "would_create": {
+        "order": "Would create invoice",
+        "other": "Would create"
+      },
+      "would_update": {
+        "order": "Would update invoice",
+        "other": "Would update"
+      },
+      "created": {
+        "order": "Invoice created",
+        "other": "Created"
+      },
+      "updated": {
+        "order": "Invoice updated",
+        "other": "Updated"
+      },
+      "skipped": {
+        "order": "Skipped",
+        "other": "Skipped"
+      },
+      "failed": {
+        "order": "Would fail",
+        "other": "Would fail"
+      }
+    },
+    "saleKind": {
+      "domestic": "Sale in Denmark",
+      "euB2b": "EU B2B sale",
+      "euB2c": "EU consumer sale",
+      "export": "Sale outside the EU"
+    },
+    "undo": "Undo",
+    "redo": "Redo"
+  },
+  "templates": {
+    "title": "New flow",
+    "intro": "Pick a template. It uses your connections, and every route starts in Test.",
+    "search": "Search templates",
+    "cat": {
+      "all": "All",
+      "erp": "Accounting",
+      "crm": "CRM",
+      "marketing": "Marketing"
+    },
+    "popular": "Most used",
+    "connectFirst": "Connect {names} first",
+    "blank": "Start from blank",
+    "blankBody": "Build the routes from your webshop yourself.",
+    "name": "Flow name",
+    "setupHint": "You can change everything in the editor afterwards.",
+    "cancel": "Cancel",
+    "use": "Use template",
+    "extra": {
+      "customers-mailchimp": {
+        "title": "Customers to Mailchimp",
+        "body": "Subscribe customers in Mailchimp."
+      }
+    },
+    "errors": {
+      "missingSource": "Connect a webshop first.",
+      "generic": "The flow couldn't be created. Try again."
     }
   }
 }

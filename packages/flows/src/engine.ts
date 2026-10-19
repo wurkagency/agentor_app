@@ -193,6 +193,17 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
       skipReason: null,
       preview: null,
     };
+    // "Send når ordren er Gennemført" (D6 Generelt): orders in other states wait.
+    const trigger = route.settings['trigger.orderStatus'];
+    if (
+      route.entity === 'order' &&
+      typeof trigger === 'string' &&
+      trigger &&
+      (rec as Order).status !== trigger
+    ) {
+      out.push({ ...base, outcome: 'skipped', skipReason: `trigger:${trigger}`, durationMs: 0 });
+      continue;
+    }
     const rule = failedFilter(route, rec);
     if (rule) {
       out.push({

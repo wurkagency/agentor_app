@@ -530,7 +530,11 @@
       "flow_route_paused": "Satte en rute på pause",
       "flow_route_resumed": "Genoptog en rute",
       "flow_retried": "Gentog fejlede records",
-      "flow_run_requested": "Startede en kørsel"
+      "flow_run_requested": "Startede en kørsel",
+      "flow_published": "Publicerede et flow",
+      "flow_draft_discarded": "Kasserede en kladde",
+      "flow_created": "Oprettede et flow",
+      "flow_version_restored": "Gendannede en version som kladde"
     },
     "groups": {
       "member": "Team",
@@ -1278,6 +1282,379 @@
       "helpBody": "Book 20 minutter med en rådgiver, eller invitér din udvikler eller revisor.",
       "book": "Book rådgiver",
       "invite": "Invitér"
+    }
+  },
+  "editor": {
+    "title": "Editor",
+    "back": "Tilbage til flowet",
+    "viewLabel": "Visning",
+    "canvas": "Lærred",
+    "modeLabel": "Tilstand",
+    "validate": "Validér",
+    "testRun": "Testkør",
+    "publishButton": "Publicér",
+    "fixFirst": "Ret fejlene før du publicerer",
+    "menu": "Flere handlinger",
+    "versions": "Versioner",
+    "exportJson": "Eksportér som JSON",
+    "discard": "Kassér kladde",
+    "cancel": "Annullér",
+    "close": "Luk",
+    "save": "Gem",
+    "saving": "Gemmer …",
+    "savedAgo": "Gemt {when}",
+    "unsaved": "Ikke gemte ændringer",
+    "allSaved": "Alt er gemt",
+    "readOnly": "Kun læsning",
+    "readOnlyRole": "Du kan se flowet, men ikke redigere det med din rolle.",
+    "lockedBy": "{name} redigerer flowet lige nu. Du ser det i læsetilstand.",
+    "publishedV": "Publiceret v{n}",
+    "neverPublished": "Aldrig publiceret",
+    "draftChanges": "{count, plural, one {# ændring i kladden} other {# ændringer i kladden}}",
+    "noChanges": "Ingen ændringer",
+    "published": "Version {n} er publiceret",
+    "retrying": "De fejlede poster køres igen.",
+    "selectedRoute": "Valgt rute: {route}",
+    "errorsToFix": "{count, plural, one {# fejl skal rettes} other {# fejl skal rettes}}",
+    "errors": {
+      "test": "Testkørslen kunne ikke starte. Prøv igen.",
+      "locked": "En anden redigerer flowet. Dine ændringer er ikke gemt.",
+      "save": "Kladden kunne ikke gemmes. Prøv igen."
+    },
+    "guide": {
+      "title": "Sådan kommer du i gang",
+      "body": "Vælg en rute, udfyld kontiene under Mapping, og testkør. Alle ruter starter i Test, så der skrives intet, før du publicerer."
+    },
+    "list": {
+      "title": "Liste",
+      "route": "Rute",
+      "mode": "Tilstand",
+      "status": "Status",
+      "filters": "Filtre",
+      "all": "Alle poster",
+      "keyboard": "Brug piletasterne for at flytte mellem ruter og Enter for at åbne en."
+    },
+    "sourceTitle": "Fra {name}",
+    "routesTo": "{routes, plural, one {# rute} other {# ruter}} til {destinations, plural, one {# system} other {# systemer}}",
+    "needsFix": "Skal rettes",
+    "canvasLabel": "Flowets lærred",
+    "connectionOk": "Forbindelsen virker",
+    "connectionBroken": "Forbindelsen er afbrudt",
+    "pausedShort": "Pauset",
+    "free": "Ledig",
+    "zoom": "Zoom",
+    "zoomLevel": "{pct} %",
+    "routesCount": "{count, plural, one {# rute} other {# ruter}}",
+    "nodeFindings": "{count, plural, one {# fund} other {# fund}}",
+    "selectRoute": "Vælg ruten {route}",
+    "legend": {
+      "live": "Live",
+      "test": "Test",
+      "paused": "Pauset"
+    },
+    "paletteLabel": "Forbindelser",
+    "searchConnections": "Søg i forbindelser",
+    "palette": {
+      "source": "Kilde: {name}",
+      "inFlow": "I flowet: {name}",
+      "broken": "Afbrudt: {name}",
+      "add": "Tilføj {name} til flowet",
+      "addConnection": "Tilføj forbindelse",
+      "destinations": "Destinationer",
+      "unlimited": "{count} af ubegrænset",
+      "of": "{count} af {max}",
+      "moreNeedEnterprise": "Flere destinationer kræver en større plan end {plan}.",
+      "seePlans": "Se planer"
+    },
+    "inspectorLabel": "Rutens indstillinger",
+    "inspectorTabs": "Rutens faner",
+    "closeInspector": "Luk indstillinger",
+    "route": "Rute",
+    "routeMenu": "Rutens handlinger",
+    "deleteRoute": "Slet rute",
+    "hasErrors": "Har fejl",
+    "tabs": {
+      "general": "Generelt",
+      "mapping": "Mapping",
+      "filters": "Filtre",
+      "run": "Kørsel",
+      "history": "Historik"
+    },
+    "general": {
+      "mode": "Tilstand",
+      "sendWhen": "Send når ordren er",
+      "updateExisting": "Opdatér eksisterende",
+      "updateExistingHelp": "Ændringer i kilden opdaterer posten, der allerede er oprettet.",
+      "conflict": "Ved konflikt vinder",
+      "idempotency": "Dubletnøgle",
+      "idempotencyHelp": "Samme post oprettes aldrig to gange."
+    },
+    "modeHelp": {
+      "test": "Prøvekørsel. Der skrives intet til {system}.",
+      "draft": "Oprettes som kladde i {system}, uden bogføring.",
+      "live": "Oprettes og bogføres i {system} med det samme."
+    },
+    "orderStatus": {
+      "completed": "Gennemført",
+      "processing": "Under behandling"
+    },
+    "conflict": {
+      "source": "Kilden",
+      "destination": "Destinationen",
+      "skip": "Spring over"
+    },
+    "advanced": "Avanceret",
+    "account": "Konto",
+    "accounts": "Konti",
+    "chooseAccount": "Vælg konto",
+    "required": "Skal udfyldes",
+    "accountGone": "Kontoen {value} findes ikke længere i {system}.",
+    "lookupNote": "Kontiene hentes fra {system}.",
+    "noMapping": "{system} har ingen felter, der skal kobles.",
+    "mappingMissing": "{count, plural, one {# felt mangler} other {# felter mangler}}",
+    "categoryTitle": "Konti pr. kategori",
+    "categoryHint": "Undtagelser for bestemte produkter eller kategorier.",
+    "exception": "Tilføj undtagelse",
+    "newProduct": "Nyt produkt",
+    "category": "Kategori eller produkt",
+    "productName": "Produktnavn",
+    "productException": "Produktundtagelse",
+    "remove": "Fjern",
+    "removeRow": "Fjern {name}",
+    "accountFor": "Konto for {name}",
+    "filter": {
+      "none": "Alle poster sendes.",
+      "field": "Felt",
+      "op": "Betingelse",
+      "value": "Værdi",
+      "add": "Tilføj filter",
+      "remove": "Fjern filter",
+      "fields": {
+        "total": "Beløb",
+        "status": "Status",
+        "country": "Land",
+        "customerKind": "Kundetype"
+      },
+      "ops": {
+        "gt": "større end",
+        "gte": "mindst",
+        "lt": "mindre end",
+        "eq": "er",
+        "neq": "er ikke"
+      },
+      "sentence": {
+        "total": "beløb {op} {value}",
+        "status": "status {op} {value}",
+        "country": "land {op} {value}",
+        "customerKind": "kundetype {op} {value}"
+      }
+    },
+    "run": {
+      "interval": "Hent nye poster hvert",
+      "every": "{count, plural, one {# minut} other {# minutter}}",
+      "intervalHelp": "Din plan tillader ned til {min} minutter.",
+      "note": "Webhooks sendes med det samme, uanset interval."
+    },
+    "recordsWeek": "{count, plural, one {# post de sidste 7 dage} other {# poster de sidste 7 dage}}",
+    "history": {
+      "none": "Ingen kørsler endnu.",
+      "outcome": {
+        "created": "Oprettet",
+        "updated": "Opdateret",
+        "skipped": "Sprunget over",
+        "failed": "Fejlet",
+        "would_create": "Ville oprette",
+        "would_update": "Ville opdatere"
+      }
+    },
+    "bottomLabel": "Validering og test",
+    "bottom": {
+      "validation": "Validering",
+      "test": "Testkørsel"
+    },
+    "expandPanel": "Udvid panelet",
+    "collapsePanel": "Fold panelet sammen",
+    "noFindings": "Ingen fejl. Flowet er klar til at blive testkørt.",
+    "validatedAt": "Valideret {when}",
+    "goToField": "Gå til feltet",
+    "showRoute": "Vis ruten",
+    "severity": {
+      "error": "Fejl",
+      "warning": "Advarsel"
+    },
+    "findings": {
+      "NO_SOURCE": {
+        "title": "Flowet har ingen kilde",
+        "body": "Tilføj den webshop, data skal hentes fra."
+      },
+      "NO_DESTINATION": {
+        "title": "Flowet har ingen destination",
+        "body": "Tilføj mindst ét system, data skal sendes til."
+      },
+      "TOO_MANY_DESTINATIONS": {
+        "title": "For mange destinationer",
+        "body": "Din plan tillader {max} destinationer. Fjern en, eller skift plan."
+      },
+      "UNKNOWN_CONNECTION": {
+        "title": "Ukendt forbindelse",
+        "body": "Forbindelsen findes ikke længere. Vælg en anden."
+      },
+      "CONNECTION_BROKEN": {
+        "title": "{name} er afbrudt",
+        "body": "Forbind {name} igen, før flowet kan køre."
+      },
+      "PORT_UNSUPPORTED": {
+        "title": "{route} kan ikke modtages",
+        "body": "Destinationen understøtter ikke denne type data."
+      },
+      "MODE_UNSUPPORTED": {
+        "title": "{route} understøtter ikke tilstanden",
+        "body": "Vælg en anden tilstand for ruten."
+      },
+      "MAPPING_REQUIRED": {
+        "title": "{field} mangler",
+        "body": "Vælg en værdi for {field} på ruten {route}."
+      },
+      "ACCOUNT_NOT_FOUND": {
+        "title": "Konto {value} findes ikke i {system}",
+        "body": "{field} på ruten {route} peger på en konto, der ikke findes. Vælg en anden konto."
+      },
+      "ROUTE_IN_TEST": {
+        "title": "{route} er i Test",
+        "body": "Ruten skriver intet til {system}, før du skifter tilstand."
+      }
+    },
+    "testIntro": "Testkør henter de seneste poster fra kilden og viser, hvad der ville ske. Der skrives intet.",
+    "testRunning": "Testkører …",
+    "dryRun": "Prøvekørsel",
+    "runAgain": "Kør igen",
+    "latestFrom": "De seneste {count} poster fra {source}",
+    "testRoutes": "Ruter i testkørslen",
+    "testRecords": "Poster i testkørslen",
+    "wouldCreate": "Ville oprette",
+    "wouldUpdate": "Ville opdatere",
+    "wouldSkip": "Springes over",
+    "wouldFail": "{count, plural, one {# ville fejle} other {# ville fejle}}",
+    "skippedZero": "Sprunget over: 0 kr.",
+    "before": "{label} i {source}",
+    "after": "Efter",
+    "beforeAfter": "Før og efter for {label}",
+    "customer": "Kunde",
+    "country": "Land",
+    "vatNo": "CVR/moms-nr.",
+    "line": "Linje {n}",
+    "shipping": "Fragt",
+    "noAccount": "Ingen konto",
+    "total": "I alt",
+    "withoutVat": "uden moms",
+    "noPreview": "Ingen forhåndsvisning for denne post.",
+    "mode": "Tilstand",
+    "modes": {
+      "test": "Test",
+      "draft": "Kladde",
+      "live": "Live"
+    },
+    "change": {
+      "added": "Ny rute",
+      "removed": "Rute fjernet",
+      "mode": "{before} → {after}",
+      "mapping": "Mapping ændret",
+      "settings": "Indstillinger ændret",
+      "filtersTitle": "Filtre på {route}",
+      "filters": "Nu: {rules}",
+      "noFilters": "ingen filtre"
+    },
+    "publish": {
+      "title": "Publicér version {n}",
+      "first": "Første version",
+      "changesSince": "{count, plural, one {# ændring} other {# ændringer}} siden v{n}",
+      "notTested": "Ikke testkørt",
+      "testedClean": "Testkørt uden fejl",
+      "testedErrors": "Testkørt med fejl",
+      "changes": "Ændringer",
+      "noChanges": "Ingen ændringer siden den publicerede version.",
+      "all": "Vis alle ændringer",
+      "fewer": "Vis færre",
+      "inDraft": "I kladden",
+      "retry": "{count, plural, one {Kør den # fejlede post igen efter publicering} other {Kør de # fejlede poster igen efter publicering}}",
+      "howInvoices": "Hvordan skal fakturaer oprettes i {system}?",
+      "draftTitle": "Som kladde, uden bogføring",
+      "draftBody": "Fakturaer lægges som kladder i {system}. I bogfører dem selv.",
+      "liveTitle": "Bogfør med det samme",
+      "liveBody": "Fakturaer bogføres automatisk, når ordren er gennemført.",
+      "confirm": "Jeg forstår, at flowet skriver til {system}",
+      "confirmDraftHelp": "Kladder kan slettes i {system}, før de bogføres.",
+      "confirmLiveHelp": "Bogførte fakturaer kan kun rettes med en kreditnota.",
+      "asDraft": "Publicér som kladde",
+      "publish": "Publicér",
+      "errors": {
+        "VALIDATION": "Flowet har fejl, der skal rettes, før det kan publiceres.",
+        "LOCKED": "En anden redigerer flowet. Prøv igen om lidt.",
+        "generic": "Flowet kunne ikke publiceres. Prøv igen."
+      }
+    },
+    "testOutcome": {
+      "would_create": {
+        "order": "Ville oprette faktura",
+        "other": "Ville oprette"
+      },
+      "would_update": {
+        "order": "Ville opdatere faktura",
+        "other": "Ville opdatere"
+      },
+      "created": {
+        "order": "Faktura oprettet",
+        "other": "Oprettet"
+      },
+      "updated": {
+        "order": "Faktura opdateret",
+        "other": "Opdateret"
+      },
+      "skipped": {
+        "order": "Springes over",
+        "other": "Springes over"
+      },
+      "failed": {
+        "order": "Ville fejle",
+        "other": "Ville fejle"
+      }
+    },
+    "saleKind": {
+      "domestic": "Salg i Danmark",
+      "euB2b": "EU B2B-salg",
+      "euB2c": "EU-salg til forbruger",
+      "export": "Salg uden for EU"
+    },
+    "undo": "Fortryd",
+    "redo": "Gentag"
+  },
+  "templates": {
+    "title": "Nyt flow",
+    "intro": "Vælg en skabelon. Den bruger dine forbindelser, og alle ruter starter i Test.",
+    "search": "Søg i skabeloner",
+    "cat": {
+      "all": "Alle",
+      "erp": "Regnskab",
+      "crm": "CRM",
+      "marketing": "Marketing"
+    },
+    "popular": "Mest brugt",
+    "connectFirst": "Forbind {names} først",
+    "blank": "Start fra blankt",
+    "blankBody": "Byg selv ruterne fra din webshop.",
+    "name": "Navn på flowet",
+    "setupHint": "Du kan ændre alt i editoren bagefter.",
+    "cancel": "Annullér",
+    "use": "Brug skabelon",
+    "extra": {
+      "customers-mailchimp": {
+        "title": "Kunder til Mailchimp",
+        "body": "Tilmeld kunder i Mailchimp."
+      }
+    },
+    "errors": {
+      "missingSource": "Forbind en webshop først.",
+      "generic": "Flowet kunne ikke oprettes. Prøv igen."
     }
   }
 }

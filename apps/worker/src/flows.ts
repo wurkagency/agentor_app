@@ -40,7 +40,9 @@ export async function processFlowJob(deps: FlowDeps, data: unknown) {
   if (!run) return; // already handled (redelivery) or removed
   try {
     const def = parseDefinition(run.definition);
-    const results = await execute(deps, job.tenantId, run, def, job.retry);
+    // A retry run only ever touches open failures, whether or not the job names a route.
+    const retry = job.retry ?? (run.kind === 'retry' ? {} : undefined);
+    const results = await execute(deps, job.tenantId, run, def, retry);
     const { failed } = await completeRun(deps.db, job.tenantId, run, results, {
       pollMinutes: def.pollMinutes,
       startedAt: started,

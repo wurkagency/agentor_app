@@ -101,7 +101,8 @@ export const dinero: ConnectorManifest = {
     { entity: 'customer', label: 'Kunder', modes: ['dry_run', 'live'] },
     { entity: 'product', label: 'Produkter', modes: ['dry_run', 'live'] },
   ],
-  mapping: { order: [ACCOUNT_GROUP], creditNote: [ACCOUNT_GROUP] },
+  // Credit notes are created from the original invoice and reuse its accounts (INVOICE_MISSING).
+  mapping: { order: [ACCOUNT_GROUP] },
   routeSettings: {
     order: [
       {

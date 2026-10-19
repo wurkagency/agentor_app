@@ -102,3 +102,40 @@ describe('records, links and notifications', () => {
     expect(forge.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
   });
 });
+
+describe('publishing a draft (app.publish_flow_version)', () => {
+  const publish = (ctx: { tenantId: string; userId: string }, flowId: string, draftId: string) =>
+    run('web', ctx, `select app.publish_flow_version($1, $2, '[]'::jsonb, 'Test') as n`, [
+      flowId,
+      draftId,
+    ]);
+
+  it('promotes the draft to the next version and archives the previous one', async () => {
+    const { result, error } = await publish(OWNER_A, ID.flowA1, ID.draftA1);
+    expect(error).toBeUndefined();
+    expect(result!.rows[0].n).toBe(2);
+  });
+
+  it('readers, other tenants and users without access to the flow cannot publish', async () => {
+    expect((await publish(READER_A, ID.flowA1, ID.draftA1)).error?.code).toBe(
+      INSUFFICIENT_PRIVILEGE,
+    );
+    expect((await publish(DEV_A, ID.flowA2, ID.draftA1)).error?.code).toBe(INSUFFICIENT_PRIVILEGE);
+    const otherTenant = await publish(
+      { tenantId: ID.tenantB, userId: ID.userBOwner },
+      ID.flowB1,
+      ID.draftA1,
+    );
+    expect(otherTenant.error?.message).toContain('DRAFT_NOT_FOUND');
+  });
+
+  it('only the web role may call it', async () => {
+    const { error } = await run(
+      'worker',
+      OWNER_A,
+      `select app.publish_flow_version($1, $2, '[]'::jsonb, 'x')`,
+      [ID.flowA1, ID.draftA1],
+    );
+    expect(error?.code).toBe(INSUFFICIENT_PRIVILEGE);
+  });
+});

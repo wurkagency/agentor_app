@@ -172,7 +172,8 @@ await inTenant(n.id, async () => {
   const kekPub = process.env.KEK_PUBLIC_KEY;
   if (!kekPub) throw new Error('KEK_PUBLIC_KEY missing (node infra/scripts/dev-kek.mjs)');
   for (const c of Object.values(CONNECTIONS)) {
-    const broken = c.connectorId === 'economic';
+    // The board shows e-conomic disconnected; the gate path starts with only the Dinero account wrong.
+    const broken = SCENARIO === 'board' && c.connectorId === 'economic';
     await owner.query(
       `insert into connections (tenant_id, id, connector_id, name, status, status_reason, broken_since, account_id,
          configured_by, configured_by_name, last_checked_at, last_webhook_at, token_expires_at, created_at)
