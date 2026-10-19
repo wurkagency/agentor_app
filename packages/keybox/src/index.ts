@@ -104,7 +104,7 @@ export function seal(
   const shared = diffieHellman({ privateKey: eph.privateKey, publicKey: kekPublic });
   const key = deriveKey(shared, ephRaw, rawPublic(kekPublic));
   const nonce = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', key, nonce);
+  const cipher = createCipheriv('aes-256-gcm', key, nonce, { authTagLength: TAG_LEN });
   cipher.setAAD(aad(bind));
   const body = Buffer.concat([cipher.update(plaintext), cipher.final(), cipher.getAuthTag()]);
   return { format: SEALED_FORMAT, nonce, ciphertext: Buffer.concat([ephRaw, body]) };
@@ -123,7 +123,7 @@ export function open(env: Envelope, kekPrivate: KeyObject, bind: readonly string
 }
 
 function gcmOpen(key: Buffer, nonce: Buffer, body: Buffer, bind: readonly string[]): Buffer {
-  const decipher = createDecipheriv('aes-256-gcm', key, nonce);
+  const decipher = createDecipheriv('aes-256-gcm', key, nonce, { authTagLength: TAG_LEN });
   decipher.setAAD(aad(bind));
   decipher.setAuthTag(body.subarray(body.length - TAG_LEN));
   try {
@@ -159,7 +159,7 @@ export function dekEncrypt(
   bind: readonly string[],
 ): Envelope {
   const nonce = randomBytes(12);
-  const cipher = createCipheriv('aes-256-gcm', dek, nonce);
+  const cipher = createCipheriv('aes-256-gcm', dek, nonce, { authTagLength: TAG_LEN });
   cipher.setAAD(aad(bind));
   const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final(), cipher.getAuthTag()]);
   return { format: DEK_FORMAT, nonce, ciphertext };

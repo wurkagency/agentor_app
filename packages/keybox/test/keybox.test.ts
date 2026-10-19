@@ -34,6 +34,12 @@ describe('sealing to the KEK', () => {
     expect(() => open(env, other, secretBinding(T, C))).toThrow(/does not open/);
   });
 
+  it('refuses a truncated authentication tag', () => {
+    const env = seal('x', pub, secretBinding(T, C));
+    env.ciphertext = env.ciphertext.subarray(0, env.ciphertext.length - 4);
+    expect(() => open(env, priv, secretBinding(T, C))).toThrow();
+  });
+
   it('detects tampering', () => {
     const env = seal('x', pub, secretBinding(T, C));
     env.ciphertext[env.ciphertext.length - 1]! ^= 1;

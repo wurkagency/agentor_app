@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { createHmac } from 'node:crypto';
+import { createHmac, randomBytes } from 'node:crypto';
 import { CONNECTIONS, SEED_WOO_WEBHOOK_TOKEN } from '../scripts/seed-data';
 import { login } from './support';
 
@@ -114,7 +114,7 @@ test('webhooks: a signed delivery is accepted, a forged one is not (§9.4)', asy
   expect(unknown.status).toBe(404);
 
   // A forged signature is stored but rejected by the worker; the timestamp doesn't move.
-  expect((await post(createHmac('sha256', 'forged').update(body).digest('base64'))).status).toBe(
+  expect((await post(createHmac('sha256', randomBytes(32)).update(body).digest('base64'))).status).toBe(
     202,
   );
   const good = createHmac('sha256', CONNECTIONS.woo.credentials.consumerSecret)
