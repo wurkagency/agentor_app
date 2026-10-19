@@ -479,7 +479,7 @@
     },
     "P1-Kunder-Menu.dc.html": {
       "expand": "fill",
-      "h": 900,
+      "h": 920,
       "title": "Platform · tandhjulsmenu",
       "w": 1440,
       "x": 1520,
@@ -487,7 +487,7 @@
     },
     "P1-Kunder.dc.html": {
       "expand": "fill",
-      "h": 900,
+      "h": 920,
       "is_interactive": true,
       "title": "Platform · Kunder (Supporter)",
       "w": 1440,
@@ -504,7 +504,7 @@
     },
     "P3-Adgang.dc.html": {
       "expand": "fill",
-      "h": 900,
+      "h": 920,
       "title": "Platform · anmod om adgang",
       "w": 1440,
       "x": 4560,
@@ -536,7 +536,7 @@
     },
     "S1-Sager-Tavle.dc.html": {
       "expand": "fill",
-      "h": 1108,
+      "h": 1110,
       "title": "Supportsager · tavle",
       "w": 1440,
       "x": 0,
@@ -576,7 +576,7 @@
     },
     "S6-Min-Tid.dc.html": {
       "expand": "fill",
-      "h": 900,
+      "h": 920,
       "title": "Tid · ugeoversigt",
       "w": 1440,
       "x": 7600,
@@ -584,7 +584,7 @@
     },
     "S7-Fejl.dc.html": {
       "expand": "fill",
-      "h": 900,
+      "h": 920,
       "title": "Fejl på tværs af kunder",
       "w": 1440,
       "x": 9120,
@@ -592,11 +592,75 @@
     },
     "S8-Sag-Loes.dc.html": {
       "expand": "fill",
-      "h": 1120,
+      "h": 1289,
       "title": "Supportsag · løs og send forløb",
       "w": 1440,
       "x": 10640,
       "y": 15150
+    },
+    "F1-Finans-Oversigt.dc.html": {
+      "expand": "fill",
+      "h": 1340,
+      "title": "Finans · oversigt",
+      "w": 1440,
+      "x": 0,
+      "y": 16700
+    },
+    "F2-Abonnementer.dc.html": {
+      "expand": "fill",
+      "h": 1180,
+      "title": "Finans · abonnementer",
+      "w": 1440,
+      "x": 1520,
+      "y": 16700
+    },
+    "F3-Support-Afregning.dc.html": {
+      "expand": "fill",
+      "h": 1360,
+      "title": "Finans · supportafregning, indeværende måned",
+      "w": 1440,
+      "x": 3040,
+      "y": 16700
+    },
+    "F4-Kunde-Oekonomi.dc.html": {
+      "expand": "fill",
+      "h": 1180,
+      "title": "Finans · kundens økonomi",
+      "w": 1440,
+      "x": 4560,
+      "y": 16700
+    },
+    "F5-Supportfaktura.dc.html": {
+      "expand": "fill",
+      "h": 1000,
+      "title": "Finans · supportfaktura (kladde)",
+      "w": 1440,
+      "x": 6080,
+      "y": 16700
+    },
+    "F6-Betalinger.dc.html": {
+      "expand": "fill",
+      "h": 1180,
+      "title": "Finans · fakturaer og betalinger",
+      "w": 1440,
+      "x": 7600,
+      "y": 16700
+    },
+    "F7-Rapporter.dc.html": {
+      "expand": "fill",
+      "h": 1340,
+      "title": "Finans · månedsrapport",
+      "w": 1440,
+      "x": 9120,
+      "y": 16700
+    },
+    "F1-Finans-Oversigt-Dage.dc.html": {
+      "expand": "fill",
+      "h": 1340,
+      "title": "Finans · oversigt pr. dag",
+      "w": 1440,
+      "x": 10640,
+      "y": 16700
     }
   },
   "createdOnFiles": {
@@ -667,11 +731,19 @@
     },
     "sager": {
       "kind": "title1",
-      "maxW": 12080,
+      "maxW": 8000,
       "text": "Supportoverblik — sager, noter og tid",
       "w": 240,
       "x": 0,
       "y": 14880
+    },
+    "finans": {
+      "kind": "title1",
+      "maxW": 12080,
+      "text": "Finans — abonnementer, supportafregning og rapporter (Superadmin)",
+      "w": 240,
+      "x": 0,
+      "y": 16430
     }
   },
   "order": [
@@ -749,7 +821,15 @@
     "S5-Session-Slut.dc.html",
     "S6-Min-Tid.dc.html",
     "S7-Fejl.dc.html",
-    "S8-Sag-Loes.dc.html"
+    "S8-Sag-Loes.dc.html",
+    "F1-Finans-Oversigt.dc.html",
+    "F1-Finans-Oversigt-Dage.dc.html",
+    "F2-Abonnementer.dc.html",
+    "F3-Support-Afregning.dc.html",
+    "F4-Kunde-Oekonomi.dc.html",
+    "F5-Supportfaktura.dc.html",
+    "F6-Betalinger.dc.html",
+    "F7-Rapporter.dc.html"
   ],
   "pages": [],
   "title": "Agentor App — Runde 1"

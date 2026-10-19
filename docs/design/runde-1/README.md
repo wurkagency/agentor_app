@@ -1,5 +1,7 @@
 # Agentor App — Design, runde 1
 
+> **Status 19. okt. 2026: klar til Claude Code.** Denne mappe er en eksakt kopi af canvas (83 tegneflader, version 1792428068). Videre opdateringer sker i koden. Ændres designet igen på canvas, eksporteres det på ny hertil.
+
 Eksport af designlærredet **"Agentor App — Runde 1"** (Claude Design), version 1792357173-1860, 18. okt. 2026.
 Live-lærred (privat, kræver adgang): https://claude.ai/artifact/PM26ZBLDG84UP6EMwvRw1a
 
@@ -84,6 +86,19 @@ Tegnefladerne henter logoer fra lærredets asset-lager (`/_blob/<id>`). Lokalt p
 | `S7-Fejl.dc.html` | Fejl på tværs af kunder grupperet efter fejlkode, med antal kunder, udvikling og sag |
 | `S8-Sag-Loes.dc.html` | Løs sag og send forløbet til kunden på e-mail: modtagere, hvad der kommer med, interne noter udelades altid, valgfri afsluttende besked, forhåndsvisning |
 
+### Finans (Platform, kun Superadmin)
+
+| Fil | Indhold |
+|---|---|
+| `F1-Finans-Oversigt.dc.html` | Abonnementsomsætning pr. måned, aktive abonnementer, support i måneden, forfaldent, omsætning pr. måned (abonnement og support), punkter der kræver handling, fornyelser |
+| `F1-Finans-Oversigt-Dage.dc.html` | Samme oversigt med omsætning pr. dag i den valgte måned (skift mellem Dage og Måneder) |
+| `F2-Abonnementer.dc.html` | Alle abonnementer: plan, månedlig eller årlig, pris, periode, næste opkrævning, betalingsmetode og status |
+| `F3-Support-Afregning.dc.html` | Indeværende måneds support pr. kunde og sag: registreret tid, oprundet tid og beløb, åben periode |
+| `F4-Kunde-Oekonomi.dc.html` | Én kundes abonnement, løbende support, support pr. måned og fakturaer med betalingsstatus |
+| `F5-Supportfaktura.dc.html` | Kladde til supportfaktura med linjer pr. sag, moms og afsendelse via QuickPay |
+| `F6-Betalinger.dc.html` | Fakturaer og betalinger på tværs: forfaldne, rykkere, fejlede kortbetalinger, seneste betalinger |
+| `F7-Rapporter.dc.html` | Månedsrapport: økonomiske nøgletal og supportomfang, største kunder, tid pr. supporter, tidligere måneder |
+
 ## Beslutninger truffet under designet (afviger fra specifikationerne)
 
 Disse vinder over Designspecifikation v1 og Produktspecifikation v1.x, hvor de er i konflikt:
@@ -107,6 +122,8 @@ Disse vinder over Designspecifikation v1 og Produktspecifikation v1.x, hvor de e
 16. **Agentor Platform i app'en** (afviger fra produktspecifikationen, der placerer support i manage.agentor.dk): Agentor-medarbejdere med rollen **Superadmin** eller **Supporter** får et tandhjul i topbjælken. Det åbner Platform-området med egen header (Platform-mærke og navigation: Kunder, Supportsager, Systemstatus, Platformbrugere). Reglerne fra produktspecifikation §9.7 gælder uændret: ingen stående adgang, adgang pr. sag med begrundelse i højst 24 timer (afviger fra produktspecifikationens 60 minutter), kundens godkendelse når kunden kræver det (D8), aldrig nøgler, team eller abonnement, og hver handling i kundens audit-log med medarbejderens navn. Under adgang vises kundens egen app med en navy supportbjælke, der ikke kan skjules, og kunden kan skiftes med ⌘J. Superadmin har heller ingen stående adgang til kundedata.
 
 17. **Supportoverblik** (ny funktion, ikke i produktspecifikationen): Platform-navigationen har nu Kunder, Supportsager, Fejl, Tid, Systemstatus og Platformbrugere. Sager har statusserne Ny, I gang, Venter på kunde og Løst (arkiveres efter 14 dage) og prioriteterne Kritisk, Høj, Normal og Lav. Prioritet bruger ikke statusfarver. Tid logges automatisk pr. supportsession (fra første til sidste handling, pauser over 10 min. trækkes fra) og bekræftes, når sessionen afsluttes. Manuel tid og timer findes også. Interne noter er gule (#FBF0DC), markeret "Intern note" og aldrig synlige for kunden. Kundenoter kan fastgøres på kunden. "Fejl på tværs" viser kun antal og fejlkoder, aldrig kundedata. Fakturerbar tid kan markeres for alle kunder, og kundens abonnement vises ved feltet. Svarfrister er en pladsholder, til der er besluttet en supportaftale.
+18. **Finans** (ny funktion): Abonnementer og betalt support afregnes gennem Agentor Platform under fanen Finans, som kun Superadmin ser. Abonnementer opkræves forud, månedligt eller årligt, med kort eller MobilePay via QuickPay. Enterprise kan betale på faktura med EAN. Årlig pris er antaget at være 10 gange månedsprisen. Support faktureres bagud den 1. i næste måned til 800 kr. pr. time inkl. moms (640 kr. ekskl.). Tiden oprundes til nærmeste 15 min. pr. sag pr. måned. Tid uden sag og tid markeret som ikke fakturerbar kommer ikke med. Satsen kan ændres af Superadmin. Rapporter viser beløb ekskl. moms, mens fakturaer og supportafregning viser beløb inkl. moms. Mislykkede kortbetalinger forsøges igen efter 2, 5 og 9 dage.
+19. **Dashboard-blokke** (gælder alle Platform-oversigter: Kunder, Supportsager, Tid, Fejl og alle Finans-sider): Hver side starter med en række nøgletalskort. Det første kort er fremhævet (lime gradient, stort tal, vækstmærke og en kurve over tidligere perioder). De øvrige kort har ét visuelt element: en segmenteret søjle med streg-ticks i enden, en halvcirkel-måler med lime prik eller små søjler for de sidste 6 perioder, hvor den aktuelle periode er skraveret. Vækstmærker viser ↑/↓ mod forrige periode, grønt når ændringen er god, rødt når den er dårlig, gråt når den er neutral. Omsætningsgrafen kan skifte mellem Dage og Måneder: måneder som stablede, afrundede søjler (sort abonnement, skraveret lime support) med tooltip, dage som tynde søjler med en linje for samlet omsætning og en stiplet prognose. Eksempeltallene for tidligere perioder er pladsholdere. Kortene findes i to størrelser: stor (Finans) og kompakt, ca. 120 px høj (Kunder, Supportsager, Tid og Fejl), hvor grafikken står til højre for tallet og detaljerne er samlet på én linje.
 
 ## Kendte pladsholdere
 
