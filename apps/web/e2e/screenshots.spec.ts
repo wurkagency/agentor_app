@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { test, type Page } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { latestMailTo } from './mailpit';
@@ -54,7 +55,8 @@ test('M4 subscription', async ({ page }) => {
 test('M4 sign-up and onboarding', async ({ page }) => {
   test.setTimeout(120_000);
   const email = `skaerm.${Date.now()}@e2e.agentor.test`;
-  const password = 'Skaermbillede-kodeord-1';
+  // Generated per run: e2e never carries credential literals.
+  const password = `E2e-${randomUUID()}`;
   await page.goto('/signup');
   await shot(page, 'Signup');
   await page.getByLabel('Dit navn').fill('Ida Ejer');

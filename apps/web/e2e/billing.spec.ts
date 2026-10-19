@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import globalSetup from './global-setup';
@@ -20,7 +21,8 @@ test('sign up, confirm the e-mail, onboard with CVR, card and a template (D14)',
 }) => {
   test.setTimeout(150_000);
   const email = `ejer.${Date.now()}@e2e.agentor.test`;
-  const password = 'Nyt-firma-kodeord-42';
+  // Generated per run: e2e never carries credential literals.
+  const password = `E2e-${randomUUID()}`;
 
   await page.goto('/signup');
   await axe(page);

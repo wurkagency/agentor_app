@@ -1,0 +1,5 @@
+# Test-only passwords for throwaway e2e accounts (…@e2e.agentor.test) in commit c25c475.
+# Replaced by per-run random passwords in the following commit; kept here because the commit
+# is already on a pushed review branch.
+c25c475dcf2e25f43e4eecc59e8d92e8056399ca:apps/web/e2e/screenshots.spec.ts:generic-api-key:57
+c25c475dcf2e25f43e4eecc59e8d92e8056399ca:apps/web/e2e/billing.spec.ts:generic-api-key:23
