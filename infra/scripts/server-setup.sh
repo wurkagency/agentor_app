@@ -142,7 +142,7 @@ else
   common() {
     printf '%s\n' "APP_URL=https://$DOMAIN" "REDIS_URL=$REDIS_URL" "BETTER_AUTH_SECRET=$AUTH_SECRET" \
       "CONNECTOR_MODE=mock" "QUICKPAY_MODE=mock" "CVR_PROVIDER=fixture" \
-      "INGEST_PUBLIC_URL=https://$DOMAIN" "INGEST_INTERNAL_URL=http://127.0.0.1:3100" "LOG_LEVEL=info"
+      "INGEST_PUBLIC_URL=https://$DOMAIN" "INGEST_INTERNAL_URL=http://127.0.0.1:3411" "LOG_LEVEL=info"
     # Only when given: an empty value is invalid, and without it mail goes nowhere.
     if [ -n "${SMTP_URL:-}" ]; then echo "SMTP_URL=$SMTP_URL"; fi
   }

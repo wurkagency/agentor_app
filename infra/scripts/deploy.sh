@@ -23,6 +23,16 @@ set +a
 pnpm db:migrate
 unset DATABASE_URL_OWNER
 
+echo "== Ports"
+# Shared server: refuse to start if another site already listens on Agentor's ports.
+for port in 3410 3411; do
+  pid=$(ss -ltnpH "sport = :$port" 2>/dev/null | grep -o 'pid=[0-9]*' | head -1 | cut -d= -f2 || true)
+  if [ -n "$pid" ] && [ "$(ps -o user= -p "$pid" | tr -d ' ')" != agentor-web ]; then
+    echo "Port $port is used by another program ($(ps -o user=,comm= -p "$pid")). Free it or change the port in infra/pm2 and infra/plesk."
+    exit 1
+  fi
+done
+
 echo "== Switch and reload"
 chown -R root:root "$R" && chmod -R a+rX "$R"
 ln -sfn "$R" "$D/current"
@@ -35,7 +45,9 @@ as agentor-worker pm2 save >/dev/null
 echo "== Health"
 ok=0
 for _ in $(seq 1 20); do
-  if curl -fsS -o /dev/null http://127.0.0.1:3000/login && curl -fsS -o /dev/null http://127.0.0.1:3100/healthz; then ok=1; break; fi
+  # Check that it is Agentor answering, not another site on the same server.
+  if curl -fsS http://127.0.0.1:3410/login 2>/dev/null | grep -q 'Agentor' &&
+     curl -fsS http://127.0.0.1:3411/healthz 2>/dev/null | grep -q '"ok"'; then ok=1; break; fi
   sleep 3
 done
 if [ "$ok" != 1 ]; then
