@@ -159,11 +159,11 @@ export default async function BillingPage() {
           locale={locale}
           invoices={invoices.slice(0, 6).map((i) => ({
             id: i.id,
-            number: i.number,
+            number: i.number ?? '',
             date: formatDate(i.periodStart, locale),
             description: i.description,
             amount: formatMoney((i.amountOre + i.vatOre) / 100, locale),
-            status: i.status,
+            status: i.status === 'draft' ? 'open' : i.status,
           }))}
         />
       </div>

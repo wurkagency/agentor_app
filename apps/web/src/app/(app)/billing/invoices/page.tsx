@@ -24,11 +24,11 @@ export default async function InvoicesPage() {
         locale={locale}
         invoices={invoices.map((i) => ({
           id: i.id,
-          number: i.number,
+          number: i.number ?? '',
           date: formatDate(i.periodStart, locale),
           description: i.description,
           amount: formatMoney((i.amountOre + i.vatOre) / 100, locale),
-          status: i.status,
+          status: i.status === 'draft' ? 'open' : i.status,
         }))}
       />
     </PageBody>

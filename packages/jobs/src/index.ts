@@ -18,6 +18,10 @@ export const billingJobs = {
   'quickpay.callback': z.object({ body: z.string().max(64 * 1024) }),
   /** Monthly charge for one tenant, enqueued by the scheduler. */
   'billing.charge': z.object({ tenantId: z.uuid() }),
+  /** An approved support invoice to number and send or charge (Finans, F5). */
+  'billing.send-invoice': z.object({ tenantId: z.uuid(), invoiceId: z.uuid() }),
+  /** A failed card charge due for its next try (2, 5 and 9 days). */
+  'billing.retry': z.object({ tenantId: z.uuid(), invoiceId: z.uuid() }),
 } as const;
 
 export type BillingJobName = keyof typeof billingJobs;

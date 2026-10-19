@@ -9,6 +9,9 @@ import {
   applyChargeResult,
   applySubscriptionAuthorized,
   prepareCharge,
+  prepareRetry,
+  sendSupportInvoice,
+  type PendingCharge,
   resolveBillingRef,
   type Database,
 } from '@agentor/db';
@@ -59,7 +62,16 @@ async function handleCallback(deps: BillingDeps, body: string): Promise<void> {
 /** Monthly charge for one tenant (scheduler → queue → here). Safe to retry. */
 async function handleCharge(deps: BillingDeps, tenantId: string): Promise<void> {
   const charge = await prepareCharge(deps.db, tenantId, newOrderId);
-  if (!charge) return;
+  if (charge) await runCharge(deps, tenantId, charge, 'subscription charged');
+}
+
+/** Runs a prepared QuickPay charge and records a synchronous outcome. */
+async function runCharge(
+  deps: BillingDeps,
+  tenantId: string,
+  charge: PendingCharge,
+  message: string,
+): Promise<void> {
   let result;
   try {
     result = await deps.quickpay.recurring({
@@ -82,10 +94,7 @@ async function handleCharge(deps: BillingDeps, tenantId: string): Promise<void> 
       providerPaymentId: result.paymentId,
     });
   }
-  deps.log.info(
-    { tenantId, invoice: charge.number, accepted: result.accepted },
-    'subscription charged',
-  );
+  deps.log.info({ tenantId, invoice: charge.number, accepted: result.accepted }, message);
 }
 
 export async function processBillingJob(
@@ -98,6 +107,19 @@ export async function processBillingJob(
       return handleCallback(deps, parseBillingJob('quickpay.callback', data).body);
     case 'billing.charge':
       return handleCharge(deps, parseBillingJob('billing.charge', data).tenantId);
+    case 'billing.send-invoice': {
+      const { tenantId, invoiceId } = parseBillingJob('billing.send-invoice', data);
+      const charge = await sendSupportInvoice(deps.db, tenantId, invoiceId, newOrderId);
+      if (charge) await runCharge(deps, tenantId, charge, 'support invoice charged');
+      else deps.log.info({ tenantId }, 'support invoice sent');
+      return;
+    }
+    case 'billing.retry': {
+      const { tenantId, invoiceId } = parseBillingJob('billing.retry', data);
+      const charge = await prepareRetry(deps.db, tenantId, invoiceId, newOrderId);
+      if (charge) await runCharge(deps, tenantId, charge, 'charge retried');
+      return;
+    }
     default:
       throw new Error(`unknown billing job ${name}`);
   }

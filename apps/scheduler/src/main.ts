@@ -1,8 +1,14 @@
-import { createDatabase, createScheduledRun, dueFlows, dueSubscriptions } from '@agentor/db';
+import {
+  createDatabase,
+  createScheduledRun,
+  dueFlows,
+  dueInvoiceJobs,
+  dueSubscriptions,
+} from '@agentor/db';
 import { billingQueue, enqueueBilling, enqueueFlowRun, flowsQueue } from '@agentor/jobs';
 import { Redis } from 'ioredis';
 import pino from 'pino';
-import { BILLING_INTERVAL_MS, billingTick } from './billing.js';
+import { BILLING_INTERVAL_MS, billingTick, invoiceTick } from './billing.js';
 import { FLOW_INTERVAL_MS, flowTick } from './flows.js';
 import { LeaderLock } from './leader-lock.js';
 
@@ -36,6 +42,17 @@ const runBilling = () =>
       enqueueBilling(queue, 'billing.charge', { tenantId }, { jobId }),
   })
     .then((n) => n && log.info({ due: n }, 'billing charges enqueued'))
+    .then(() =>
+      invoiceTick({
+        isLeader: () => lock.isLeader,
+        dueInvoiceJobs: (now) => dueInvoiceJobs(database.db, now),
+        enqueue: (job, tenantId, invoiceId, jobId) =>
+          job === 'send'
+            ? enqueueBilling(queue, 'billing.send-invoice', { tenantId, invoiceId }, { jobId })
+            : enqueueBilling(queue, 'billing.retry', { tenantId, invoiceId }, { jobId }),
+      }),
+    )
+    .then((n) => n && log.info({ due: n }, 'invoice jobs enqueued'))
     .catch((err: unknown) =>
       log.error({ err: err instanceof Error ? err.message : err }, 'billing tick failed'),
     );

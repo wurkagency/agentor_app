@@ -5,11 +5,14 @@ import {
   applySubscriptionAuthorized,
   attachPaymentSubscription,
   changePlan,
+  dueInvoiceJobs,
   dueSubscriptions,
   getBillingOverview,
   getPaymentSubscription,
   prepareCharge,
+  prepareRetry,
   resolveBillingRef,
+  sendSupportInvoice,
 } from '../../src/repo/billing.js';
 import { roleUrl } from './env.js';
 import { ID } from './fixtures.js';
@@ -134,5 +137,84 @@ describe('billing lifecycle', () => {
     ).rejects.toMatchObject({ cause: { code: '42501' } });
     const charge = await prepareCharge(web.db, tenantId, () => 'AGWEB0000001').catch((e) => e);
     expect(charge).toBeInstanceOf(Error);
+  });
+
+  it('a yearly subscription costs 10 months, less an active discount', async () => {
+    await admin(
+      `update subscriptions set interval = 'year', discount_pct = 50, discount_until = now() + interval '30 days',
+         current_period_end = now() - interval '1 minute' where tenant_id = $1`,
+      [tenantId],
+    );
+    const charge = await prepareCharge(worker.db, tenantId, () => 'AGYEAR000001');
+    // Business 159 kr. × 10 × 50 % = 795 kr. + 25 % VAT.
+    expect(charge?.amountOre).toBe(99375);
+    await applyChargeResult(worker.db, tenantId, charge!.invoiceId, {
+      accepted: true,
+      providerPaymentId: 'py1',
+    });
+  });
+
+  it('an approved support invoice is numbered and charged; a failure is retried after 2 days', async () => {
+    const inv = (
+      await admin(
+        `insert into invoices (tenant_id, kind, status, period_start, period_end, description, amount_ore, vat_ore,
+         payment_method, approved_at, approved_by_name, send_at)
+       values ($1, 'support', 'draft', date_trunc('month', now()), date_trunc('month', now()) + interval '1 month',
+         'Support', 64000, 16000, 'card', now(), 'Kasper', now() - interval '1 minute') returning id`,
+        [tenantId],
+      )
+    ).rows[0] as { id: string } | undefined;
+    const jobs = await dueInvoiceJobs(worker.db);
+    expect(jobs).toContainEqual({ tenantId, invoiceId: inv!.id, job: 'send' });
+    const now = new Date();
+    const charge = await sendSupportInvoice(
+      worker.db,
+      tenantId,
+      inv!.id,
+      () => 'AGSUP0000001',
+      now,
+    );
+    expect(charge).toMatchObject({ amountOre: 80000, providerSubscriptionId: 'qp-sub-1' });
+    expect(charge!.number).toMatch(/^AG-\d{4}-\d{4,}$/);
+    // Sent once: a repeated job does nothing.
+    expect(await sendSupportInvoice(worker.db, tenantId, inv!.id, () => 'AGSUP0000002')).toBeNull();
+    await applyChargeResult(
+      worker.db,
+      tenantId,
+      inv!.id,
+      { accepted: false, providerPaymentId: 'ps1' },
+      now,
+    );
+    // A failed support charge leaves the subscription alone.
+    expect((await getBillingOverview(web.db, actor()))?.subscription.status).toBe('active');
+    const later = new Date(now.getTime() + 2 * 86_400_000 + 60_000);
+    expect(
+      await dueInvoiceJobs(worker.db, new Date(now.getTime() + 86_400_000)),
+    ).not.toContainEqual(expect.objectContaining({ invoiceId: inv!.id }));
+    expect(await dueInvoiceJobs(worker.db, later)).toContainEqual({
+      tenantId,
+      invoiceId: inv!.id,
+      job: 'retry',
+    });
+    const retry = await prepareRetry(worker.db, tenantId, inv!.id, () => 'AGSUP0000003', later);
+    expect(retry).toMatchObject({ orderId: 'AGSUP0000003', amountOre: 80000 });
+    expect(await resolveBillingRef(worker.db, 'AGSUP0000003')).toMatchObject({ kind: 'invoice' });
+    await applyChargeResult(worker.db, tenantId, inv!.id, {
+      accepted: true,
+      providerPaymentId: 'ps2',
+    });
+    const paid = (await admin('select status, attempts from invoices where id = $1', [inv!.id]))
+      .rows[0];
+    expect(paid).toEqual({ status: 'paid', attempts: 2 });
+  });
+
+  it('a cancelled subscription ends at the period end instead of renewing', async () => {
+    await admin(
+      `update subscriptions set cancel_at = now() - interval '1 minute', current_period_end = now() - interval '1 minute'
+        where tenant_id = $1`,
+      [tenantId],
+    );
+    expect(await prepareCharge(worker.db, tenantId, () => 'AGCANCEL0001')).toBeNull();
+    expect((await getBillingOverview(web.db, actor()))?.subscription.status).toBe('cancelled');
   });
 });

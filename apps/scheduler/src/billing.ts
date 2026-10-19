@@ -17,4 +17,30 @@ export async function billingTick(deps: BillingTickDeps, now = new Date()): Prom
   return due.length;
 }
 
+export interface InvoiceTickDeps {
+  isLeader: () => boolean;
+  dueInvoiceJobs: (
+    now: Date,
+  ) => Promise<{ tenantId: string; invoiceId: string; job: 'send' | 'retry' }[]>;
+  enqueue: (
+    job: 'send' | 'retry',
+    tenantId: string,
+    invoiceId: string,
+    jobId: string,
+  ) => Promise<void>;
+}
+
+/**
+ * Support invoices approved on Finans are sent at their send time (the 1st at 08:00), and failed
+ * card charges are retried on their retry day. Job ids are per invoice and day.
+ */
+export async function invoiceTick(deps: InvoiceTickDeps, now = new Date()): Promise<number> {
+  if (!deps.isLeader()) return 0;
+  const due = await deps.dueInvoiceJobs(now);
+  const day = now.toISOString().slice(0, 10);
+  for (const j of due)
+    await deps.enqueue(j.job, j.tenantId, j.invoiceId, `${j.job}-${j.invoiceId}-${day}`);
+  return due.length;
+}
+
 export const BILLING_INTERVAL_MS = 15 * 60_000;

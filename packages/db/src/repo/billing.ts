@@ -6,12 +6,16 @@ import {
   planChangeBlockers,
   quotaState,
   withVat,
+  INVOICE_DUE_DAYS,
+  nextRetryAt,
+  periodEndFor,
+  subscriptionPriceOre,
   type CurrentUsage,
   type DowngradeBlocker,
   type Entitlements,
   type QuotaState,
 } from '@agentor/core';
-import { and, asc, count, desc, eq, gt, inArray, isNull, lt, sql, sum } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, inArray, isNull, lt, ne, sql, sum } from 'drizzle-orm';
 import { withoutTenant, withTenant, type Database, type Transaction } from '../client.js';
 import {
   addons,
@@ -24,10 +28,9 @@ import {
   subscriptions,
   tenants,
   usageCounters,
+  type InvoiceLine,
   type InvoiceStatus,
   type SubscriptionStatus,
-  platformSettings,
-  timeEntries,
 } from '../schema/index.js';
 import { writeAudit, writeSystemAudit, type Actor } from './audit.js';
 
@@ -178,13 +181,22 @@ export async function getBillingOverview(
 /** Owners only (RLS returns nothing for others). */
 export function listInvoices(db: Database, ctx: Ctx) {
   return withTenant(db, ctx, (tx) =>
-    tx.select().from(invoices).orderBy(desc(invoices.periodStart)).limit(36),
+    tx
+      .select()
+      .from(invoices)
+      .where(ne(invoices.status, 'draft'))
+      .orderBy(desc(invoices.periodStart))
+      .limit(36),
   );
 }
 
 export async function getInvoice(db: Database, ctx: Ctx, id: string) {
   const rows = await withTenant(db, ctx, async (tx) => {
-    const inv = await tx.select().from(invoices).where(eq(invoices.id, id)).limit(1);
+    const inv = await tx
+      .select()
+      .from(invoices)
+      .where(and(eq(invoices.id, id), ne(invoices.status, 'draft')))
+      .limit(1);
     const t = await tx.select().from(tenants).limit(1);
     return inv[0] && t[0] ? { invoice: inv[0], tenant: t[0] } : null;
   });
@@ -419,28 +431,47 @@ export interface PendingCharge {
   resumed: boolean;
 }
 
+const DAY = 86_400_000;
+
 /**
- * Creates (or finds) the invoice for the subscription's current period: plan price plus add-ons
- * bought in that period, with 25 % VAT. Idempotent per period (invoices_period_key), so a
- * scheduler retry never bills twice.
+ * Creates (or finds) the subscription invoice for the next period: the plan price for a month or
+ * a year (10 months), less an active discount, plus add-ons bought in the last period, with 25 %
+ * VAT. Idempotent per period (invoices_period_key), so a scheduler retry never bills twice.
+ * A cancelled subscription ends instead of renewing. Invoice payment (EAN) issues the invoice
+ * with payment terms and moves the period on; card and MobilePay return a charge to run.
  */
 export async function prepareCharge(
   db: Database,
   tenantId: string,
   newOrderId: () => string,
+  now = new Date(),
 ): Promise<PendingCharge | null> {
   return withTenant(db, { tenantId }, async (tx) => {
     const [sub] = await tx.select().from(subscriptions).limit(1);
-    if (!sub?.providerSubscriptionId || !sub.currentPeriodEnd) return null;
+    if (!sub?.currentPeriodEnd) return null;
     if (sub.status !== 'active' && sub.status !== 'past_due') return null;
     const periodStart = sub.currentPeriodEnd;
+    if (sub.cancelAt && sub.cancelAt.getTime() <= periodStart.getTime()) {
+      await tx
+        .update(subscriptions)
+        .set({ status: 'cancelled', updatedAt: now })
+        .where(eq(subscriptions.id, sub.id));
+      await writeSystemAudit(tx, tenantId, {
+        action: 'subscription.ended',
+        objectType: 'subscription',
+        objectId: sub.id,
+      });
+      return null;
+    }
+    const byInvoice = sub.paymentMethod === 'invoice';
+    if (!byInvoice && !sub.providerSubscriptionId) return null;
     const [existing] = await tx
       .select()
       .from(invoices)
-      .where(eq(invoices.periodStart, periodStart))
+      .where(and(eq(invoices.kind, 'subscription'), eq(invoices.periodStart, periodStart)))
       .limit(1);
     if (existing) {
-      if (existing.status === 'paid' || existing.status === 'void') return null;
+      if (byInvoice || existing.status === 'paid' || existing.status === 'void') return null;
       const ref = await tx.execute<{ order_id: string }>(
         sql`select order_id from app.resolve_invoice_order(${existing.id})`,
       );
@@ -448,10 +479,10 @@ export async function prepareCharge(
       if (!orderId) return null;
       return {
         invoiceId: existing.id,
-        number: existing.number,
+        number: existing.number!,
         orderId,
         amountOre: existing.amountOre + existing.vatOre,
-        providerSubscriptionId: sub.providerSubscriptionId,
+        providerSubscriptionId: sub.providerSubscriptionId!,
         resumed: true,
       };
     }
@@ -463,32 +494,57 @@ export async function prepareCharge(
       .select({ n: sum(addons.priceOre).mapWith(Number) })
       .from(addons)
       .where(eq(addons.period, prevPeriod));
-    // Billable support time from before this period (README decision 17), at the hourly rate
-    // Superadmin set; without a rate nothing is billed and the time waits.
-    const support = await supportTimeLine(tx, periodStart);
-    const lines = support ? [support.line] : [];
-    const net = plan.priceMonthlyOre + (addonRow?.n ?? 0) + (support?.line.amountOre ?? 0);
+    const fullPrice = subscriptionPriceOre({
+      monthlyOre: plan.priceMonthlyOre,
+      interval: sub.interval,
+    });
+    const price = subscriptionPriceOre({
+      monthlyOre: plan.priceMonthlyOre,
+      interval: sub.interval,
+      discountPct: sub.discountPct,
+      discountUntil: sub.discountUntil,
+      at: periodStart,
+    });
+    const lines: InvoiceLine[] =
+      price < fullPrice
+        ? [{ text: `Rabat ${sub.discountPct} %`, amountOre: price - fullPrice }]
+        : [];
+    const net = price + (addonRow?.n ?? 0);
     const { vat } = withVat(net);
     const numRes = await tx.execute<{ n: string }>(sql`select app.next_invoice_number() as n`);
     const number = numRes.rows[0]!.n;
+    const periodEnd = periodEndFor(periodStart, sub.interval);
     const [inv] = await tx
       .insert(invoices)
       .values({
         tenantId,
         number,
+        kind: 'subscription',
         periodStart,
-        periodEnd: addMonth(periodStart),
-        description: `${plan.name} · månedlig`,
+        periodEnd,
+        description: `${plan.name} · ${sub.interval === 'year' ? 'årlig' : 'månedlig'}`,
         lines,
         amountOre: net,
         vatOre: vat,
+        paymentMethod: sub.paymentMethod,
+        issuedAt: now,
+        dueAt: byInvoice ? new Date(now.getTime() + INVOICE_DUE_DAYS * DAY) : now,
       })
       .returning({ id: invoices.id });
-    if (support)
+    if (byInvoice) {
+      // Paid on terms: the period moves on now; an unpaid invoice shows as overdue on Finans.
       await tx
-        .update(timeEntries)
-        .set({ invoiceId: inv!.id })
-        .where(inArray(timeEntries.id, support.entryIds));
+        .update(subscriptions)
+        .set({ currentPeriodStart: periodStart, currentPeriodEnd: periodEnd, updatedAt: now })
+        .where(eq(subscriptions.id, sub.id));
+      await writeSystemAudit(tx, tenantId, {
+        action: 'invoice.issued',
+        objectType: 'invoice',
+        objectId: inv!.id,
+        after: { number },
+      });
+      return null;
+    }
     const orderId = newOrderId();
     await tx.execute(sql`select app.register_billing_ref(${orderId}, 'invoice', ${inv!.id})`);
     return {
@@ -496,47 +552,107 @@ export async function prepareCharge(
       number,
       orderId,
       amountOre: net + vat,
+      providerSubscriptionId: sub.providerSubscriptionId!,
+      resumed: false,
+    };
+  });
+}
+
+export interface DueInvoiceJob {
+  tenantId: string;
+  invoiceId: string;
+  job: 'send' | 'retry';
+}
+
+/** Approved support invoices to send and failed charges to retry (scheduler). */
+export async function dueInvoiceJobs(db: Database, now = new Date()): Promise<DueInvoiceJob[]> {
+  const res = await db.execute<{ tenant_id: string; invoice_id: string; job: 'send' | 'retry' }>(
+    sql`select * from app.due_invoice_jobs(${now.toISOString()}::timestamptz)`,
+  );
+  return res.rows.map((r) => ({ tenantId: r.tenant_id, invoiceId: r.invoice_id, job: r.job }));
+}
+
+/**
+ * Sends an approved support invoice (F5, the 1st at 08:00): it gets its number and is charged on
+ * the customer's card or MobilePay, or issued with payment terms when the customer pays by
+ * invoice. Returns the charge to run, if any. Safe to retry.
+ */
+export async function sendSupportInvoice(
+  db: Database,
+  tenantId: string,
+  invoiceId: string,
+  newOrderId: () => string,
+  now = new Date(),
+): Promise<PendingCharge | null> {
+  return withTenant(db, { tenantId }, async (tx) => {
+    const [inv] = await tx.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
+    if (!inv || inv.kind !== 'support' || inv.status !== 'draft' || !inv.approvedAt) return null;
+    const [sub] = await tx.select().from(subscriptions).limit(1);
+    const numRes = await tx.execute<{ n: string }>(sql`select app.next_invoice_number() as n`);
+    const number = numRes.rows[0]!.n;
+    const byInvoice = inv.paymentMethod === 'invoice' || !sub?.providerSubscriptionId;
+    await tx
+      .update(invoices)
+      .set({
+        number,
+        status: 'open',
+        issuedAt: now,
+        paymentMethod: byInvoice ? 'invoice' : inv.paymentMethod,
+        dueAt: byInvoice ? new Date(now.getTime() + INVOICE_DUE_DAYS * DAY) : now,
+      })
+      .where(eq(invoices.id, inv.id));
+    await writeSystemAudit(tx, tenantId, {
+      action: 'invoice.issued',
+      objectType: 'invoice',
+      objectId: inv.id,
+      after: { number },
+    });
+    if (byInvoice) return null;
+    const orderId = newOrderId();
+    await tx.execute(sql`select app.register_billing_ref(${orderId}, 'invoice', ${inv.id})`);
+    return {
+      invoiceId: inv.id,
+      number,
+      orderId,
+      amountOre: inv.amountOre + inv.vatOre,
+      providerSubscriptionId: sub!.providerSubscriptionId!,
+      resumed: false,
+    };
+  });
+}
+
+/** A failed card charge whose retry is due: a new QuickPay order for the same invoice. */
+export async function prepareRetry(
+  db: Database,
+  tenantId: string,
+  invoiceId: string,
+  newOrderId: () => string,
+  now = new Date(),
+): Promise<PendingCharge | null> {
+  return withTenant(db, { tenantId }, async (tx) => {
+    const [inv] = await tx.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
+    if (!inv || inv.status !== 'failed' || !inv.nextRetryAt || inv.nextRetryAt > now) return null;
+    const [sub] = await tx.select().from(subscriptions).limit(1);
+    if (!sub?.providerSubscriptionId) return null;
+    // Claimed: the next retry is set again if this attempt fails.
+    await tx.update(invoices).set({ nextRetryAt: null }).where(eq(invoices.id, inv.id));
+    const orderId = newOrderId();
+    await tx.execute(sql`select app.register_billing_ref(${orderId}, 'invoice', ${inv.id})`);
+    return {
+      invoiceId: inv.id,
+      number: inv.number!,
+      orderId,
+      amountOre: inv.amountOre + inv.vatOre,
       providerSubscriptionId: sub.providerSubscriptionId,
       resumed: false,
     };
   });
 }
 
-/** Unbilled billable support time before the period, priced at the platform hourly rate. */
-async function supportTimeLine(tx: Transaction, periodStart: Date) {
-  const [rate] = await tx
-    .select({ value: platformSettings.value })
-    .from(platformSettings)
-    .where(eq(platformSettings.key, 'hourlyRateOre'));
-  const rateOre = typeof rate?.value === 'number' ? rate.value : null;
-  if (!rateOre) return null;
-  const entries = await tx
-    .select({ id: timeEntries.id, minutes: timeEntries.minutes })
-    .from(timeEntries)
-    .where(
-      and(
-        eq(timeEntries.billable, true),
-        isNull(timeEntries.invoiceId),
-        lt(timeEntries.workDate, periodStart.toISOString().slice(0, 10)),
-      ),
-    );
-  const minutes = entries.reduce((a, e) => a + e.minutes, 0);
-  if (minutes === 0) return null;
-  const h = Math.floor(minutes / 60);
-  const m = minutes % 60;
-  return {
-    entryIds: entries.map((e) => e.id),
-    line: {
-      text: `Supporttid · ${h ? `${h} t ` : ''}${m ? `${m} min.` : ''}`.trim(),
-      amountOre: Math.round((minutes / 60) * rateOre),
-    },
-  };
-}
-
 /**
- * Outcome of a charge (from the synchronous recurring response or the callback). Paid moves the
- * subscription one period on; a failure marks it past due, which the app shows as a banner.
- * Repeated callbacks for the same outcome are no-ops.
+ * Outcome of a charge (from the synchronous recurring response or the callback). A paid
+ * subscription invoice moves the subscription one period on; a failed one marks it past due.
+ * Failed charges are retried after 2, 5 and 9 days. Repeated callbacks are no-ops.
  */
 export async function applyChargeResult(
   db: Database,
@@ -549,40 +665,51 @@ export async function applyChargeResult(
     const [inv] = await tx.select().from(invoices).where(eq(invoices.id, invoiceId)).limit(1);
     if (!inv) throw new BillingError('UNKNOWN_REFERENCE');
     if (inv.status === 'paid') return;
+    // The same failure reported twice (sync answer and callback) counts once.
+    if (
+      !result.accepted &&
+      inv.status === 'failed' &&
+      inv.providerPaymentId === result.providerPaymentId
+    )
+      return;
     const [sub] = await tx.select().from(subscriptions).limit(1);
     if (!sub) throw new BillingError('NO_SUBSCRIPTION');
-    const status: InvoiceStatus = result.accepted ? 'paid' : 'failed';
-    if (inv.status === status) return;
+    const attempts = inv.attempts + 1;
+    const retry = result.accepted ? null : nextRetryAt(inv.issuedAt ?? inv.createdAt, attempts);
     await tx
       .update(invoices)
       .set({
-        status,
+        status: result.accepted ? 'paid' : 'failed',
         providerPaymentId: result.providerPaymentId,
         paidAt: result.accepted ? now : null,
+        attempts,
+        nextRetryAt: retry,
       })
       .where(eq(invoices.id, inv.id));
-    if (result.accepted) {
-      await tx
-        .update(subscriptions)
-        .set({
-          status: 'active',
-          pastDueSince: null,
-          currentPeriodStart: inv.periodStart,
-          currentPeriodEnd: inv.periodEnd,
-          updatedAt: now,
-        })
-        .where(eq(subscriptions.id, sub.id));
-    } else {
-      await tx
-        .update(subscriptions)
-        .set({ status: 'past_due', pastDueSince: sub.pastDueSince ?? now, updatedAt: now })
-        .where(eq(subscriptions.id, sub.id));
+    if (inv.kind === 'subscription') {
+      if (result.accepted) {
+        await tx
+          .update(subscriptions)
+          .set({
+            status: 'active',
+            pastDueSince: null,
+            currentPeriodStart: inv.periodStart,
+            currentPeriodEnd: inv.periodEnd,
+            updatedAt: now,
+          })
+          .where(eq(subscriptions.id, sub.id));
+      } else {
+        await tx
+          .update(subscriptions)
+          .set({ status: 'past_due', pastDueSince: sub.pastDueSince ?? now, updatedAt: now })
+          .where(eq(subscriptions.id, sub.id));
+      }
     }
     await writeSystemAudit(tx, tenantId, {
       action: result.accepted ? 'invoice.paid' : 'invoice.failed',
       objectType: 'invoice',
       objectId: inv.id,
-      after: { number: inv.number },
+      after: { number: inv.number, ...(retry ? { retryAt: retry.toISOString() } : {}) },
     });
   });
 }

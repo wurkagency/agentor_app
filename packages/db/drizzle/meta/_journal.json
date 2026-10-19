@@ -197,6 +197,20 @@
       "when": 1792407349506,
       "tag": "0027_support_grant_from_approval",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792431400899,
+      "tag": "0028_finance",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792431418527,
+      "tag": "0029_finance_security",
+      "breakpoints": true
     }
   ]
 }

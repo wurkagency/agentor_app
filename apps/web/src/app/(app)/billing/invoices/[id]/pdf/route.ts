@@ -1,5 +1,5 @@
 import { getInvoice, isUuid } from '@agentor/db';
-import { formatDate, formatMoney } from '@agentor/i18n';
+import { formatDate, formatMinutes, formatMoney } from '@agentor/i18n';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { requireRole } from '@/server/auth/session';
 import { db } from '@/server/infra';
@@ -17,12 +17,17 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const locale = (await getLocale()) as 'da' | 'en';
   const money = (ore: number) => formatMoney(ore / 100, locale);
   const pdf = invoicePdf({
-    number: i.number,
+    number: i.number ?? '',
     date: formatDate(i.periodStart, locale),
     period: `${formatDate(i.periodStart, locale)} – ${formatDate(new Date(i.periodEnd.getTime() - 1), locale)}`,
     description: i.description,
-    planAmount: money(i.amountOre - i.lines.reduce((a, l) => a + l.amountOre, 0)),
-    extra: i.lines.map((l) => ({ text: l.text, amount: money(l.amountOre) })),
+    ...(i.kind === 'subscription'
+      ? { planAmount: money(i.amountOre - i.lines.reduce((a, l) => a + l.amountOre, 0)) }
+      : {}),
+    extra: i.lines.map((l) => ({
+      text: l.billedMinutes ? `${l.text} · ${formatMinutes(l.billedMinutes, locale)}` : l.text,
+      amount: money(l.amountOre),
+    })),
     net: money(i.amountOre),
     vat: money(i.vatOre),
     total: money(i.amountOre + i.vatOre),
@@ -52,7 +57,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   return new Response(new Uint8Array(pdf), {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${i.number}.pdf"`,
+      'Content-Disposition': `attachment; filename="${i.number ?? 'faktura'}.pdf"`,
       'Cache-Control': 'private, no-store',
     },
   });

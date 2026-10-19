@@ -85,7 +85,8 @@ export interface InvoicePdfInput {
   period: string;
   description: string;
   /** The plan line's own amount; extra lines (support time) follow it. */
-  planAmount: string;
+  /** The plan line; support invoices have only their case lines. */
+  planAmount?: string;
   extra: { text: string; amount: string }[];
   net: string;
   vat: string;
@@ -135,7 +136,7 @@ export function invoicePdf(i: InvoicePdfInput): Buffer {
     { text: `${L.status}: ${i.status}`, x: 539, y: 662, size: 10, align: 'right' },
     { text: L.description, x: 56, y: 590, size: 9, bold: true },
     { text: L.amount, x: 539, y: 590, size: 9, bold: true, align: 'right' },
-    ...[{ text: i.description, amount: i.planAmount }, ...i.extra].flatMap((row, n) => [
+    ...[...(i.planAmount ? [{ text: i.description, amount: i.planAmount }] : []), ...i.extra].flatMap((row, n) => [
       { text: row.text, x: 56, y: 568 - n * 16, size: 10 },
       { text: row.amount, x: 539, y: 568 - n * 16, size: 10, align: 'right' as const },
     ]),

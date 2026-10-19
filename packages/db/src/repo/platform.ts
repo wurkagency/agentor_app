@@ -1,3 +1,4 @@
+import { DEFAULT_SUPPORT_RATE_ORE } from '@agentor/core';
 import { and, asc, desc, eq, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { withoutTenant, withTenant, type Database, type Transaction } from '../client.js';
 import {
@@ -206,15 +207,18 @@ export async function disableStaff(db: Database, actor: StaffActor, userId: stri
 /* ---- Settings --------------------------------------------------------------------------------- */
 
 export interface PlatformSettingsValues {
-  /** Net øre per hour for billable support time; null = not invoiced. */
+  /** Net øre per hour for billable support time (README decision 18: 640 kr. ex. VAT). */
   hourlyRateOre: number | null;
   maxHours: number;
   requireCaseAndReason: boolean;
   warnConcurrentGrants: number;
+  /** Where Finans sends the monthly report (F7 "Send til bogholder"). */
+  bookkeeperEmail: string | null;
 }
 
 const SETTING_DEFAULTS: PlatformSettingsValues = {
-  hourlyRateOre: null,
+  hourlyRateOre: DEFAULT_SUPPORT_RATE_ORE,
+  bookkeeperEmail: null,
   maxHours: 24,
   requireCaseAndReason: true,
   warnConcurrentGrants: 3,
