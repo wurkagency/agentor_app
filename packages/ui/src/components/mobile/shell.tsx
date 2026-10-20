@@ -2,6 +2,7 @@ import { ArrowLeft, Bell, type LucideIcon } from 'lucide-react';
 import type { ElementType, ReactNode } from 'react';
 import { cn } from '../../lib/cn';
 import { Icon } from '../icon';
+import { Logotype } from '../logotype';
 
 // Server-safe: no hooks. Links render through `linkAs` (next/link in the app, <a> by default).
 
@@ -97,17 +98,17 @@ export interface TopBarProps {
   /** Trailing actions instead of or before the bell (MP03 "Registrér tid", MP01 avatar). */
   actions?: ReactNode;
   linkAs?: LinkAs;
+  /**
+   * A page's own bar (default). The layout's fallback bar passes false, so CSS can hide the
+   * fallback whenever a page renders its own (`group-has-[[data-page-topbar]]`).
+   */
+  pageLevel?: boolean;
   className?: string;
 }
 
-/** Wordmark "Agent" + "or" with a 2 px underline under "or" (README decision 5), 20/700 on mobile. */
+/** The Agentor logotype, 20 px high as on the MA/MP boards; white on the navy Platform bar. */
 export function MobileWordmark({ onNavy = false }: { onNavy?: boolean }) {
-  return (
-    <span className={cn('text-m-logo', onNavy ? 'text-on-navy' : 'text-fg-1')} aria-hidden>
-      Agent
-      <span className={cn('border-b-2 pb-px', onNavy ? 'border-on-navy' : 'border-fg-1')}>or</span>
-    </span>
-  );
+  return <Logotype className={cn('h-5', onNavy ? 'text-on-navy' : 'text-fg-1')} />;
 }
 
 const ICON_BUTTON =
@@ -122,11 +123,13 @@ export function TopBar({
   bell,
   actions,
   linkAs: L = 'a',
+  pageLevel = true,
   className,
 }: TopBarProps) {
   const navy = variant === 'platform';
   return (
     <header
+      {...(pageLevel ? { 'data-page-topbar': '' } : {})}
       className={cn(
         'sticky top-0 z-30 flex-none pt-safe',
         navy ? 'on-navy bg-navy text-on-navy' : 'bg-canvas text-fg-1',

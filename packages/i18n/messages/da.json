@@ -2896,7 +2896,8 @@
     },
     "dev": {
       "title": "Mobilkomponenter"
-    }
+    },
+    "platformBell": "Mine sager, {count, plural, =0 {ingen åbne} one {# åben} other {# åbne}}"
   },
   "signupFlow": {
     "loginPrompt": "Har du allerede en konto?",

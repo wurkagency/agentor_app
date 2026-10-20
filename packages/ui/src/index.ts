@@ -14,3 +14,4 @@ export * from './components/empty';
 export * from './components/states';
 export * from './components/data';
 export * from './components/dashboard';
+export * from './components/logotype';

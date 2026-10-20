@@ -193,3 +193,55 @@ test.describe('@mobile responsive switch', () => {
     expect(res?.status()).toBe(403);
   });
 });
+
+/**
+ * Issue 2 (20 Oct 2026): every screen below 768 px has one top bar with the logo (or a back link
+ * on detail screens) and the bell with its badge; navy on Platform.
+ */
+test.describe('@mobile top bar on every screen', () => {
+  // The app's top bars are sticky; desktop content may use <header> inside cards.
+  const visibleBars = (page: Page) => page.locator('header.sticky:visible');
+
+  test('customer app', async ({ page }) => {
+    await login(page, 'mette');
+    for (const path of [
+      '/',
+      '/integrations',
+      '/activity',
+      '/connections',
+      '/billing',
+      '/support',
+      '/settings/team',
+      '/integrations/templates',
+    ]) {
+      await page.goto(path);
+      const bars = visibleBars(page);
+      await expect(bars, path).toHaveCount(1);
+      await expect(
+        bars.getByRole('link', { name: /Agentor, gå til Overblik|Tilbage/ }),
+        path,
+      ).toBeVisible();
+      await expect(bars.getByRole('link', { name: /^Notifikationer/ }), path).toBeVisible();
+      expect((await bars.boundingBox())!.height, path).toBe(60);
+    }
+  });
+
+  test('Platform, navy', async ({ page }) => {
+    await login(page, 'kasper');
+    for (const path of [
+      '/platform/customers',
+      '/platform/cases',
+      '/platform/errors',
+      '/platform/finance',
+      '/platform/time',
+    ]) {
+      await page.goto(path);
+      const bars = visibleBars(page);
+      await expect(bars, path).toHaveCount(1);
+      expect(await bars.evaluate((el) => getComputedStyle(el).backgroundColor), path).toBe(
+        'rgb(19, 41, 58)',
+      );
+      await expect(bars.getByRole('link', { name: /^Mine sager/ }), path).toBeVisible();
+    }
+  });
+});

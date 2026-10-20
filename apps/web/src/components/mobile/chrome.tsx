@@ -31,16 +31,25 @@ type PageTopBarProps = Pick<TopBarProps, 'title' | 'subtitle' | 'actions' | 'cla
   back?: string;
   /** MA11, MA12 have no bell. */
   bell?: boolean;
+  /**
+   * The layout's bar for pages without a mobile view of their own: hidden as soon as the page
+   * renders its own top bar, and never above 768 px (issue 2, 20 Oct 2026).
+   */
+  fallback?: boolean;
 };
 
+const FALLBACK = 'md:hidden group-has-[[data-page-topbar]]/shell:hidden';
+
 /** The customer app's top bar with the bell from the layout. */
-export function AppTopBar({ back, bell = true, ...rest }: PageTopBarProps) {
+export function AppTopBar({ back, bell = true, fallback = false, ...rest }: PageTopBarProps) {
   const t = useTranslations('mobile');
   const { attention } = useContext(ChromeContext);
   return (
     <TopBar
       {...rest}
       linkAs={Link}
+      pageLevel={!fallback}
+      className={cn(fallback && FALLBACK, rest.className)}
       {...(back
         ? { back: { href: back, label: t('back') } }
         : { logo: { href: '/', label: t('home') } })}
@@ -58,15 +67,30 @@ export function AppTopBar({ back, bell = true, ...rest }: PageTopBarProps) {
   );
 }
 
-/** Platform's navy top bar: wordmark + "Platform", avatar; or back + title on a case. */
-export function PlatformTopBar({ back, ...rest }: Omit<PageTopBarProps, 'bell'>) {
+/**
+ * Platform's navy top bar: logotype + "Platform", the bell and the avatar; or back + title on a
+ * case. Staff have no notification feed, so the bell counts their own open cases and opens them.
+ */
+export function PlatformTopBar({ back, bell = true, fallback = false, ...rest }: PageTopBarProps) {
   const t = useTranslations('mobile');
-  const { user } = useContext(ChromeContext);
+  const { user, attention } = useContext(ChromeContext);
   return (
     <TopBar
       {...rest}
       variant="platform"
       linkAs={Link}
+      pageLevel={!fallback}
+      className={cn(fallback && FALLBACK, rest.className)}
+      {...(bell
+        ? {
+            bell: {
+              href: '/platform/cases?filter=mine',
+              count: attention.count,
+              severe: attention.severe,
+              label: t('platformBell', { count: attention.count }),
+            },
+          }
+        : {})}
       {...(back
         ? { back: { href: back, label: t('back') } }
         : {

@@ -5,7 +5,12 @@ import { formatPercent, type Locale } from '@agentor/i18n';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
-import { AppTabBar, MobileChromeProvider, UnderTabBar } from '@/components/mobile/chrome';
+import {
+  AppTabBar,
+  AppTopBar,
+  MobileChromeProvider,
+  UnderTabBar,
+} from '@/components/mobile/chrome';
 import { DeskOnly } from '@/components/mobile/desk-only';
 import { SupportBar, type SwitcherGrant } from '@/components/platform/support-bar';
 import { AppHeader } from '@/components/shell/app-header';
@@ -87,7 +92,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const skip =
     'sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-surface focus:px-4 focus:py-2 focus:shadow-card';
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="group/shell flex min-h-dvh flex-col">
       {/* Below 768 px the page's mobile branch owns the content (README decision 20). */}
       <a href="#main" className={`${skip} max-md:hidden`}>
         {t('skipToContent')}
@@ -158,6 +163,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           </>
         ) : (
           <>
+            {/* Logo and bell for pages that don't render a mobile top bar of their own. */}
+            <AppTopBar fallback />
             <UnderTabBar>{children}</UnderTabBar>
             <AppTabBar />
           </>
