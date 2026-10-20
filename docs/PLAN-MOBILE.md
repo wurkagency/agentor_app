@@ -31,7 +31,7 @@ Prisen er, at HTML'en indeholder begge grene. Det holdes nede ved at:
 - mobilgrenen kun renderer det, tegnefladen viser (ingen tabeller, ingen KPI-dæk);
 - vi måler HTML-størrelse på `/`, `/integrations` og `/integrations/[id]` før og efter og rapporterer tallet i PR'en.
 
-Desktop-only ruter (`/integrations/[id]/editor`, `/integrations/new`, `/integrations/templates`, `/activity/reconciliation`, `/settings/team`, `/settings/security`, `/settings/audit-log`, `/settings/company`, `/onboarding/*`, `/signup`, `/platform/time/*`, `/platform/users/*`, `/platform/settings`, `/platform/finance/{subscriptions,support,reports,customers}` og supportvisningen) får på mobil én fælles skærm: `DeskNote` + "Send link til min computer".
+Desktop-only ruter (`/integrations/[id]/editor`, `/integrations/new`, `/integrations/templates`, `/activity/reconciliation`, `/settings/team`, `/settings/security`, `/settings/audit-log`, `/settings/company`, `/platform/time/*`, `/platform/users/*`, `/platform/settings`, `/platform/finance/{subscriptions,support,reports,customers}` og supportvisningen) får på mobil én fælles skærm: `DeskNote` + "Send link til min computer".
 
 Mobile-only ruter (`/more`, `/install`) og nye ruter (`/notifications`, `/support-access/[grantId]`, `/connections/[id]/reconnect`, `/integrations/[id]/runs/[runId]`) har også en desktopgren, så et link sendt fra telefonen virker på computeren:
 

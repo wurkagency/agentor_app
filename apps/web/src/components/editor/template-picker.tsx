@@ -33,7 +33,7 @@ export function TemplatePicker({
   initial: string;
 }) {
   const t = useTranslations('templates');
-  const tn = useTranslations('onboarding.templates');
+  const tn = useTranslations('templates.catalog');
   const ta = useTranslations('activity.entity');
   const [cat, setCat] = useState<(typeof CATS)[number]>('all');
   const [q, setQ] = useState('');

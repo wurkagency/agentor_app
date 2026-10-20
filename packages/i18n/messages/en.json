@@ -565,107 +565,6 @@
     "cancel": "Cancel",
     "unsaved": "You have unsaved changes."
   },
-  "signup": {
-    "title": "Create account",
-    "intro": "Create your account. You connect your systems afterwards.",
-    "name": "Your name",
-    "terms": "I accept the <link>terms</link> and the data processing agreement.",
-    "create": "Create account",
-    "creating": "Creating…",
-    "haveAccount": "Already have an account?",
-    "sent": "We have sent an e-mail to {email}. Click the link to confirm your e-mail. The link works for 24 hours.",
-    "errors": {
-      "invalid": "Check the fields: name, a valid e-mail and a password of at least 12 characters.",
-      "terms": "You need to accept the terms to create an account.",
-      "rateLimited": "Too many attempts from your connection. Try again in an hour."
-    }
-  },
-  "onboarding": {
-    "steps": "Setup steps",
-    "step": {
-      "company": "Company",
-      "plan": "Plan and payment",
-      "flow": "First flow"
-    },
-    "stepDone": "done",
-    "companyTitle": "Tell us about your company",
-    "companyIntro": "We fetch name and address from the Danish CVR register.",
-    "cvr": "CVR number",
-    "lookup": "Look up",
-    "activeSince": "active since {year}",
-    "ceased": "The company has ceased in the CVR register.",
-    "notIt": "Not this one?",
-    "enterManually": "Enter the company yourself",
-    "name": "Company name",
-    "address": "Address",
-    "postalCode": "Postcode",
-    "city": "City",
-    "billingEmail": "E-mail for invoices",
-    "smsPhone": "Phone for SMS alerts",
-    "orders": "Orders per month, roughly",
-    "ordersHelp": "Helps us suggest the right plan.",
-    "ordersPlaceholder": "Choose",
-    "ordersOption": {
-      "0-200": "0–200",
-      "200-1000": "200–1,000",
-      "1000+": "Over 1,000"
-    },
-    "continue": "Continue",
-    "back": "Back",
-    "planTitle": "Choose plan",
-    "planIntro": "You can change plan at any time. Prices exclude VAT.",
-    "recommendedFor": "Recommended for {orders} orders",
-    "payByCard": "Pay by card via QuickPay",
-    "priceLine": "{plan}: {net} + VAT {vat} = {gross} per month. You pay when you leave the setup.",
-    "addCard": "Add card",
-    "changeCard": "Change card",
-    "cardAdded": "{brand} •••• {last4} has been added",
-    "cardWaiting": "Waiting for confirmation from QuickPay…",
-    "cardCancelled": "You cancelled the card payment. Add a card to continue.",
-    "cardSlow": "We have not received the confirmation from QuickPay yet. Refresh in a moment or add the card again.",
-    "flowTitle": "What do you want to connect first?",
-    "flowIntro": "Choose a template. You connect your accounts in the next step, and nothing is sent until you go Live.",
-    "skip": "Skip",
-    "startSetup": "Start setup",
-    "templates": {
-      "webshop-dinero": {
-        "title": "Webshop to accounting",
-        "body": "Orders become invoices in Dinero."
-      },
-      "webshop-economic": {
-        "title": "Webshop to e-conomic",
-        "body": "Invoices and customers in e-conomic."
-      },
-      "shopify-dinero": {
-        "title": "Shopify to Dinero",
-        "body": "Orders from Shopify are booked in Dinero."
-      },
-      "shopify-economic": {
-        "title": "Shopify to e-conomic",
-        "body": "Sales and credit notes in e-conomic."
-      },
-      "customers-hubspot": {
-        "title": "Customers to CRM",
-        "body": "Customers become contacts in HubSpot."
-      },
-      "customers-brevo": {
-        "title": "Customers to newsletter",
-        "body": "Subscribe customers in Brevo."
-      }
-    },
-    "errors": {
-      "cvrFormat": "A CVR number is 8 digits.",
-      "cvrNotFound": "We could not find the CVR number. Check it, or enter the company yourself.",
-      "cvrUnavailable": "The CVR register is not answering right now. Enter the company yourself.",
-      "lookupFirst": "Look up the CVR number, or enter the company yourself.",
-      "nameRequired": "Enter the company name.",
-      "email": "The invoice e-mail does not look right.",
-      "phone": "The phone number does not look right. Write e.g. +45 20 12 12 48.",
-      "TENANT_LIMIT": "You already own 10 companies. Contact us if you need more.",
-      "cardRequired": "Add a card to continue.",
-      "generic": "Something went wrong. Try again in a moment."
-    }
-  },
   "plans": {
     "perMonthShort": "DKK/mo.",
     "perMonthExVat": "DKK/mo. excl. VAT",
@@ -1749,6 +1648,32 @@
     "errors": {
       "missingSource": "Connect a webshop first.",
       "generic": "The flow couldn't be created. Try again."
+    },
+    "catalog": {
+      "webshop-dinero": {
+        "title": "Webshop to accounting",
+        "body": "Orders become invoices in Dinero."
+      },
+      "webshop-economic": {
+        "title": "Webshop to e-conomic",
+        "body": "Invoices and customers in e-conomic."
+      },
+      "shopify-dinero": {
+        "title": "Shopify to Dinero",
+        "body": "Orders from Shopify are booked in Dinero."
+      },
+      "shopify-economic": {
+        "title": "Shopify to e-conomic",
+        "body": "Sales and credit notes in e-conomic."
+      },
+      "customers-hubspot": {
+        "title": "Customers to CRM",
+        "body": "Customers become contacts in HubSpot."
+      },
+      "customers-brevo": {
+        "title": "Customers to newsletter",
+        "body": "Subscribe customers in Brevo."
+      }
     }
   },
   "platform": {
@@ -2912,7 +2837,6 @@
         "settings": "Team, security, company and audit log are changed under Settings on a computer.",
         "reconciliation": "Reconciliation and CSV export are on a computer.",
         "plan": "Change plan on a computer under Subscription.",
-        "signup": "New user? Create an account at app.agentor.dk from a computer.",
         "supportView": "Support view of a customer's app opens on a computer.",
         "finance": "Reports, settlement and invoice drafts are on a computer.",
         "platformAdmin": "Time, platform users and platform settings are on a computer.",

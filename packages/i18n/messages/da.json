@@ -565,107 +565,6 @@
     "cancel": "Annullér",
     "unsaved": "Du har ændringer, der ikke er gemt."
   },
-  "signup": {
-    "title": "Opret konto",
-    "intro": "Opret din konto. Du forbinder dine systemer bagefter.",
-    "name": "Dit navn",
-    "terms": "Jeg accepterer <link>vilkårene</link> og databehandleraftalen.",
-    "create": "Opret konto",
-    "creating": "Opretter…",
-    "haveAccount": "Har du allerede en konto?",
-    "sent": "Vi har sendt en mail til {email}. Klik på linket for at bekræfte din e-mail. Linket virker i 24 timer.",
-    "errors": {
-      "invalid": "Tjek felterne: navn, en gyldig e-mail og en adgangskode på mindst 12 tegn.",
-      "terms": "Du skal acceptere vilkårene for at oprette en konto.",
-      "rateLimited": "For mange forsøg fra din forbindelse. Prøv igen om en time."
-    }
-  },
-  "onboarding": {
-    "steps": "Trin i opsætningen",
-    "step": {
-      "company": "Virksomhed",
-      "plan": "Plan og betaling",
-      "flow": "Første flow"
-    },
-    "stepDone": "færdig",
-    "companyTitle": "Fortæl os om virksomheden",
-    "companyIntro": "Vi henter navn og adresse fra CVR-registeret.",
-    "cvr": "CVR-nummer",
-    "lookup": "Slå op",
-    "activeSince": "aktiv siden {year}",
-    "ceased": "Virksomheden er ophørt i CVR-registeret.",
-    "notIt": "Ikke den?",
-    "enterManually": "Indtast virksomheden selv",
-    "name": "Virksomhedens navn",
-    "address": "Adresse",
-    "postalCode": "Postnr.",
-    "city": "By",
-    "billingEmail": "E-mail til fakturaer",
-    "smsPhone": "Telefon til SMS-alarmer",
-    "orders": "Ordrer pr. måned, cirka",
-    "ordersHelp": "Hjælper os med at foreslå den rigtige plan.",
-    "ordersPlaceholder": "Vælg",
-    "ordersOption": {
-      "0-200": "0–200",
-      "200-1000": "200–1.000",
-      "1000+": "Over 1.000"
-    },
-    "continue": "Fortsæt",
-    "back": "Tilbage",
-    "planTitle": "Vælg plan",
-    "planIntro": "Du kan skifte plan når som helst. Priser er ekskl. moms.",
-    "recommendedFor": "Anbefalet ved {orders} ordrer",
-    "payByCard": "Betaling med kort via QuickPay",
-    "priceLine": "{plan}: {net} + moms {vat} = {gross} pr. måned. Du betaler først, når du forlader opsætningen.",
-    "addCard": "Tilføj kort",
-    "changeCard": "Skift kort",
-    "cardAdded": "{brand} •••• {last4} er tilføjet",
-    "cardWaiting": "Venter på bekræftelse fra QuickPay…",
-    "cardCancelled": "Du afbrød kortbetalingen. Tilføj et kort for at fortsætte.",
-    "cardSlow": "Vi har ikke fået bekræftelsen fra QuickPay endnu. Opdatér siden om lidt, eller tilføj kortet igen.",
-    "flowTitle": "Hvad vil du forbinde først?",
-    "flowIntro": "Vælg en skabelon. Du forbinder dine konti i næste trin, og intet sendes, før du går Live.",
-    "skip": "Spring over",
-    "startSetup": "Start opsætning",
-    "templates": {
-      "webshop-dinero": {
-        "title": "Webshop til regnskab",
-        "body": "Ordrer bliver til fakturaer i Dinero."
-      },
-      "webshop-economic": {
-        "title": "Webshop til e-conomic",
-        "body": "Fakturaer og kunder i e-conomic."
-      },
-      "shopify-dinero": {
-        "title": "Shopify til Dinero",
-        "body": "Ordrer fra Shopify bogføres i Dinero."
-      },
-      "shopify-economic": {
-        "title": "Shopify til e-conomic",
-        "body": "Salg og kreditnotaer i e-conomic."
-      },
-      "customers-hubspot": {
-        "title": "Kunder til CRM",
-        "body": "Kunder bliver til kontakter i HubSpot."
-      },
-      "customers-brevo": {
-        "title": "Kunder til nyhedsbrev",
-        "body": "Tilmeld kunder i Brevo."
-      }
-    },
-    "errors": {
-      "cvrFormat": "Et CVR-nummer er 8 cifre.",
-      "cvrNotFound": "Vi fandt ikke CVR-nummeret. Tjek det, eller indtast virksomheden selv.",
-      "cvrUnavailable": "CVR-registeret svarer ikke lige nu. Indtast virksomheden selv, så retter vi den ikke.",
-      "lookupFirst": "Slå CVR-nummeret op, eller indtast virksomheden selv.",
-      "nameRequired": "Skriv virksomhedens navn.",
-      "email": "E-mailen til fakturaer ser ikke rigtig ud.",
-      "phone": "Telefonnummeret ser ikke rigtigt ud. Skriv fx +45 20 12 12 48.",
-      "TENANT_LIMIT": "Du ejer allerede 10 virksomheder. Kontakt os, hvis du har brug for flere.",
-      "cardRequired": "Tilføj et kort for at fortsætte.",
-      "generic": "Noget gik galt. Prøv igen om lidt."
-    }
-  },
   "plans": {
     "perMonthShort": "kr./md.",
     "perMonthExVat": "kr./md. ekskl. moms",
@@ -1749,6 +1648,32 @@
     "errors": {
       "missingSource": "Forbind en webshop først.",
       "generic": "Flowet kunne ikke oprettes. Prøv igen."
+    },
+    "catalog": {
+      "webshop-dinero": {
+        "title": "Webshop til regnskab",
+        "body": "Ordrer bliver til fakturaer i Dinero."
+      },
+      "webshop-economic": {
+        "title": "Webshop til e-conomic",
+        "body": "Fakturaer og kunder i e-conomic."
+      },
+      "shopify-dinero": {
+        "title": "Shopify til Dinero",
+        "body": "Ordrer fra Shopify bogføres i Dinero."
+      },
+      "shopify-economic": {
+        "title": "Shopify til e-conomic",
+        "body": "Salg og kreditnotaer i e-conomic."
+      },
+      "customers-hubspot": {
+        "title": "Kunder til CRM",
+        "body": "Kunder bliver til kontakter i HubSpot."
+      },
+      "customers-brevo": {
+        "title": "Kunder til nyhedsbrev",
+        "body": "Tilmeld kunder i Brevo."
+      }
     }
   },
   "platform": {
@@ -2912,7 +2837,6 @@
         "settings": "Team, sikkerhed, virksomhed og audit-log ændres under Indstillinger på computer.",
         "reconciliation": "Afstemning og CSV-eksport findes på computer.",
         "plan": "Skift plan på computer under Abonnement.",
-        "signup": "Ny bruger? Opret konto på app.agentor.dk fra en computer.",
         "supportView": "Supportvisning af en kundes app åbnes på computer.",
         "finance": "Rapporter, afregning og fakturakladder findes på computer.",
         "platformAdmin": "Tid, platformbrugere og platformindstillinger findes på computer.",

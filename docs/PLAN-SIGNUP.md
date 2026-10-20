@@ -478,3 +478,21 @@ Ikke gjort endnu / kendt:
 - **Passkey først** i MFA-opsætningen (B9) er ikke bygget; opsætningen er TOTP som før.
 - **SSO-brugere kan ikke sætte totrin op:** opsætningen kræver adgangskoden, og en Google-/Microsoft-bruger har ingen. Det rammer B9 og B10.
 - **B10's totrinsbekræftelse efter SSO** er stadig ikke e2e-testet.
+
+## 17. Status for S4 (20. okt. 2026)
+
+Bygget på `v1.0`, ikke committet.
+
+- **Fjernet:**
+  - `packages/db/src/repo/onboarding.ts` (`createCompany`, `completeOnboarding`). `onboarding_completed_at` bliver og sættes nu af `advanceOnboarding('done')`.
+  - i18n-navnerummene `onboarding` og `signup`. Skabelontitlerne ligger nu i `templates.catalog` (bruges af `empty-flows.tsx` og `template-picker.tsx`).
+  - `DeskArea` `signup` og dens tekst, `--container-onboarding-narrow`, `/onboarding/*` og `/signup` i PLAN-MOBILE §1.
+  - Den sprungne D14-test i `billing.spec.ts`, D14-blokken i `screenshots.spec.ts`, `docs/screenshots/D14-Onboarding-{1,2,3}.png` og `Signup.png`.
+- **Rutekort** i `docs/CLAUDE-CODE-BUILD-PROMPT.md` §5: `/login/mfa/setup`, mobiltegnefladerne MS1–MS6 og MO1–MO5, "Spring over" og `/connect/*`.
+- **Demo-seed** `SEED_SCENARIO=signup pnpm --filter @agentor/web seed`: tavle-seedet plus tre fiktive ejere på `@nordlys-cykler.test` med seed-adgangskoden.
+  - Freja Kragh: bekræftet, ingen virksomhed (åbner SU3).
+  - Emil Vang: Nordlys Cykler Odense ApS, Business årligt, `pending_payment` (åbner SU5).
+  - Nora Bech: Nordlys Cykler Aalborg ApS, aktiv, onboarding sprunget over ved OB1 (Overblik med påmindelse). Har totrin som de øvrige seed-brugere.
+  - Lavet med signup-repoets egne funktioner og web-rollen. Kun aktiveringen sker som tabelejer, fordi kun et verificeret QuickPay-callback kan aktivere i app'en.
+  - Freja og Emil slettes af oprydningen 24 timer efter seedet (B1). Kør seedet igen for at få dem tilbage.
+- **Kontrol:** typecheck, lint og format grønne. Unit 202 og isolation 519 bestået (9 sprunget over som før: tabeller uden rækker). Hele Playwright-suiten (desktop, 390, 360, 430): 111 bestået, 5 sprunget over, 0 fejlet.

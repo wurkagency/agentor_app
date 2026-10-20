@@ -26,7 +26,7 @@ export async function EmptyFlows({
   canEdit: boolean;
 }) {
   const t = await getTranslations('flows');
-  const to = await getTranslations('onboarding');
+  const to = await getTranslations('templates');
   const names = [...new Set(connected)].map((c) => NAMES[c] ?? c);
   return (
     <section className="flex flex-col items-center gap-6 rounded-md bg-surface px-6 py-12 text-center shadow-sm">
@@ -59,8 +59,8 @@ export async function EmptyFlows({
                       connector={{ name: NAMES[s.to]!, logoUrl: `/logos/${s.to}.svg` }}
                     />
                   </span>
-                  <span className="text-body font-semibold">{to(`templates.${s.id}.title`)}</span>
-                  <span className="text-table text-fg-2">{to(`templates.${s.id}.body`)}</span>
+                  <span className="text-body font-semibold">{to(`catalog.${s.id}.title`)}</span>
+                  <span className="text-table text-fg-2">{to(`catalog.${s.id}.body`)}</span>
                 </Link>
               </li>
             ))}

@@ -21,6 +21,7 @@ const {
   SEED_PASSWORD,
   SEED_TOTP_SECRET,
   SEED_WOO_WEBHOOK_TOKEN,
+  SIGNUP_USERS,
   TENANTS,
   USERS,
 } = await import('./seed-data');
@@ -29,9 +30,15 @@ const { hashWebhookToken } = await import('@agentor/db');
 const { seedFlows } = await import('./seed-flows');
 const { seedPlatform } = await import('./seed-platform');
 const { seedFinance } = await import('./seed-finance');
+const { seedSignup } = await import('./seed-signup');
 const { DINERO_ACCOUNTS } = await import('@agentor/connectors');
-/** board (default): what the boards show; gate: the Phase 1 prototype path (scripts/seed-flows.ts). */
+/**
+ * board (default): what the boards show; gate: the Phase 1 prototype path (scripts/seed-flows.ts);
+ * signup: board plus one owner in each signup state (scripts/seed-signup.ts).
+ */
+const SIGNUP = process.env.SEED_SCENARIO === 'signup';
 const SCENARIO = process.env.SEED_SCENARIO === 'gate' ? 'gate' : 'board';
+const SEED_USERS = SIGNUP ? { ...USERS, ...SIGNUP_USERS } : USERS;
 
 const ownerUrl = process.env.DATABASE_URL_OWNER;
 if (!ownerUrl) throw new Error('DATABASE_URL_OWNER missing');
@@ -60,27 +67,29 @@ for (const t of Object.values(TENANTS)) {
 }
 
 const ctx = await auth().$context;
-for (const u of Object.values(USERS)) {
-  const existing = await ctx.internalAdapter.findUserByEmail(u.email);
-  if (existing) await ctx.internalAdapter.deleteUser(existing.user.id);
-}
-// Accounts made by e2e sign-up tests (…@e2e.agentor.test) and the companies they created.
+// Accounts made by e2e sign-up tests (…@e2e.agentor.test) and the signup demo, with their companies.
 {
   const adminUrl = new URL(process.env.DATABASE_ADMIN_URL ?? '');
   adminUrl.pathname = new URL(ownerUrl).pathname;
   const admin = new pg.Client({ connectionString: adminUrl.toString() });
   await admin.connect();
+  const demo = Object.values(SIGNUP_USERS).map((u) => u.email);
   await admin.query(
     `delete from tenants t where exists (select 1 from memberships m join auth.users u on u.id = m.user_id
-      where m.tenant_id = t.id and m.role = 'owner' and u.email like '%@e2e.agentor.test')`,
+      where m.tenant_id = t.id and m.role = 'owner' and (u.email like '%@e2e.agentor.test' or u.email = any($1)))`,
+    [demo],
   );
   await admin.query(`delete from auth.users where email like '%@e2e.agentor.test'`);
   await admin.end();
 }
+for (const u of [...Object.values(USERS), ...Object.values(SIGNUP_USERS)]) {
+  const existing = await ctx.internalAdapter.findUserByEmail(u.email);
+  if (existing) await ctx.internalAdapter.deleteUser(existing.user.id);
+}
 
 // --- identity (auth schema) ---------------------------------------------------------------------
 const passwordHash = await ctx.password.hash(SEED_PASSWORD);
-for (const u of Object.values(USERS)) {
+for (const u of Object.values(SEED_USERS)) {
   await ctx.adapter.create({
     model: 'user',
     data: {
@@ -256,9 +265,11 @@ await owner.query(
 await seedPlatform(owner, inTenant);
 // Finans (M9): subscription details and a year of invoices.
 await seedFinance(owner, inTenant);
+// Self-service signup in each state (PLAN-SIGNUP S4).
+if (SIGNUP) await seedSignup(owner, inTenant);
 
 await owner.end();
 console.log(
-  `Seeded ${Object.keys(USERS).length} users, ${Object.keys(TENANTS).length} tenants, ${Object.keys(FLOWS).length} flows.`,
+  `Seeded ${Object.keys(SEED_USERS).length} users, ${Object.keys(TENANTS).length} tenants, ${Object.keys(FLOWS).length} flows.`,
 );
 process.exit(0);

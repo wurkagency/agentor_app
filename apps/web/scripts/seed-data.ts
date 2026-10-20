@@ -77,6 +77,34 @@ export const USERS = {
   },
 } as const;
 
+/**
+ * SEED_SCENARIO=signup (PLAN-SIGNUP S4): three self-service owners, one per signup state. A .test
+ * domain, so no code or receipt can be mailed. The two unpaid ones are purged 24 h after seeding (B1).
+ */
+export const SIGNUP_USERS = {
+  // Verified e-mail, no company yet: opens on SU3.
+  konto: {
+    id: '0190b000-0000-7000-8000-000000000121',
+    name: 'Freja Kragh',
+    email: 'freja@nordlys-cykler.test',
+    mfa: false,
+  },
+  // Company and plan chosen, terms not accepted, not paid: opens on SU5.
+  betaling: {
+    id: '0190b000-0000-7000-8000-000000000122',
+    name: 'Emil Vang',
+    email: 'emil@nordlys-cykler.test',
+    mfa: false,
+  },
+  // Paid and active, skipped onboarding at OB1: Overblik with the reminder.
+  onboarding: {
+    id: '0190b000-0000-7000-8000-000000000123',
+    name: 'Nora Bech',
+    email: 'nora@nordlys-cykler.test',
+    mfa: true,
+  },
+} as const;
+
 /** Further fictional customers for the Platform's customer list (P1). */
 export const PLATFORM_TENANTS = {
   molle: {
