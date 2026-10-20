@@ -358,7 +358,7 @@ På mobil er app'en et overvågnings- og reaktionsværktøj. Den bruges ikke til
 **Caching og isolation:**
 
 - Service workeren cacher kun app-skallen (statiske assets). API-svar caches aldrig i Cache Storage.
-- Et "sidst kendte" status-snapshot (kun aggregater, ingen persondata) gemmes i IndexedDB nøglet på `user_id` og `tenant_id`. Det vises med tydeligt "Offline – data fra kl. 14:02".
+- Et "sidst kendte" status-snapshot (kun aggregater, ingen persondata) gemmes i IndexedDB nøglet på `user_id` og `tenant_id`. Det vises med tydeligt "Offline · data fra kl. 14:02".
 - Ved logout, skift af bruger eller 401 slettes IndexedDB og push-abonnementet afmeldes. Dette dækkes af isolationstestsuiten.
 
 ## 9. Sikkerhed og tenant-isolering (revideret)

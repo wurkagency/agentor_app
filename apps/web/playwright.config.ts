@@ -15,7 +15,8 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${port}`;
  */
 export default defineConfig({
   testDir: './e2e',
-  globalSetup: './e2e/global-setup.ts',
+  // E2E_SKIP_SEED=1 keeps the current local data (e.g. while another dev server uses it).
+  ...(process.env.E2E_SKIP_SEED === '1' ? {} : { globalSetup: './e2e/global-setup.ts' }),
   fullyParallel: false,
   workers: 1,
   // TOTP codes can't be reused, so some logins wait for the next 30-second period.
@@ -35,8 +36,24 @@ export default defineConfig({
     {
       name: 'desktop',
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
-      grepInvert: /@visual/,
+      grepInvert: /@visual|@mobile/,
     },
+    // Mobile and PWA (README decision 20): the boards are 390 × 844; 360 and 430 are the edges.
+    ...(
+      [
+        ['mobile-390', 390, 844],
+        ['mobile-360', 360, 780],
+        ['mobile-430', 430, 932],
+      ] as const
+    ).map(([name, width, height]) => ({
+      name,
+      use: {
+        ...devices['Pixel 5'],
+        viewport: { width, height },
+        deviceScaleFactor: 2,
+      },
+      grep: /@mobile/,
+    })),
     ...(process.env.PLAYWRIGHT_VISUAL === '1'
       ? [
           {

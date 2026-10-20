@@ -4,6 +4,8 @@ import { formatPercent, type Locale } from '@agentor/i18n';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { AppTabBar, MobileChromeProvider, UnderTabBar } from '@/components/mobile/chrome';
+import { DeskOnly } from '@/components/mobile/desk-only';
 import { SupportBar, type SwitcherGrant } from '@/components/platform/support-bar';
 import { AppHeader } from '@/components/shell/app-header';
 import { requireAppContext } from '@/server/auth/session';
@@ -70,66 +72,89 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   }
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
+  const attention = {
+    count: needs.length,
+    severe: needs.some((n) => n.event === 'connection_broken' || n.event === 'record_failed'),
+  };
+  const skip =
+    'sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-surface focus:px-4 focus:py-2 focus:shadow-card';
   return (
     <div className="flex min-h-dvh flex-col">
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-surface focus:px-4 focus:py-2 focus:shadow-card"
-      >
+      {/* Below 768 px the page's mobile branch owns the content (README decision 20). */}
+      <a href="#main" className={`${skip} max-md:hidden`}>
+        {t('skipToContent')}
+      </a>
+      <a href="#main-mobile" className={`${skip} md:hidden`}>
         {t('skipToContent')}
       </a>
       {ctx.support && (
-        <SupportBar
-          tenantName={ctx.tenant.tenantName}
-          initials={initials(ctx.tenant.tenantName)}
-          scope={ctx.support.scope}
-          caseRef={ctx.support.caseRef}
-          approvedBy={ctx.support.approvedByName}
-          superadmin={ctx.support.superadmin}
-          expiresAt={ctx.support.expiresAt.toISOString()}
-          grants={switcher}
-        />
+        <div className="contents max-md:hidden">
+          <SupportBar
+            tenantName={ctx.tenant.tenantName}
+            initials={initials(ctx.tenant.tenantName)}
+            scope={ctx.support.scope}
+            caseRef={ctx.support.caseRef}
+            approvedBy={ctx.support.approvedByName}
+            superadmin={ctx.support.superadmin}
+            expiresAt={ctx.support.expiresAt.toISOString()}
+            grants={switcher}
+          />
+        </div>
       )}
-      <AppHeader
-        staff={staff}
-        user={{ name: ctx.user.name, email: ctx.user.email }}
-        tenant={{
-          id: ctx.tenant.tenantId,
-          name: ctx.tenant.tenantName,
-          shortName: shortName(ctx.tenant.tenantName),
-          role: ctx.tenant.role,
-        }}
-        tenants={tenants.map((t) => ({ id: t.tenantId, name: t.name }))}
-        attention={{
-          count: needs.length,
-          severe: needs.some((n) => n.event === 'connection_broken' || n.event === 'record_failed'),
-        }}
-        notifications={notes.map((n) => ({
-          id: n.id,
-          event: n.event,
-          messageKey: n.messageKey,
-          params: n.params,
-          href: n.href,
-          needsAction: n.needsAction,
-          resolved: n.resolvedAt !== null,
-          read: n.readAt !== null,
-          createdAt: n.createdAt.toISOString(),
-        }))}
-        search={{
-          flows: views.map((v) => ({ id: v.id, name: v.name, routes: v.routes.length })),
-          connections: [...conns.values()].map((x) => ({
-            id: x.id,
-            label: `${manifestFor(x.connectorId)?.name ?? x.connectorId} · ${x.name}`,
-          })),
-          failuresToday: new Set(
-            failures
-              .filter((f) => f.createdAt >= startOfDay)
-              .map((f) => `${f.routeId}:${f.sourceId}`),
-          ).size,
-        }}
-        usageHint={usageHint}
-      />
-      {children}
+      <div className="contents max-md:hidden">
+        <AppHeader
+          staff={staff}
+          user={{ name: ctx.user.name, email: ctx.user.email }}
+          tenant={{
+            id: ctx.tenant.tenantId,
+            name: ctx.tenant.tenantName,
+            shortName: shortName(ctx.tenant.tenantName),
+            role: ctx.tenant.role,
+          }}
+          tenants={tenants.map((t) => ({ id: t.tenantId, name: t.name }))}
+          attention={attention}
+          notifications={notes.map((n) => ({
+            id: n.id,
+            event: n.event,
+            messageKey: n.messageKey,
+            params: n.params,
+            href: n.href,
+            needsAction: n.needsAction,
+            resolved: n.resolvedAt !== null,
+            read: n.readAt !== null,
+            createdAt: n.createdAt.toISOString(),
+          }))}
+          search={{
+            flows: views.map((v) => ({ id: v.id, name: v.name, routes: v.routes.length })),
+            connections: [...conns.values()].map((x) => ({
+              id: x.id,
+              label: `${manifestFor(x.connectorId)?.name ?? x.connectorId} · ${x.name}`,
+            })),
+            failuresToday: new Set(
+              failures
+                .filter((f) => f.createdAt >= startOfDay)
+                .map((f) => `${f.routeId}:${f.sourceId}`),
+            ).size,
+          }}
+          usageHint={usageHint}
+        />
+      </div>
+      <MobileChromeProvider value={{ attention }}>
+        {ctx.support ? (
+          // Support view of a customer's app happens on a computer (decision 20).
+          <>
+            <div className="contents max-md:hidden">{children}</div>
+            <div className="contents md:hidden">
+              <DeskOnly area="supportView" title={ctx.tenant.tenantName} platform />
+            </div>
+          </>
+        ) : (
+          <>
+            <UnderTabBar>{children}</UnderTabBar>
+            <AppTabBar />
+          </>
+        )}
+      </MobileChromeProvider>
     </div>
   );
 }

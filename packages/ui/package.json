@@ -8,6 +8,7 @@
   ],
   "exports": {
     ".": "./src/index.ts",
+    "./mobile": "./src/components/mobile/index.ts",
     "./styles.css": "./src/styles/index.css"
   },
   "scripts": {

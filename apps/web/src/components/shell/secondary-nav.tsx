@@ -30,8 +30,9 @@ export function SecondaryBar({
   right?: ReactNode;
 }) {
   const pathname = usePathname();
+  // Desktop only: below 768 px each page has its own mobile top bar (README decision 20).
   return (
-    <div className="flex-none px-gutter">
+    <div className="flex-none px-gutter max-md:hidden">
       <div className="mx-auto flex h-subnav max-w-content items-center justify-between gap-6 shadow-hairline-t">
         {items ? (
           <nav aria-label={label} className="flex items-center gap-1 overflow-x-auto">

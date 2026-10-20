@@ -2878,5 +2878,54 @@
     "replyPlaceholder": "Write a reply …",
     "sendReply": "Send reply",
     "reopen": "Reply within 14 days and the case reopens."
+  },
+  "mobile": {
+    "tabs": {
+      "label": "Main menu",
+      "overview": "Overview",
+      "integrations": "Integrations",
+      "activity": "Activity",
+      "more": "More",
+      "customers": "Customers",
+      "cases": "Cases",
+      "errors": "Errors",
+      "finance": "Finance"
+    },
+    "bell": "Notifications, {count, plural, =0 {none new} one {# new} other {# new}}",
+    "back": "Back",
+    "home": "Agentor, go to Overview",
+    "platformBadge": "Platform",
+    "profile": "Profile: {name}",
+    "skipToContent": "Skip to content",
+    "desk": {
+      "title": "Open on a computer",
+      "send": "Send link to my computer",
+      "sending": "Sending link…",
+      "sent": "Link sent to {email}",
+      "failed": "The link couldn't be sent. Try again in a moment.",
+      "rateLimited": "You've sent a lot of links. Try again in an hour.",
+      "toOverview": "To Overview",
+      "toPlatform": "To Customers",
+      "areas": {
+        "editor": "Mapping, filters and new routes are changed in the editor on a computer.",
+        "newFlow": "New flows and mapping are made on a computer. Here you can follow along, pause and retry.",
+        "settings": "Team, security, company and audit log are changed under Settings on a computer.",
+        "reconciliation": "Reconciliation and CSV export are on a computer.",
+        "plan": "Change plan on a computer under Subscription.",
+        "signup": "New user? Create an account at app.agentor.dk from a computer.",
+        "supportView": "Support view of a customer's app opens on a computer.",
+        "finance": "Reports, settlement and invoice drafts are on a computer.",
+        "platformAdmin": "Time, platform users and platform settings are on a computer.",
+        "generic": "This page is used on a computer."
+      },
+      "mail": {
+        "page": "a page in Agentor",
+        "subject": "Link to {page}",
+        "body": "You asked to open {page} on your computer.\n\nOpen the link here:\n{url}\n\nYou need to be signed in. If you didn't ask for this link, you can ignore this e-mail."
+      }
+    },
+    "dev": {
+      "title": "Mobile components"
+    }
   }
 }

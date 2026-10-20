@@ -2878,5 +2878,54 @@
     "replyPlaceholder": "Skriv et svar …",
     "sendReply": "Send svar",
     "reopen": "Svarer I inden 14 dage, genåbnes sagen."
+  },
+  "mobile": {
+    "tabs": {
+      "label": "Hovedmenu",
+      "overview": "Overblik",
+      "integrations": "Integrationer",
+      "activity": "Aktivitet",
+      "more": "Mere",
+      "customers": "Kunder",
+      "cases": "Sager",
+      "errors": "Fejl",
+      "finance": "Finans"
+    },
+    "bell": "Notifikationer, {count, plural, =0 {ingen nye} one {# ny} other {# nye}}",
+    "back": "Tilbage",
+    "home": "Agentor, gå til Overblik",
+    "platformBadge": "Platform",
+    "profile": "Profil: {name}",
+    "skipToContent": "Spring til indhold",
+    "desk": {
+      "title": "Åbn på computer",
+      "send": "Send link til min computer",
+      "sending": "Sender link…",
+      "sent": "Link sendt til {email}",
+      "failed": "Linket kunne ikke sendes. Prøv igen om lidt.",
+      "rateLimited": "Du har sendt mange links. Prøv igen om en time.",
+      "toOverview": "Til Overblik",
+      "toPlatform": "Til Kunder",
+      "areas": {
+        "editor": "Mapping, filtre og nye ruter ændres i editoren på computer.",
+        "newFlow": "Nye flows og mapping laves på computer. Her kan du følge med, pause og gentage.",
+        "settings": "Team, sikkerhed, virksomhed og audit-log ændres under Indstillinger på computer.",
+        "reconciliation": "Afstemning og CSV-eksport findes på computer.",
+        "plan": "Skift plan på computer under Abonnement.",
+        "signup": "Ny bruger? Opret konto på app.agentor.dk fra en computer.",
+        "supportView": "Supportvisning af en kundes app åbnes på computer.",
+        "finance": "Rapporter, afregning og fakturakladder findes på computer.",
+        "platformAdmin": "Tid, platformbrugere og platformindstillinger findes på computer.",
+        "generic": "Den her side bruges på computer."
+      },
+      "mail": {
+        "page": "en side i Agentor",
+        "subject": "Link til {page}",
+        "body": "Du bad om at åbne {page} på din computer.\n\nÅbn linket her:\n{url}\n\nDu skal være logget ind. Har du ikke bedt om linket, kan du se bort fra denne e-mail."
+      }
+    },
+    "dev": {
+      "title": "Mobilkomponenter"
+    }
   }
 }
