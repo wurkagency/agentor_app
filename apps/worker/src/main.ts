@@ -9,6 +9,7 @@ import { processBillingJob } from './billing.js';
 import { processConnectionJob } from './connections.js';
 import { processFlowJobByName } from './flows.js';
 import { metrics, serveMetrics } from './metrics.js';
+import { drainPushQueue } from './push.js';
 
 /**
  * agentor-worker: the only process with the KEK and outbound access to customer systems
@@ -67,6 +68,24 @@ const metricsServer = process.env.METRICS_PORT
   ? serveMetrics(metrics, Number(process.env.METRICS_PORT))
   : null;
 
+// Web Push (PLAN-MOBILE M3): off until the VAPID key pair is configured.
+const vapid =
+  process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY
+    ? {
+        publicKey: process.env.VAPID_PUBLIC_KEY,
+        privateKey: process.env.VAPID_PRIVATE_KEY,
+        subject: process.env.VAPID_SUBJECT ?? 'mailto:support@agentor.dk',
+      }
+    : null;
+const pushDeps = { db: database.db, redis: connection, log: log.child({ part: 'push' }), vapid };
+const pushTimer = vapid
+  ? setInterval(() => {
+      drainPushQueue(pushDeps).catch((e: unknown) =>
+        log.error({ err: e instanceof Error ? e.message : String(e) }, 'push drain failed'),
+      );
+    }, 5_000)
+  : null;
+
 const workers = [
   new Worker(
     QUEUES.system,
@@ -93,12 +112,16 @@ for (const w of workers) {
     log.error({ queue: w.name, jobId: job?.id, name: job?.name, err: err.message }, 'job failed'),
   );
 }
-log.info({ queues: workers.map((w) => w.name), quickpay: billingDeps.mode }, 'worker started');
+log.info(
+  { queues: workers.map((w) => w.name), quickpay: billingDeps.mode, push: Boolean(vapid) },
+  'worker started',
+);
 
 // Graceful deploy (§10.4): stop taking jobs, let active ones finish (max 60 s), then exit.
 const shutdown = async (signal: string) => {
   log.info({ signal }, 'shutting down');
   const timeout = setTimeout(() => process.exit(1), 60_000);
+  if (pushTimer) clearInterval(pushTimer);
   await Promise.all(workers.map((w) => w.close()));
   await producer.close();
   metricsServer?.close();

@@ -12,6 +12,7 @@ import {
   UnderTabBar,
 } from '@/components/mobile/chrome';
 import { DeskOnly } from '@/components/mobile/desk-only';
+import { DeviceGuard } from '@/components/mobile/pwa';
 import { SupportBar, type SwitcherGrant } from '@/components/platform/support-bar';
 import { AppHeader } from '@/components/shell/app-header';
 import { requireAppContext } from '@/server/auth/session';
@@ -152,6 +153,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           usageHint={usageHint}
         />
       </div>
+      {!ctx.support && <DeviceGuard owner={`${ctx.user.id}:${ctx.tenant.tenantId}`} />}
       <MobileChromeProvider value={{ attention }}>
         {ctx.support ? (
           // Support view of a customer's app happens on a computer (decision 20).

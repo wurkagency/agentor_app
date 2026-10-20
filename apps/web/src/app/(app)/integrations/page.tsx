@@ -211,6 +211,11 @@ export default async function IntegrationsPage({
   const and = locale === 'da' ? ' og ' : ' and ';
   const mobile = (
     <IntegrationsMobile
+      snapshot={
+        ctx.support || active !== 'all'
+          ? null
+          : { owner: `${ctx.user.id}:${ctx.tenant.tenantId}`, company: ctx.tenant.tenantName }
+      }
       title={t('title')}
       subtitle={atLimit ? tm('allSetsUsed', { count: views.length }) : summary}
       filter={{

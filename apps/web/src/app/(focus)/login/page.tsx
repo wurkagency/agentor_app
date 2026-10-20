@@ -5,6 +5,8 @@ import { getUserSession } from '@/server/auth/session';
 import { safeNext } from '@/lib/safe-next';
 import { env } from '@/server/env';
 import { LoginForm } from './login-form';
+import { Responsive } from '@agentor/ui/mobile';
+import { MobileLogin } from './mobile-login';
 
 export async function generateMetadata() {
   const t = await getTranslations('auth');
@@ -20,13 +22,17 @@ export default async function LoginPage({
   const next = safeNext(sp.next);
   if (await getUserSession()) redirect(next);
   const t = await getTranslations('auth');
+  const form = (
+    <LoginForm next={next} ssoEnabled={env().SSO_MODE !== 'off'} ssoFailed={sp.sso === 'failed'} />
+  );
   return (
-    <FocusCard title={t('loginTitle')} intro={t('loginIntro')}>
-      <LoginForm
-        next={next}
-        ssoEnabled={env().SSO_MODE !== 'off'}
-        ssoFailed={sp.sso === 'failed'}
-      />
-    </FocusCard>
+    <Responsive
+      desktop={
+        <FocusCard title={t('loginTitle')} intro={t('loginIntro')}>
+          {form}
+        </FocusCard>
+      }
+      mobile={<MobileLogin next={next} form={form} />}
+    />
   );
 }

@@ -3039,6 +3039,321 @@
       "id": "id {id}",
       "today": "today {time}",
       "deskNote": "Mapping and developer details are edited in the editor on a computer."
+    },
+    "activity": {
+      "filterLabel": "Filter activity",
+      "all": "All",
+      "failed": "Errors {count}",
+      "flow": "Flow",
+      "flowNamed": "Flow: {name}",
+      "pickFlow": "Choose flow",
+      "allFlows": "All flows",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "single": "{entity} {label} {verb}",
+      "many": "{count, plural, one {# {entity}} other {# {entities}}} {verb}",
+      "entity": {
+        "order": "Order",
+        "creditNote": "Credit note",
+        "customer": "Customer",
+        "product": "Product",
+        "stock": "Stock",
+        "record": "Record"
+      },
+      "entities": {
+        "order": "orders",
+        "creditNote": "credit notes",
+        "customer": "customers",
+        "product": "products",
+        "stock": "stock items",
+        "record": "records"
+      },
+      "verb": {
+        "created": "created",
+        "createdOrder": "booked",
+        "updated": "updated",
+        "failed": "failed",
+        "skipped": "skipped",
+        "waiting": "waiting",
+        "test": "test run"
+      },
+      "paused": "{flow} paused",
+      "resumed": "{flow} running again",
+      "published": "{name} published v{n}",
+      "broken": "{system} disconnected",
+      "brokenMeta": "Access expired · {flows}",
+      "reauthorized": "{system} connected again",
+      "empty": "No activity",
+      "emptyBody": "Nothing has happened in this period.",
+      "more": "Show older"
+    },
+    "reconnect": {
+      "title": "Reconnect {system}",
+      "broken": "{system} is disconnected",
+      "brokenBody": "Access to {system} expired {when}. {flows} has not sent anything since.",
+      "brokenBodyNoFlows": "Access to {system} expired {when}.",
+      "waiting": "{count, plural, one {# {entity} waiting} other {# {entities} waiting}}",
+      "waitingNone": "No records waiting",
+      "waitingMeta": "Sent as soon as the connection works again",
+      "youLogIn": "You sign in at {system}",
+      "neverPassword": "Agentor never sees your password",
+      "logIn": "Sign in at {system}",
+      "later": "Later",
+      "ok": "{system} is connected",
+      "okBody": "The connection works. Waiting records are being sent now.",
+      "toOverview": "To Overview",
+      "keyNote": "A new API key is entered on a computer.",
+      "noAccess": "Ask an administrator to reconnect {system}.",
+      "entity": {
+        "order": "order",
+        "customer": "customer",
+        "creditNote": "credit note",
+        "product": "product",
+        "stock": "stock item",
+        "record": "record"
+      },
+      "entities": {
+        "order": "orders",
+        "customer": "customers",
+        "creditNote": "credit notes",
+        "product": "products",
+        "stock": "stock items",
+        "record": "records"
+      },
+      "yesterday": "yesterday at {time}",
+      "today": "today at {time}",
+      "on": "{date} at {time}"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "markAll": "Mark all read",
+      "marked": "All are marked as read",
+      "choose": "Choose what you are told about",
+      "unread": "Unread",
+      "resolved": "Resolved",
+      "empty": "No notifications",
+      "emptyBody": "When something goes wrong, you see it here and on Overview.",
+      "items": {
+        "connectionBroken": "{connector} is disconnected",
+        "recordsFailed": "{count, plural, one {# record failed} other {# records failed}}",
+        "creditNotesFailed": "{count, plural, one {# credit note failed} other {# credit notes failed}}",
+        "published": "{name} published v{number}",
+        "supportRequested": "Agentor support asks for access",
+        "supportOpened": "Agentor support has access",
+        "supportExtension": "Agentor support asks for more time",
+        "paymentFailed": "The payment was declined"
+      },
+      "meta": {
+        "support": "{name} · tap to answer",
+        "payment": "Invoice {number}"
+      }
+    },
+    "more": {
+      "title": "More",
+      "role": "{role} · {company}",
+      "billing": "Subscription and usage",
+      "billingMeta": "{plan} · {used} / {limit} transactions",
+      "billingMetaUnlimited": "{plan} · {used} transactions",
+      "support": "Support access",
+      "supportPending": "{count, plural, one {# request waiting} other {# requests waiting}}",
+      "supportNone": "No requests",
+      "notifications": "Notifications",
+      "notificationsMeta": "Push on errors and broken connections",
+      "security": "Security",
+      "securityMeta": "Two-step, passkeys and sessions",
+      "team": "Team and access",
+      "teamMeta": "{count, plural, one {# user} other {# users}}",
+      "connections": "Connections",
+      "connectionsMeta": "{count, plural, one {# connection} other {# connections}}{broken, plural, =0 {} one { · # disconnected} other { · # disconnected}}",
+      "auditLog": "Audit log",
+      "auditLogMeta": "Every change and all support access",
+      "contact": "Contact support",
+      "contactMeta": "Answer within 1 working day",
+      "install": "Add Agentor to home screen",
+      "installMeta": "Faster access and push messages",
+      "logout": "Log out"
+    },
+    "support": {
+      "title": "Support access",
+      "asks": "{name} from Agentor support asks for access",
+      "forCase": "For case {case} · {reason}",
+      "forCaseShort": "For case {case}",
+      "canSee": "What {name} can see",
+      "canSeeView": "Status, runs, errors and mapping",
+      "canSeeHelp": "Flows, runs, errors and mapping · can retry, pause and fix mapping",
+      "cannot": "What {name} cannot do",
+      "cannotBody": "See keys, team or subscription",
+      "duration": "Duration",
+      "durationBody": "{hours, plural, one {At most # hour} other {At most # hours}} · you can stop it at any time",
+      "audit": "Everything {name} does is in your audit log with {name}’s name.",
+      "approve": "Approve",
+      "deny": "Decline",
+      "approved": "Access approved for {hours, plural, one {# hour} other {# hours}}",
+      "denied": "The request was declined",
+      "stop": "Stop the access now",
+      "stopped": "The access was stopped",
+      "stateApproved": "Approved · expires {when}",
+      "stateDenied": "Declined",
+      "stateExpired": "Expired",
+      "stateRevoked": "Stopped",
+      "stateLapsed": "The request expired without an answer",
+      "failed": "That didn’t work. The request may already have been answered.",
+      "onlyAdmins": "Only owners and administrators can answer support access requests.",
+      "toSecurity": "See all in Security"
+    },
+    "install": {
+      "title": "Add to home screen",
+      "heroTitle": "Agentor on your home screen",
+      "heroBody": "Opens like an app and can send push messages",
+      "ios": "On iPhone in Safari",
+      "step1": "Tap Share",
+      "step1Meta": "At the bottom of Safari",
+      "step2": "Choose \"Add to Home Screen\"",
+      "step2Meta": "Scroll down the list",
+      "step3": "Open Agentor from the home screen",
+      "step3Meta": "And allow push messages",
+      "android": "On Android, Chrome shows \"Install app\" automatically.",
+      "installNow": "Install app",
+      "done": "I have done it",
+      "installed": "Agentor is installed",
+      "installedBody": "You are already using the app from the home screen.",
+      "iosVersion": "Push on iPhone needs iOS 16.4 or later."
+    },
+    "push": {
+      "recordsFailed": {
+        "title": "{count, plural, one {# record failed} other {# records failed}}",
+        "body": "{flow}. Tap to see what happened."
+      },
+      "creditNotesFailed": {
+        "title": "{count, plural, one {# credit note failed} other {# credit notes failed}}",
+        "body": "{system}. Tap to see what happened."
+      },
+      "connectionBroken": {
+        "title": "{connector} is disconnected",
+        "body": "{name} has stopped. Sign in again to continue."
+      },
+      "supportRequested": {
+        "title": "Agentor support asks for access",
+        "body": "{first} wants to help for {hours, plural, one {# hour} other {# hours}}. Approve or decline."
+      },
+      "supportExtension": {
+        "title": "Agentor support asks for more time",
+        "body": "{first} would like to extend the access. Approve or decline."
+      },
+      "paymentFailed": {
+        "title": "The payment was declined",
+        "body": "Update the card under Subscription."
+      },
+      "quota": {
+        "title": "Over 80 % of the quota is used",
+        "body": "See usage under Subscription."
+      },
+      "weekly": {
+        "title": "Weekly summary",
+        "body": "Tap to see the week."
+      },
+      "resolved": {
+        "title": "The error is fixed",
+        "body": "{subject} runs again without errors."
+      },
+      "morning": {
+        "title": "{count, plural, one {# thing happened overnight} other {# things happened overnight}}",
+        "body": "Tap to see them."
+      },
+      "generic": {
+        "title": "Agentor",
+        "body": "Tap to see what happened."
+      }
+    },
+    "offline": {
+      "title": "Offline",
+      "banner": "Offline · data from {time}",
+      "bannerDate": "Offline · data from {date} at {time}",
+      "actionsOff": "Actions are off until you are online again.",
+      "retry": "Try again",
+      "noneTitle": "No data on this device",
+      "noneBody": "Once you have opened Overview online, you can see the latest here without a network.",
+      "overview": "Overview",
+      "integrations": "Integrations",
+      "activity": "Activity"
+    },
+    "pushSettings": {
+      "title": "Notifications",
+      "device": "Push on this phone",
+      "errors": "Error in a flow",
+      "errorsMeta": "Right away",
+      "connection": "Broken connection",
+      "connectionMeta": "Right away",
+      "support": "Support access",
+      "supportMeta": "When Agentor asks for access",
+      "quota": "Quota over 80 %",
+      "quotaMeta": "Once a month",
+      "weekly": "Weekly summary",
+      "weeklyMeta": "Monday at 08",
+      "quiet": "Quiet hours",
+      "quietTitle": "No push at night",
+      "quietMeta": "{start}–{end} · errors are collected for the morning",
+      "channels": "E-mail and SMS are chosen under Settings on a computer.",
+      "channelsLink": "E-mail, SMS and app per event",
+      "turnOn": "Turn on push on this phone",
+      "turningOn": "Turning on push…",
+      "turnOff": "Turn off push on this phone",
+      "on": "Push is on",
+      "off": "Push is off",
+      "saved": "Saved",
+      "failed": "That didn’t work. Try again.",
+      "unsupported": "This browser can’t receive push.",
+      "unsupportedBody": "Use Safari on iPhone (iOS 16.4 or later) or Chrome on Android.",
+      "needsInstall": "Push needs Agentor on the home screen",
+      "needsInstallBody": "On iPhone, push only works in the app from the home screen.",
+      "howToInstall": "How to",
+      "denied": "Push is blocked for Agentor",
+      "deniedBody": "Allow notifications for Agentor in the phone’s settings, and try again.",
+      "notConfigured": "Push is not set up on the server yet.",
+      "supportView": "Push doesn’t apply in support view."
+    },
+    "billing": {
+      "title": "Subscription and usage",
+      "planYear": "{plan} · yearly",
+      "planMonth": "{plan} · monthly",
+      "paid": "Paid",
+      "pastDue": "Payment failed",
+      "noCard": "No payment yet",
+      "transactions": "Transactions in {month}",
+      "resets": "Resets {date}",
+      "support": "Support in {month}",
+      "supportMeta": "{time} · invoiced {date}",
+      "supportNone": "No support this month",
+      "card": "Payment card",
+      "cardNone": "No card",
+      "changeCard": "Change card at QuickPay",
+      "next": "Next charge",
+      "nextMeta": "{date} · {amount}",
+      "invoices": "Latest invoices",
+      "invoiceMeta": "{date} · {status}",
+      "pdf": "Download PDF of {name}",
+      "status": {
+        "paid": "paid",
+        "open": "open",
+        "failed": "failed",
+        "refunded": "refunded",
+        "void": "void",
+        "overdue": "overdue"
+      },
+      "changePlan": "Change plan",
+      "ownerOnly": "Only the owner can see subscription and payment.",
+      "cardFailed": "The card change couldn’t start. Try again."
+    },
+    "login": {
+      "tagline": "Keep an eye on your integrations, and fix errors when you are away from your computer.",
+      "passkey": "Sign in with passkey",
+      "passkeyBusy": "Waiting for the phone…",
+      "passkeyHelp": "The phone confirms with Face ID, Touch ID or a fingerprint",
+      "passkeyFailed": "The passkey didn’t work. Try again, or sign in with e-mail and password.",
+      "email": "Sign in with e-mail and password",
+      "back": "Back to passkey",
+      "newUser": "New user?",
+      "signup": "Create account"
     }
   },
   "signupFlow": {

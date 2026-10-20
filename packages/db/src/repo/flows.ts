@@ -589,3 +589,28 @@ export async function dailyNumbers(
     }));
   });
 }
+
+/**
+ * Records held back because a connection is broken (outcome 'waiting', not yet resolved), per
+ * entity, for the reconnect screen (MA08 "38 ordrer venter").
+ */
+export async function waitingRecords(db: Database, ctx: Ctx, flowIds: string[]) {
+  if (flowIds.length === 0) return [] as { entity: string; count: number }[];
+  return withTenant(db, ctx, async (tx) => {
+    const rows = await tx
+      .select({
+        entity: runRecords.entity,
+        count: sql<number>`count(distinct ${runRecords.sourceId})::int`,
+      })
+      .from(runRecords)
+      .where(
+        and(
+          inArray(runRecords.flowId, flowIds),
+          eq(runRecords.outcome, 'waiting'),
+          isNull(runRecords.resolvedAt),
+        ),
+      )
+      .groupBy(runRecords.entity);
+    return rows;
+  });
+}

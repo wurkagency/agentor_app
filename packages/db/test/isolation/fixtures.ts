@@ -303,5 +303,11 @@ export async function seedFixtures(admin: pg.ClientBase): Promise<void> {
        ($1, $3, $5, 'systematic_error', 'test'), ($2, $4, $6, 'systematic_error', 'test')`,
     [ID.tenantA, ID.tenantB, ID.noteA, ID.noteB, ID.userAOwner, ID.userBOwner],
   );
+  // M11 (mobile): one Web Push device per tenant, both the owner's.
+  await q(
+    `insert into push_subscriptions (tenant_id, user_id, endpoint, p256dh, auth, events) values
+       ($1, $3, 'https://push.example.test/a', 'k', 'a', '{}'), ($2, $4, 'https://push.example.test/b', 'k', 'a', '{}')`,
+    [ID.tenantA, ID.tenantB, ID.userAOwner, ID.userBOwner],
+  );
   await q('commit');
 }

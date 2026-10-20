@@ -18,6 +18,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { Logo } from '../logo';
+import { forgetDevice } from '@/components/mobile/pwa';
 import { GearMenu, type GearCounts } from './gear-menu';
 
 export interface PlatformUser {
@@ -128,6 +129,7 @@ export function PlatformHeader({ user, counts }: { user: PlatformUser; counts: G
                 icon={<Icon icon={LogOut} size={16} />}
                 onSelect={() =>
                   start(async () => {
+                    await forgetDevice();
                     await authClient.signOut();
                     router.replace('/login');
                     router.refresh();

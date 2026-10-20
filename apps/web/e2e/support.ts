@@ -23,9 +23,15 @@ export async function totp(secret = SEED_TOTP_SECRET): Promise<string> {
 
 export async function fillPassword(page: Page, email: string, password = SEED_PASSWORD) {
   await page.goto('/login');
-  await page.getByLabel('E-mail').fill(email);
-  await page.getByLabel('Adgangskode', { exact: true }).fill(password);
-  await page.getByRole('button', { name: 'Log ind', exact: true }).click();
+  // Below 768 px the login starts with passkey (MA01); the e-mail form is one tap away.
+  const mobile = page.getByRole('button', { name: 'Log ind med e-mail og kode' });
+  if (await mobile.isVisible()) await mobile.click();
+  await page.getByLabel('E-mail').filter({ visible: true }).fill(email);
+  await page.getByLabel('Adgangskode', { exact: true }).filter({ visible: true }).fill(password);
+  await page
+    .getByRole('button', { name: 'Log ind', exact: true })
+    .filter({ visible: true })
+    .click();
 }
 
 type Cookies = Awaited<ReturnType<BrowserContext['cookies']>>;

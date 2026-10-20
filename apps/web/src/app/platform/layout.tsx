@@ -7,6 +7,7 @@ import {
   PlatformTopBar,
   UnderTabBar,
 } from '@/components/mobile/chrome';
+import { DeviceGuard } from '@/components/mobile/pwa';
 import { PlatformHeader } from '@/components/platform/platform-header';
 import { requireStaff } from '@/server/platform';
 import { gearCounts, initials } from '@/server/platform-data';
@@ -41,6 +42,7 @@ export default async function PlatformLayout({ children }: { children: ReactNode
           counts={counts}
         />
       </div>
+      <DeviceGuard owner={`staff:${actor.userId}`} />
       <MobileChromeProvider
         value={{
           attention: { count: counts.mineCases, severe: false },

@@ -3039,6 +3039,321 @@
       "id": "id {id}",
       "today": "i dag {time}",
       "deskNote": "Mapping og udviklerdetaljer redigeres i editoren på computer."
+    },
+    "activity": {
+      "filterLabel": "Filtrér aktivitet",
+      "all": "Alle",
+      "failed": "Fejl {count}",
+      "flow": "Flow",
+      "flowNamed": "Flow: {name}",
+      "pickFlow": "Vælg flow",
+      "allFlows": "Alle flows",
+      "today": "I dag",
+      "yesterday": "I går",
+      "single": "{entity} {label} {verb}",
+      "many": "{count, plural, one {# {entity}} other {# {entities}}} {verb}",
+      "entity": {
+        "order": "Ordre",
+        "creditNote": "Kreditnota",
+        "customer": "Kunde",
+        "product": "Produkt",
+        "stock": "Lager",
+        "record": "Record"
+      },
+      "entities": {
+        "order": "ordrer",
+        "creditNote": "kreditnotaer",
+        "customer": "kunder",
+        "product": "produkter",
+        "stock": "lagerposter",
+        "record": "records"
+      },
+      "verb": {
+        "created": "oprettet",
+        "createdOrder": "bogført",
+        "updated": "opdateret",
+        "failed": "fejlede",
+        "skipped": "sprunget over",
+        "waiting": "venter",
+        "test": "testkørt"
+      },
+      "paused": "{flow} sat på pause",
+      "resumed": "{flow} kører igen",
+      "published": "{name} publicerede v{n}",
+      "broken": "{system} blev afbrudt",
+      "brokenMeta": "Adgangen udløb · {flows}",
+      "reauthorized": "{system} er forbundet igen",
+      "empty": "Ingen aktivitet",
+      "emptyBody": "Der er ikke sket noget i perioden.",
+      "more": "Vis ældre"
+    },
+    "reconnect": {
+      "title": "Genforbind {system}",
+      "broken": "{system} er afbrudt",
+      "brokenBody": "Adgangen til {system} udløb {when}. {flows} har ikke sendt noget siden.",
+      "brokenBodyNoFlows": "Adgangen til {system} udløb {when}.",
+      "waiting": "{count, plural, one {# {entity} venter} other {# {entities} venter}}",
+      "waitingNone": "Ingen records venter",
+      "waitingMeta": "Sendes, så snart forbindelsen virker igen",
+      "youLogIn": "Du logger ind hos {system}",
+      "neverPassword": "Agentor ser aldrig din adgangskode",
+      "logIn": "Log ind hos {system}",
+      "later": "Senere",
+      "ok": "{system} er forbundet",
+      "okBody": "Forbindelsen virker. Ventende records sendes nu.",
+      "toOverview": "Til Overblik",
+      "keyNote": "En ny API-nøgle indtastes på computer.",
+      "noAccess": "Bed en administrator om at forbinde {system} igen.",
+      "entity": {
+        "order": "ordre",
+        "customer": "kunde",
+        "creditNote": "kreditnota",
+        "product": "produkt",
+        "stock": "lagerpost",
+        "record": "record"
+      },
+      "entities": {
+        "order": "ordrer",
+        "customer": "kunder",
+        "creditNote": "kreditnotaer",
+        "product": "produkter",
+        "stock": "lagerposter",
+        "record": "records"
+      },
+      "yesterday": "i går kl. {time}",
+      "today": "i dag kl. {time}",
+      "on": "{date} kl. {time}"
+    },
+    "notifications": {
+      "title": "Notifikationer",
+      "markAll": "Marker alle læst",
+      "marked": "Alle er markeret som læst",
+      "choose": "Vælg hvad du får besked om",
+      "unread": "Ulæst",
+      "resolved": "Løst",
+      "empty": "Ingen notifikationer",
+      "emptyBody": "Når noget går galt, ser du det her og på Overblik.",
+      "items": {
+        "connectionBroken": "{connector} er afbrudt",
+        "recordsFailed": "{count, plural, one {# record fejlede} other {# records fejlede}}",
+        "creditNotesFailed": "{count, plural, one {# kreditnota fejlede} other {# kreditnotaer fejlede}}",
+        "published": "{name} publicerede v{number}",
+        "supportRequested": "Agentor support beder om adgang",
+        "supportOpened": "Agentor support har adgang",
+        "supportExtension": "Agentor support beder om mere tid",
+        "paymentFailed": "Betalingen blev afvist"
+      },
+      "meta": {
+        "support": "{name} · tryk for at svare",
+        "payment": "Faktura {number}"
+      }
+    },
+    "more": {
+      "title": "Mere",
+      "role": "{role} · {company}",
+      "billing": "Abonnement og forbrug",
+      "billingMeta": "{plan} · {used} / {limit} transaktioner",
+      "billingMetaUnlimited": "{plan} · {used} transaktioner",
+      "support": "Supportadgang",
+      "supportPending": "{count, plural, one {# anmodning venter} other {# anmodninger venter}}",
+      "supportNone": "Ingen anmodninger",
+      "notifications": "Notifikationer",
+      "notificationsMeta": "Push ved fejl og afbrudte forbindelser",
+      "security": "Sikkerhed",
+      "securityMeta": "Totrin, passkeys og sessioner",
+      "team": "Team og adgang",
+      "teamMeta": "{count, plural, one {# bruger} other {# brugere}}",
+      "connections": "Forbindelser",
+      "connectionsMeta": "{count, plural, one {# forbindelse} other {# forbindelser}}{broken, plural, =0 {} one { · # afbrudt} other { · # afbrudt}}",
+      "auditLog": "Audit-log",
+      "auditLogMeta": "Alle ændringer og al supportadgang",
+      "contact": "Kontakt support",
+      "contactMeta": "Svar inden for 1 arbejdsdag",
+      "install": "Føj Agentor til hjemmeskærm",
+      "installMeta": "Hurtigere adgang og push-beskeder",
+      "logout": "Log ud"
+    },
+    "support": {
+      "title": "Supportadgang",
+      "asks": "{name} fra Agentor support beder om adgang",
+      "forCase": "Til sag {case} · {reason}",
+      "forCaseShort": "Til sag {case}",
+      "canSee": "Hvad {name} kan se",
+      "canSeeView": "Status, kørsler, fejl og mapping",
+      "canSeeHelp": "Flows, kørsler, fejl og mapping · kan gentage, pause og rette mapping",
+      "cannot": "Hvad {name} ikke kan",
+      "cannotBody": "Se nøgler, team eller abonnement",
+      "duration": "Varighed",
+      "durationBody": "{hours, plural, one {Højst # time} other {Højst # timer}} · du kan stoppe den når som helst",
+      "audit": "Alt {name} gør, står i jeres audit-log med {name}s navn.",
+      "approve": "Godkend",
+      "deny": "Afvis",
+      "approved": "Adgangen er godkendt i {hours, plural, one {# time} other {# timer}}",
+      "denied": "Anmodningen er afvist",
+      "stop": "Stop adgangen nu",
+      "stopped": "Adgangen er stoppet",
+      "stateApproved": "Godkendt · udløber {when}",
+      "stateDenied": "Afvist",
+      "stateExpired": "Udløbet",
+      "stateRevoked": "Stoppet",
+      "stateLapsed": "Anmodningen er udløbet uden svar",
+      "failed": "Det lykkedes ikke. Anmodningen er måske allerede besvaret.",
+      "onlyAdmins": "Kun ejere og administratorer kan svare på anmodninger om supportadgang.",
+      "toSecurity": "Se alle i Sikkerhed"
+    },
+    "install": {
+      "title": "Føj til hjemmeskærm",
+      "heroTitle": "Agentor på hjemmeskærmen",
+      "heroBody": "Åbner som en app og kan sende push-beskeder",
+      "ios": "På iPhone i Safari",
+      "step1": "Tryk på Del",
+      "step1Meta": "Nederst i Safari",
+      "step2": "Vælg \"Føj til hjemmeskærm\"",
+      "step2Meta": "Rul ned i listen",
+      "step3": "Åbn Agentor fra hjemmeskærmen",
+      "step3Meta": "Og tillad push-beskeder",
+      "android": "På Android vises \"Installér app\" automatisk i Chrome.",
+      "installNow": "Installér app",
+      "done": "Jeg har gjort det",
+      "installed": "Agentor er installeret",
+      "installedBody": "Du bruger allerede appen fra hjemmeskærmen.",
+      "iosVersion": "Push på iPhone kræver iOS 16.4 eller nyere."
+    },
+    "push": {
+      "recordsFailed": {
+        "title": "{count, plural, one {# record fejlede} other {# records fejlede}}",
+        "body": "{flow}. Tryk for at se, hvad der skete."
+      },
+      "creditNotesFailed": {
+        "title": "{count, plural, one {# kreditnota fejlede} other {# kreditnotaer fejlede}}",
+        "body": "{system}. Tryk for at se, hvad der skete."
+      },
+      "connectionBroken": {
+        "title": "{connector} er afbrudt",
+        "body": "{name} står stille. Log ind igen for at fortsætte."
+      },
+      "supportRequested": {
+        "title": "Agentor support beder om adgang",
+        "body": "{first} vil hjælpe i {hours, plural, one {# time} other {# timer}}. Godkend eller afvis."
+      },
+      "supportExtension": {
+        "title": "Agentor support beder om mere tid",
+        "body": "{first} vil gerne forlænge adgangen. Godkend eller afvis."
+      },
+      "paymentFailed": {
+        "title": "Betalingen blev afvist",
+        "body": "Opdatér kortet under Abonnement."
+      },
+      "quota": {
+        "title": "Over 80 % af kvoten er brugt",
+        "body": "Se forbruget under Abonnement."
+      },
+      "weekly": {
+        "title": "Ugens opsummering",
+        "body": "Tryk for at se ugen."
+      },
+      "resolved": {
+        "title": "Fejlen er løst",
+        "body": "{subject} kører igen uden fejl."
+      },
+      "morning": {
+        "title": "{count, plural, one {# ting skete i nat} other {# ting skete i nat}}",
+        "body": "Tryk for at se dem."
+      },
+      "generic": {
+        "title": "Agentor",
+        "body": "Tryk for at se, hvad der skete."
+      }
+    },
+    "offline": {
+      "title": "Offline",
+      "banner": "Offline · data fra kl. {time}",
+      "bannerDate": "Offline · data fra {date} kl. {time}",
+      "actionsOff": "Handlinger er slået fra, til du er online igen.",
+      "retry": "Prøv igen",
+      "noneTitle": "Ingen data på denne enhed",
+      "noneBody": "Når du har åbnet Overblik online, kan du se det seneste her uden net.",
+      "overview": "Overblik",
+      "integrations": "Integrationer",
+      "activity": "Aktivitet"
+    },
+    "pushSettings": {
+      "title": "Notifikationer",
+      "device": "Push på denne telefon",
+      "errors": "Fejl i et flow",
+      "errorsMeta": "Med det samme",
+      "connection": "Afbrudt forbindelse",
+      "connectionMeta": "Med det samme",
+      "support": "Supportadgang",
+      "supportMeta": "Når Agentor beder om adgang",
+      "quota": "Kvote over 80 %",
+      "quotaMeta": "Én gang pr. måned",
+      "weekly": "Ugens opsummering",
+      "weeklyMeta": "Mandag kl. 08",
+      "quiet": "Stille timer",
+      "quietTitle": "Ingen push om natten",
+      "quietMeta": "{start}–{end} · fejl samles til morgen",
+      "channels": "E-mail og SMS vælges under Indstillinger på computer.",
+      "channelsLink": "E-mail, SMS og app pr. hændelse",
+      "turnOn": "Slå push til på denne telefon",
+      "turningOn": "Slår push til…",
+      "turnOff": "Slå push fra på denne telefon",
+      "on": "Push er slået til",
+      "off": "Push er slået fra",
+      "saved": "Gemt",
+      "failed": "Det lykkedes ikke. Prøv igen.",
+      "unsupported": "Denne browser kan ikke modtage push.",
+      "unsupportedBody": "Brug Safari på iPhone (iOS 16.4 eller nyere) eller Chrome på Android.",
+      "needsInstall": "Push kræver, at Agentor er på hjemmeskærmen",
+      "needsInstallBody": "På iPhone virker push kun i appen fra hjemmeskærmen.",
+      "howToInstall": "Sådan gør du",
+      "denied": "Push er blokeret for Agentor",
+      "deniedBody": "Tillad notifikationer for Agentor i telefonens indstillinger, og prøv igen.",
+      "notConfigured": "Push er ikke sat op på serveren endnu.",
+      "supportView": "Push gælder ikke i supportvisning."
+    },
+    "billing": {
+      "title": "Abonnement og forbrug",
+      "planYear": "{plan} · årlig",
+      "planMonth": "{plan} · månedlig",
+      "paid": "Betalt",
+      "pastDue": "Betaling fejlet",
+      "noCard": "Ingen betaling endnu",
+      "transactions": "Transaktioner i {month}",
+      "resets": "Nulstilles {date}",
+      "support": "Support i {month}",
+      "supportMeta": "{time} · faktureres {date}",
+      "supportNone": "Ingen support i måneden",
+      "card": "Betalingskort",
+      "cardNone": "Intet kort",
+      "changeCard": "Skift kort hos QuickPay",
+      "next": "Næste opkrævning",
+      "nextMeta": "{date} · {amount}",
+      "invoices": "Seneste fakturaer",
+      "invoiceMeta": "{date} · {status}",
+      "pdf": "Hent PDF af {name}",
+      "status": {
+        "paid": "betalt",
+        "open": "åben",
+        "failed": "fejlet",
+        "refunded": "refunderet",
+        "void": "annulleret",
+        "overdue": "forfalden"
+      },
+      "changePlan": "Skift plan",
+      "ownerOnly": "Kun ejeren kan se abonnement og betaling.",
+      "cardFailed": "Kortskift kunne ikke startes. Prøv igen."
+    },
+    "login": {
+      "tagline": "Hold øje med dine integrationer, og ret fejl, når du er væk fra computeren.",
+      "passkey": "Log ind med passkey",
+      "passkeyBusy": "Venter på telefonen…",
+      "passkeyHelp": "Telefonen bekræfter med Face ID, Touch ID eller fingeraftryk",
+      "passkeyFailed": "Det lykkedes ikke med passkey. Prøv igen, eller log ind med e-mail og kode.",
+      "email": "Log ind med e-mail og kode",
+      "back": "Tilbage til passkey",
+      "newUser": "Ny bruger?",
+      "signup": "Opret konto"
     }
   },
   "signupFlow": {

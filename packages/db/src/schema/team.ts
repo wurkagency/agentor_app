@@ -186,3 +186,44 @@ export const notifications = pgTable(
     index('notifications_user_idx').on(t.tenantId, t.userId, t.createdAt),
   ],
 );
+
+/** Push categories a device can switch on and off (MA11 "Push på denne telefon"). */
+export const PUSH_CATEGORIES = ['errors', 'connection', 'support', 'quota', 'weekly'] as const;
+export type PushCategory = (typeof PUSH_CATEGORIES)[number];
+export type PushToggles = Record<PushCategory, boolean>;
+
+/** Default toggles for a new device: everything but the weekly summary (MA14, B8). */
+export const DEFAULT_PUSH_TOGGLES: PushToggles = {
+  errors: true,
+  connection: true,
+  support: true,
+  quota: true,
+  weekly: false,
+};
+
+/**
+ * Web Push subscriptions, one per user, device and company (PLAN-MOBILE M3, B8, B12). The
+ * endpoint and keys only let Agentor send to this browser; they are never logged.
+ */
+export const pushSubscriptions = pgTable(
+  'push_subscriptions',
+  {
+    tenantId: tenantIdColumn(),
+    id: idColumn(),
+    userId: uuid('user_id').notNull(),
+    endpoint: text('endpoint').notNull(),
+    p256dh: text('p256dh').notNull(),
+    auth: text('auth').notNull(),
+    /** "iPhone · Safari", from the user agent, for the settings list. */
+    label: text('label').notNull().default(''),
+    events: jsonb('events').$type<PushToggles>().notNull(),
+    createdAt: createdAt(),
+    lastSeenAt: ts('last_seen_at').notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.id] }),
+    unique('push_subscriptions_endpoint_key').on(t.tenantId, t.userId, t.endpoint),
+    foreignKey({ columns: [t.tenantId], foreignColumns: [tenants.id] }).onDelete('cascade'),
+    check('push_subscriptions_endpoint_https', sql`${t.endpoint} ~ '^https://'`),
+  ],
+);

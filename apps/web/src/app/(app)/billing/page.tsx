@@ -14,6 +14,8 @@ import { PaymentMethod } from './payment-method';
 import { PlanCompare } from './plan-compare';
 import { PlanHero } from './plan-hero';
 import { QuotaNotice } from './quota-notice';
+import { Responsive } from '@agentor/ui/mobile';
+import { BillingMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('pages');
@@ -33,7 +35,7 @@ export default async function BillingPage() {
   const unlimited = t('unlimited');
   const n = (v: number) => formatNumber(v, locale);
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader title={t('title')} subtitle={t('ownerOnly')} />
       {o.subscription.status === 'past_due' && (
@@ -180,4 +182,5 @@ export default async function BillingPage() {
       </div>
     </PageBody>
   );
+  return <Responsive desktop={desktop} mobile={<BillingMobile ctx={ctx} o={o} />} />;
 }

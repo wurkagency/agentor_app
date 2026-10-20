@@ -19,6 +19,9 @@ export function proxy(request: NextRequest) {
     `img-src 'self' data: blob:`,
     `font-src 'self'`,
     `connect-src 'self'${dev ? ' ws: wss:' : ''}`,
+    // The PWA service worker (PLAN-MOBILE M3); strict-dynamic would otherwise block it.
+    `worker-src 'self'`,
+    `manifest-src 'self'`,
     // Terms and privacy policy from agentor.dk in the payment modal (PLAN-SIGNUP B6).
     `frame-src https://agentor.dk https://www.agentor.dk`,
     `frame-ancestors 'none'`,
@@ -56,7 +59,7 @@ export const config = {
   // Pages only: never static assets or the image optimiser (a lesson from agentor.dk).
   matcher: [
     {
-      source: '/((?!_next/static|_next/image|favicon.ico|logos/|fonts/|api/auth).*)',
+      source: '/((?!_next/static|_next/image|favicon.ico|logos/|fonts/|icons/|api/auth).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },

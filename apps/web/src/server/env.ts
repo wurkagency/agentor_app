@@ -26,6 +26,8 @@ const schema = z.object({
   CONNECTOR_MODE: z.enum(['mock', 'live']).default('mock'),
   CVR_PROVIDER: z.enum(['fixture', 'virkdata']).default('fixture'),
   VIRKDATA_API_KEY: z.string().optional(),
+  /** Web Push (PLAN-MOBILE M3): the public half goes to browsers; without it push is off. */
+  VAPID_PUBLIC_KEY: z.string().optional(),
   /**
    * Sign-up and login with Google and Microsoft (PLAN-SIGNUP §5). `off` hides the buttons,
    * `mock` uses the local test identity provider (/dev/oauth, refused in production), `live`

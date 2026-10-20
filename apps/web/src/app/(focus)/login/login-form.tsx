@@ -6,7 +6,7 @@ import { KeyRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { syncLocale } from '@/app/actions/session';
 import { startSso } from '@/app/(signup)/actions';
@@ -44,6 +44,8 @@ export function LoginForm({
   const t = useTranslations('auth');
   const ts = useTranslations('signupFlow.account');
   const router = useRouter();
+  // Unique: the form can be on the page twice (desktop and the mobile MA01 fallback).
+  const passwordId = useId();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [busy, setBusy] = useState<'password' | 'passkey' | 'google' | 'microsoft' | null>(null);
@@ -118,7 +120,7 @@ export function LoginForm({
       </Field>
       <div className="flex flex-col gap-1.5">
         <div className="flex justify-between">
-          <label htmlFor="password" className="text-table font-medium">
+          <label htmlFor={passwordId} className="text-table font-medium">
             {t('password')}
           </label>
           <Link href="/forgot-password" className="text-table font-semibold text-fg-1">
@@ -126,7 +128,7 @@ export function LoginForm({
           </Link>
         </div>
         <Input
-          id="password"
+          id={passwordId}
           type="password"
           name="password"
           autoComplete="current-password"

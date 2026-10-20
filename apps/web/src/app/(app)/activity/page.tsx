@@ -13,6 +13,8 @@ import { connectionMap, viewsFor } from '@/server/flows';
 import { db } from '@/server/infra';
 import { ActivityFilters, ActivityRetry } from './activity-filters';
 import { toActivityFilter, type ActivityQuery } from './query';
+import { Responsive } from '@agentor/ui/mobile';
+import { ActivityMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('activity');
@@ -85,7 +87,7 @@ export default async function ActivityPage({
   const next = hasMore ? new URLSearchParams(params) : null;
   next?.set('before', page[page.length - 1]!.createdAt.toISOString());
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('title')}
@@ -158,5 +160,18 @@ export default async function ActivityPage({
         </div>
       )}
     </PageBody>
+  );
+  return (
+    <Responsive
+      desktop={desktop}
+      mobile={
+        <ActivityMobile
+          ctx={ctx}
+          views={views}
+          conns={conns}
+          query={{ outcome: q.outcome, flow: q.flow }}
+        />
+      }
+    />
   );
 }

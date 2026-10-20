@@ -328,3 +328,14 @@ export async function getTenantThresholds(db: Database, ctx: Ctx) {
   );
   return { errorRatePct: t?.rate ?? 5, consecutiveFailures: t?.failures ?? 3 };
 }
+
+/** One support access request for the customer (MA12, opened from push). Not Superadmin's direct access. */
+export async function getSupportGrant(db: Database, ctx: Ctx, grantId: string) {
+  return withTenant(db, ctx, async (tx) => {
+    const [g] = await tx
+      .select()
+      .from(supportAccessGrants)
+      .where(and(eq(supportAccessGrants.id, grantId), eq(supportAccessGrants.superadmin, false)));
+    return g ?? null;
+  });
+}

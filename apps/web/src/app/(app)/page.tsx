@@ -581,6 +581,9 @@ export default async function OverviewPage({
       ...(ref?.logo ? { logoUrl: ref.logo } : {}),
     });
     return {
+      snapshot: ctx.support
+        ? null
+        : { owner: `${ctx.user.id}:${ctx.tenant.tenantId}`, company: ctx.tenant.tenantName },
       title: ctx.support
         ? tp('supportOverview', { company: ctx.tenant.tenantName })
         : tp(greetingKey(now), { name: firstName }),

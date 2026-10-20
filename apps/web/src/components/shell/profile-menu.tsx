@@ -27,6 +27,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useTransition, type ReactNode } from 'react';
 import { changeLocale, switchTenant } from '@/app/actions/session';
+import { forgetDevice } from '@/components/mobile/pwa';
 import { authClient } from '@/lib/auth-client';
 
 export interface ProfileMenuProps {
@@ -165,6 +166,7 @@ export function ProfileMenu({
           icon={<Icon icon={LogOut} size={16} />}
           onSelect={() =>
             startTransition(async () => {
+              await forgetDevice();
               await authClient.signOut();
               router.replace('/login');
               router.refresh();

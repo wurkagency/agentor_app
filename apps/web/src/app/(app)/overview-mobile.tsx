@@ -20,8 +20,11 @@ import type { Growth } from '@agentor/ui';
 import { CircleCheck, CircleX, TriangleAlert, Unplug } from 'lucide-react';
 import Link from 'next/link';
 import { AppTopBar } from '@/components/mobile/chrome';
+import { SnapshotWriter } from '@/components/mobile/pwa';
 
 export interface OverviewMobileProps {
+  /** "<userId>:<tenantId>" for the offline snapshot; absent in support view. */
+  snapshot: { owner: string; company: string } | null;
   title: string;
   subtitle: string;
   hero: { problems: boolean; headline: string; meta: string };
@@ -67,6 +70,31 @@ export interface OverviewMobileProps {
 export function OverviewMobile(p: OverviewMobileProps) {
   return (
     <MobileShell topBar={<AppTopBar />}>
+      {p.snapshot && (
+        <SnapshotWriter
+          owner={p.snapshot.owner}
+          company={p.snapshot.company}
+          page="overview"
+          data={{
+            headline: p.hero.headline,
+            meta: p.hero.meta,
+            problems: p.hero.problems,
+            kpis: [
+              { label: p.kpi.label, value: p.kpi.value, meta: p.kpi.meta },
+              ...(p.ring
+                ? [
+                    {
+                      label: p.ring.label,
+                      value: `${p.ring.value} ${p.ring.of}`,
+                      meta: p.ring.meta,
+                    },
+                  ]
+                : []),
+            ],
+            rows: p.issues.map((i) => ({ title: i.title, meta: i.meta, status: i.status })),
+          }}
+        />
+      )}
       <MobilePageTitle title={p.title} subtitle={p.subtitle} />
       <StatusHero
         tone={p.hero.problems ? 'error' : 'ok'}

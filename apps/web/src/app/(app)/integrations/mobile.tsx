@@ -14,6 +14,7 @@ import {
 import { TriangleAlert } from 'lucide-react';
 import Link from 'next/link';
 import { AppTopBar } from '@/components/mobile/chrome';
+import { SnapshotWriter } from '@/components/mobile/pwa';
 import { FlowSelectList, type SelectableFlow } from './select-list';
 
 export interface MobileFlow extends SelectableFlow {
@@ -26,6 +27,7 @@ export interface MobileFlow extends SelectableFlow {
 }
 
 export interface IntegrationsMobileProps {
+  snapshot: { owner: string; company: string } | null;
   title: string;
   subtitle: string;
   filter: { label: string; value: string; items: { key: string; label: string; href: string }[] };
@@ -51,6 +53,19 @@ export interface IntegrationsMobileProps {
 export function IntegrationsMobile(p: IntegrationsMobileProps) {
   return (
     <MobileShell topBar={<AppTopBar />}>
+      {p.snapshot && !p.mode.select && (
+        <SnapshotWriter
+          owner={p.snapshot.owner}
+          company={p.snapshot.company}
+          page="integrations"
+          data={p.flows.map((f) => ({
+            name: f.name,
+            meta: f.cardMeta,
+            status: f.status,
+            statusLabel: f.statusLabel,
+          }))}
+        />
+      )}
       <MobilePageTitle
         title={p.title}
         subtitle={p.subtitle}

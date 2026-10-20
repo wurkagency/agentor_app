@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { FLOWS } from '../scripts/seed-data';
+import { CONNECTIONS, FLOWS } from '../scripts/seed-data';
 import { login, type USERS } from './support';
 
 /** The failure screen (MA06) of the seeded EU-account error, via the flow screen (MA05). */
@@ -42,7 +42,8 @@ export async function checkScreen(page: Page, board: string, project: string) {
 
 interface Screen {
   board: string;
-  user: keyof typeof USERS;
+  /** null: signed out (MA01). */
+  user: keyof typeof USERS | null;
   path: string | ((page: Page) => Promise<string>);
   /** Texts the board shows that must be on screen. */
   texts: (string | RegExp)[];
@@ -115,13 +116,85 @@ const SCREENS: Screen[] = [
     path: async (page) => `${await failureHref(page)}?view=developer`,
     texts: ['Basic', 'Developer', 'Fejlet', 'ACCOUNT_NOT_FOUND'],
   },
+  {
+    board: 'MA07-Aktivitet',
+    user: 'mette',
+    path: '/activity',
+    texts: ['Aktivitet', 'Alle', /^Fejl \d+$/, 'Flow', 'I dag'],
+  },
+  {
+    board: 'MA08-Genforbind',
+    user: 'mette',
+    path: `/connections/${CONNECTIONS.economic.id}/reconnect`,
+    texts: ['e-conomic er afbrudt', 'Sendes, så snart forbindelsen virker igen', 'Senere'],
+  },
+  {
+    board: 'MA09-Notifikationer',
+    user: 'mette',
+    path: '/notifications',
+    texts: ['Notifikationer', 'Marker alle læst', 'Vælg hvad du får besked om'],
+  },
+  {
+    board: 'MA10-Mere',
+    user: 'mette',
+    path: '/more',
+    texts: [
+      'Mette Holm',
+      'Abonnement og forbrug',
+      'Supportadgang',
+      'Notifikationer',
+      'Sikkerhed',
+      'Kontakt support',
+      'Log ud',
+    ],
+  },
+  {
+    board: 'MA11-Notifikationsindstillinger',
+    user: 'mette',
+    path: '/settings/notifications',
+    texts: [
+      'Push på denne telefon',
+      'Fejl i et flow',
+      'Ugens opsummering',
+      'Ingen push om natten',
+      /22\.00–07\.00/,
+    ],
+  },
+  {
+    board: 'MA13-Installer',
+    user: 'mette',
+    path: '/install',
+    texts: ['Agentor på hjemmeskærmen', 'Tryk på Del', 'Jeg har gjort det'],
+  },
+  {
+    board: 'MA15-Abonnement',
+    user: 'mette',
+    path: '/billing',
+    texts: [
+      /^Business · (årlig|månedlig)$/,
+      /^Transaktioner i /,
+      /^Support i /,
+      'Betalingskort',
+      'Skift plan',
+    ],
+  },
+  {
+    board: 'MA01-Log-ind',
+    user: null,
+    path: '/login',
+    texts: [
+      'Log ind med passkey',
+      'Log ind med e-mail og kode',
+      /Face ID, Touch ID eller fingeraftryk/,
+    ],
+  },
   // SCREENS-END
 ];
 
 test.describe('@mobile boards', () => {
   for (const s of SCREENS)
     test(s.board, async ({ page }, info) => {
-      await login(page, s.user);
+      if (s.user) await login(page, s.user);
       const path = typeof s.path === 'string' ? s.path : await s.path(page);
       await page.goto(path);
       for (const text of s.texts)
