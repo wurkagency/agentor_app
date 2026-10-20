@@ -30,7 +30,10 @@ import { ensureSignupReceipt } from '@/server/signup-receipt';
 import { billingOverview } from '@/server/billing-overview';
 import { connectionMap, NEEDS_ACTION, PERIOD_DAYS, periodOf, viewsFor } from '@/server/flows';
 import { db } from '@/server/infra';
+import { formatRelative } from '@agentor/i18n';
+import { Responsive } from '@agentor/ui/mobile';
 import { NewCustomer } from './new-customer';
+import { OverviewMobile, type OverviewMobileProps } from './overview-mobile';
 import { OnboardingReminder } from '@/components/signup/onboarding-reminder';
 import { PeriodSelector } from './period-selector';
 
@@ -73,6 +76,7 @@ export default async function OverviewPage({
   const ts = await getTranslations('status');
   const te = await getTranslations('recordErrors');
   const nav = await getTranslations('nav');
+  const tm = await getTranslations('mobile.overview');
   const locale = (await getLocale()) as 'da' | 'en';
   const now = new Date();
   const firstName = ctx.user.name.split(' ')[0] ?? ctx.user.name;
@@ -111,7 +115,8 @@ export default async function OverviewPage({
 
   const [numbers, daily, activity, failures] = await Promise.all([
     overviewNumbers(db(), c, days),
-    dailyNumbers(db(), c, Math.max(days, 7)),
+    // Eight days: mobile compares today with the same weekday last week (MA02).
+    dailyNumbers(db(), c, Math.max(days, 8)),
     recentActivity(db(), c, 8),
     openFailures(db(), c),
   ]);
@@ -133,6 +138,8 @@ export default async function OverviewPage({
     body: string;
     meta: string;
     action: { label: string; href: string } | null;
+    /** Mobile (MA03): reconnect in the app, or the run's failure screen (MA06). */
+    mobile: { title: string; meta: string; href: string; action?: string };
   }[] = [];
   for (const conn of conns.values())
     if (conn.status === 'broken') {
@@ -152,6 +159,15 @@ export default async function OverviewPage({
         action: canEdit
           ? { label: t('reconnect'), href: `/connections/${conn.id}?reconnect=1` }
           : null,
+        mobile: {
+          title: t('issue.broken', { name: manifestFor(conn.connectorId)?.name ?? conn.name }),
+          meta: tm('brokenMeta', {
+            flow: affected.map((v) => v.name).join(', ') || conn.name,
+            when: conn.brokenSince ? relativeWhen(conn.brokenSince) : '–',
+          }),
+          href: `/connections/${conn.id}/reconnect`,
+          ...(canEdit ? { action: tm('reconnect') } : {}),
+        },
       });
     }
   const groups = new Map<string, typeof failures>();
@@ -185,6 +201,14 @@ export default async function OverviewPage({
       ),
       body: e.short,
       meta: `${view.name} · ${formatTime(first.createdAt, locale)}`,
+      mobile: {
+        title: te(
+          `notDone.${first.entity === 'creditNote' ? 'creditNote' : first.entity === 'order' ? 'order' : 'record'}`,
+          { count, system: target.system },
+        ),
+        meta: `${view.name} · ${formatTime(first.createdAt, locale)}`,
+        href: `/integrations/${view.id}/runs/${first.runId}`,
+      },
       action: canEdit
         ? e.mappingField
           ? {
@@ -222,7 +246,7 @@ export default async function OverviewPage({
   };
   const setsLimit = billing?.plan.entitlements.integrationSets ?? null;
 
-  return (
+  const desktop = (
     <>
       {header}
       <OnboardingReminder ctx={ctx} />
@@ -489,6 +513,189 @@ export default async function OverviewPage({
       </PageBody>
     </>
   );
+  return <Responsive desktop={desktop} mobile={<OverviewMobile {...buildMobile()} />} />;
+
+  /** MA02 / MA03 from the same data as the desktop page. */
+  function buildMobile(): OverviewMobileProps {
+    const tz = 'Europe/Copenhagen';
+    const dayKey = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: tz }).format(d);
+    const byDay = new Map(daily.map((d) => [d.day, d]));
+    const weekAgoDate = new Date(now.getTime() - 7 * 86_400_000);
+    const today = byDay.get(dayKey(now));
+    const weekAgo = byDay.get(dayKey(weekAgoDate));
+    const weekday = (d: Date, style: 'short' | 'long') =>
+      new Intl.DateTimeFormat(locale === 'da' ? 'da-DK' : 'en-GB', {
+        weekday: style,
+        timeZone: tz,
+      }).format(d);
+    const cap = (x: string) => x.charAt(0).toUpperCase() + x.slice(1);
+    const week = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now.getTime() - (6 - i) * 86_400_000);
+      const n = byDay.get(dayKey(d));
+      const label = i === 6 ? tm('today') : weekday(d, 'short');
+      return {
+        label,
+        records: n?.records ?? 0,
+        errors: n?.failed ?? 0,
+        today: i === 6,
+        description: tm('weekDay', {
+          day: label,
+          records: formatNumber(n?.records ?? 0, locale),
+          errors: n?.failed ?? 0,
+        }),
+      };
+    });
+    const errorsToday = today?.failed ?? 0;
+    const lastRun = views
+      .map((v) => v.lastRunAt)
+      .filter((d): d is Date => Boolean(d))
+      .sort((a, b) => b.getTime() - a.getTime())[0];
+    const problems = issues.length > 0;
+    const prevRecords = weekAgo?.records ?? 0;
+    const change = prevRecords ? ((today?.records ?? 0) - prevRecords) / prevRecords : null;
+    const kpiTrend =
+      problems && errorsToday
+        ? {
+            direction: 'up' as const,
+            text: tm('errorsUp', { count: errorsToday }),
+            tone: 'bad' as const,
+          }
+        : change === null
+          ? undefined
+          : {
+              direction:
+                change > 0.005
+                  ? ('up' as const)
+                  : change < -0.005
+                    ? ('down' as const)
+                    : ('flat' as const),
+              text: formatPercent(Math.abs(change), locale, 0),
+              tone: change >= 0 ? ('good' as const) : ('bad' as const),
+            };
+    const fine = published.filter((v) => !NEEDS_ACTION.includes(v.status));
+    const logoOf = (
+      ref: { connectorId: string; name: string; logo: string } | null,
+      fallback: string,
+    ) => ({
+      name: ref ? (manifestFor(ref.connectorId)?.name ?? ref.name) : fallback,
+      ...(ref?.logo ? { logoUrl: ref.logo } : {}),
+    });
+    return {
+      title: ctx.support
+        ? tp('supportOverview', { company: ctx.tenant.tenantName })
+        : tp(greetingKey(now), { name: firstName }),
+      subtitle: ctx.tenant.tenantName,
+      hero: problems
+        ? {
+            problems,
+            headline: tm('needs', { count: issues.length }),
+            meta: tm('needsMeta', { count: fine.length }),
+          }
+        : {
+            problems,
+            headline: tm('allRunning'),
+            meta: tm('allRunningMeta', {
+              flows: published.length,
+              errors: errorsToday,
+              ago: lastRun ? formatRelative(lastRun, now, locale) : '–',
+            }),
+          },
+      // Rows are labels on the boards, without the sentence full stop the desktop texts have.
+      issues: issues.map((i) => ({
+        key: i.key,
+        status: i.status,
+        ...i.mobile,
+        title: i.mobile.title.replace(/\.$/, ''),
+      })),
+      kpi: {
+        label: tm('recordsToday'),
+        value: formatNumber(today?.records ?? 0, locale),
+        ...(kpiTrend ? { trend: kpiTrend } : {}),
+        data: week.map((d) => d.records),
+        meta: tm('lastWeek', {
+          day: cap(weekday(weekAgoDate, 'long')),
+          value: formatNumber(prevRecords, locale),
+        }),
+      },
+      ring: billing
+        ? {
+            label: tm('transactions'),
+            ratio: billing.quota.ratio,
+            percent: formatPercent(billing.quota.ratio, locale, 0),
+            value: formatNumber(billing.quota.used, locale),
+            of:
+              billing.quota.limit === null
+                ? t('unlimited')
+                : tm('of', { limit: formatNumber(billing.quota.limit, locale) }),
+            meta: billing.subscription.currentPeriodEnd
+              ? tm('resets', { date: formatDate(billing.subscription.currentPeriodEnd, locale) })
+              : '',
+          }
+        : null,
+      week: {
+        title: tm('week'),
+        summary: tm('weekSummary', {
+          records: formatNumber(
+            week.reduce((a, d) => a + d.records, 0),
+            locale,
+          ),
+          errors: week.reduce((a, d) => a + d.errors, 0),
+        }),
+        days: week,
+      },
+      flows: problems
+        ? {
+            heading: tm('flows'),
+            rows: published
+              .filter((v) => NEEDS_ACTION.includes(v.status))
+              .map((v) => ({
+                id: v.id,
+                href: `/integrations/${v.id}`,
+                name: v.name,
+                meta:
+                  v.status === 'broken'
+                    ? tm('flowBroken', { when: v.statusSince ? relativeWhen(v.statusSince) : '–' })
+                    : tm('flowError', {
+                        count: v.openFailures,
+                        ago: v.lastRunAt ? formatRelative(v.lastRunAt, now, locale) : '–',
+                      }),
+                status: v.status,
+                statusLabel: ts(v.status),
+                logo: logoOf(v.source, v.name),
+              })),
+            rest: fine.length
+              ? {
+                  title: tm('rest', { count: fine.length }),
+                  meta: `${fine
+                    .slice(0, 2)
+                    .map((v) => v.name)
+                    .join(', ')}${fine.length > 2 ? ' …' : ''}`,
+                }
+              : null,
+          }
+        : null,
+      recent: {
+        heading: tm('recent'),
+        rows: activity.slice(0, 2).map((a) => {
+          const view = views.find((v) => v.id === a.flowId);
+          const route = view?.routes.find((r) => r.id === a.routeId);
+          const target = route?.destination ?? '';
+          return {
+            key: `${a.runId}-${a.routeId}`,
+            title: a.failed
+              ? tm('activityFailed', { count: a.failed, target })
+              : tm('activityRow', { count: a.records, target }),
+            meta: `${view?.name ?? ''} · ${formatRelative(a.at, now, locale)}`,
+            logo: logoOf(route?.destinationConnector ?? null, target),
+          };
+        }),
+      },
+    };
+  }
+
+  function relativeWhen(d: Date) {
+    return `${formatRelativeDay(d, now, locale)} ${formatTime(d, locale)}`;
+  }
 }
 
 function withTrend(

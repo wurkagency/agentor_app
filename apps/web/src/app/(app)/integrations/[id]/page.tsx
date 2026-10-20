@@ -28,6 +28,9 @@ import { connectionMap, viewsFor } from '@/server/flows';
 import { db } from '@/server/infra';
 import { FlowActions, RestoreVersionButton, RetryButton, RouteResume } from './flow-actions';
 import { RunsView } from './runs-view';
+import { Responsive } from '@agentor/ui/mobile';
+import { FlowMobile, RoutesMobile } from './mobile';
+import { RunsMobile } from './runs/mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('flows');
@@ -115,7 +118,7 @@ export default async function FlowPage({
         ? t('allRoutesRunning')
         : ts(f.status);
 
-  return (
+  const desktop = (
     <PageBody>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-col gap-1.5">
@@ -256,6 +259,15 @@ export default async function FlowPage({
       )}
     </PageBody>
   );
+  const mobile =
+    tab === 'routes' ? (
+      <RoutesMobile f={f} canEdit={canEdit} />
+    ) : tab === 'runs' ? (
+      <RunsMobile f={f} ctx={c} />
+    ) : (
+      <FlowMobile f={f} ctx={c} conns={conns} canEdit={canEdit} />
+    );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }
 
 async function FlowNumbers({

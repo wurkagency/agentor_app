@@ -66,6 +66,8 @@ export interface FlowView {
   published: FlowRow['published'];
   hasDraft: boolean;
   draftLockedBy: string | null;
+  /** The open draft (mobile MA20/MA22/MA23 test and publish it as it is). */
+  draft: { id: string; definition: FlowDefinition | null } | null;
   template: string | null;
 }
 
@@ -166,6 +168,7 @@ export function toView(
     published: f.published,
     hasDraft: Boolean(f.draft),
     draftLockedBy: f.draft?.lockedByName ?? null,
+    draft: f.draft ? { id: f.draft.id, definition: safeParse(f.draft.definition) } : null,
     template: f.template,
   };
 }

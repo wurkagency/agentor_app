@@ -5,4 +5,5 @@ export * from './kpi';
 export * from './controls';
 export * from './chat';
 export * from './states';
+export * from './expand';
 export { Modal } from './modal';

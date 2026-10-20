@@ -584,6 +584,7 @@ export async function dailyNumbers(
       revenueOre: Number(r.revenue),
       orders: r.orders,
       records: r.records,
+      failed: r.failed,
       errorRate: r.records + r.failed ? r.failed / (r.records + r.failed) : 0,
     }));
   });

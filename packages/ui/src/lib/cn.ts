@@ -86,6 +86,7 @@ const twMerge = extendTailwindMerge({
             'tabbar',
             'row-divider',
             'modal',
+            'hairline-gauge',
             'none',
           ],
         },
