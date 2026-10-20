@@ -5,6 +5,7 @@ import {
   tenantRequiresMfa,
   type MembershipContext,
 } from '@agentor/db';
+import { currentSignupStep, SIGNUP_PATHS } from '@agentor/core';
 import { headers } from 'next/headers';
 import { forbidden, redirect } from 'next/navigation';
 import { cache } from 'react';
@@ -24,6 +25,10 @@ export interface UserSession {
   sessionId: string;
   token: string;
   activeTenantId: string | null;
+  /** Google or Microsoft login (PLAN-SIGNUP B10). */
+  ssoLogin: boolean;
+  /** When this session passed a second factor of ours, if it did. */
+  mfaVerifiedAt: Date | null;
   user: SessionUser;
 }
 
@@ -66,11 +71,17 @@ export const getUserSession = cache(async (): Promise<UserSession | null> => {
     return null;
   }
   const u = user as typeof user & { locale?: string; twoFactorEnabled?: boolean | null };
+  const extra = session as typeof session & {
+    activeTenantId?: string | null;
+    ssoLogin?: boolean | null;
+    mfaVerifiedAt?: Date | string | null;
+  };
   return {
     sessionId: session.id,
     token: session.token,
-    activeTenantId:
-      (session as typeof session & { activeTenantId?: string | null }).activeTenantId ?? null,
+    activeTenantId: extra.activeTenantId ?? null,
+    ssoLogin: Boolean(extra.ssoLogin),
+    mfaVerifiedAt: extra.mfaVerifiedAt ? new Date(extra.mfaVerifiedAt) : null,
     user: {
       id: user.id,
       name: user.name,
@@ -109,6 +120,9 @@ export const requireAppContext = cache(async (): Promise<AppContext> => {
         role: grant.scope === 'help' ? 'admin' : 'reader',
         flowScope: 'all',
         onboardingCompleted: true,
+        signupState: 'active',
+        onboardingStep: null,
+        onboardingSkipped: true,
       },
       support: {
         grantId: grant.grantId,
@@ -124,7 +138,8 @@ export const requireAppContext = cache(async (): Promise<AppContext> => {
   }
   const own = await listOwnTenants(db(), s.user.id);
   // Agentor staff without a company of their own land in the Platform.
-  if (own.length === 0) redirect((await staffRole(s.user.id)) ? '/platform' : '/onboarding');
+  // Everyone else without a company is in the middle of signup (PLAN-SIGNUP §2).
+  if (own.length === 0) redirect((await staffRole(s.user.id)) ? '/platform' : '/signup/company');
 
   let tenantId = s.activeTenantId;
   let membership = tenantId ? await getMembership(db(), tenantId, s.user.id) : null;
@@ -135,8 +150,19 @@ export const requireAppContext = cache(async (): Promise<AppContext> => {
     if (!membership) redirect('/login');
     await setSessionTenant(db(), s.sessionId, tenantId);
   }
+  // A company in signup reaches no app route, and an owner mid-onboarding resumes it.
+  const step = currentSignupStep({
+    signedIn: true,
+    pendingEmail: false,
+    tenant: membership,
+    mfa: s.user.twoFactorEnabled,
+  });
+  if (membership.signupState !== 'active') redirect(SIGNUP_PATHS[step]);
+  const privileged = membership.role === 'owner' || membership.role === 'admin';
+  // Google or Microsoft proved the e-mail, not our second factor: confirm it once (B10).
+  if (privileged && s.user.twoFactorEnabled && s.ssoLogin && !s.mfaVerifiedAt)
+    redirect('/login/mfa?sso=1');
   if (!s.user.twoFactorEnabled) {
-    const privileged = membership.role === 'owner' || membership.role === 'admin';
     // Owners and admins always; everyone when the tenant requires it ("Kræv totrin for hele teamet").
     if (privileged || (await tenantRequiresMfa(db(), { tenantId: tenantId!, userId: s.user.id }))) {
       redirect('/login/mfa/setup');

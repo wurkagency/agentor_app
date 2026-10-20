@@ -14,13 +14,19 @@ import {
   resolveBillingRef,
   sendSupportInvoice,
 } from '../../src/repo/billing.js';
+import {
+  activateSignupIfPaid,
+  chooseSignupPlan,
+  getSignupPaymentStatus,
+} from '../../src/repo/signup.js';
 import { roleUrl } from './env.js';
 import { ID } from './fixtures.js';
 import { admin } from './helpers.js';
 
 /**
  * The billing lifecycle through the repository, as the web and worker roles really run it:
- * onboarding creates the company, the owner adds a card, the worker activates and charges.
+ * signup creates the company, the owner picks a plan and adds a card, the worker charges the first
+ * period at once and only the paid callback activates the company (PLAN-SIGNUP §4.2); then renewals.
  * Uses its own tenant and deletes it afterwards, so the other suites see the seeded data.
  */
 
@@ -38,7 +44,7 @@ beforeAll(async () => {
     await c.query('begin');
     await c.query(`select set_config('app.user_id', $1, true)`, [user]);
     const res = await c.query(
-      `select app.create_tenant('Flow Test ApS', '', '', '', '', '', 'da', 'Europe/Copenhagen', '200-1000') as t`,
+      `select app.create_tenant('Flow Test ApS', '', '', '', '', '', 'da', 'Europe/Copenhagen', '100-1000', '{woocommerce,dinero}') as t`,
     );
     await c.query('commit');
     tenantId = res.rows[0].t;
@@ -71,18 +77,71 @@ describe('billing lifecycle', () => {
     await changePlan(web.db, actor(), 'business');
   });
 
-  it('the card flow activates the subscription and makes it due', async () => {
+  it('signup: the first period is charged at once and only payment activates the company', async () => {
+    await chooseSignupPlan(web.db, actor(), 'business', 'month');
+    expect(await getSignupPaymentStatus(web.db, actor())).toBe('idle');
     await attachPaymentSubscription(web.db, actor(), 'AGFLOWSUB0001', 'qp-sub-1');
     const ref = await resolveBillingRef(worker.db, 'AGFLOWSUB0001');
     expect(ref).toMatchObject({ tenantId, kind: 'subscription' });
-    await applySubscriptionAuthorized(worker.db, ref!.tenantId, ref!.refId, {
-      brand: 'visa',
-      last4: '4242',
-      expiry: '08/28',
+    const card = { brand: 'visa', last4: '4242', expiry: '08/28' };
+    const auth = await applySubscriptionAuthorized(worker.db, ref!.tenantId, ref!.refId, card);
+    expect(auth).toEqual({ chargeNow: true });
+    // Still incomplete and never picked up by the monthly scheduler.
+    let o = await getBillingOverview(web.db, actor());
+    expect(o?.subscription).toMatchObject({ status: 'incomplete', cardLast4: '4242' });
+    expect(await dueSubscriptions(worker.db, new Date(Date.now() + 1000))).not.toContain(tenantId);
+    expect(await getSignupPaymentStatus(web.db, actor())).toBe('waiting');
+
+    // A declined first charge: no 2/5/9-day retries, no owner notice, shown on the page.
+    const first = (await prepareCharge(worker.db, tenantId, () => 'AGFIRST00001'))!;
+    expect(first.amountOre).toBe(19875);
+    await applyChargeResult(worker.db, tenantId, first.invoiceId, {
+      accepted: false,
+      providerPaymentId: 'pf1',
     });
-    const o = await getBillingOverview(web.db, actor());
-    expect(o?.subscription).toMatchObject({ status: 'active', cardLast4: '4242' });
-    expect(await dueSubscriptions(worker.db, new Date(Date.now() + 1000))).toContain(tenantId);
+    const failed = (
+      await admin('select status, next_retry_at from invoices where id = $1', [first.invoiceId])
+    ).rows[0];
+    expect(failed).toEqual({ status: 'failed', next_retry_at: null });
+    const notices = await admin(
+      `select count(*)::int as n from notifications where tenant_id = $1 and message_key = 'paymentFailed'`,
+      [tenantId],
+    );
+    expect(notices.rows[0].n).toBe(0);
+    expect(await getSignupPaymentStatus(web.db, actor())).toBe('failed');
+    expect((await getBillingOverview(web.db, actor()))?.subscription.status).toBe('incomplete');
+
+    // "Prøv igen" with a new card: the failed invoice is voided, a fresh one is charged.
+    expect(await applySubscriptionAuthorized(worker.db, tenantId, ref!.refId, card)).toEqual({
+      chargeNow: true,
+    });
+    const second = (await prepareCharge(worker.db, tenantId, () => 'AGFIRST00002'))!;
+    expect(second.invoiceId).not.toBe(first.invoiceId);
+    const voided = (await admin('select status from invoices where id = $1', [first.invoiceId]))
+      .rows[0];
+    expect(voided.status).toBe('void');
+    await applyChargeResult(worker.db, tenantId, second.invoiceId, {
+      accepted: true,
+      providerPaymentId: 'pf2',
+    });
+    // Paid, but the company waits for the activation step (run on the verified callback only).
+    expect(await getSignupPaymentStatus(web.db, actor())).toBe('waiting');
+    expect(await activateSignupIfPaid(worker.db, tenantId, first.invoiceId)).toBe(false);
+    expect(await activateSignupIfPaid(worker.db, tenantId, second.invoiceId)).toBe(true);
+    // The same callback again changes nothing.
+    expect(await activateSignupIfPaid(worker.db, tenantId, second.invoiceId)).toBe(false);
+    expect(await getSignupPaymentStatus(web.db, actor())).toBe('active');
+    o = await getBillingOverview(web.db, actor());
+    expect(o?.subscription.status).toBe('active');
+    const t = (
+      await admin('select signup_state, onboarding_step from tenants where id = $1', [tenantId])
+    ).rows[0];
+    expect(t).toEqual({ signup_state: 'active', onboarding_step: 'webshop' });
+    const activated = await admin(
+      `select count(*)::int as n from audit_log where tenant_id = $1 and action = 'tenant.activated'`,
+      [tenantId],
+    );
+    expect(activated.rows[0].n).toBe(1);
   });
 
   it('a charge creates one invoice per period, even when retried', async () => {

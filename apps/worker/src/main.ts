@@ -34,6 +34,7 @@ const billingDeps = {
   quickpay: createQuickPay({
     QUICKPAY_MODE: process.env.QUICKPAY_MODE,
     QUICKPAY_API_KEY: process.env.QUICKPAY_API_KEY,
+    QUICKPAY_PRIVATE_KEY: process.env.QUICKPAY_PRIVATE_KEY,
     APP_URL: appUrl,
     NODE_ENV: process.env.NODE_ENV,
   }),

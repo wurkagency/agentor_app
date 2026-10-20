@@ -22,3 +22,4 @@ export * from './repo/notifications.js';
 export * from './repo/editor.js';
 export * from './repo/platform.js';
 export * from './repo/finance.js';
+export * from './repo/signup.js';

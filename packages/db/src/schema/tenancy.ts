@@ -46,6 +46,23 @@ export const tenants = pgTable(
       mode: 'date',
     }),
     firstTestRunAt: timestamp('first_test_run_at', { withTimezone: true, mode: 'date' }),
+    /**
+     * Self-service signup (PLAN-SIGNUP §3.1): pending_plan → pending_payment → active. Only a
+     * verified QuickPay callback for the first invoice makes a tenant active; nothing in the app
+     * works before that. Changed only by app.signup_* functions.
+     */
+    signupState: text('signup_state').notNull().default('active'),
+    signupStateAt: timestamp('signup_state_at', { withTimezone: true, mode: 'date' }),
+    /** Systems chosen on SU3 (connector ids); pre-select onboarding and drive recommendations. */
+    chosenConnectors: text('chosen_connectors')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
+    /** Onboarding after payment (OB1–OB5); null before activation. */
+    onboardingStep: text('onboarding_step'),
+    onboardingSkippedAt: timestamp('onboarding_skipped_at', { withTimezone: true, mode: 'date' }),
+    /** The draft flow created from the template on OB3. */
+    onboardingFlowId: uuid('onboarding_flow_id'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
@@ -54,6 +71,15 @@ export const tenants = pgTable(
     check('tenants_alert_failures_check', sql`${t.alertConsecutiveFailures} between 1 and 100`),
     check('tenants_locale_check', sql`${t.locale} in ('da', 'en')`),
     check('tenants_status_check', sql`${t.status} in ('active', 'suspended', 'deleting')`),
+    check(
+      'tenants_signup_state_check',
+      sql`${t.signupState} in ('pending_plan', 'pending_payment', 'active')`,
+    ),
+    check(
+      'tenants_onboarding_step_check',
+      sql`${t.onboardingStep} in ('webshop', 'accounting', 'template', 'test', 'done')`,
+    ),
+    check('tenants_chosen_connectors_check', sql`cardinality(${t.chosenConnectors}) <= 30`),
   ],
 );
 
@@ -111,5 +137,38 @@ export const auditLog = pgTable(
     foreignKey({ columns: [t.tenantId], foreignColumns: [tenants.id] }).onDelete('cascade'),
     index('audit_log_tenant_created_idx').on(t.tenantId, t.createdAt),
     check('audit_log_actor_kind_check', sql`${t.actorKind} in ('user', 'support', 'system')`),
+  ],
+);
+
+export const TERMS_DOCUMENTS = ['subscription_terms', 'privacy_policy', 'dpa'] as const;
+export type TermsDocument = (typeof TERMS_DOCUMENTS)[number];
+
+/**
+ * "Accept af betingelser" on SU5/MS5: one row per document per acceptance, with the version
+ * shown on agentor.dk at that moment (PLAN-SIGNUP B12). Append-only, like the audit log.
+ */
+export const termsAcceptances = pgTable(
+  'terms_acceptances',
+  {
+    tenantId: tenantIdColumn(),
+    id: idColumn(),
+    userId: uuid('user_id').notNull(),
+    document: text('document').$type<TermsDocument>().notNull(),
+    version: text('version').notNull(),
+    url: text('url').notNull(),
+    ip: text('ip'),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true, mode: 'date' })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.id] }),
+    foreignKey({ columns: [t.tenantId], foreignColumns: [tenants.id] }).onDelete('cascade'),
+    index('terms_acceptances_tenant_idx').on(t.tenantId, t.acceptedAt),
+    check(
+      'terms_acceptances_document_check',
+      sql`${t.document} in ('subscription_terms', 'privacy_policy', 'dpa')`,
+    ),
+    check('terms_acceptances_version_check', sql`length(${t.version}) between 1 and 80`),
   ],
 );

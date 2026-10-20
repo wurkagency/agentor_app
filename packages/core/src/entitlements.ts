@@ -23,6 +23,8 @@ export interface Entitlements {
   quotaGraceDays: number;
   features: PlanFeatures;
   recommendedForOrders: string[];
+  /** Most systems (SU3) the plan is recommended for; null = no upper bound. */
+  recommendedForSystems: Limit;
 }
 
 const KEYS: Record<string, keyof Entitlements> = {
@@ -38,6 +40,7 @@ const KEYS: Record<string, keyof Entitlements> = {
   quota_grace_days: 'quotaGraceDays',
   features: 'features',
   recommended_for_orders: 'recommendedForOrders',
+  recommended_for_systems: 'recommendedForSystems',
 };
 
 const LIMIT_KEYS = new Set<keyof Entitlements>([
@@ -45,6 +48,7 @@ const LIMIT_KEYS = new Set<keyof Entitlements>([
   'destinationsPerFlow',
   'transactionsPerMonth',
   'seats',
+  'recommendedForSystems',
 ]);
 
 function isLimit(v: unknown): v is Limit {
@@ -203,15 +207,28 @@ export function addMonth(date: Date): Date {
   return d;
 }
 
-/** The plan recommended for an "Ordrer pr. måned" answer in onboarding. */
+/**
+ * The plan recommended from SU3's answers ("Anbefalet til jer"), from data only: the first plan
+ * (in catalogue order) whose recommended_for_orders has the order interval; if more systems were
+ * chosen than it suits (recommended_for_systems), the next plan that suits them.
+ */
 export function recommendPlan(
-  plans: readonly { id: string; entitlements: Pick<Entitlements, 'recommendedForOrders'> }[],
-  ordersPerMonth: string | null | undefined,
+  plans: readonly {
+    id: string;
+    entitlements: Pick<Entitlements, 'recommendedForOrders' | 'recommendedForSystems'>;
+  }[],
+  answers: { ordersPerMonth: string | null | undefined; systemCount?: number },
 ): string | null {
+  const { ordersPerMonth, systemCount = 0 } = answers;
   if (!ordersPerMonth) return null;
-  return (
-    plans.find((p) => p.entitlements.recommendedForOrders.includes(ordersPerMonth))?.id ?? null
+  const start = plans.findIndex((p) =>
+    p.entitlements.recommendedForOrders.includes(ordersPerMonth),
   );
+  if (start < 0) return null;
+  const fits = plans
+    .slice(start)
+    .find((p) => withinLimit(systemCount, p.entitlements.recommendedForSystems));
+  return (fits ?? plans[start]!).id;
 }
 
 /** UTC instant of local midnight on the 1st of a month in a time zone (handles DST). */

@@ -71,6 +71,40 @@ describe('QuickPay callbacks', () => {
     expect(queued).toHaveLength(1);
   });
 
+  it('gives the same callback twice the same job id, so it is applied once', async () => {
+    const send = (payload: string) =>
+      qp.inject({
+        method: 'POST',
+        url: '/billing/quickpay',
+        headers: {
+          'content-type': 'application/json',
+          [CHECKSUM_HEADER]: signCallback(payload, key),
+        },
+        payload,
+      });
+    const payment = JSON.stringify({ id: 9, type: 'Payment', order_id: 'AG5678', accepted: true });
+    const before = queued.length;
+    expect((await send(payment)).statusCode).toBe(202);
+    expect((await send(payment)).statusCode).toBe(202);
+    const ids = queued.slice(before).map((q) => q.jobId);
+    expect(ids).toHaveLength(2);
+    expect(ids[0]).toBe(ids[1]);
+  });
+
+  it('refuses a signed body that was changed afterwards', async () => {
+    const signed = signCallback(body, key);
+    const tampered = body.replace('"accepted":true', '"accepted":false');
+    const before = queued.length;
+    const res = await qp.inject({
+      method: 'POST',
+      url: '/billing/quickpay',
+      headers: { 'content-type': 'application/json', [CHECKSUM_HEADER]: signed },
+      payload: tampered,
+    });
+    expect(res.statusCode).toBe(401);
+    expect(queued).toHaveLength(before);
+  });
+
   it('is not served when billing is not configured', async () => {
     const res = await app.inject({
       method: 'POST',

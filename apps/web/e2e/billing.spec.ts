@@ -19,6 +19,9 @@ async function axe(page: Page) {
 test('sign up, confirm the e-mail, onboard with CVR, card and a template (D14)', async ({
   page,
 }) => {
+  // The D14 signup and onboarding are replaced by SU1–SU6/OB1–OB5 (PLAN-SIGNUP S1–S3); this
+  // test is removed with the old pages in S2, where e2e/signup.spec.ts covers the new path.
+  test.skip(true, 'old D14 onboarding, replaced by PLAN-SIGNUP');
   test.setTimeout(150_000);
   const email = `ejer.${Date.now()}@e2e.agentor.test`;
   // Generated per run: e2e never carries credential literals.

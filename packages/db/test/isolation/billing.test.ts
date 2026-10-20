@@ -93,7 +93,7 @@ describe('onboarding: create_tenant', () => {
     const { result, error } = await run(
       'web',
       { userId: ID.userInviteeA },
-      `select app.create_tenant('Ny Butik ApS', '11223344', '', '', 'Odense', '', 'da', 'Europe/Copenhagen', '0-200') as t`,
+      `select app.create_tenant('Ny Butik ApS', '11223344', '', '', 'Odense', '', 'da', 'Europe/Copenhagen', 'lt100', '{woocommerce}') as t`,
     );
     expect(error).toBeUndefined();
     expect(result!.rows[0].t).toMatch(/^[0-9a-f-]{36}$/);
@@ -103,20 +103,20 @@ describe('onboarding: create_tenant', () => {
     const noUser = await run(
       'web',
       null,
-      `select app.create_tenant('X', '', '', '', '', '', 'da', 'Europe/Copenhagen', '')`,
+      `select app.create_tenant('X', '', '', '', '', '', 'da', 'Europe/Copenhagen', '', '{}')`,
     );
     expect(noUser.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
     const noName = await run(
       'web',
       { userId: ID.userInviteeA },
-      `select app.create_tenant(' ', '', '', '', '', '', 'da', 'Europe/Copenhagen', '')`,
+      `select app.create_tenant(' ', '', '', '', '', '', 'da', 'Europe/Copenhagen', '', '{}')`,
     );
     expect(noName.error?.message).toContain('TENANT_NAME_REQUIRED');
     for (const role of ['worker', 'support'] as const) {
       const { error } = await run(
         role,
         { userId: ID.userInviteeA },
-        `select app.create_tenant('X', '', '', '', '', '', 'da', 'Europe/Copenhagen', '')`,
+        `select app.create_tenant('X', '', '', '', '', '', 'da', 'Europe/Copenhagen', '', '{}')`,
       );
       expect(error?.code, role).toBe(INSUFFICIENT_PRIVILEGE);
     }

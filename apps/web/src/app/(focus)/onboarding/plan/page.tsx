@@ -25,7 +25,7 @@ export default async function OnboardingPlanPage({
   if (!overview) redirect('/');
   const { card } = await searchParams;
   const t = await getTranslations('onboarding');
-  const recommended = recommendPlan(overview.plans, company?.ordersPerMonth);
+  const recommended = recommendPlan(overview.plans, { ordersPerMonth: company?.ordersPerMonth });
   return (
     <OnboardingCard step={2} title={t('planTitle')} intro={t('planIntro')}>
       <PlanStep

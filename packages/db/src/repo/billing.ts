@@ -403,6 +403,12 @@ export interface CardDetails {
 /**
  * Card authorised (or re-authorised) for a subscription. A first authorisation activates the
  * subscription and makes the first month due now, so the scheduler charges it on its next run.
+ *
+ * During signup (PLAN-SIGNUP §4.2) the subscription stays incomplete and the first period starts
+ * now; the caller charges it at once ("I alt i dag") and the company only becomes active when
+ * QuickPay's Payment callback confirms that charge. A new card after a failed first charge voids
+ * the failed invoice, so the retry is a fresh charge for a period starting now.
+ * Returns whether the caller should charge the first period now.
  */
 export async function applySubscriptionAuthorized(
   db: Database,
@@ -410,33 +416,55 @@ export async function applySubscriptionAuthorized(
   subscriptionId: string,
   card: CardDetails,
   now = new Date(),
-): Promise<void> {
-  await withTenant(db, { tenantId }, async (tx) => {
+): Promise<{ chargeNow: boolean }> {
+  return withTenant(db, { tenantId }, async (tx) => {
     const [sub] = await tx
       .select()
       .from(subscriptions)
       .where(eq(subscriptions.id, subscriptionId))
       .limit(1);
     if (!sub) throw new BillingError('UNKNOWN_REFERENCE');
+    const [t] = await tx.select({ state: tenants.signupState }).from(tenants).limit(1);
+    const signup = !!t && t.state !== 'active';
     const first = sub.status === 'incomplete';
-    await tx
-      .update(subscriptions)
-      .set({
-        cardBrand: card.brand,
-        cardLast4: card.last4 && /^\d{4}$/.test(card.last4) ? card.last4 : null,
-        cardExpiry: card.expiry,
-        ...(first
-          ? { status: 'active' as const, currentPeriodStart: now, currentPeriodEnd: now }
-          : {}),
-        updatedAt: now,
-      })
-      .where(eq(subscriptions.id, sub.id));
+    const cardFields = {
+      cardBrand: card.brand,
+      cardLast4: card.last4 && /^\d{4}$/.test(card.last4) ? card.last4 : null,
+      cardExpiry: card.expiry,
+    };
+    if (signup) {
+      await tx
+        .update(invoices)
+        .set({ status: 'void', nextRetryAt: null })
+        .where(and(eq(invoices.kind, 'subscription'), eq(invoices.status, 'failed')));
+      await tx
+        .update(subscriptions)
+        .set({ ...cardFields, currentPeriodStart: now, currentPeriodEnd: now, updatedAt: now })
+        .where(eq(subscriptions.id, sub.id));
+      await tx.execute(sql`select app.signup_payment_activity()`);
+    } else {
+      await tx
+        .update(subscriptions)
+        .set({
+          ...cardFields,
+          ...(first
+            ? { status: 'active' as const, currentPeriodStart: now, currentPeriodEnd: now }
+            : {}),
+          updatedAt: now,
+        })
+        .where(eq(subscriptions.id, sub.id));
+    }
     await writeSystemAudit(tx, tenantId, {
-      action: first ? 'subscription.activated' : 'subscription.card_changed',
+      action: first
+        ? signup
+          ? 'subscription.card_authorised'
+          : 'subscription.activated'
+        : 'subscription.card_changed',
       objectType: 'subscription',
       objectId: sub.id,
       after: { card: card.last4 ? `•••• ${card.last4}` : null },
     });
+    return { chargeNow: signup };
   });
 }
 
@@ -475,7 +503,11 @@ export async function prepareCharge(
   return withTenant(db, { tenantId }, async (tx) => {
     const [sub] = await tx.select().from(subscriptions).limit(1);
     if (!sub?.currentPeriodEnd) return null;
-    if (sub.status !== 'active' && sub.status !== 'past_due') return null;
+    // The first charge during signup runs on an incomplete subscription (card authorised).
+    const [t] = await tx.select({ state: tenants.signupState }).from(tenants).limit(1);
+    const signup = !!t && t.state !== 'active';
+    if (signup ? sub.status !== 'incomplete' : sub.status !== 'active' && sub.status !== 'past_due')
+      return null;
     const periodStart = sub.currentPeriodEnd;
     if (sub.cancelAt && sub.cancelAt.getTime() <= periodStart.getTime()) {
       await tx
@@ -700,8 +732,14 @@ export async function applyChargeResult(
       return;
     const [sub] = await tx.select().from(subscriptions).limit(1);
     if (!sub) throw new BillingError('NO_SUBSCRIPTION');
+    // A failed first payment during signup is shown on /signup/payment with "Prøv igen"; the
+    // 2/5/9-day retries and owner notices are for renewals of active companies (decision 18).
+    const [t] = await tx.select({ state: tenants.signupState }).from(tenants).limit(1);
+    const signup = !!t && t.state !== 'active';
+    if (signup) await tx.execute(sql`select app.signup_payment_activity()`);
     const attempts = inv.attempts + 1;
-    const retry = result.accepted ? null : nextRetryAt(inv.issuedAt ?? inv.createdAt, attempts);
+    const retry =
+      result.accepted || signup ? null : nextRetryAt(inv.issuedAt ?? inv.createdAt, attempts);
     await tx
       .update(invoices)
       .set({
@@ -724,7 +762,7 @@ export async function applyChargeResult(
             updatedAt: now,
           })
           .where(eq(subscriptions.id, sub.id));
-      } else {
+      } else if (!signup) {
         await tx
           .update(subscriptions)
           .set({ status: 'past_due', pastDueSince: sub.pastDueSince ?? now, updatedAt: now })
@@ -732,13 +770,14 @@ export async function applyChargeResult(
       }
     }
     // The owners hear about every failed try, with when it is tried again (README decision 18);
-    // a payment that goes through clears the notice.
+    // a payment that goes through clears the notice. A failed first payment during signup is
+    // shown on /signup/payment instead.
     if (result.accepted)
       await tx.execute(sql`
         update notifications set resolved_at = ${now}
          where message_key = 'paymentFailed' and resolved_at is null
            and params ->> 'number' = ${inv.number ?? ''}`);
-    else
+    else if (!signup)
       await tx.execute(sql`
         insert into notifications (tenant_id, user_id, event, needs_action, message_key, params, href)
         select ${tenantId}::uuid, m.user_id, 'payment_failed', true, 'paymentFailed',

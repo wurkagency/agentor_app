@@ -24,7 +24,8 @@ const ROWS = [
   { key: 'overage_price_ore_per_1000', value: 10000 },
   { key: 'quota_grace_days', value: 7 },
   { key: 'features', value: { included: ['transactions'], excluded: [] } },
-  { key: 'recommended_for_orders', value: ['0-200'] },
+  { key: 'recommended_for_orders', value: ['lt100'] },
+  { key: 'recommended_for_systems', value: 3 },
   { key: 'unknown_future_key', value: true },
 ];
 
@@ -35,7 +36,14 @@ const enterprise: Entitlements = {
   destinationsPerFlow: null,
   seats: null,
   transactionsPerMonth: 2000,
-  recommendedForOrders: ['1000+'],
+  recommendedForOrders: ['gt1000'],
+  recommendedForSystems: null,
+};
+const business: Entitlements = {
+  ...startup,
+  transactionsPerMonth: 1000,
+  recommendedForOrders: ['100-1000'],
+  recommendedForSystems: 3,
 };
 
 describe('parseEntitlements', () => {
@@ -124,13 +132,19 @@ describe('money and periods', () => {
       '2026-11-01T00:00:00.000Z',
     );
   });
-  it('recommends a plan from orders per month', () => {
+  it('recommends a plan from orders per month and number of systems', () => {
     const plans = [
       { id: 'startup', entitlements: startup },
+      { id: 'business', entitlements: business },
       { id: 'enterprise', entitlements: enterprise },
     ];
-    expect(recommendPlan(plans, '1000+')).toBe('enterprise');
-    expect(recommendPlan(plans, null)).toBeNull();
+    expect(recommendPlan(plans, { ordersPerMonth: 'gt1000' })).toBe('enterprise');
+    expect(recommendPlan(plans, { ordersPerMonth: '100-1000', systemCount: 3 })).toBe('business');
+    // More systems than Business suits: the next plan that suits them.
+    expect(recommendPlan(plans, { ordersPerMonth: '100-1000', systemCount: 4 })).toBe('enterprise');
+    expect(recommendPlan(plans, { ordersPerMonth: 'lt100', systemCount: 2 })).toBe('startup');
+    expect(recommendPlan(plans, { ordersPerMonth: null })).toBeNull();
+    expect(recommendPlan(plans, { ordersPerMonth: 'unknown' })).toBeNull();
   });
 });
 

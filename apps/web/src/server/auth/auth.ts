@@ -6,13 +6,47 @@ import { hash, verify, type Options as Argon2Options } from '@node-rs/argon2';
 import { betterAuth } from 'better-auth';
 import { APIError, createAuthMiddleware } from 'better-auth/api';
 import { nextCookies } from 'better-auth/next-js';
-import { twoFactor } from 'better-auth/plugins';
+import { emailOTP, genericOAuth, twoFactor } from 'better-auth/plugins';
 import { env, isProduction } from '../env';
 import { db } from '../infra';
 import { notifyNewDevice } from './new-device';
 import { redisRateLimitStorage } from './rate-limit';
 import { clearFailures, isLocked, recordFailure } from './lockout';
 import { sendMail } from '../mail';
+import { markSessionMfaVerified, markSignupStarted } from '@agentor/db';
+import { mockSsoConfig, SSO_PROVIDERS } from '../mock-sso';
+import { sendSignupCode } from '../signup-mail';
+
+/**
+ * Better Auth's e-mail OTP endpoints would sign a user in with just a mailed code, past the
+ * password and second factor. They are closed over HTTP; signup calls them only from its own
+ * server actions with its own checks (PLAN-SIGNUP §5).
+ */
+const CLOSED_PATHS = [
+  '/email-otp/send-verification-otp',
+  '/email-otp/check-verification-otp',
+  '/email-otp/verify-email',
+  '/sign-in/email-otp',
+  '/email-otp/request-password-reset',
+  '/forget-password/email-otp',
+  '/email-otp/reset-password',
+  '/email-otp/request-email-change',
+  '/email-otp/change-email',
+];
+
+/** Endpoints that end in a session for a social or mock-IdP sign-in. */
+const isSsoCallback = (path: string | undefined) => !!path && path.startsWith('/callback/');
+
+/** Endpoints where the user passed a second factor. */
+const SECOND_FACTOR_PATHS = new Set([
+  '/two-factor/verify-totp',
+  '/two-factor/verify-backup-code',
+  '/passkey/verify-authentication',
+]);
+
+/** Six-digit codes for e-mail signup: 10 minutes, 5 tries, stored hashed (PLAN-SIGNUP §3.7). */
+export const SIGNUP_CODE_SECONDS = 600;
+export const SIGNUP_CODE_ATTEMPTS = 5;
 
 /** Argon2id (produktspecifikation §9.5); OWASP-recommended parameters. */
 const ARGON2: Argon2Options = {
@@ -33,6 +67,7 @@ function createAuth() {
     appName: 'Agentor',
     baseURL: e.APP_URL,
     basePath: '/api/auth',
+    disabledPaths: CLOSED_PATHS,
     secret: e.BETTER_AUTH_SECRET,
     trustedOrigins: [appUrl.origin],
     telemetry: { enabled: false },
@@ -66,6 +101,8 @@ function createAuth() {
       cookieCache: { enabled: false },
       additionalFields: {
         activeTenantId: { type: 'string', required: false, input: false },
+        ssoLogin: { type: 'boolean', required: false, defaultValue: false, input: false },
+        mfaVerifiedAt: { type: 'date', required: false, input: false },
       },
     },
     emailAndPassword: {
@@ -90,6 +127,37 @@ function createAuth() {
           text: `Hej ${user.name}\n\nBrug linket herunder til at vælge en ny adgangskode. Linket virker i 1 time.\n\n${url}\n\nHar du ikke bedt om det, kan du se bort fra denne mail.\n\nVenlig hilsen\nAgentor`,
         });
       },
+    },
+    ...(e.SSO_MODE === 'live'
+      ? {
+          socialProviders: {
+            ...(e.GOOGLE_CLIENT_ID && e.GOOGLE_CLIENT_SECRET
+              ? {
+                  google: {
+                    clientId: e.GOOGLE_CLIENT_ID,
+                    clientSecret: e.GOOGLE_CLIENT_SECRET,
+                    prompt: 'select_account' as const,
+                  },
+                }
+              : {}),
+            ...(e.MICROSOFT_CLIENT_ID && e.MICROSOFT_CLIENT_SECRET
+              ? {
+                  microsoft: {
+                    clientId: e.MICROSOFT_CLIENT_ID,
+                    clientSecret: e.MICROSOFT_CLIENT_SECRET,
+                    tenantId: 'common',
+                    prompt: 'select_account' as const,
+                  },
+                }
+              : {}),
+          },
+        }
+      : {}),
+    account: {
+      // The provider has verified the e-mail; link it to an existing account with that e-mail.
+      // An account from an unfinished e-mail signup has no password yet (it is set when the code
+      // is confirmed), so linking can't hand someone else's password a Google login.
+      accountLinking: { enabled: true, trustedProviders: [...SSO_PROVIDERS] },
     },
     emailVerification: {
       sendOnSignIn: true,
@@ -123,6 +191,7 @@ Agentor`,
         '/two-factor/verify-backup-code': { window: 60, max: 5 },
         '/request-password-reset': { window: 300, max: 3 },
         '/send-verification-email': { window: 300, max: 3 },
+        '/sign-in/social': { window: 60, max: 20 },
       },
       customStorage: redisRateLimitStorage,
     },
@@ -149,11 +218,36 @@ Agentor`,
           if (ctx.context.returned instanceof APIError) await recordFailure(email);
           else await clearFailures(email);
         }
+        // A second factor confirmed on an existing session (after a Google or Microsoft login).
+        if (
+          SECOND_FACTOR_PATHS.has(ctx.path) &&
+          !(ctx.context.returned instanceof APIError) &&
+          !ctx.context.newSession &&
+          ctx.context.session
+        ) {
+          await markSessionMfaVerified(db(), ctx.context.session.session.id);
+        }
       }),
     },
     databaseHooks: {
+      user: {
+        create: {
+          after: async (user, ctx) => {
+            // A new account from Google or Microsoft is a signup: purged after 24 h unless its
+            // company becomes active (B1). E-mail signups are marked by their own action.
+            if (isSsoCallback(ctx?.path)) await markSignupStarted(db(), user.id);
+          },
+        },
+      },
       session: {
         create: {
+          before: async (session, ctx) => ({
+            data: {
+              ...session,
+              ssoLogin: isSsoCallback(ctx?.path),
+              mfaVerifiedAt: ctx?.path && SECOND_FACTOR_PATHS.has(ctx.path) ? new Date() : null,
+            },
+          }),
           after: async (session) => {
             // Fire and forget: a mail outage must never block a login.
             void notifyNewDevice(session).catch((err: unknown) => {
@@ -174,6 +268,19 @@ Agentor`,
         trustDeviceMaxAge: 30 * 24 * 3600, // "Husk denne enhed i 30 dage" (D14-MFA)
       }),
       passkey({ rpID: appUrl.hostname, rpName: 'Agentor', origin: appUrl.origin }),
+      emailOTP({
+        otpLength: 6,
+        expiresIn: SIGNUP_CODE_SECONDS,
+        allowedAttempts: SIGNUP_CODE_ATTEMPTS,
+        storeOTP: 'hashed',
+        disableSignUp: true,
+        overrideDefaultEmailVerification: true,
+        sendVerificationOTP: async ({ email, otp, type }) => {
+          if (type === 'email-verification') await sendSignupCode(email, otp);
+        },
+      }),
+      // Always registered (typed API); providers only in mock mode.
+      genericOAuth({ config: e.SSO_MODE === 'mock' ? mockSsoConfig(e.APP_URL) : [] }),
       nextCookies(),
     ],
   });

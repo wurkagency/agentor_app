@@ -97,6 +97,62 @@ describe('clients', () => {
     });
   });
 
+  it('offers card only in the payment window', async () => {
+    const fetchMock = vi.fn(async () => Response.json({ url: 'https://payment.quickpay.net/x' }));
+    const qp = new HttpQuickPayClient('test', 'k', fetchMock as typeof fetch, 'https://qp.test');
+    await qp.subscriptionLink({
+      subscriptionId: '42',
+      orderId: 'AGX1234',
+      amountOre: 198750,
+      continueUrl: 'https://app.example/signup/payment?return=1',
+      cancelUrl: 'https://app.example/signup/payment?cancelled=1',
+      callbackUrl: 'https://ingest.example/billing/quickpay',
+      language: 'da',
+    });
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('https://qp.test/subscriptions/42/link');
+    expect(JSON.parse(String(init.body))).toMatchObject({
+      amount: 198750,
+      payment_methods: 'creditcard',
+    });
+  });
+
+  it('mock charges send the signed Payment callback QuickPay would send', async () => {
+    vi.useFakeTimers();
+    const posted: { url: string; body: string; checksum: string }[] = [];
+    const realFetch = globalThis.fetch;
+    globalThis.fetch = (async (url: string, init: RequestInit) => {
+      posted.push({
+        url,
+        body: String(init.body),
+        checksum: (init.headers as Record<string, string>)['quickpay-checksum-sha256']!,
+      });
+      return new Response(null, { status: 202 });
+    }) as typeof fetch;
+    try {
+      const qp = new MockQuickPayClient('http://localhost:3000', 'private');
+      const r = await qp.recurring({
+        subscriptionId: 'mock_AGX1234',
+        orderId: 'AGCHARGE01',
+        amountOre: 100,
+        callbackUrl: 'http://ingest.test/billing/quickpay',
+      });
+      expect(r.accepted).toBe(true);
+      await vi.runAllTimersAsync();
+      expect(posted).toHaveLength(1);
+      expect(posted[0]!.url).toBe('http://ingest.test/billing/quickpay');
+      expect(verifyCallback(posted[0]!.body, posted[0]!.checksum, 'private')).toBe(true);
+      expect(JSON.parse(posted[0]!.body)).toMatchObject({
+        type: 'Payment',
+        order_id: 'AGCHARGE01',
+        accepted: true,
+      });
+    } finally {
+      globalThis.fetch = realFetch;
+      vi.useRealTimers();
+    }
+  });
+
   it('reports errors without echoing the response body', async () => {
     const fetchMock = vi.fn(
       async () => new Response('{"message":"card 4111..."}', { status: 400 }),

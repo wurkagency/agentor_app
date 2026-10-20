@@ -193,6 +193,12 @@ export async function seedFixtures(admin: pg.ClientBase): Promise<void> {
     [ID.tenantA, ID.tenantB],
   );
   await q(
+    `insert into terms_acceptances (tenant_id, user_id, document, version, url) values
+       ($1, $3, 'subscription_terms', 'test-1', 'https://agentor.dk/test'),
+       ($2, $4, 'subscription_terms', 'test-1', 'https://agentor.dk/test')`,
+    [ID.tenantA, ID.tenantB, ID.userAOwner, ID.userBOwner],
+  );
+  await q(
     `insert into addons (tenant_id, kind, quantity, period, price_ore) values
        ($1, 'transactions', 1000, '2026-10', 10000), ($2, 'transactions', 1000, '2026-10', 10000)`,
     [ID.tenantA, ID.tenantB],

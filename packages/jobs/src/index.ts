@@ -22,6 +22,8 @@ export const billingJobs = {
   'billing.send-invoice': z.object({ tenantId: z.uuid(), invoiceId: z.uuid() }),
   /** A failed card charge due for its next try (2, 5 and 9 days). */
   'billing.retry': z.object({ tenantId: z.uuid(), invoiceId: z.uuid() }),
+  /** Unfinished signups older than 24 hours are deleted (PLAN-SIGNUP B1). */
+  'signup.purge': z.object({}),
 } as const;
 
 export type BillingJobName = keyof typeof billingJobs;

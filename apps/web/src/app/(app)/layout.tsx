@@ -1,4 +1,5 @@
 import { manifestFor } from '@agentor/connectors';
+import { currentSignupStep, SIGNUP_PATHS } from '@agentor/core';
 import { listNotifications, listOwnTenants, myGrants, openFailures } from '@agentor/db';
 import { formatPercent, type Locale } from '@agentor/i18n';
 import { getLocale, getTranslations } from 'next-intl/server';
@@ -22,8 +23,15 @@ function shortName(name: string): string {
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const ctx = await requireAppContext();
-  // A company that hasn't finished onboarding (D14) goes back there; only the owner can finish.
-  if (!ctx.tenant.onboardingCompleted && ctx.tenant.role === 'owner') redirect('/onboarding/plan');
+  // An owner in the middle of onboarding resumes it, unless they chose "Spring over"; then
+  // Overblik shows the reminder instead (PLAN-SIGNUP §2, S3).
+  const step = currentSignupStep({
+    signedIn: true,
+    pendingEmail: false,
+    tenant: ctx.support ? null : ctx.tenant,
+    mfa: ctx.user.twoFactorEnabled,
+  });
+  if (!ctx.support && step !== 'app') redirect(SIGNUP_PATHS[step]);
   const tenants = ctx.tenantCount > 1 ? await listOwnTenants(db(), ctx.user.id) : [];
   const t = await getTranslations('nav');
   // Profile menu hint next to "Abonnement" (App-skal-B): this month's transaction usage.

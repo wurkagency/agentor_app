@@ -120,7 +120,7 @@ const n = TENANTS.nordlys;
 await inTenant(n.id, async () => {
   await owner.query(
     `insert into tenants (id, name, cvr, address_line, postal_code, city, billing_email, orders_per_month, onboarding_completed_at, first_test_run_at)
-     values ($1, $2, $3, 'Cykelvej 12', '8000', 'Aarhus C', 'regnskab@nordlys-cykler.dk', '200-1000', '2026-08-01T09:00:00+02:00', '2026-08-01T10:12:00+02:00')`,
+     values ($1, $2, $3, 'Cykelvej 12', '8000', 'Aarhus C', 'regnskab@nordlys-cykler.dk', '100-1000', '2026-08-01T09:00:00+02:00', '2026-08-01T10:12:00+02:00')`,
     [n.id, n.name, n.cvr],
   );
   const m = async (userId: string, role: string, scope = 'all', external = false) =>

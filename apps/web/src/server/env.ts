@@ -25,6 +25,25 @@ const schema = z.object({
   CONNECTOR_MODE: z.enum(['mock', 'live']).default('mock'),
   CVR_PROVIDER: z.enum(['fixture', 'datafordeler']).default('fixture'),
   DATAFORDELER_API_KEY: z.string().optional(),
+  /**
+   * Sign-up and login with Google and Microsoft (PLAN-SIGNUP §5). `off` hides the buttons,
+   * `mock` uses the local test identity provider (/dev/oauth, refused in production), `live`
+   * the real providers with the client ids below.
+   */
+  SSO_MODE: z.enum(['off', 'mock', 'live']).default('off'),
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  MICROSOFT_CLIENT_ID: z.string().optional(),
+  MICROSOFT_CLIENT_SECRET: z.string().optional(),
+  /**
+   * Terms accepted on the payment step, served from agentor.dk (PLAN-SIGNUP B6, B12). The
+   * version is read from the page when the owner accepts. FOLLOW-UP (T3): real URLs.
+   */
+  LEGAL_SUBSCRIPTION_TERMS_URL: z.url().optional(),
+  LEGAL_PRIVACY_URL: z.url().optional(),
+  LEGAL_DPA_URL: z.url().optional(),
+  /** Development and tests only: the version used while agentor.dk has no documents yet. */
+  LEGAL_DEV_VERSION: z.string().max(80).optional(),
 });
 
 export type ServerEnv = z.infer<typeof schema>;

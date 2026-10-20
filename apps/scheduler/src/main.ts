@@ -62,6 +62,17 @@ const runBilling = () =>
       }),
     )
     .then((n) => n && log.info({ due: n }, 'invoice jobs enqueued'))
+    // Unfinished signups (24 h, PLAN-SIGNUP B1): one job per tick, the worker does the rest.
+    .then(() =>
+      lock.isLeader
+        ? enqueueBilling(
+            queue,
+            'signup.purge',
+            {},
+            { jobId: `signup-purge-${Math.floor(Date.now() / BILLING_INTERVAL_MS)}` },
+          )
+        : undefined,
+    )
     .catch((err: unknown) =>
       log.error({ err: err instanceof Error ? err.message : err }, 'billing tick failed'),
     );

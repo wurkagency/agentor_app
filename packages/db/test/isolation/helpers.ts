@@ -54,6 +54,36 @@ export async function run(
   }
 }
 
+/**
+ * Like run(), but several statements in one transaction (rolled back), each with its own context.
+ * Stops at the first error and returns it with the results so far.
+ */
+export async function runSteps(
+  role: Role,
+  steps: { ctx: Ctx | null; text: string; values?: unknown[] }[],
+): Promise<{ results: pg.QueryResult[]; error?: pg.DatabaseError; failedAt?: number }> {
+  const c = await client(role);
+  const results: pg.QueryResult[] = [];
+  await c.query('begin');
+  try {
+    for (const [i, s] of steps.entries()) {
+      await c.query(
+        `select set_config('app.tenant_id', $1, true), set_config('app.user_id', $2, true)`,
+        [s.ctx?.tenantId ?? '', s.ctx?.userId ?? ''],
+      );
+      try {
+        results.push(await c.query(s.text, s.values ?? []));
+      } catch (error) {
+        if (error instanceof pg.DatabaseError) return { results, error, failedAt: i };
+        throw error;
+      }
+    }
+    return { results };
+  } finally {
+    await c.query('rollback');
+  }
+}
+
 /** Runs a statement as superuser (bypasses RLS) to read ground truth. */
 export async function admin(text: string, values: unknown[] = []): Promise<pg.QueryResult> {
   return (await client('admin')).query(text, values);

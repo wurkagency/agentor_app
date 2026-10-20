@@ -40,6 +40,10 @@ export interface MembershipContext {
   flowScope: 'all' | 'selected';
   /** False until the owner has finished /onboarding (D14). */
   onboardingCompleted: boolean;
+  /** Self-service signup state; nothing in the app works before 'active' (PLAN-SIGNUP §3.1). */
+  signupState: 'pending_plan' | 'pending_payment' | 'active';
+  onboardingStep: 'webshop' | 'accounting' | 'template' | 'test' | 'done' | null;
+  onboardingSkipped: boolean;
 }
 
 /** The user's membership in a tenant, or null. The tenant comes from the session, never input. */
@@ -56,6 +60,9 @@ export async function getMembership(
         role: memberships.role,
         flowScope: memberships.flowScope,
         onboardingCompletedAt: tenants.onboardingCompletedAt,
+        signupState: tenants.signupState,
+        onboardingStep: tenants.onboardingStep,
+        onboardingSkippedAt: tenants.onboardingSkippedAt,
       })
       .from(memberships)
       .innerJoin(tenants, eq(tenants.id, memberships.tenantId))
@@ -64,8 +71,15 @@ export async function getMembership(
   );
   const row = rows[0];
   if (!row) return null;
-  const { onboardingCompletedAt, ...rest } = row;
-  return { ...rest, userId, onboardingCompleted: onboardingCompletedAt !== null };
+  const { onboardingCompletedAt, onboardingSkippedAt, signupState, onboardingStep, ...rest } = row;
+  return {
+    ...rest,
+    userId,
+    onboardingCompleted: onboardingCompletedAt !== null,
+    signupState: signupState as MembershipContext['signupState'],
+    onboardingStep: onboardingStep as MembershipContext['onboardingStep'],
+    onboardingSkipped: onboardingSkippedAt !== null,
+  };
 }
 
 /** Stores the tenant a session works in. Only called after getMembership() confirmed access. */
@@ -115,4 +129,12 @@ export async function getUserById(db: Database, userId: string) {
     .where(eq(authUsers.id, userId))
     .limit(1);
   return rows[0] ?? null;
+}
+
+/** A second factor was confirmed on this session (after a Google or Microsoft login, B10). */
+export async function markSessionMfaVerified(db: Database, sessionId: string): Promise<void> {
+  await db
+    .update(authSessions)
+    .set({ mfaVerifiedAt: new Date() })
+    .where(eq(authSessions.id, sessionId));
 }

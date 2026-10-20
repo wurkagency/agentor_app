@@ -39,6 +39,8 @@ export interface QuickPayClient {
   createSubscription(orderId: string, description: string): Promise<{ id: string }>;
   subscriptionLink(input: SubscriptionLinkInput): Promise<{ url: string }>;
   recurring(input: RecurringInput): Promise<RecurringResult>;
+  /** Unfinished signups are purged after 24 h; their saved card goes first (PLAN-SIGNUP B1). */
+  cancelSubscription(subscriptionId: string): Promise<void>;
 }
 
 /** QuickPay order ids: 4–20 alphanumerics. "AG" + 12 random base-36 characters. */
@@ -116,9 +118,19 @@ export class HttpQuickPayClient implements QuickPayClient {
         cancel_url: i.cancelUrl,
         callback_url: i.callbackUrl,
         language: i.language,
+        // Card only (MobilePay is not offered, PLAN-SIGNUP §4).
+        payment_methods: 'creditcard',
       },
     );
     return { url: r.url };
+  }
+
+  async cancelSubscription(subscriptionId: string) {
+    await this.call(
+      'POST',
+      `/subscriptions/${encodeURIComponent(subscriptionId)}/cancel?synchronized`,
+      {},
+    );
   }
 
   async recurring(i: RecurringInput) {
@@ -135,11 +147,16 @@ export class HttpQuickPayClient implements QuickPayClient {
 
 /**
  * No network: subscriptions are "mock_<order>", the card form is the app's own mock checkout
- * page, and recurring charges succeed at once.
+ * page, and recurring charges succeed at once. With the private key it also sends the signed
+ * Payment callback QuickPay would send, through the real ingest verification, because only that
+ * callback activates a new company (PLAN-SIGNUP §4.2).
  */
 export class MockQuickPayClient implements QuickPayClient {
   readonly mode = 'mock' as const;
-  constructor(private readonly appUrl: string) {}
+  constructor(
+    private readonly appUrl: string,
+    private readonly privateKey?: string,
+  ) {}
 
   async createSubscription(orderId: string) {
     return { id: `mock_${orderId}` };
@@ -156,8 +173,34 @@ export class MockQuickPayClient implements QuickPayClient {
   }
 
   async recurring(i: RecurringInput) {
-    return { paymentId: `mock_pay_${i.orderId}`, accepted: true };
+    const paymentId = `mock_pay_${i.orderId}`;
+    const key = this.privateKey;
+    if (key) {
+      const body = JSON.stringify({
+        id: paymentId,
+        type: 'Payment',
+        order_id: i.orderId,
+        accepted: true,
+        test_mode: true,
+        state: 'processed',
+      });
+      // After the answer, like QuickPay: the callback arrives separately.
+      setTimeout(() => {
+        void fetch(i.callbackUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            [CHECKSUM_HEADER]: signCallback(body, key),
+          },
+          body,
+          signal: AbortSignal.timeout(5000),
+        }).catch(() => undefined);
+      }, 200);
+    }
+    return { paymentId, accepted: true };
   }
+
+  async cancelSubscription() {}
 }
 
 export function quickPayMode(value: string | undefined): QuickPayMode {
@@ -169,6 +212,8 @@ export function quickPayMode(value: string | undefined): QuickPayMode {
 export function createQuickPay(env: {
   QUICKPAY_MODE?: string | undefined;
   QUICKPAY_API_KEY?: string | undefined;
+  /** Mock mode only: signs the Payment callbacks the mock sends. */
+  QUICKPAY_PRIVATE_KEY?: string | undefined;
   APP_URL: string;
   NODE_ENV?: string | undefined;
 }): QuickPayClient {
@@ -176,7 +221,7 @@ export function createQuickPay(env: {
   if (mode === 'mock') {
     if (env.NODE_ENV === 'production' && !env.APP_URL.startsWith('http://localhost'))
       throw new Error('QUICKPAY_MODE=mock is not allowed in production');
-    return new MockQuickPayClient(env.APP_URL);
+    return new MockQuickPayClient(env.APP_URL, env.QUICKPAY_PRIVATE_KEY);
   }
   return new HttpQuickPayClient(mode, env.QUICKPAY_API_KEY ?? '');
 }

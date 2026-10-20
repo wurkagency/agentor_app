@@ -13,6 +13,8 @@ export interface CvrCompany {
   /** Year the company was founded, for "aktiv siden 2014". */
   since: number | null;
   active: boolean;
+  /** Industry text, "Detailhandel med cykler" on SU3's "Fundet" state. */
+  industry: string | null;
 }
 
 export interface CvrProvider {
@@ -31,6 +33,7 @@ const FIXTURES: CvrCompany[] = [
     city: 'Aarhus C',
     since: 2014,
     active: true,
+    industry: 'Detailhandel med cykler',
   },
   {
     cvr: '87654321',
@@ -40,6 +43,7 @@ const FIXTURES: CvrCompany[] = [
     city: 'Odense C',
     since: 2019,
     active: true,
+    industry: 'Detailhandel med cykler',
   },
   {
     cvr: '11112222',
@@ -49,6 +53,7 @@ const FIXTURES: CvrCompany[] = [
     city: 'København K',
     since: 2009,
     active: false,
+    industry: null,
   },
 ];
 
@@ -59,7 +64,8 @@ export class FixtureCvrProvider implements CvrProvider {
 }
 
 /**
- * Datafordeler GraphQL (CVR register, API key as `apiKey` query parameter).
+ * Datafordeler GraphQL (CVR register, API key as `apiKey` query parameter). Chosen for signup
+ * (PLAN-SIGNUP B2): the older CVR distribution closes next year.
  * FOLLOW-UP: the entity and field names below must be verified against the published schema at
  * https://graphql.datafordeler.dk/CVR/v1/schema before CVR_PROVIDER=datafordeler is enabled;
  * the fixture provider is the default until then (PLAN.md, CVR lookup).
@@ -130,6 +136,8 @@ export class DatafordelerCvrProvider implements CvrProvider {
       city: a?.postdistrikt ?? null,
       since: n.virksomhedStartdato ? Number(n.virksomhedStartdato.slice(0, 4)) : null,
       active: !n.virksomhedOphoersdato,
+      // FOLLOW-UP (B2): the industry field is added once the schema is verified with a key.
+      industry: null,
     };
   }
 }

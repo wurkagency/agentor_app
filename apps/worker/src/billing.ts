@@ -6,11 +6,16 @@ import {
   type QuickPayMode,
 } from '@agentor/billing';
 import {
+  activateSignupIfPaid,
   applyChargeResult,
   applySubscriptionAuthorized,
   prepareCharge,
   prepareRetry,
+  providerSubscriptionFor,
+  purgeSignupTenant,
+  purgeSignupUsers,
   sendSupportInvoice,
+  signupPurgeCandidates,
   type PendingCharge,
   resolveBillingRef,
   type Database,
@@ -44,8 +49,15 @@ async function handleCallback(deps: BillingDeps, body: string): Promise<void> {
       deps.log.info({ tenantId: ref.tenantId }, 'card authorisation not accepted');
       return;
     }
-    await applySubscriptionAuthorized(deps.db, ref.tenantId, ref.refId, cb.card);
+    const { chargeNow } = await applySubscriptionAuthorized(
+      deps.db,
+      ref.tenantId,
+      ref.refId,
+      cb.card,
+    );
     deps.log.info({ tenantId: ref.tenantId }, 'subscription card authorised');
+    // Signup: the first period is charged at once ("I alt i dag", PLAN-SIGNUP §4.2).
+    if (chargeNow) await handleCharge(deps, ref.tenantId);
     return;
   }
   if (cb.type === 'Payment' && ref.kind === 'invoice') {
@@ -54,6 +66,10 @@ async function handleCallback(deps: BillingDeps, body: string): Promise<void> {
       providerPaymentId: cb.id,
     });
     deps.log.info({ tenantId: ref.tenantId, accepted: cb.accepted }, 'charge result applied');
+    // Only a verified Payment callback activates a new company, never the browser's return or
+    // the synchronous answer to our own request (PLAN-SIGNUP §4.2). Idempotent.
+    if (cb.accepted && (await activateSignupIfPaid(deps.db, ref.tenantId, ref.refId)))
+      deps.log.info({ tenantId: ref.tenantId }, 'company activated');
     return;
   }
   deps.log.warn({ type: cb.type, kind: ref.kind }, 'quickpay callback type mismatch');
@@ -97,6 +113,32 @@ async function runCharge(
   deps.log.info({ tenantId, invoice: charge.number, accepted: result.accepted }, message);
 }
 
+/**
+ * Unfinished signups are deleted 24 hours after they started (PLAN-SIGNUP B1): the saved card at
+ * QuickPay is cancelled first, then the company and finally accounts left without one. A payment
+ * in flight in the last hour waits for the next run. Counts only in the log, no personal data.
+ */
+async function purgeSignups(deps: BillingDeps): Promise<void> {
+  let tenants = 0;
+  for (const tenantId of await signupPurgeCandidates(deps.db)) {
+    const sub = await providerSubscriptionFor(deps.db, tenantId);
+    if (sub) {
+      try {
+        await deps.quickpay.cancelSubscription(sub);
+      } catch (e) {
+        // Already cancelled or never authorised: nothing is saved at QuickPay to keep.
+        if (!(e instanceof QuickPayError && e.status >= 400 && e.status < 500)) {
+          deps.log.warn({ tenantId }, 'signup purge: QuickPay cancel failed, retried next run');
+          continue;
+        }
+      }
+    }
+    if (await purgeSignupTenant(deps.db, tenantId)) tenants++;
+  }
+  const users = await purgeSignupUsers(deps.db);
+  if (tenants || users) deps.log.info({ tenants, users }, 'unfinished signups purged');
+}
+
 export async function processBillingJob(
   deps: BillingDeps,
   name: string,
@@ -120,6 +162,8 @@ export async function processBillingJob(
       if (charge) await runCharge(deps, tenantId, charge, 'charge retried');
       return;
     }
+    case 'signup.purge':
+      return purgeSignups(deps);
     default:
       throw new Error(`unknown billing job ${name}`);
   }

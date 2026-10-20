@@ -34,6 +34,11 @@ export const users = authSchema.table(
     twoFactorEnabled: boolean('two_factor_enabled').notNull().default(false),
     /** UI language, "da" or "en" (profile menu "Sprog"). */
     locale: text('locale').notNull().default('da'),
+    /**
+     * Set when self-service signup created the account, cleared when its company becomes active.
+     * Only such accounts are deleted after 24 hours (PLAN-SIGNUP B1); invited users never are.
+     */
+    signupStartedAt: ts('signup_started_at'),
     createdAt: ts('created_at').notNull().defaultNow(),
     updatedAt: ts('updated_at').notNull().defaultNow(),
   },
@@ -57,6 +62,13 @@ export const sessions = authSchema.table(
     userAgent: text('user_agent'),
     /** Tenant the session works in. Validated against memberships on every request. */
     activeTenantId: uuid('active_tenant_id'),
+    /**
+     * Signed in with Google or Microsoft. Such a session has passed no second factor of ours, so
+     * owners and admins confirm with TOTP or a passkey before the app (PLAN-SIGNUP B10), which
+     * sets mfa_verified_at.
+     */
+    ssoLogin: boolean('sso_login').notNull().default(false),
+    mfaVerifiedAt: ts('mfa_verified_at'),
     createdAt: ts('created_at').notNull().defaultNow(),
     updatedAt: ts('updated_at').notNull().defaultNow(),
   },
