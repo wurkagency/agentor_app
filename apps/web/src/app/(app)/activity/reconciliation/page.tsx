@@ -2,6 +2,7 @@ import { manifestFor } from '@agentor/connectors';
 import { reconciliation } from '@agentor/db';
 import { formatDate, formatMoney, formatNumber } from '@agentor/i18n';
 import { Card, EmptyState, StatCard, StatusPill, Table, Td, Th, Tr } from '@agentor/ui';
+import { Responsive } from '@agentor/ui/mobile';
 import { Scale } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -10,6 +11,7 @@ import { requireAppContext } from '@/server/auth/session';
 import { viewsFor } from '@/server/flows';
 import { db } from '@/server/infra';
 import { ReconciliationFlowPicker } from './flow-picker';
+import { ReconciliationMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('reconciliation');
@@ -23,7 +25,7 @@ export async function generateMetadata() {
 export default async function ReconciliationPage({
   searchParams,
 }: {
-  searchParams: Promise<{ flow?: string }>;
+  searchParams: Promise<{ flow?: string; period?: string }>;
 }) {
   const ctx = await requireAppContext();
   // Flows with an order → invoice route into an ERP.
@@ -42,29 +44,46 @@ export default async function ReconciliationPage({
   );
   const t = await getTranslations('reconciliation');
   const locale = (await getLocale()) as 'da' | 'en';
-  const { flow } = await searchParams;
+  const { flow, period: rawPeriod } = await searchParams;
+  // MA28 chips: 7 or 30 days on the phone; the desktop table stays at 7 days.
+  const period = rawPeriod === '30d' ? '30d' : '7d';
+  const canEdit = ['owner', 'admin', 'developer'].includes(ctx.tenant.role);
+  const flowList = views.map((v) => ({ id: v.id, name: v.name }));
   const f =
     views.find((v) => v.id === flow) ??
     [...views].sort((a, b) => b.openFailures - a.openFailures || b.records - a.records)[0];
   if (!f)
     return (
-      <PageBody>
-        <PageHeader title={t('title')} subtitle={t('intro')} />
-        <EmptyState icon={Scale} title={t('emptyTitle')}>
-          {t('emptyBody')}
-        </EmptyState>
-      </PageBody>
+      <Responsive
+        desktop={
+          <PageBody>
+            <PageHeader title={t('title')} subtitle={t('intro')} />
+            <EmptyState icon={Scale} title={t('emptyTitle')}>
+              {t('emptyBody')}
+            </EmptyState>
+          </PageBody>
+        }
+        mobile={
+          <ReconciliationMobile
+            flow={null}
+            flows={[]}
+            days={[]}
+            period={period}
+            src=""
+            dest=""
+            canEdit={canEdit}
+          />
+        }
+      />
     );
   const routeIds = (f.definition?.routes ?? [])
     .filter((r) => r.entity === 'order' && r.targetEntity === 'order')
     .map((r) => r.id);
-  const days = await reconciliation(
-    db(),
-    { tenantId: ctx.tenant.tenantId, userId: ctx.user.id },
-    f.id,
-    routeIds,
-    7,
-  );
+  const c0 = { tenantId: ctx.tenant.tenantId, userId: ctx.user.id };
+  const [days, days30] = await Promise.all([
+    reconciliation(db(), c0, f.id, routeIds, 7),
+    period === '30d' ? reconciliation(db(), c0, f.id, routeIds, 30) : null,
+  ]);
   const src = f.source ? manifestFor(f.source.connectorId)?.name : '';
   const dest = f.routes.find((r) => routeIds.includes(r.id))?.destinationConnector;
   const destName = dest ? manifestFor(dest.connectorId)?.name : '';
@@ -76,14 +95,11 @@ export default async function ReconciliationPage({
   const money = (ore: number) => formatMoney(ore / 100, locale);
   const today = new Date().toISOString().slice(0, 10);
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader title={t('title')} subtitle={t('intro')} />
       <div className="flex flex-wrap items-center gap-2">
-        <ReconciliationFlowPicker
-          flows={views.map((v) => ({ id: v.id, name: v.name }))}
-          value={f.id}
-        />
+        <ReconciliationFlowPicker flows={flowList} value={f.id} />
         <span className="text-table text-fg-2">{t('last7')}</span>
       </div>
       <div className="grid gap-4 md:grid-cols-3">
@@ -170,4 +186,16 @@ export default async function ReconciliationPage({
       )}
     </PageBody>
   );
+  const mobile = (
+    <ReconciliationMobile
+      flow={{ id: f.id, name: f.name }}
+      flows={flowList}
+      days={days30 ?? days}
+      period={period}
+      src={src ?? ''}
+      dest={destName ?? ''}
+      canEdit={canEdit}
+    />
+  );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }

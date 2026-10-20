@@ -3,7 +3,7 @@ import { Check, X } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 /** Rettigheder pr. rolle (P6). The database enforces these; the table explains them. */
-const RIGHTS: [key: string, superadmin: boolean, supporter: boolean][] = [
+export const RIGHTS: [key: string, superadmin: boolean, supporter: boolean][] = [
   ['seeCustomers', true, true],
   ['requestAccess', true, true],
   ['helpInApp', true, true],

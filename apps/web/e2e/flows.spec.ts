@@ -48,7 +48,9 @@ test('Overblik shows what needs action (D1-Overblik-Problemer)', async ({ page }
 test('Integrationer: routes, statuses and modes per flow (D2)', async ({ page }) => {
   await login(page, 'mette');
   await page.goto('/integrations');
-  await expect(page.getByText('6 flows · 1 med fejl · 1 afbrudt · 1 pauset')).toBeVisible();
+  await expect(
+    page.getByText('6 flows · 1 med fejl · 1 afbrudt · 1 pauset').filter({ visible: true }),
+  ).toBeVisible();
   const table = page.getByRole('table', { name: 'Flows' });
   // The flow with errors is expanded by default.
   await expect(table).toContainText('Ordrer → Dinero Fakturaer');
@@ -80,7 +82,7 @@ test('bulk pause and resume (D2-Valg)', async ({ page }) => {
   const bar = page.getByRole('region', { name: 'Handlinger for valgte flows' });
   await expect(bar).toContainText('2 flows valgt');
   await bar.getByRole('button', { name: 'Pause' }).click();
-  await expect(page.getByText('2 flows er sat på pause')).toBeVisible();
+  await expect(page.getByText('2 flows er sat på pause').filter({ visible: true })).toBeVisible();
   await expect(page.getByRole('row', { name: /Kreditnotaer · 1 rute/ })).toContainText('Pauset');
   await page.getByRole('checkbox', { name: 'Vælg Kreditnotaer' }).click();
   await page.getByRole('checkbox', { name: 'Vælg Kunder til nyhedsbrev' }).click();
@@ -88,14 +90,16 @@ test('bulk pause and resume (D2-Valg)', async ({ page }) => {
     .getByRole('region', { name: 'Handlinger for valgte flows' })
     .getByRole('button', { name: 'Genoptag' })
     .click();
-  await expect(page.getByText('2 flows kører igen')).toBeVisible();
+  await expect(page.getByText('2 flows kører igen').filter({ visible: true })).toBeVisible();
 });
 
 test('flow detail explains the failure and how to fix it (D7-Flow-Fejl, D8)', async ({ page }) => {
   await login(page, 'mette');
   await page.goto(`/integrations/${WEBSHOP}`);
   await expect(page.getByRole('heading', { name: 'Webshop → regnskab og CRM' })).toBeVisible();
-  await expect(page.getByText('publiceret v7 af Jonas Krag')).toBeVisible();
+  await expect(
+    page.getByText('publiceret v7 af Jonas Krag').filter({ visible: true }),
+  ).toBeVisible();
   await expect(page.getByRole('alert').first()).toContainText(
     '3 ordrer kunne ikke bogføres i Dinero.',
   );
@@ -108,20 +112,26 @@ test('flow detail explains the failure and how to fix it (D7-Flow-Fejl, D8)', as
   await expect(
     page.getByRole('heading', { name: /^Ordre #10\d+ blev ikke bogført i Dinero$/ }),
   ).toBeVisible();
-  await expect(page.getByText('Kontoen 1010 findes ikke længere i Dinero.')).toBeVisible();
+  await expect(
+    page.getByText('Kontoen 1010 findes ikke længere i Dinero.').filter({ visible: true }),
+  ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Åbn indstilling' })).toHaveAttribute(
     'href',
     /tab=mapping&field=accounts.euB2b/,
   );
-  await expect(page.getByText('Vises i Developer-visning.')).toBeVisible();
+  await expect(
+    page.getByText('Vises i Developer-visning.').filter({ visible: true }),
+  ).toBeVisible();
   await axe(page);
   await page.getByRole('radio', { name: 'Developer' }).click();
-  await expect(page.getByText('ACCOUNT_NOT_FOUND')).toBeVisible();
+  await expect(page.getByText('ACCOUNT_NOT_FOUND').filter({ visible: true })).toBeVisible();
 
   // Retrying with the stale account fails again: the cause has to be fixed in the editor.
   await page.goto(`/integrations/${WEBSHOP}`);
   await page.getByRole('alert').first().getByRole('button', { name: 'Gentag 3' }).click();
-  await expect(page.getByText('Agentor prøver de fejlede records igen')).toBeVisible();
+  await expect(
+    page.getByText('Agentor prøver de fejlede records igen').filter({ visible: true }),
+  ).toBeVisible();
   await expect(async () => {
     await page.reload();
     await expect(page.getByRole('alert').first()).toContainText('3 ordrer', { timeout: 1000 });

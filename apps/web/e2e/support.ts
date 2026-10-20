@@ -67,9 +67,13 @@ export async function fullLogin(page: Page, user: keyof typeof USERS) {
     // A full run signs in many times; the TOTP endpoint allows 5 tries a minute per IP, so a
     // rate-limited attempt waits for the window to pass and tries once more.
     for (let attempt = 0; attempt < 2; attempt++) {
-      await page.getByLabel('Ciffer 1').fill(await totp());
-      await page.getByRole('button', { name: 'Bekræft' }).click();
-      const limited = page.getByText('For mange forsøg på kort tid');
+      // Desktop and mobile (MA34) forms are both in the page; one is display: none.
+      await page
+        .getByLabel('Ciffer 1')
+        .filter({ visible: true })
+        .fill(await totp());
+      await page.getByRole('button', { name: 'Bekræft' }).filter({ visible: true }).click();
+      const limited = page.getByText('For mange forsøg på kort tid').filter({ visible: true });
       const done = await Promise.race([
         page.waitForURL(/\/$/, { timeout: 10_000 }).then(() => true),
         limited.waitFor({ timeout: 10_000 }).then(() => false),

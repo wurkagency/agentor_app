@@ -14,7 +14,9 @@ test('signed-out visitors are sent to /login', async ({ page }) => {
 
 test('login page matches D14-Login and has no WCAG violations', async ({ page }) => {
   await page.goto('/login');
-  await expect(page.getByText('Velkommen tilbage. Dine flows har kørt imens.')).toBeVisible();
+  await expect(
+    page.getByText('Velkommen tilbage. Dine flows har kørt imens.').filter({ visible: true }),
+  ).toBeVisible();
   await expect(page.getByRole('link', { name: 'Glemt adgangskode?' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Log ind med passkey' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Opret konto' })).toBeVisible();
@@ -45,17 +47,23 @@ test('owner signs in with password and TOTP and lands on Overblik', async ({ pag
 test('a wrong TOTP code is rejected with an explanation', async ({ page }) => {
   await fillPassword(page, USERS.jonas.email);
   await expect(page).toHaveURL(/\/login\/mfa$/);
-  await page.getByLabel('Ciffer 1').fill('000000');
-  await page.getByRole('button', { name: 'Bekræft' }).click();
-  await expect(page.getByRole('alert').filter({ hasText: 'Koden passer ikke' })).toBeVisible();
+  await page.getByLabel('Ciffer 1').filter({ visible: true }).fill('000000');
+  await page.getByRole('button', { name: 'Bekræft' }).filter({ visible: true }).click();
+  await expect(
+    page.getByRole('alert').filter({ hasText: 'Koden passer ikke', visible: true }),
+  ).toBeVisible();
 });
 
 test('a reader without MFA signs in but cannot open admin settings', async ({ page }) => {
   await login(page, 'bo');
   await page.goto('/settings/company');
-  await expect(page.getByText('Du har ikke adgang til denne side')).toBeVisible();
+  await expect(
+    page.getByText('Du har ikke adgang til denne side').filter({ visible: true }),
+  ).toBeVisible();
   await page.goto('/billing');
-  await expect(page.getByText('Du har ikke adgang til denne side')).toBeVisible();
+  await expect(
+    page.getByText('Du har ikke adgang til denne side').filter({ visible: true }),
+  ).toBeVisible();
   // Readers still reach their own notification settings.
   await page.goto('/settings/notifications');
   await expect(page.getByRole('heading', { name: 'Notifikationer', level: 1 })).toBeVisible();
@@ -123,7 +131,7 @@ test('an admin without MFA must enrol before using the app', async ({ page }) =>
     .getByLabel('Skriv den 6-cifrede kode fra appen')
     .fill(await totp(base32Decode(secret.trim())));
   await page.getByRole('button', { name: 'Slå til' }).click();
-  await expect(page.getByText('Gem dine reservekoder')).toBeVisible();
+  await expect(page.getByText('Gem dine reservekoder').filter({ visible: true })).toBeVisible();
   await expect(
     page.getByRole('list', { name: 'Gem dine reservekoder' }).getByRole('listitem'),
   ).toHaveCount(8);

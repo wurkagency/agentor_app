@@ -2,6 +2,7 @@ import { manifestFor } from '@agentor/connectors';
 import { currentSignupStep, SIGNUP_PATHS } from '@agentor/core';
 import { listNotifications, listOwnTenants, myGrants, openFailures } from '@agentor/db';
 import { formatPercent, type Locale } from '@agentor/i18n';
+import { cn } from '@agentor/ui';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -11,9 +12,9 @@ import {
   MobileChromeProvider,
   UnderTabBar,
 } from '@/components/mobile/chrome';
-import { DeskOnly } from '@/components/mobile/desk-only';
 import { DeviceGuard } from '@/components/mobile/pwa';
 import { SupportBar, type SwitcherGrant } from '@/components/platform/support-bar';
+import { SupportBarMobile } from '@/components/platform/support-bar-mobile';
 import { AppHeader } from '@/components/shell/app-header';
 import { requireAppContext } from '@/server/auth/session';
 import { billingOverview } from '@/server/billing-overview';
@@ -93,7 +94,13 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const skip =
     'sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-surface focus:px-4 focus:py-2 focus:shadow-card';
   return (
-    <div className="group/shell flex min-h-dvh flex-col">
+    <div
+      className={cn(
+        'group/shell flex min-h-dvh flex-col',
+        // The page's sticky top bar sits under the 52 px support bar (MP10).
+        ctx.support && 'max-md:[&_[data-page-topbar]]:top-13',
+      )}
+    >
       {/* Below 768 px the page's mobile branch owns the content (README decision 20). */}
       <a href="#main" className={`${skip} max-md:hidden`}>
         {t('skipToContent')}
@@ -155,22 +162,25 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       </div>
       {!ctx.support && <DeviceGuard owner={`${ctx.user.id}:${ctx.tenant.tenantId}`} />}
       <MobileChromeProvider value={{ attention }}>
-        {ctx.support ? (
-          // Support view of a customer's app happens on a computer (decision 20).
-          <>
-            <div className="contents max-md:hidden">{children}</div>
-            <div className="contents md:hidden">
-              <DeskOnly area="supportView" title={ctx.tenant.tenantName} platform />
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Logo and bell for pages that don't render a mobile top bar of their own. */}
-            <AppTopBar fallback />
-            <UnderTabBar>{children}</UnderTabBar>
-            <AppTabBar />
-          </>
+        {ctx.support && (
+          // MP10: on a phone the support view is the customer's own mobile screens under the lime
+          // bar (decision 23); desktop keeps the navy bar above.
+          <div className="contents md:hidden">
+            <SupportBarMobile
+              tenantName={ctx.tenant.tenantName}
+              initials={initials(ctx.tenant.tenantName)}
+              scope={ctx.support.scope}
+              caseRef={ctx.support.caseRef}
+              superadmin={ctx.support.superadmin}
+              expiresAt={ctx.support.expiresAt.toISOString()}
+              grants={switcher}
+            />
+          </div>
         )}
+        {/* Logo and bell for pages that don't render a mobile top bar of their own. */}
+        <AppTopBar fallback />
+        <UnderTabBar>{children}</UnderTabBar>
+        <AppTabBar />
       </MobileChromeProvider>
     </div>
   );

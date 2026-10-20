@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatMessage, pushCategory, pushUrl, quietUntil } from '../src/push';
+import { formatMessage, pushCategory, pushUrl, quietUntil } from '../src/push.js';
 
 const FLOW = '0190b000-0000-7000-8000-000000000201';
 const RUN = '0190b000-0000-7000-8000-000000000301';

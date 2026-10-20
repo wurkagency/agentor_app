@@ -8,6 +8,8 @@ export type PlatformTab = 'customers' | 'cases' | 'errors' | 'finance';
 const under = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
 
 export function activeAppTab(path: string): AppTab | null {
+  // MA26/MA27 Forbindelser are reached from Mere; MA08 Genforbind from the problems on Overblik.
+  if (path === '/connections' || under(path, '/connections/new')) return 'more';
   if (path === '/' || under(path, '/notifications') || under(path, '/connections'))
     return 'overview';
   // A run's failure (MA06) is opened from the problems on Overblik.
@@ -24,8 +26,10 @@ export function activeAppTab(path: string): AppTab | null {
 }
 
 export function activePlatformTab(path: string): PlatformTab | null {
-  if (under(path, '/platform/customers') || path === '/platform') return 'customers';
-  if (under(path, '/platform/cases')) return 'cases';
+  // MP12 Platformbrugere is reached from Kunder, MP15 Min tid from Sager.
+  if (under(path, '/platform/customers') || under(path, '/platform/users') || path === '/platform')
+    return 'customers';
+  if (under(path, '/platform/cases') || under(path, '/platform/time')) return 'cases';
   if (under(path, '/platform/errors')) return 'errors';
   if (under(path, '/platform/finance')) return 'finance';
   return null;

@@ -9,6 +9,8 @@ import { PageBody } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
 import { tenantNames } from '@/server/platform-data';
+import { Responsive } from '@agentor/ui/mobile';
+import { ResolveMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.resolve');
@@ -28,7 +30,34 @@ export default async function ResolvePage({ params }: { params: Promise<{ id: st
   ]);
   const c = data.case;
   const minutes = data.time.reduce((a, e) => a + e.minutes, 0);
-  return (
+  const form = {
+    caseId: c.id,
+    number: c.number,
+    title: c.title,
+    tenantName: names.get(c.tenantId) ?? '',
+    recipients: recipients.map((r) => ({ userId: r.userId, name: r.name, email: r.email })),
+    defaultRecipient:
+      c.createdVia === 'customer' && recipients.some((r) => r.userId === c.createdByUserId)
+        ? c.createdByUserId
+        : null,
+    events: data.events
+      .filter(
+        (e) =>
+          e.kind === 'customer_message' ||
+          e.kind === 'reply' ||
+          e.kind === 'status' ||
+          e.kind === 'session',
+      )
+      .map((e) => ({
+        kind: e.kind as 'reply',
+        authorName: e.authorName,
+        body: e.body,
+        createdAt: e.createdAt.toISOString(),
+      })),
+    minutes,
+    internalNotes: data.events.filter((e) => e.kind === 'internal_note').length,
+  };
+  const desktop = (
     <PageBody>
       <Link
         href={`/platform/cases/${c.id}`}
@@ -37,34 +66,8 @@ export default async function ResolvePage({ params }: { params: Promise<{ id: st
         <Icon icon={ArrowLeft} size={16} />
         {t('back', { n: c.number })}
       </Link>
-      <ResolveForm
-        caseId={c.id}
-        number={c.number}
-        title={c.title}
-        tenantName={names.get(c.tenantId) ?? ''}
-        recipients={recipients.map((r) => ({ userId: r.userId, name: r.name, email: r.email }))}
-        defaultRecipient={
-          c.createdVia === 'customer' && recipients.some((r) => r.userId === c.createdByUserId)
-            ? c.createdByUserId
-            : null
-        }
-        events={data.events
-          .filter(
-            (e) =>
-              e.kind === 'customer_message' ||
-              e.kind === 'reply' ||
-              e.kind === 'status' ||
-              e.kind === 'session',
-          )
-          .map((e) => ({
-            kind: e.kind as 'reply',
-            authorName: e.authorName,
-            body: e.body,
-            createdAt: e.createdAt.toISOString(),
-          }))}
-        minutes={minutes}
-        internalNotes={data.events.filter((e) => e.kind === 'internal_note').length}
-      />
+      <ResolveForm {...form} />
     </PageBody>
   );
+  return <Responsive desktop={desktop} mobile={<ResolveMobile {...form} />} />;
 }

@@ -7,15 +7,17 @@ import { ButtonLink } from '@/components/button-link';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { requireRole } from '@/server/auth/session';
 import { db } from '@/server/infra';
+import { Responsive } from '@agentor/ui/mobile';
 import { AuditFilters } from './audit-filters';
 import { describeObject, toFilter, type AuditQuery } from './filters';
+import { AuditLogMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('audit');
   return { title: t('title') };
 }
 
-/** Audit-log (D12-Auditlog): append-only; support rows are tinted and tagged. */
+/** Audit-log (D12-Auditlog; MA32 below 768 px): append-only; support rows are tinted and tagged. */
 export default async function AuditLogPage({
   searchParams,
 }: {
@@ -47,7 +49,7 @@ export default async function AuditLogPage({
     return t.has(key as 'actions.member_invited') ? t(key as 'actions.member_invited') : action;
   };
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader
         eyebrow={nav('settings')}
@@ -123,5 +125,18 @@ export default async function AuditLogPage({
         </div>
       )}
     </PageBody>
+  );
+  return (
+    <Responsive
+      desktop={desktop}
+      mobile={
+        <AuditLogMobile
+          entries={entries}
+          query={Object.fromEntries(params)}
+          nextHref={nextHref}
+          actionLabel={actionLabel}
+        />
+      }
+    />
   );
 }

@@ -1,4 +1,6 @@
+import { Responsive } from '@agentor/ui/mobile';
 import { getTranslations } from 'next-intl/server';
+import { MyTimeMobile } from './mobile';
 import { TimeView } from './view';
 
 export async function generateMetadata() {
@@ -11,5 +13,11 @@ export default async function MyTimePage({
 }: {
   searchParams: Promise<{ week?: string }>;
 }) {
-  return <TimeView team={false} week={(await searchParams).week} />;
+  const { week } = await searchParams;
+  return (
+    <Responsive
+      desktop={<TimeView team={false} week={week} />}
+      mobile={<MyTimeMobile week={week} />}
+    />
+  );
 }

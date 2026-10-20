@@ -29,6 +29,7 @@ import {
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { ComponentProps } from 'react';
 import Link from 'next/link';
+import { Responsive } from '@agentor/ui/mobile';
 import { ButtonLink } from '@/components/button-link';
 import { DiscountButton } from '@/components/platform/finance/discount-dialog';
 import {
@@ -55,6 +56,7 @@ import {
   type SubRow,
 } from '@/server/finance-data';
 import { requireStaff } from '@/server/platform';
+import { SubscriptionsMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.finance');
@@ -129,6 +131,10 @@ export default async function SubscriptionsPage({
   const since30 = new Date(now.getTime() - 30 * 86_400_000);
   const cancelled30 = subs.filter((s) => s.cancelAt && s.cancelAt > since30).length;
   const churn = pct(cancelled30, Math.max(1, live.length));
+  const since60 = new Date(now.getTime() - 60 * 86_400_000);
+  const cancelledBefore = subs.filter(
+    (s) => s.cancelAt && s.cancelAt > since60 && s.cancelAt <= since30,
+  ).length;
   const churnBars = monthsBack(cur, 6).map((m) => ({
     label: monthShort(m.start, locale),
     value: subs.filter((s) => s.cancelAt && s.cancelAt >= m.start && s.cancelAt < m.end).length,
@@ -175,6 +181,24 @@ export default async function SubscriptionsPage({
       </span>
     );
   };
+  const nextCharge = (s: SubRow) =>
+    s.state === 'failed' && s.retryAt
+      ? t('state.retrying', { date: dayMonth(s.retryAt, locale) })
+      : s.state === 'trial' && s.trialEndsAt
+        ? `${dayMonth(s.trialEndsAt, locale)} · ${kr(s.priceOre, locale)} kr.`
+        : s.nextChargeAt
+          ? s.interval === 'year'
+            ? formatDate(s.nextChargeAt, locale)
+            : dayMonth(s.nextChargeAt, locale)
+          : t('sub.none');
+  const methodText = (s: SubRow) =>
+    s.state === 'trial' && !s.cardLast4
+      ? t('sub.noMethod')
+      : s.paymentMethod === 'invoice'
+        ? t('sub.invoiceEan')
+        : s.paymentMethod === 'mobilepay'
+          ? 'MobilePay'
+          : `${s.cardBrand === 'mastercard' ? 'Mastercard' : 'Visa'} •••• ${s.cardLast4}`;
   const statusLabel = (s: SubRow) =>
     s.state === 'renews'
       ? t('state.renews', { days: daysBetween(now, s.nextChargeAt!) })
@@ -191,7 +215,11 @@ export default async function SubscriptionsPage({
       : `${dayMonth(s.currentPeriodStart, locale)}–${dayMonth(end, locale)}`;
   };
 
-  return (
+  const discountCustomers = live
+    .filter((s) => s.state !== 'trial')
+    .map((s) => ({ tenantId: s.tenantId, name: s.tenantName, discountPct: s.discountPct }));
+
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('tab.subscriptions')}
@@ -206,15 +234,7 @@ export default async function SubscriptionsPage({
               <Icon icon={Download} size={16} />
               {t('export')}
             </ButtonLink>
-            <DiscountButton
-              customers={live
-                .filter((s) => s.state !== 'trial')
-                .map((s) => ({
-                  tenantId: s.tenantId,
-                  name: s.tenantName,
-                  discountPct: s.discountPct,
-                }))}
-            />
+            <DiscountButton customers={discountCustomers} />
           </>
         }
       />
@@ -407,15 +427,7 @@ export default async function SubscriptionsPage({
                 </Td>
                 <Td className="text-fg-2">{period(s)}</Td>
                 <Td className={s.state === 'failed' ? 'font-medium text-error-fg' : ''}>
-                  {s.state === 'failed' && s.retryAt
-                    ? t('state.retrying', { date: dayMonth(s.retryAt, locale) })
-                    : s.state === 'trial' && s.trialEndsAt
-                      ? `${dayMonth(s.trialEndsAt, locale)} · ${kr(s.priceOre, locale)} kr.`
-                      : s.nextChargeAt
-                        ? s.interval === 'year'
-                          ? formatDate(s.nextChargeAt, locale)
-                          : dayMonth(s.nextChargeAt, locale)
-                        : t('sub.none')}
+                  {nextCharge(s)}
                 </Td>
                 <Td>{methodCell(s)}</Td>
                 <Td className="pr-5">
@@ -460,4 +472,40 @@ export default async function SubscriptionsPage({
       <p className="m-0 text-meta text-fg-2">{t('sub.footnote')}</p>
     </PageBody>
   );
+  const mobile = (
+    <SubscriptionsMobile
+      d={{
+        month: cur.start,
+        mrr,
+        series,
+        live: live.length,
+        startup,
+        trials: trials.length,
+        conversion: endedTrials.length ? pct(converted, endedTrials.length) : null,
+        churn,
+        churnBefore: pct(cancelledBefore, Math.max(1, live.length)),
+        cancelled30,
+        filter,
+        counts: {
+          all: counts.all,
+          problems: counts.problems,
+          year: counts.year,
+          trial: counts.trial,
+        },
+        rows: shown.map((s) => ({
+          s,
+          status: stateStatus(s.state),
+          label: statusLabel(s),
+          next: nextCharge(s),
+          method: methodText(s),
+        })),
+        total: rows.length,
+        page,
+        pageSize: PAGE,
+        params: { ...base, f: sp.f },
+        discountCustomers,
+      }}
+    />
+  );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }

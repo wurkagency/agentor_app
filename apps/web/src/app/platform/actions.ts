@@ -25,6 +25,7 @@ import {
   stopTimer,
   superadminAccess,
   updateCase,
+  updateTime,
   upsertStaff,
   type CaseEvent,
 } from '@agentor/db';
@@ -372,13 +373,56 @@ export async function startTimerAction(caseId: string | null): Promise<ActionRes
   return { ok: true };
 }
 
+/** Stops the timer; MP04 can override the 15-minute round-up, the type and billable (B1). */
 export async function stopTimerAction(
   description: string,
+  opts?: { minutes?: number; kind?: string; billable?: boolean },
 ): Promise<ActionResult<{ minutes: number | null }>> {
   const { actor } = await requireStaff();
-  const minutes = await stopTimer(db(), actor, description.slice(0, 500));
+  const parsed = z
+    .object({
+      minutes: z.number().int().min(1).max(1440).optional(),
+      kind: timeSchema.shape.kind.optional(),
+      billable: z.boolean().optional(),
+    })
+    .safeParse(opts ?? {});
+  if (!parsed.success) return { ok: false, error: 'invalid' };
+  const o = parsed.data;
+  try {
+    const minutes = await stopTimer(db(), actor, description.slice(0, 500), {
+      ...(o.minutes !== undefined ? { minutes: o.minutes } : {}),
+      ...(o.kind !== undefined ? { kind: o.kind } : {}),
+      ...(o.billable !== undefined ? { billable: o.billable } : {}),
+    });
+    revalidatePath('/platform', 'layout');
+    return { ok: true, data: { minutes } };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/** "Ret tid" (MP15): minutes, type, description and billable on one's own entry. */
+export async function updateTimeAction(
+  id: string,
+  input: { minutes: number; kind: string; description: string; billable: boolean },
+): Promise<ActionResult> {
+  const { actor } = await requireStaff();
+  const parsed = z
+    .object({
+      minutes: timeSchema.shape.minutes,
+      kind: z.enum(['session', 'phone', 'email', 'clarification', 'meeting', 'other']),
+      description: timeSchema.shape.description,
+      billable: z.boolean(),
+    })
+    .safeParse(input);
+  if (!isUuid(id) || !parsed.success) return { ok: false, error: 'invalid' };
+  try {
+    await updateTime(db(), actor, id, parsed.data);
+  } catch (e) {
+    return fail(e);
+  }
   revalidatePath('/platform', 'layout');
-  return { ok: true, data: { minutes } };
+  return { ok: true };
 }
 
 export async function linkSessionAction(sessionId: string, caseId: string): Promise<ActionResult> {

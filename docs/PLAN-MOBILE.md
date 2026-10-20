@@ -270,3 +270,39 @@ Afvigelser fra tegnefladerne, som du bør kende:
 4. Platform-avataren er ikke klikbar, indtil "Mere" (G7) er tegnet.
 
 Ikke gjort i M1: ingen af skærmene MA01–MA15 og MP01–MP07 (M2/M4), Lighthouse (kører når der er rigtige skærme), og `playwright.config.ts` har fået `E2E_SKIP_SEED=1` til lokale kørsler mens en anden dev-server bruger databasen.
+
+## 13. Beslutninger taget uden svar (20.–21. okt. 2026)
+
+Taget under natarbejdet efter planens anbefaling, så arbejdet ikke stod stille. Ret dem, så retter jeg koden. Punkter mærket **(design)** er huller uden tegneflade og skal godkendes af design.
+
+1. **Platform-klokken** viser antal åbne sager tildelt dig og linker til `/platform/cases?filter=mine` (B13: ingen push til Platform endnu).
+2. **Topbjælke på alle mobilskærme** (issue 2): logotypen fra `docs/assets/logotype.svg` erstatter tekst-ordmærket; klokken også på underskærme med tilbage-pil. PWA-ikonerne er lavet ud fra `favicon.svg`.
+3. **MA19** er en valgtilstand af Integrationer (`/integrations?select=1`), ikke en egen rute.
+4. **Mere (MA10)** har fået rækkerne Forbindelser, Team og Audit-log.
+5. **MA01** linker til oprettelse af konto (signup-sessionens skærme).
+6. **Push-tekster** (MA14): titel og brødtekst som på tegnefladen; uden kundedata ud over flownavn og antal. Workeren sender kun på dansk, til brugerens sprog gemmes på enheden. Ugentlig opsummering og kvote-push har endnu ingen generator (kategorierne findes og kan slås til/fra).
+7. **MA06** har en Basis/Udvikler-segmentknap, der skifter til MA25 i samme skærm.
+8. **MA05** har en "Kørsler"-række ned til MA24.
+9. **MA11/MA35:** MA11 styrer push på denne enhed og stille timer; MA35 styrer kanaler pr. hændelse. MA11 linker til MA35. SMS vises ikke som et løfte (B4, ingen "kommer senere").
+10. **MA07 Aktivitet** viser kun etiketter for ordre- og kreditnotanumre, aldrig e-mails eller navne fra records.
+11. **MP02 "Ny sag" (G8) (design):** genbruger desktop-dialogen, indtil der er en mobiltegneflade.
+12. **MP02 svarfrist:** "Svarfrist overskredet" (rød), "Svar inden 16:00" i dag, "Svar i morgen", ellers dato. Sager der venter på kunden viser ingen frist.
+13. **MP03:** timeren startes fra bjælken nederst ("Start timer"), når den ikke kører. "Stop og gem" og "Registrér tid" åbner samme modal (MP04); timeren stoppes først, når tiden gemmes, så "Annullér" ikke mister tid.
+14. **MP04 (B1):** varigheden forudfyldes rundet op til nærmeste 15 min. og kan overskrives med 15/30/60 eller den rundede værdi. Desktop `stopTimer` runder nu også op (B1), og gem + stop sker i én transaktion. "Fakturerbar tid" er slået til, når kunden har en plan.
+15. **MP05** viser altid de sidste 24 timer; trend "Ny i dag" når koden ikke fandtes i perioden før.
+16. **MP06:** beløb i hele kroner som på tegnefladen. "Support i {måned}" er ekskl. moms, "Supportafregning" inkl. moms. "Rapporter" viser sidste måneds omsætning (ikke en lukket rapport, da lukning ikke gemmes særskilt).
+17. **MP07** er en ny rute (`/platform/finance/invoices?status=overdue`); på computer sendes man videre til Fakturaer og betalinger (F6). Rykker og betalingslink kræver bekræftelse i en modal og bruger samme action som desktop.
+18. **MP01:** kunder uden flows (status "none") viser ingen statuspille.
+19. **Kontrast:** orange tekst på lærredet (svarfrist i dag på MP03) er under 4,5:1, så teksten er mørk; kun overskredet frist er rød. Desktop-`GrowthBadge` har samme grønne kontrastproblem (opfølgning).
+20. **Signup og onboarding** (brugerens besked 21. okt.): mobiltegnefladerne, der gentager det godkendte signup- og onboardingflow, bygges ikke. MA16 Kom i gang (= MO1–MO5) er droppet; signup-sessionens ruter og komponenter er urørte.
+21. **MA27** viser kun forbindelser, der findes. Ingen "på vej"-rækker og ingen "Giv besked" (brugeren: potentielt falske løfter).
+22. **Ark (bottom sheets) (design):** der findes ingen mobil ark-komponent. Ark på tegnefladerne (MA23, MA30, MP09, MP11, MP14, MP17 m.fl.) bruger den centrerede `Modal`; MA29/MA30 har et lokalt `MobileSheet`. En fælles ark-variant med håndtag bør tegnes og samles i `@agentor/ui/mobile`, sammen med radiokort, multivalg-chips og filter-chips der åbner et ark.
+23. **MA17 Søg** nås fra et søgeikon ved klokken på kundens topniveau-skærme (ingen tegneflade viste indgangen). Tilbage-pil i stedet for "Annullér". Flows og forbindelser matches på tekst, ikke paletten's fuzzy-match.
+24. **MA22** starter en testkørsel af den gemte kladde, når skærmen åbnes (ny action `testDraftAction`, uden at tage editorens lås); alle ordrer kan foldes ud. **MA23** viser "Testkørt uden fejl" kun når `?run=` er en færdig test af den aktuelle kladde.
+25. **MA26/MA27/MA28** beholder klokken. MA26 lyser "Mere" i tabbaren. MA27: ingen side for én forbindelse på mobil endnu (design). MA28: "Gentag" gentager alle åbne fejl i flowet (den eksisterende action); mobil har også 30 dage.
+26. **MA35** viser alle 7 hændelser fra desktop; SMS kun for de 3 kritiske, som desktop allerede understøtter. Tærskler kan ikke rettes på mobil endnu (design). Tilbage går til MA11.
+27. **MA29–MA34:** undertitel som desktop ("4 brugere · 2 af 10 pladser brugt"); "Ekstern bruger" medtaget; "Fjern" kræver navnet skrevet som på desktop. MA31: "Totrin for mig" kan ikke slås fra (heller ikke på desktop); antal reservekoder kendes ikke, så rækken hedder "Lav nye reservekoder"; ingen by på sessioner (ingen GeoIP); godkenderens navn findes ikke i data. MA32 "Kun supportadgang" = `?group=support` (supportadgangens hændelser); desktop-chippen `?support=1` viser handlinger udført af support — vælg gerne. MA33 bruger desktop-teksten om prisændring fra næste opkrævning (tegnefladens "udlignes forholdsmæssigt" lover proration, som appen ikke laver). MA34 deler logik med desktop i `use-mfa.ts`.
+28. **MP08:** chippen "Noter" tilføjet; "Gentag" og telefon/forbrug udeladt (ingen data/handling uden supportvisning). **MP10:** "Skift kunde" sidder i den lime bjælke; introlinjen er udeladt. **MP14:** "Fakturerbar tid" beholdt fra desktop; tiden kan ikke rettes; "Afslut også supportadgangen" er slået til som på tegnefladen. **MP17** åbnes fra MP08, ikke fra MP01-rækkerne (én handling pr. række).
+29. **MP12:** totrin vises som "Slået til/Mangler" (metoden kendes ikke); alle 9 rettigheder; fodnoten siger, at Superadmin kan åbne en kunde direkte, og at det logges (tegnefladens tekst modsagde rettighederne). **MP13:** fulde navne, knappen "Åbn sag". **MP15:** én række pr. registrering, så "Ret tid" retter præcis én (ny `updateTime`, kun egne, ikke-fakturerede). **MP16:** "Statusændringer" og "Spørg om kunden var tilfreds" som på desktop; "Tidsforbrug" er slået fra som på desktop; MP03 har fået et stille "Løs sag"-link under samtalen.
+30. **MP18–MP23:** MP21 ligger på desktop-ruten `/platform/finance/support/[tenantId]?month=` (før en kladde findes, er der intet faktura-id); `invoices/[tenantId]/[invoiceId]` viderestiller. MP21 beholder tabbaren, og knapperne står nederst på siden. MP20 "Send kontoudtog" kræver bekræftelse på mobil. MP22-ringen viser beløb uden "kr." for at passe på 360 px. MP23 har ingen median for løste sager (findes ikke i data).
+31. **Tabbar:** MP12 lyser "Kunder", MP15 lyser "Sager".

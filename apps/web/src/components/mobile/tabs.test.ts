@@ -6,6 +6,8 @@ describe('activeAppTab', () => {
     expect(activeAppTab('/')).toBe('overview');
     expect(activeAppTab('/notifications')).toBe('overview');
     expect(activeAppTab('/connections/abc/reconnect')).toBe('overview');
+    expect(activeAppTab('/connections')).toBe('more');
+    expect(activeAppTab('/connections/new')).toBe('more');
     expect(activeAppTab('/integrations/abc/runs/def')).toBe('overview');
     expect(activeAppTab('/integrations')).toBe('integrations');
     expect(activeAppTab('/integrations/abc')).toBe('integrations');
@@ -23,7 +25,9 @@ describe('platform tabs', () => {
     expect(activePlatformTab('/platform/customers')).toBe('customers');
     expect(activePlatformTab('/platform/cases/123')).toBe('cases');
     expect(activePlatformTab('/platform/finance/invoices')).toBe('finance');
-    expect(activePlatformTab('/platform/time')).toBeNull();
+    expect(activePlatformTab('/platform/time')).toBe('cases');
+    expect(activePlatformTab('/platform/users')).toBe('customers');
+    expect(activePlatformTab('/platform/settings')).toBeNull();
     expect(platformHidesTabBar('/platform/cases/123')).toBe(true);
     expect(platformHidesTabBar('/platform/cases')).toBe(false);
     expect(platformHidesTabBar('/platform/cases/archive')).toBe(false);

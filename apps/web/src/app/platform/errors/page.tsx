@@ -30,6 +30,8 @@ import { PeriodPills } from '@/components/platform/period-pills';
 import { PageBody, PageHeader, SecondaryBar } from '@/components/shell/secondary-nav';
 import { requireStaff } from '@/server/platform';
 import { customersFor, errorsFor } from '@/server/platform-data';
+import { Responsive } from '@agentor/ui/mobile';
+import { ErrorsMobile } from './mobile';
 
 const DAYS = { '24h': 1, '7d': 7, '30d': 30 } as const;
 
@@ -76,7 +78,7 @@ export default async function ErrorsPage({
       : '';
   const customerList = customers.map((c) => ({ id: c.tenantId, name: c.name }));
 
-  return (
+  const desktop = (
     <>
       <SecondaryBar label={t('period')}>
         <PeriodPills
@@ -265,5 +267,10 @@ export default async function ErrorsPage({
         </Card>
       </PageBody>
     </>
+  );
+  // The phone always shows the last 24 hours (MP05).
+  const day = period === '24h' ? groups : await errorsFor(actor.userId, 1);
+  return (
+    <Responsive desktop={desktop} mobile={<ErrorsMobile groups={day} describe={describe} />} />
   );
 }

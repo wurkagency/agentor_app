@@ -24,7 +24,7 @@ test('subscription page: plan, meters, blocked downgrade and invoices (D13)', as
     '71',
   );
   await expect(page.getByText('712 / 1.000').first()).toBeVisible();
-  await expect(page.getByText('2 eksterne brugere')).toBeVisible();
+  await expect(page.getByText('2 eksterne brugere').filter({ visible: true })).toBeVisible();
 
   const startup = page.getByRole('region', { name: 'Startup', exact: true });
   await expect(startup.getByRole('button', { name: 'Nedgradér' })).toBeDisabled();
@@ -53,7 +53,7 @@ test('upgrade to Enterprise; Business is then blocked while over its seats', asy
   await page.getByRole('button', { name: 'Opgradér til Enterprise' }).click();
   const dialog = page.getByRole('dialog', { name: 'Opgradér til Enterprise?' });
   await dialog.getByRole('button', { name: 'Opgradér til Enterprise' }).click();
-  await expect(page.getByText('Du er nu på Enterprise')).toBeVisible();
+  await expect(page.getByText('Du er nu på Enterprise').filter({ visible: true })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Enterprise', exact: true })).toContainText(
     'Din plan',
   );
@@ -81,7 +81,7 @@ test('a plan with no free seats refuses further invitations (D11)', async ({ pag
   await page.goto('/settings/team');
   // Every user takes a seat, external users included: the seed customer is over its 3 seats
   // (Mette, Jonas, Sara and Bo), so no invitation goes through.
-  await expect(page.getByText('4 af 3 pladser brugt')).toBeVisible();
+  await expect(page.getByText('4 af 3 pladser brugt').filter({ visible: true })).toBeVisible();
   const invite = async (email: string) => {
     await page.getByRole('button', { name: 'Invitér' }).click();
     const dialog = page.getByRole('dialog', { name: 'Invitér bruger' });
@@ -102,9 +102,13 @@ test('the owner switches to yearly billing from the next renewal (D13)', async (
   const dialog = page.getByRole('dialog', { name: 'Skift til årlig' });
   await expect(dialog).toContainText('1.590 kr./år');
   await dialog.getByRole('button', { name: 'Skift til årlig' }).click();
-  await expect(page.getByText('Du betaler årligt fra næste fornyelse')).toBeVisible();
+  await expect(
+    page.getByText('Du betaler årligt fra næste fornyelse').filter({ visible: true }),
+  ).toBeVisible();
   await expect(page.getByRole('region', { name: 'Business' }).first()).toBeVisible();
   await page.getByRole('button', { name: 'Skift til månedlig' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Skift til månedlig' }).click();
-  await expect(page.getByText('Du betaler månedligt fra næste fornyelse')).toBeVisible();
+  await expect(
+    page.getByText('Du betaler månedligt fra næste fornyelse').filter({ visible: true }),
+  ).toBeVisible();
 });

@@ -58,6 +58,8 @@ import {
   supportForMonth,
 } from '@/server/finance-data';
 import { requireStaff } from '@/server/platform';
+import { Responsive } from '@agentor/ui/mobile';
+import { FinanceMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.finance');
@@ -229,7 +231,7 @@ export default async function FinanceOverview({
   const viewHref = (v: string) =>
     v === 'days' ? '/platform/finance?view=days' : '/platform/finance';
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('title')}
@@ -636,4 +638,37 @@ export default async function FinanceOverview({
       </Card>
     </PageBody>
   );
+  // MP06: whole kroner as on the board ("25.894 kr.").
+  const lastMonth = revenue.at(-2);
+  const krs = (ore: number) => `${kr(ore, locale)} kr.`;
+  const mobile = (
+    <FinanceMobile
+      d={{
+        month: monthYear(cur.start, locale),
+        monthName: monthLong(cur.start, locale),
+        mrr: krs(mrr),
+        mrrGrowth: growthOf(growthPct(mrr, mrrPrev), growthText, locale),
+        subscriptions: live.length,
+        newSubs: newThisMonth,
+        paymentProblems: subs.filter((s) => s.state === 'failed').length,
+        supportNet: krs(supportNet),
+        supportTime: formatMinutes(supportRegistered, locale),
+        supportGross: krs(supportGross),
+        overdue: krs(overdueGross),
+        overdueCount: overdue.length,
+        ytd: krs(ytdNet),
+        ytdGrowth: growthOf(growthPct(ytdNet, lastYearNet), growthText, locale),
+        lastMonthName: monthLong(prev.start, locale),
+        lastMonthTotal: krs((lastMonth?.subscriptionOre ?? 0) + (lastMonth?.supportOre ?? 0)),
+        actions: actions.slice(0, 5).map((a, i) => ({
+          key: `${a.tenantId}:${i}`,
+          name: a.name,
+          detail: a.detail,
+          tone: a.pill.status,
+          card: a.pill.label !== t('state.overdue'),
+        })),
+      }}
+    />
+  );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }

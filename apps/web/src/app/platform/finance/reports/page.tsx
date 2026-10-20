@@ -16,6 +16,7 @@ import {
 import { CircleCheck, Clock, Download, FileText, Headphones, TriangleAlert } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import { Responsive } from '@agentor/ui/mobile';
 import { ButtonLink } from '@/components/button-link';
 import { SendReportButton } from '@/components/platform/finance/action-buttons';
 import {
@@ -38,6 +39,7 @@ import {
   shiftMonth,
 } from '@/server/finance-data';
 import { requireStaff } from '@/server/platform';
+import { ReportsMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.finance');
@@ -60,11 +62,13 @@ export default async function ReportsPage({
   const m = sp.month ? parseMonth(sp.month, now) : shiftMonth(cur, -1);
   const list = monthsBack(cur, 6).reverse();
   const history = monthsBack(m, 6);
-  const [reports, r, before, past] = await Promise.all([
+  const [reports, r, before, past, oldest] = await Promise.all([
     Promise.all(list.map((mm) => monthReport(actor, mm, now))),
     monthReport(actor, m, now),
     monthReport(actor, shiftMonth(m, -1), now),
     Promise.all(history.map((mm) => monthReport(actor, mm, now))),
+    // MP23: the trend on the oldest month in the list needs the month before it.
+    monthReport(actor, shiftMonth(list.at(-1)!, -1), now),
   ]);
   const prevName = monthLong(shiftMonth(m, -1).start, locale);
   const g = (a: number, b: number, goodUp = true) =>
@@ -145,7 +149,7 @@ export default async function ReportsPage({
     },
   ];
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('tab.reports')}
@@ -440,4 +444,13 @@ export default async function ReportsPage({
       </div>
     </PageBody>
   );
+  const mobile = (
+    <ReportsMobile
+      d={{
+        months: reports.map((x, i) => ({ r: x, before: reports[i + 1] ?? oldest })),
+        selected: r,
+      }}
+    />
+  );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }

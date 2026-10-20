@@ -83,4 +83,9 @@ export default tseslint.config(
     languageOptions: { sourceType: 'commonjs' },
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
+  {
+    // The PWA service worker (PLAN-MOBILE M3): a classic script in the worker scope.
+    files: ['apps/web/public/sw.js'],
+    languageOptions: { sourceType: 'script', globals: { ...globals.serviceworker } },
+  },
 );

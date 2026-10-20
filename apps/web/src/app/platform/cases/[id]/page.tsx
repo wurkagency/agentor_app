@@ -16,6 +16,8 @@ import { PageBody } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
 import { customersFor, initials, planNames } from '@/server/platform-data';
+import { Responsive } from '@agentor/ui/mobile';
+import { CaseMobile } from './mobile';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -47,7 +49,7 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
   const created = c.createdAt;
   const creator = c.createdVia === 'customer' ? t('byCustomer') : c.createdByName;
 
-  return (
+  const desktop = (
     <PageBody>
       <Link
         href="/platform/cases"
@@ -214,5 +216,21 @@ export default async function CasePage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
     </PageBody>
+  );
+  const timerView = timer
+    ? { caseId: timer.caseId, startedAt: timer.startedAt.toISOString() }
+    : null;
+  return (
+    <Responsive
+      desktop={desktop}
+      mobile={
+        <CaseMobile
+          c={{ ...c, tenantName: customer?.name ?? '' }}
+          events={data.events}
+          plan={customer?.planId ? plan : null}
+          timer={timerView}
+        />
+      }
+    />
   );
 }

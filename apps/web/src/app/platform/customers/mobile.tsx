@@ -1,9 +1,8 @@
-import type { Status } from '@agentor/core';
+import { STATUSES, type Status } from '@agentor/core';
 import { formatRelative, type Locale } from '@agentor/i18n';
 import { StatusPill } from '@agentor/ui';
 import {
   ChipGroup,
-  DeskNote,
   MobileCard,
   MobileEmpty,
   MobileLogo,
@@ -105,13 +104,17 @@ export async function CustomersMobile({
                 meta={[access, c.errorsToday ? t('errors', { count: c.errorsToday }) : null]
                   .filter(Boolean)
                   .join(' · ')}
-                trailing={<StatusPill status={c.status as Status}>{ts(c.status)}</StatusPill>}
+                // No flows yet ("none"): no status to show, just the chevron.
+                {...((STATUSES as readonly string[]).includes(c.status)
+                  ? {
+                      trailing: <StatusPill status={c.status as Status}>{ts(c.status)}</StatusPill>,
+                    }
+                  : {})}
               />
             );
           })}
         </MobileCard>
       )}
-      <DeskNote>{t('deskNote')}</DeskNote>
     </MobileShell>
   );
 }

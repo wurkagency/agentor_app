@@ -16,6 +16,7 @@ import {
   Tr,
   type SegmentTone,
 } from '@agentor/ui';
+import { Responsive } from '@agentor/ui/mobile';
 import { ArrowLeft, CalendarClock, CreditCard, Download, Headphones, Layers } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -46,6 +47,7 @@ import {
 } from '@/server/finance-data';
 import { initials } from '@/server/platform-data';
 import { requireStaff } from '@/server/platform';
+import { CustomerFinanceMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.finance.customer');
@@ -170,7 +172,7 @@ export default async function CustomerFinancePage({
   };
   const draftRow = mine && !mine.invoice ? mine : null;
 
-  return (
+  const desktop = (
     <PageBody>
       <Link
         href="/platform/finance/subscriptions"
@@ -398,4 +400,79 @@ export default async function CustomerFinancePage({
       </Card>
     </PageBody>
   );
+  const draftHref = `/platform/finance/support/${tenantId}?month=${cur.key}`;
+  const supportTitle = (d: Date) => `${t('kind.support')} · ${monthLong(d, locale)}`;
+  const mobile = (
+    <CustomerFinanceMobile
+      d={{
+        sub,
+        cur,
+        ytdNet,
+        ytdSubs,
+        lastYear,
+        curve,
+        supportGross: mine?.grossOre ?? 0,
+        supportBilled: mine?.billed ?? 0,
+        prevSupport,
+        used,
+        periodMonths,
+        method: card,
+        subscription: {
+          status:
+            sub.state === 'failed'
+              ? 'error'
+              : sub.state === 'card_expiring'
+                ? 'warn'
+                : sub.state === 'paid' || sub.state === 'renews'
+                  ? 'ok'
+                  : sub.state === 'trial'
+                    ? 'info'
+                    : 'paused',
+          label: t(`state.${sub.state === 'renews' ? 'paid' : sub.state}`),
+        },
+        invoices: [
+          ...(draftRow
+            ? [
+                {
+                  key: 'draft',
+                  href: draftHref,
+                  file: false,
+                  title: supportTitle(cur.start),
+                  meta: `${t('state.draft')} · ${dayMonth(cur.end, locale)} · ${formatMinutes(draftRow.billed, locale)}`,
+                  amount: money(draftRow.grossOre, locale),
+                  pill: (
+                    <span className="text-meta font-medium text-fg-2">
+                      {t('state.sendsOn', { date: dayMonth(cur.end, locale) })}
+                    </span>
+                  ),
+                },
+              ]
+            : []),
+          ...invoices.map((i) => {
+            const minutes = i.lines.reduce((a, l) => a + (l.billedMinutes ?? 0), 0);
+            return {
+              key: i.id,
+              href:
+                i.status === 'draft'
+                  ? draftHref
+                  : `/platform/finance/invoices/${tenantId}/${i.id}/pdf`,
+              file: i.status !== 'draft',
+              title:
+                i.kind === 'support'
+                  ? supportTitle(i.periodStart)
+                  : `${t('kind.subscription')} · ${i.description}`,
+              meta: [
+                i.number ?? t('state.draft'),
+                dayMonth(i.issuedAt ?? i.sendAt ?? i.createdAt, locale),
+                i.kind === 'support' ? formatMinutes(minutes, locale) : '–',
+              ].join(' · '),
+              amount: money(i.grossOre, locale),
+              pill: pill(i),
+            };
+          }),
+        ],
+      }}
+    />
+  );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }

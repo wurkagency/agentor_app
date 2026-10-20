@@ -1,8 +1,25 @@
 'use client';
 
 import { cn } from '@agentor/ui';
-import { CreditCard, House, Kanban, Menu, Activity, CircleX, Users, Workflow } from 'lucide-react';
-import { PlatformBadge, TabBar, TopBar, TopBarAvatar, type TopBarProps } from '@agentor/ui/mobile';
+import {
+  Activity,
+  CircleX,
+  CreditCard,
+  House,
+  Kanban,
+  Menu,
+  Search,
+  Users,
+  Workflow,
+} from 'lucide-react';
+import {
+  PlatformBadge,
+  TabBar,
+  TopBar,
+  TopBarAction,
+  TopBarAvatar,
+  type TopBarProps,
+} from '@agentor/ui/mobile';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -44,9 +61,16 @@ const FALLBACK = 'md:hidden group-has-[[data-page-topbar]]/shell:hidden';
 export function AppTopBar({ back, bell = true, fallback = false, ...rest }: PageTopBarProps) {
   const t = useTranslations('mobile');
   const { attention } = useContext(ChromeContext);
+  // Top-level screens get search (MA17) next to the bell; sub-screens bring their own actions.
+  const actions =
+    rest.actions ??
+    (back ? undefined : (
+      <TopBarAction icon={Search} label={t('search.title')} href="/search" linkAs={Link} />
+    ));
   return (
     <TopBar
       {...rest}
+      {...(actions ? { actions } : {})}
       linkAs={Link}
       pageLevel={!fallback}
       className={cn(fallback && FALLBACK, rest.className)}

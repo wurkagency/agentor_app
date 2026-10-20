@@ -210,7 +210,10 @@ test('Google owner: two-step without a password after a fresh sign-in, then aske
   await expect(page).toHaveURL(/\/login\/mfa\?sso=1/);
   await page.goto('/onboarding/webshop');
   await expect(page).toHaveURL(/\/login\/mfa/);
-  await page.getByLabel('Ciffer 1').fill(await totp(secret));
-  await page.getByRole('button', { name: 'Bekræft' }).click();
+  await page
+    .getByLabel('Ciffer 1')
+    .filter({ visible: true })
+    .fill(await totp(secret));
+  await page.getByRole('button', { name: 'Bekræft' }).filter({ visible: true }).click();
   await expect(page).toHaveURL(/\/onboarding\/webshop/, { timeout: 20_000 });
 });

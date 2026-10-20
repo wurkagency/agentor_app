@@ -2,13 +2,14 @@ import { pushUrl } from '@agentor/core';
 import { createDatabase, requestAccess } from '@agentor/db';
 import { expect, test, type Page } from '@playwright/test';
 import { FLOWS, TENANTS, USERS } from '../scripts/seed-data';
-import { login } from './support';
+import { adminQuery, login } from './support';
 
 /**
  * PLAN-MOBILE e2e paths at phone size:
  * - push → MA12 → approve support access, visible in the customer's audit log;
  * - MA03 → MA06 → retry;
- * - offline: the last overview from this device, with the grey banner.
+ * - offline: the last overview from this device, with the grey banner;
+ * - MP03 → stop the timer → MP04 → save 15 min. (rounded up, B1).
  */
 test.describe.configure({ mode: 'serial' });
 
@@ -129,4 +130,54 @@ test('@mobile offline shows the last overview with the grey banner', async ({ pa
   await expect(page.getByText('Nordlys Cykler ApS')).toBeVisible();
   await expect(page.getByText('Handlinger er slået fra, til du er online igen.')).toBeVisible();
   await context.setOffline(false);
+});
+
+test('@mobile MP03 → stop timer → MP04 → save 15 min.', async ({ page }) => {
+  await login(page, 'anne');
+  await page.goto('/platform/cases');
+  await page
+    .getByRole('link', { name: /Fakturaer til EU-kunder fejler/ })
+    .filter({ visible: true })
+    .first()
+    .click();
+  await expect(page.getByRole('button', { name: /^(Start timer|Stop og gem)$/ })).toBeVisible();
+  const caseId = new URL(page.url()).pathname.split('/').at(-1)!;
+  const count = async () =>
+    (
+      await adminQuery<{ n: number }>(
+        `select count(*)::int as n from platform.time_entries
+          where case_id = $1 and staff_user_id = $2 and source = 'timer'`,
+        [caseId, USERS.anne.id],
+      )
+    )[0]!.n;
+  const before = await count();
+
+  // Start the timer if it isn't running on this case, let it tick, then stop and save.
+  const startTimer = page.getByRole('button', { name: 'Start timer' });
+  if (await startTimer.isVisible()) await startTimer.click();
+  const stop = page.getByRole('button', { name: 'Stop og gem' });
+  await expect(stop).toBeVisible();
+  await page.waitForTimeout(2000);
+  await stop.click();
+
+  const dialog = page.getByRole('dialog', { name: 'Registrér tid' });
+  await expect(dialog.getByText(/^Timer stoppet · \d+ min\. \d+ s\. rundet op$/)).toBeVisible();
+  await expect(dialog.getByText('0:15', { exact: true })).toBeVisible();
+  await dialog.getByRole('button', { name: 'E-mail' }).click();
+  await dialog.getByLabel('Beskrivelse').fill('E2E mobil: tjekkede kontoen');
+  await dialog.getByRole('button', { name: 'Gem 15 min.' }).click();
+  await expect(page.getByText('15 min. er gemt på sagen')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Start timer' })).toBeVisible();
+
+  expect(await count()).toBe(before + 1);
+  const [entry] = await adminQuery<{ minutes: number; kind: string; description: string }>(
+    `select minutes, kind, description from platform.time_entries
+      where case_id = $1 and staff_user_id = $2 and source = 'timer'
+      order by created_at desc limit 1`,
+    [caseId, USERS.anne.id],
+  );
+  expect(entry).toEqual({ minutes: 15, kind: 'email', description: 'E2E mobil: tjekkede kontoen' });
+  expect(
+    await adminQuery(`select 1 from platform.timers where staff_user_id = $1`, [USERS.anne.id]),
+  ).toEqual([]);
 });

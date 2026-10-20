@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import { Responsive } from '@agentor/ui/mobile';
 import { ButtonLink } from '@/components/button-link';
 import {
   CustomerChip,
@@ -57,6 +58,7 @@ import {
   supportForMonth,
 } from '@/server/finance-data';
 import { requireStaff } from '@/server/platform';
+import { SettlementMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.finance');
@@ -186,7 +188,7 @@ export default async function SupportBillingPage({
     );
   };
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader
         title={`${t('tab.support')} · ${monthLong(m.start, locale)} ${m.year}`}
@@ -513,4 +515,34 @@ export default async function SupportBillingPage({
       <p className="m-0 text-meta text-fg-2">{t('billing.footnote')}</p>
     </PageBody>
   );
+  const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+  const last = shiftMonth(cur, -1);
+  const mobile = (
+    <SettlementMobile
+      d={{
+        m,
+        isOpen,
+        rateOre: data.rateOre,
+        totals,
+        prevGross,
+        prevBilled,
+        series,
+        customers,
+        live,
+        months: [
+          {
+            key: last.key,
+            label: cap(monthLong(last.start, locale)),
+            href: href({ month: last.key, open: undefined }),
+          },
+          {
+            key: cur.key,
+            label: cap(monthLong(cur.start, locale)),
+            href: href({ month: undefined, open: undefined }),
+          },
+        ],
+      }}
+    />
+  );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }

@@ -2,6 +2,7 @@ import { supportMonth } from '@agentor/core';
 import { isUuid } from '@agentor/db';
 import { formatDateTime, formatMinutes, type Locale } from '@agentor/i18n';
 import { Banner, Card, Icon, StatusPill, Table, Td, Th, Tr } from '@agentor/ui';
+import { Responsive } from '@agentor/ui/mobile';
 import { ArrowLeft, ArrowRight, CreditCard, FileText } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -18,6 +19,7 @@ import { Logo } from '@/components/logo';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { parseMonth, subscriptionRows, supportForMonth } from '@/server/finance-data';
 import { requireStaff } from '@/server/platform';
+import { SupportInvoiceMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.finance.draft');
@@ -90,7 +92,7 @@ export default async function SupportInvoicePage({
         ? 'MobilePay'
         : `${sub.cardBrand === 'mastercard' ? 'Mastercard' : 'Visa'} •••• ${sub.cardLast4 ?? ''}`;
 
-  return (
+  const desktop = (
     <PageBody>
       <Link
         href={`/platform/finance/support?month=${m.key}`}
@@ -307,4 +309,44 @@ export default async function SupportInvoicePage({
       </div>
     </PageBody>
   );
+  const mobile = (
+    <SupportInvoiceMobile
+      d={{
+        tenantId,
+        name: sub.tenantName,
+        m,
+        lines,
+        net,
+        vat,
+        state: invoice?.status === 'draft' || !invoice ? t('state.draft') : state,
+        position: index >= 0 ? { n: index + 1, total: data.customers.length } : null,
+        prevHref: prev
+          ? withParams(`/platform/finance/support/${prev.tenantId}`, { month: m.key })
+          : null,
+        nextHref: next
+          ? withParams(`/platform/finance/support/${next.tenantId}`, { month: m.key })
+          : null,
+        sendAt,
+        email: sub.billingEmail,
+        method,
+        methodMeta:
+          sub.paymentMethod === 'invoice' ? t('draft.invoiceTerms') : t('draft.chargedOnSend'),
+        invoice: invoice
+          ? {
+              id: invoice.id,
+              attachTimelog: invoice.attachTimelog,
+              approved: Boolean(invoice.approvedAt) || invoice.status !== 'draft',
+            }
+          : null,
+        editable,
+        showRounding,
+        roundingHref: withParams(`/platform/finance/support/${tenantId}`, {
+          month: m.key,
+          rounding: showRounding ? undefined : '1',
+        }),
+        nonBillableMinutes: c?.nonBillableMinutes ?? 0,
+      }}
+    />
+  );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }

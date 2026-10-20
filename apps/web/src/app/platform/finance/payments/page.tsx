@@ -17,6 +17,7 @@ import {
 import { CalendarDays, CircleCheck, Download, FileText, TriangleAlert } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import { Responsive } from '@agentor/ui/mobile';
 import { ButtonLink } from '@/components/button-link';
 import { NotifyButton } from '@/components/platform/finance/action-buttons';
 import {
@@ -51,6 +52,7 @@ import {
   type PaymentState,
 } from '@/server/finance-data';
 import { requireStaff } from '@/server/platform';
+import { PaymentsMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.finance');
@@ -115,15 +117,15 @@ export default async function PaymentsPage({
     .filter((x) => x.i.paymentMethod !== 'invoice')
     .reduce((a, x) => a + x.i.grossOre, 0);
   const age = (x: (typeof overdue)[number]) => daysBetween(x.i.dueAt ?? x.i.createdAt, now);
-  const nextRunSubs = subs
+  const nextRunList = subs
     .filter(
       (s) =>
         (s.status === 'active' || s.status === 'past_due') && s.state !== 'trial' && !s.cancelAt,
     )
     .filter(
       (s) => s.nextChargeAt && s.nextChargeAt < shiftMonth(cur, 1).end && s.nextChargeAt >= now,
-    )
-    .reduce((a, s) => a + Math.round(s.priceOre * 1.25), 0);
+    );
+  const nextRunSubs = nextRunList.reduce((a, s) => a + Math.round(s.priceOre * 1.25), 0);
   const nextRunSupport = support.customers.reduce((a, c) => a + c.grossOre, 0);
   const nextRun = nextRunSubs + nextRunSupport;
 
@@ -217,7 +219,7 @@ export default async function PaymentsPage({
     return null;
   };
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('tab.payments')}
@@ -481,4 +483,57 @@ export default async function PaymentsPage({
       </Card>
     </PageBody>
   );
+  const methodOf = (i: (typeof invoices)[number]) =>
+    i.paymentMethod === 'invoice' ? t('method.ean') : t(`method.${i.paymentMethod}`);
+  const mobileRow = (x: (typeof states)[number]) => ({
+    id: x.i.id,
+    tenantId: x.i.tenantId,
+    name: x.i.tenantName,
+    meta: [
+      x.i.number,
+      `${x.i.kind === 'support' ? t('kind.support') : x.i.description.split(' · ')[0]} ${monthLong(x.i.periodStart, locale)}`,
+      methodOf(x.i),
+    ]
+      .filter(Boolean)
+      .join(' · '),
+    amount: x.i.grossOre,
+    status: status(x),
+  });
+  const cardsRefused = overdue.filter((x) => x.s === 'card_failed' || x.s === 'retrying').length;
+  const mobile = (
+    <PaymentsMobile
+      d={{
+        exportHref: `/platform/finance/payments/export?month=${m.key}`,
+        invoicedLabel: t('pay.invoiced', { month: monthShort(m.start, locale) }),
+        invoicedTrend: growthOf(growthPct(gross, prevGross), (a) => `${a} %`, locale),
+        gross,
+        prevGross,
+        prevMonth: monthLong(prev.start, locale),
+        series,
+        paidGross,
+        median,
+        overdueGross,
+        overdueCount: overdue.length,
+        cardsRefused,
+        pastDue: overdue.length - cardsRefused,
+        nextRunDate: cur.end,
+        nextRun,
+        nextRunSubs: nextRunList.length,
+        nextRunSupport: support.customers.length,
+        chip,
+        chips: (['action', 'awaiting', 'paid', 'all'] as const).map((c) => ({
+          key: c,
+          href: withParams('/platform/finance/payments', {
+            ...base,
+            f: c === 'action' ? undefined : c,
+          }),
+          label:
+            c === 'all' || c === 'paid' ? t(`pay.chip.${c}`) : `${t(`pay.chip.${c}`)} ${counts[c]}`,
+        })),
+        rows: rows.map(mobileRow),
+        latest: latest.map(mobileRow),
+      }}
+    />
+  );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }

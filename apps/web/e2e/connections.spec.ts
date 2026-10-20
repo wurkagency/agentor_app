@@ -26,7 +26,9 @@ const card = (page: Page, name: string) => page.getByRole('article', { name, exa
 test('my connections: six accounts, one broken (D9-Forbindelser)', async ({ page }) => {
   await login(page, 'mette');
   await page.goto('/connections');
-  await expect(page.getByText('6 forbindelser · 1 afbrudt')).toBeVisible();
+  await expect(
+    page.getByText('6 forbindelser · 1 afbrudt').filter({ visible: true }),
+  ).toBeVisible();
   await expect(page.getByRole('article')).toHaveCount(6);
   const economic = card(page, 'e-conomic');
   await expect(economic).toContainText('Afbrudt');
@@ -59,7 +61,9 @@ test('connect Brevo with an API key; the worker checks it', async ({ page }) => 
   // Sealed in the browser session → worker opens with the KEK → test → Aktiv.
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Brevo');
   await expect(page.getByText('Aktiv', { exact: true }).first()).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText('Nøgler vises aldrig, heller ikke maskeret.')).toBeVisible();
+  await expect(
+    page.getByText('Nøgler vises aldrig, heller ikke maskeret.').filter({ visible: true }),
+  ).toBeVisible();
   await expect(page.locator('body')).not.toContainText('xkeysib-e2e');
 });
 

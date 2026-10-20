@@ -12,7 +12,9 @@ test('Supporters and customers never see Finans', async ({ browser, page }) => {
   await page.goto('/platform/customers');
   await expect(page.getByRole('link', { name: 'Finans' })).toHaveCount(0);
   await page.goto('/platform/finance');
-  await expect(page.getByText('Du har ikke adgang til denne side')).toBeVisible();
+  await expect(
+    page.getByText('Du har ikke adgang til denne side').filter({ visible: true }),
+  ).toBeVisible();
 
   const customer = await (await browser.newContext()).newPage();
   await login(customer, 'jonas');
@@ -29,7 +31,7 @@ test('the overview shows revenue and what needs action', async ({ page }) => {
   const action = page.getByRole('link', { name: /Mølle Sport ApS.*Kortbetaling afvist/ });
   await expect(action).toBeVisible();
   await page.getByRole('link', { name: 'Dage', exact: true }).click();
-  await expect(page.getByText('Omsætning pr. dag')).toBeVisible();
+  await expect(page.getByText('Omsætning pr. dag').filter({ visible: true })).toBeVisible();
 });
 
 test('subscriptions filter and a discount', async ({ page }) => {
@@ -46,7 +48,7 @@ test('subscriptions filter and a discount', async ({ page }) => {
   await page.getByRole('option', { name: PLATFORM_TENANTS.osterbro.name }).click();
   await dialog.getByRole('textbox', { name: 'Rabat i %' }).fill('20');
   await dialog.getByRole('button', { name: 'Gem rabat' }).click();
-  await expect(page.getByText('Rabatten er gemt')).toBeVisible();
+  await expect(page.getByText('Rabatten er gemt').filter({ visible: true })).toBeVisible();
   await page.goto('/platform/finance/subscriptions');
   await expect(
     page.getByRole('row', { name: new RegExp(PLATFORM_TENANTS.osterbro.name) }),
@@ -69,7 +71,9 @@ test('support is drafted per case, rounded per registration, and approved', asyn
   await expect(line).toContainText('1 t 12 min.');
   await expect(line).toContainText('1 t 15 min.');
   await expect(
-    page.getByText('20 min. på kundens sager er markeret som ikke fakturerbar'),
+    page
+      .getByText('20 min. på kundens sager er markeret som ikke fakturerbar')
+      .filter({ visible: true }),
   ).toBeVisible();
   // A line by hand (goodwill) and the time log, before approval.
   await page.getByRole('button', { name: 'Tilføj linje' }).click();
@@ -83,7 +87,7 @@ test('support is drafted per case, rounded per registration, and approved', asyn
   await timelog.click();
   await expect(timelog).not.toBeChecked();
   await page.getByRole('button', { name: 'Godkend' }).click();
-  await expect(page.getByText('Godkendt af Kasper Nyborg')).toBeVisible();
+  await expect(page.getByText('Godkendt af Kasper Nyborg').filter({ visible: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Godkendt' })).toBeDisabled();
 });
 
@@ -92,7 +96,9 @@ test('a reminder and a payment link go to the customer by e-mail', async ({ page
   await page.goto('/platform/finance/payments');
   const hav = page.getByRole('row', { name: new RegExp(PLATFORM_TENANTS.hav.name) }).first();
   await hav.getByRole('button', { name: 'Send rykker' }).click();
-  await expect(page.getByText('Sendt til faktura@hav-hudpleje.test')).toBeVisible();
+  await expect(
+    page.getByText('Sendt til faktura@hav-hudpleje.test').filter({ visible: true }),
+  ).toBeVisible();
   const mail = await latestMailTo('faktura@hav-hudpleje.test');
   expect(mail.subject).toMatch(/^Påmindelse: faktura INV\/\d{4}\/\d{5,} /);
   await page.reload();
@@ -116,7 +122,9 @@ test('the monthly report exports and goes to the bookkeeper', async ({ page }) =
   const pdf = await page.request.get('/platform/finance/reports/pdf');
   expect(pdf.headers()['content-type']).toBe('application/pdf');
   await page.getByRole('button', { name: 'Send til bogholder' }).click();
-  await expect(page.getByText('Sendt til bogholder@agentor.test')).toBeVisible();
+  await expect(
+    page.getByText('Sendt til bogholder@agentor.test').filter({ visible: true }),
+  ).toBeVisible();
   const mail = await latestMailTo('bogholder@agentor.test');
   expect(mail.subject).toMatch(/^Agentor · månedsrapport /);
 });
@@ -128,11 +136,11 @@ test('Superadmin edits a plan in Platformindstillinger', async ({ page }) => {
   const dialog = page.getByRole('dialog', { name: 'Plan: Startup' });
   await dialog.getByLabel('Brugere').fill('3');
   await dialog.getByRole('button', { name: 'Gem plan' }).click();
-  await expect(page.getByText('Startup er gemt')).toBeVisible();
+  await expect(page.getByText('Startup er gemt').filter({ visible: true })).toBeVisible();
   await expect(page.getByRole('row', { name: /Startup/ })).toContainText('3');
   // Back to the seed's value.
   await page.getByRole('button', { name: 'Redigér Startup' }).click();
   await page.getByRole('dialog').getByLabel('Brugere').fill('2');
   await page.getByRole('dialog').getByRole('button', { name: 'Gem plan' }).click();
-  await expect(page.getByText('Startup er gemt')).toBeVisible();
+  await expect(page.getByText('Startup er gemt').filter({ visible: true })).toBeVisible();
 });

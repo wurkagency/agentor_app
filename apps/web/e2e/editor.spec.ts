@@ -38,7 +38,9 @@ test('Phase 1 gate: fix the EU B2B account and publish as draft', async ({ page 
   await login(page, 'mette');
   await page.goto('/');
   await expect(page.getByRole('heading', { name: '1 flow kræver handling' })).toBeVisible();
-  await expect(page.getByText('Konto 1010 findes ikke i Dinero.')).toBeVisible();
+  await expect(
+    page.getByText('Konto 1010 findes ikke i Dinero.').filter({ visible: true }),
+  ).toBeVisible();
 
   // 2–4. Integrationer, expand the flow, open the editor.
   await page.getByRole('navigation').getByRole('link', { name: 'Integrationer' }).first().click();
@@ -67,7 +69,9 @@ test('Phase 1 gate: fix the EU B2B account and publish as draft', async ({ page 
   await findings.getByRole('button', { name: 'Gå til feltet' }).first().click();
   const euB2b = page.locator('[id="field-mapping.accounts.euB2b"]');
   await expect(euB2b).toBeFocused();
-  await expect(page.getByText('Kontoen 1010 findes ikke længere i Dinero.')).toBeVisible();
+  await expect(
+    page.getByText('Kontoen 1010 findes ikke længere i Dinero.').filter({ visible: true }),
+  ).toBeVisible();
   await page.screenshot({ path: test.info().outputPath('1-validation.png') });
   await axe(page);
 
@@ -100,7 +104,7 @@ test('Phase 1 gate: fix the EU B2B account and publish as draft', async ({ page 
   await page.screenshot({ path: test.info().outputPath('3-publish.png') });
   await axe(page);
   await dialog.getByRole('button', { name: 'Publicér som kladde' }).click();
-  await expect(page.getByText('Version 8 er publiceret')).toBeVisible();
+  await expect(page.getByText('Version 8 er publiceret').filter({ visible: true })).toBeVisible();
 
   // 10. The retry run resolves the three EU orders: Overblik is back to "Alt kører".
   await expect(async () => {
@@ -178,7 +182,7 @@ test('an earlier version can be restored as the draft', async ({ page }) => {
   await page.goto(`/integrations/${WEBSHOP}?tab=settings`);
   await page.getByRole('button', { name: 'Gendan version 6 som kladde' }).click();
   await expect(page).toHaveURL(new RegExp(`/integrations/${WEBSHOP}/editor`), { timeout: 30_000 });
-  await expect(page.getByText(/ændring(er)? i kladden/)).toBeVisible();
+  await expect(page.getByText(/ændring(er)? i kladden/).filter({ visible: true })).toBeVisible();
 });
 
 test('template picker creates a flow in Test and opens the editor (D4)', async ({ page }) => {
@@ -195,8 +199,8 @@ test('template picker creates a flow in Test and opens the editor (D4)', async (
   await page.getByLabel('Navn på flowet').fill('Kunder til HubSpot (e2e)');
   await page.getByRole('button', { name: 'Brug skabelon' }).click();
   await expect(page).toHaveURL(/\/integrations\/[0-9a-f-]+\/editor\?guide=1/);
-  await expect(page.getByText('Sådan kommer du i gang')).toBeVisible();
-  await expect(page.getByText('Aldrig publiceret')).toBeVisible();
+  await expect(page.getByText('Sådan kommer du i gang').filter({ visible: true })).toBeVisible();
+  await expect(page.getByText('Aldrig publiceret').filter({ visible: true })).toBeVisible();
 
   // A destination can be dragged from the palette onto the canvas.
   const before = await page.locator('.react-flow__node').count();

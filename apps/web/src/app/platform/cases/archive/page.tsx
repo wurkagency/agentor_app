@@ -10,6 +10,8 @@ import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
 import { initials, tenantNames } from '@/server/platform-data';
+import { Responsive } from '@agentor/ui/mobile';
+import { ArchiveMobile } from './mobile';
 import { archiveRows, type ArchiveQuery } from './rows';
 
 export async function generateMetadata() {
@@ -39,7 +41,7 @@ export default async function ArchivePage({
     Object.entries(q).filter(([, v]) => typeof v === 'string') as [string, string][],
   );
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('title')}
@@ -171,5 +173,20 @@ export default async function ArchivePage({
         </p>
       </Card>
     </PageBody>
+  );
+  return (
+    <Responsive
+      desktop={desktop}
+      mobile={
+        <ArchiveMobile
+          rows={shown}
+          count={rows.length}
+          totalMinutes={total}
+          query={q}
+          customers={[...names].map(([value, label]) => ({ value, label }))}
+          staff={staff.map((s) => ({ value: s.userId, label: s.name }))}
+        />
+      }
+    />
   );
 }

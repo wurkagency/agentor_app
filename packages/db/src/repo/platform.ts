@@ -1,4 +1,4 @@
-import { DEFAULT_SUPPORT_RATE_ORE } from '@agentor/core';
+import { DEFAULT_SUPPORT_RATE_ORE, roundUpQuarter } from '@agentor/core';
 import { randomBytes } from 'node:crypto';
 import { and, asc, desc, eq, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { withoutTenant, withTenant, type Database, type Transaction } from '../client.js';
@@ -1165,47 +1165,82 @@ export async function caseStats(db: Database, userId: string): Promise<CaseStats
 
 /* ---- Time (S4, S6) ---------------------------------------------------------------------------- */
 
-export async function addTime(
-  db: Database,
-  actor: StaffActor,
-  input: {
-    caseId: string | null;
-    tenantId: string | null;
-    workDate: string;
-    minutes: number;
-    kind: TimeKind;
-    description: string;
-    billable: boolean;
-    source?: 'manual' | 'timer';
-  },
-) {
+type TimeInput = {
+  caseId: string | null;
+  tenantId: string | null;
+  workDate: string;
+  minutes: number;
+  kind: TimeKind;
+  description: string;
+  billable: boolean;
+  source?: 'manual' | 'timer';
+};
+
+function checkTime(input: TimeInput) {
   if (!Number.isInteger(input.minutes) || input.minutes < 1 || input.minutes > 1440)
     throw new PlatformError('INVALID');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.workDate)) throw new PlatformError('INVALID');
-  await asStaff(db, actor.userId, async (tx) => {
-    let tenantId = input.tenantId;
-    if (input.caseId) {
-      const [c] = await tx
-        .select({ tenantId: cases.tenantId })
-        .from(cases)
-        .where(eq(cases.id, input.caseId));
-      if (!c) throw new PlatformError('NOT_FOUND');
-      tenantId = c.tenantId;
-      await tx.update(cases).set({ updatedAt: new Date() }).where(eq(cases.id, input.caseId));
-    }
-    await tx.insert(timeEntries).values({
-      staffUserId: actor.userId,
-      staffName: actor.name,
-      caseId: input.caseId,
-      tenantId,
-      workDate: input.workDate,
-      minutes: input.minutes,
-      kind: input.kind,
-      source: input.source ?? 'manual',
-      description: input.description.trim().slice(0, 500),
-      billable: input.billable && tenantId !== null,
-    });
+}
+
+async function insertTime(tx: Transaction, actor: StaffActor, input: TimeInput) {
+  let tenantId = input.tenantId;
+  if (input.caseId) {
+    const [c] = await tx
+      .select({ tenantId: cases.tenantId })
+      .from(cases)
+      .where(eq(cases.id, input.caseId));
+    if (!c) throw new PlatformError('NOT_FOUND');
+    tenantId = c.tenantId;
+    await tx.update(cases).set({ updatedAt: new Date() }).where(eq(cases.id, input.caseId));
+  }
+  await tx.insert(timeEntries).values({
+    staffUserId: actor.userId,
+    staffName: actor.name,
+    caseId: input.caseId,
+    tenantId,
+    workDate: input.workDate,
+    minutes: input.minutes,
+    kind: input.kind,
+    source: input.source ?? 'manual',
+    description: input.description.trim().slice(0, 500),
+    billable: input.billable && tenantId !== null,
   });
+}
+
+export async function addTime(db: Database, actor: StaffActor, input: TimeInput) {
+  checkTime(input);
+  await asStaff(db, actor.userId, (tx) => insertTime(tx, actor, input));
+}
+
+/** "Ret tid" (MP15): the person's own entry, until it is invoiced (RLS enforces both too). */
+export async function updateTime(
+  db: Database,
+  actor: StaffActor,
+  id: string,
+  input: { minutes: number; kind: TimeKind; description: string; billable: boolean },
+) {
+  if (!Number.isInteger(input.minutes) || input.minutes < 1 || input.minutes > 1440)
+    throw new PlatformError('INVALID');
+  const rows = await asStaff(db, actor.userId, (tx) =>
+    tx
+      .update(timeEntries)
+      .set({
+        minutes: input.minutes,
+        kind: input.kind,
+        description: input.description.trim().slice(0, 500),
+        // Billable only with a customer, as when the entry was made.
+        billable: sql`${input.billable} and ${timeEntries.tenantId} is not null`,
+      })
+      .where(
+        and(
+          eq(timeEntries.id, id),
+          eq(timeEntries.staffUserId, actor.userId),
+          isNull(timeEntries.invoiceId),
+        ),
+      )
+      .returning({ id: timeEntries.id }),
+  );
+  if (rows.length === 0) throw new PlatformError('NOT_FOUND');
 }
 
 export async function linkSessionTime(
@@ -1284,27 +1319,35 @@ export async function startTimer(db: Database, actor: StaffActor, caseId: string
   );
 }
 
-/** Stops the timer and logs the time (rounded up to whole minutes). */
-export async function stopTimer(db: Database, actor: StaffActor, description: string) {
+/**
+ * Stops the timer and logs the time in one transaction. The duration is rounded up to the next
+ * 15 minutes unless the person overrides it (PLAN-MOBILE B1: 12 min. 40 s. → 15 min.).
+ */
+export async function stopTimer(
+  db: Database,
+  actor: StaffActor,
+  description: string,
+  opts: { minutes?: number; kind?: TimeKind; billable?: boolean } = {},
+) {
   const t = await getTimer(db, actor.userId);
   if (!t) return null;
-  const minutes = Math.min(
-    1440,
-    Math.max(1, Math.ceil((Date.now() - t.startedAt.getTime()) / 60000)),
-  );
-  await addTime(db, actor, {
+  const elapsed = Math.max(1, Math.ceil((Date.now() - t.startedAt.getTime()) / 60000));
+  const minutes = Math.min(1440, opts.minutes ?? roundUpQuarter(elapsed));
+  const input: TimeInput = {
     caseId: t.caseId,
     tenantId: null,
     workDate: new Date().toISOString().slice(0, 10),
     minutes,
-    kind: 'other',
+    kind: opts.kind ?? 'other',
     description,
-    billable: false,
+    billable: opts.billable ?? false,
     source: 'timer',
+  };
+  checkTime(input);
+  await asStaff(db, actor.userId, async (tx) => {
+    await insertTime(tx, actor, input);
+    await tx.delete(timers).where(eq(timers.staffUserId, actor.userId));
   });
-  await asStaff(db, actor.userId, (tx) =>
-    tx.delete(timers).where(eq(timers.staffUserId, actor.userId)),
-  );
   return minutes;
 }
 

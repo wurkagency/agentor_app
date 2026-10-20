@@ -6,8 +6,8 @@ import {
   CardButton,
   MobileCallout,
   MobileCard,
-  MobileFootnote,
   Row,
+  RowLink,
   SectionHeading,
   Switch,
 } from '@agentor/ui/mobile';
@@ -74,6 +74,7 @@ export function PushSettings({
 }) {
   const t = useTranslations('mobile.pushSettings');
   const tc = useTranslations('common');
+  const tch = useTranslations('mobile.channels');
   const standalone = useStandalone();
   const [state, setState] = useState<State>('checking');
   const [endpoint, setEndpoint] = useState<string | null>(null);
@@ -242,7 +243,15 @@ export function PushSettings({
           }
         />
       </MobileCard>
-      <MobileFootnote>{t('channels')}</MobileFootnote>
+      <SectionHeading>{tch('linkHeading')}</SectionHeading>
+      <MobileCard>
+        <RowLink
+          href="/settings/notifications/channels"
+          linkAs={Link}
+          title={t('channelsLink')}
+          meta={tch('linkMeta')}
+        />
+      </MobileCard>
       {on && (
         <button
           type="button"

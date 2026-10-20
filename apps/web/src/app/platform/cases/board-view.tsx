@@ -7,11 +7,20 @@ import { CaseBoard, type BoardCase } from '@/components/platform/case-board';
 import { NewCaseButton } from '@/components/platform/new-case-button';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
+import { Responsive } from '@agentor/ui/mobile';
+import { CasesMobile, type CaseFilter } from './mobile';
 import { requireStaff } from '@/server/platform';
 import { customersFor, initials, statsFor, tenantNames } from '@/server/platform-data';
 
 /** Supportsager (S1): board or list of the cases that aren't archived. */
-export async function BoardView({ view }: { view: 'board' | 'list' }) {
+export async function BoardView({
+  view,
+  filter = 'mine',
+}: {
+  view: 'board' | 'list';
+  /** Mobile chips (MP02). */
+  filter?: CaseFilter;
+}) {
   const { actor } = await requireStaff();
   const t = await getTranslations('platform.cases');
   const locale = (await getLocale()) as Locale;
@@ -66,7 +75,7 @@ export async function BoardView({ view }: { view: 'board' | 'list' }) {
     };
   });
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('title')}
@@ -164,5 +173,19 @@ export async function BoardView({ view }: { view: 'board' | 'list' }) {
         archived={archived.length}
       />
     </PageBody>
+  );
+  return (
+    <Responsive
+      desktop={desktop}
+      mobile={
+        <CasesMobile
+          cases={items}
+          userId={actor.userId}
+          filter={filter}
+          minutesToday={stats.minutesToday}
+          customers={customerList}
+        />
+      }
+    />
   );
 }

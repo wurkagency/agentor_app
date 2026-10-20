@@ -20,14 +20,16 @@ test('Supporter sees customers but not Platformbrugere', async ({ page }) => {
   await expect(page.getByRole('link', { name: 'Nordlys Cykler ApS' }).first()).toBeVisible();
   await expect(page.getByRole('link', { name: 'Platformbrugere' })).toHaveCount(0);
   await page.goto('/platform/users');
-  await expect(page.getByText('Du har ikke adgang til denne side')).toBeVisible();
+  await expect(
+    page.getByText('Du har ikke adgang til denne side').filter({ visible: true }),
+  ).toBeVisible();
 });
 
 test('Superadmin manages platform users', async ({ page }) => {
   await login(page, 'kasper');
   await page.goto('/platform/users');
   await expect(page.getByRole('heading', { name: 'Platformbrugere og roller' })).toBeVisible();
-  await expect(page.getByText('anne@agentor.test')).toBeVisible();
+  await expect(page.getByText('anne@agentor.test').filter({ visible: true })).toBeVisible();
 });
 
 test('a customer never sees internal notes', async ({ browser, page }) => {
@@ -39,9 +41,11 @@ test('a customer never sees internal notes', async ({ browser, page }) => {
   const composer = page.getByRole('textbox', { name: 'Svar til kunden' });
   await composer.fill('E2E svar: vi kigger på momskoden nu.');
   await page.getByRole('button', { name: 'Send', exact: true }).click();
-  await expect(page.getByText('Svaret er sendt')).toBeVisible();
+  await expect(page.getByText('Svaret er sendt').filter({ visible: true })).toBeVisible();
   // The composer is busy until the page has refreshed with the reply.
-  await expect(page.getByText('E2E svar: vi kigger på momskoden nu.')).toBeVisible();
+  await expect(
+    page.getByText('E2E svar: vi kigger på momskoden nu.').filter({ visible: true }),
+  ).toBeVisible();
   await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
 
   await page.getByRole('radio', { name: 'Intern note' }).click();
@@ -49,7 +53,9 @@ test('a customer never sees internal notes', async ({ browser, page }) => {
   await note.fill('E2E intern note: kun for Agentor.');
   await page.getByRole('button', { name: 'Gem note' }).click();
   await expect(note).toHaveValue('');
-  await expect(page.getByText('E2E intern note: kun for Agentor.')).toBeVisible();
+  await expect(
+    page.getByText('E2E intern note: kun for Agentor.').filter({ visible: true }),
+  ).toBeVisible();
 
   const customer = await as(browser, 'jonas');
   await customer.goto('/support');
@@ -84,7 +90,9 @@ test('support view logs time on the case and can end the access', async ({ page 
   await expect(page.getByRole('region', { name: 'Supportvisning' })).toBeVisible();
   // Support is never tenant admin: settings stay closed.
   await page.goto('/settings/team');
-  await expect(page.getByText('Du har ikke adgang til denne side')).toBeVisible();
+  await expect(
+    page.getByText('Du har ikke adgang til denne side').filter({ visible: true }),
+  ).toBeVisible();
 
   await page.goto('/');
   await page.getByRole('button', { name: 'Afslut supportvisning' }).click();
@@ -110,7 +118,9 @@ test('access needs the customer’s approval', async ({ browser, page }) => {
     .getByRole('textbox', { name: 'Begrundelse til kunden' })
     .fill('E2E: vi vil se lagerflowet');
   await dialog.getByRole('button', { name: 'Send anmodning' }).click();
-  await expect(page.getByText('Venter på kundens godkendelse', { exact: false })).toBeVisible();
+  await expect(
+    page.getByText('Venter på kundens godkendelse', { exact: false }).filter({ visible: true }),
+  ).toBeVisible();
 
   const customer = await as(browser, 'jonas');
   await customer.goto('/settings/security');
@@ -120,7 +130,9 @@ test('access needs the customer’s approval', async ({ browser, page }) => {
   await customer.context().close();
 
   await page.reload();
-  await expect(page.getByText('Du har supportadgang til', { exact: false })).toBeVisible();
+  await expect(
+    page.getByText('Du har supportadgang til', { exact: false }).filter({ visible: true }),
+  ).toBeVisible();
 });
 
 test('Superadmin opens a customer app directly, without a request', async ({ browser, page }) => {
@@ -173,7 +185,9 @@ test('Superadmin creates a customer; the owner accepts, pays and the company is 
   await page.getByRole('option', { name: 'Årlig' }).click();
   await dialog.getByRole('button', { name: 'Opret og send invitation' }).click();
   await expect(page).toHaveURL(/\/platform\/customers\/[0-9a-f-]{36}\?created=1$/);
-  await expect(page.getByText('Kunden er oprettet, og ejeren har fået en mail')).toBeVisible();
+  await expect(
+    page.getByText('Kunden er oprettet, og ejeren har fået en mail').filter({ visible: true }),
+  ).toBeVisible();
   const [t] = await adminQuery<{ id: string; signup_state: string }>(
     'select id, signup_state from tenants where name = $1',
     [name],

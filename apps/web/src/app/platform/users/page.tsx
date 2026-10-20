@@ -7,6 +7,8 @@ import { InviteStaffButton, RulesForm, StaffRowMenu } from '@/components/platfor
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
+import { Responsive } from '@agentor/ui/mobile';
+import { PlatformUsersMobile } from './mobile';
 import { RightsTable } from './rights';
 
 export async function generateMetadata() {
@@ -25,7 +27,7 @@ export default async function StaffPage() {
     getPlatformSettings(db(), actor.userId),
   ]);
   const now = new Date();
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader title={t('title')} subtitle={t('intro')} actions={<InviteStaffButton />} />
       <Card padding="none" className="overflow-x-auto">
@@ -130,5 +132,20 @@ export default async function StaffPage() {
         </div>
       </div>
     </PageBody>
+  );
+  return (
+    <Responsive
+      desktop={desktop}
+      mobile={
+        <PlatformUsersMobile
+          staff={staff}
+          grantCounts={Object.fromEntries(
+            staff.map((s) => [s.userId, grants.filter((g) => g.staffUserId === s.userId).length]),
+          )}
+          selfId={actor.userId}
+          warnConcurrent={settings.warnConcurrentGrants}
+        />
+      }
+    />
   );
 }

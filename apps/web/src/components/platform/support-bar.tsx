@@ -260,7 +260,7 @@ function Switcher({
 }
 
 /** Turns a visited path into a line in the session log (S5). */
-function actionLabel(t: (k: string, p?: Record<string, string>) => string, label: string) {
+export function actionLabel(t: (k: string, p?: Record<string, string>) => string, label: string) {
   if (label === 'opened') return t('action.opened');
   if (label === '/') return t('action.overview');
   if (/^\/integrations\/[^/]+\/editor/.test(label)) return t('action.editor');

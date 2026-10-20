@@ -1,10 +1,12 @@
 import { CATALOGUE, manifestFor } from '@agentor/connectors';
 import { listConnections } from '@agentor/db';
+import { Responsive } from '@agentor/ui/mobile';
 import { getTranslations } from 'next-intl/server';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { requireRole } from '@/server/auth/session';
 import { db } from '@/server/infra';
 import { Catalogue, type CatalogueItem } from './catalogue';
+import { CatalogueMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('connections');
@@ -41,10 +43,11 @@ export default async function CataloguePage() {
           : { type: 'key' as const, fields: m.auth.fields, webhook: Boolean(m.webhook) },
     };
   });
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader eyebrow={t('title')} title={t('add')} subtitle={t('catalogueIntro')} />
       <Catalogue items={items} />
     </PageBody>
   );
+  return <Responsive desktop={desktop} mobile={<CatalogueMobile items={items} />} />;
 }

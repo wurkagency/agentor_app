@@ -25,6 +25,7 @@ import { ArrowLeft, CircleCheck, Clock, Lock, MessageSquare, ShieldCheck } from 
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Responsive } from '@agentor/ui/mobile';
 import { LinkTabs } from '@/components/link-tabs';
 import {
   GrantActions,
@@ -39,8 +40,11 @@ import { flowViews, connectionMap, NEEDS_ACTION } from '@/server/flows';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
 import { customersFor, initials, planNames, tenantNames } from '@/server/platform-data';
+import { CustomerMobile, type CustomerTab } from './mobile';
+import type { MobileGrant } from './mobile-actions';
 
 const TABS = ['overview', 'cases', 'log', 'notes'] as const;
+const MOBILE_TABS: CustomerTab[] = ['overview', 'flows', 'cases', 'log', 'notes'];
 
 /**
  * Kundedetalje (P2): name, plan and status for everyone; contacts and the customer's own
@@ -51,7 +55,7 @@ export default async function CustomerPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string; created?: string }>;
+  searchParams: Promise<{ tab?: string; created?: string; request?: string }>;
 }) {
   const { id } = await params;
   if (!isUuid(id)) notFound();
@@ -106,7 +110,7 @@ export default async function CustomerPage({
 
   const created =
     sp.created === '1' ? t('created') : sp.created === 'nomail' ? t('createdNoMail') : null;
-  return (
+  const desktop = (
     <PageBody>
       {created && <Banner tone={sp.created === '1' ? 'info' : 'warn'}>{created}</Banner>}
       <Link
@@ -391,4 +395,58 @@ export default async function CustomerPage({
       )}
     </PageBody>
   );
+
+  const mobileTab = MOBILE_TABS.includes(sp.tab as CustomerTab)
+    ? (sp.tab as CustomerTab)
+    : 'overview';
+  const grantKind: MobileGrant = active
+    ? { kind: 'active', grantId: active.grantId, until: formatDateTime(active.expiresAt, locale) }
+    : actor.role === 'superadmin'
+      ? { kind: 'direct' }
+      : grant?.state === 'pending'
+        ? { kind: 'pending' }
+        : { kind: 'none' };
+  const mobile = (
+    <CustomerMobile
+      customer={{
+        tenantId: id,
+        name: customer.name,
+        meta: [plan, customer.cvr ? `CVR ${customer.cvr}` : null].filter(Boolean).join(' · '),
+        grant: grantKind,
+        target,
+        financeHref: actor.role === 'superadmin' ? `/platform/finance/customers/${id}` : null,
+        status: customer.status,
+        statusLabel,
+        facts: [
+          customer.cvr ? `CVR ${customer.cvr}` : null,
+          plan,
+          t('since', { date: formatDate(customer.createdAt, locale) }),
+        ]
+          .filter(Boolean)
+          .join(' · '),
+        plan,
+        flows: customer.flows,
+        brokenConnections: customer.brokenConnections,
+        openFailures: customer.openFailures,
+        requiresApproval: customer.requiresApproval,
+      }}
+      tab={mobileTab}
+      openRequest={sp.request === '1'}
+      created={created ? { text: created, ok: sp.created === '1' } : null}
+      active={active}
+      pendingSince={grant?.state === 'pending' ? grant.requestedAt : null}
+      contacts={contacts}
+      broken={broken.map((b) => ({ id: b.id, name: b.name }))}
+      flows={views.map((v) => ({
+        id: v.id,
+        name: v.name,
+        status: v.status,
+        openFailures: v.openFailures,
+      }))}
+      cases={cases}
+      log={log}
+      notes={notes}
+    />
+  );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }

@@ -135,7 +135,7 @@ test.describe('@mobile responsive switch', () => {
   }) => {
     await login(page, 'mette');
     await page.setViewportSize({ width: 767, height: 900 });
-    await page.goto('/settings/team');
+    await page.goto('/settings/company');
     const tabs = page.getByRole('navigation', { name: 'Hovedmenu' });
     await expect(tabs).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Åbn på computer' })).toBeVisible();
@@ -160,14 +160,14 @@ test.describe('@mobile responsive switch', () => {
 
   test('desktop-only page sends a link to the computer', async ({ page }, info) => {
     await login(page, 'mette');
-    await page.goto('/settings/team');
-    await expect(page.getByText('Team, sikkerhed, virksomhed og audit-log ændres')).toBeVisible();
+    await page.goto('/settings/company');
+    await expect(page.getByText('Virksomhedsoplysninger og din profil ændres')).toBeVisible();
     const started = Date.now();
     await page.getByRole('button', { name: 'Send link til min computer' }).click();
     await expect(page.getByText(`Link sendt til ${USERS.mette.email}`)).toBeVisible();
     const mail = await latestMailTo(USERS.mette.email);
     expect(mail.subject).toMatch(/^Link til /);
-    expect(mail.text).toContain('/settings/team');
+    expect(mail.text).toContain('/settings/company');
     expect(Date.now() - started).toBeLessThan(15_000);
     await page.screenshot({
       path: `../../docs/screenshots/mobile/M1-desk-only-${info.project.name}.png`,

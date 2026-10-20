@@ -496,6 +496,10 @@
 @utility pb-bar-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
+/* MP04 footer: Annullér and the wider "Gem" (flex 1 : 1.4 on the board). */
+@utility grid-cols-m-actions {
+  grid-template-columns: 1fr 1.4fr;
+}
 /* MobileKpi rows: label 20, value 30, visual 30, meta 16 (MA02). */
 @utility grid-rows-m-kpi {
   grid-template-rows: 20px 30px 30px 16px;

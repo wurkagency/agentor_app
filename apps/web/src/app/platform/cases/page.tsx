@@ -6,6 +6,16 @@ export async function generateMetadata() {
   return { title: t('title') };
 }
 
-export default function CasesPage() {
-  return <BoardView view="board" />;
+export default async function CasesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filter?: string }>;
+}) {
+  const { filter } = await searchParams;
+  return (
+    <BoardView
+      view="board"
+      filter={filter === 'unassigned' || filter === 'waiting' ? filter : 'mine'}
+    />
+  );
 }

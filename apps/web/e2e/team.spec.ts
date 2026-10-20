@@ -26,7 +26,7 @@ test('team list shows roles, per-flow access, external users and MFA state (D11-
   const bo = table.getByRole('row', { name: /Bo Dahl/ });
   await expect(bo).toContainText('Alle flows · kun læse');
   await expect(bo).toContainText('Mangler');
-  await expect(page.getByText(/4 brugere/)).toBeVisible();
+  await expect(page.getByText(/4 brugere/).filter({ visible: true })).toBeVisible();
   const axe = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
     .analyze();
@@ -87,7 +87,7 @@ test('change a role and access in one go; the audit log records it', async ({ pa
   await dialog.getByText('Læser', { exact: true }).click();
   await expect(dialog.getByText('Personen bliver logget ud')).toBeVisible();
   await dialog.getByRole('button', { name: 'Gem ændringer' }).click();
-  await expect(page.getByText('Ændringerne er gemt')).toBeVisible();
+  await expect(page.getByText('Ændringerne er gemt').filter({ visible: true })).toBeVisible();
   await expect(page.getByRole('row', { name: /Sara Lind/ })).toContainText('Læser');
 
   await page.goto('/settings/audit-log');
@@ -105,7 +105,9 @@ test('removing a member requires typing their name', async ({ page }) => {
   await expect(confirm).toBeDisabled();
   await dialog.getByLabel('Skriv brugerens navn for at bekræfte').fill('Ny Bogholder');
   await confirm.click();
-  await expect(page.getByText('Ny Bogholder er fjernet fra teamet')).toBeVisible();
+  await expect(
+    page.getByText('Ny Bogholder er fjernet fra teamet').filter({ visible: true }),
+  ).toBeVisible();
   await expect(page.getByRole('row', { name: /Ny Bogholder/ })).toHaveCount(0);
 });
 
@@ -121,16 +123,20 @@ test('company details save and appear in the audit log', async ({ page }) => {
   await page.goto('/settings/company');
   await page.getByLabel('CVR-nummer').fill('1234');
   await page.getByLabel('CVR-nummer').blur();
-  await expect(page.getByText('Et CVR-nummer har 8 cifre')).toBeVisible();
+  await expect(page.getByText('Et CVR-nummer har 8 cifre').filter({ visible: true })).toBeVisible();
   // Eight digits that fail modulus 11 are a typo, not a CVR number.
   await page.getByLabel('CVR-nummer').fill('12345678');
   await page.getByLabel('CVR-nummer').blur();
-  await expect(page.getByText('Det CVR-nummer findes ikke. Tjek cifrene.')).toBeVisible();
+  await expect(
+    page.getByText('Det CVR-nummer findes ikke. Tjek cifrene.').filter({ visible: true }),
+  ).toBeVisible();
   // The VAT form with spaces is the same number and is stored as 8 digits.
   await page.getByLabel('CVR-nummer').fill('DK 12 34 56 74');
   await page.getByLabel('By', { exact: true }).fill('Aarhus N');
   await page.getByRole('button', { name: 'Gem', exact: true }).click();
-  await expect(page.getByText('Virksomhedens oplysninger er gemt')).toBeVisible();
+  await expect(
+    page.getByText('Virksomhedens oplysninger er gemt').filter({ visible: true }),
+  ).toBeVisible();
   await page.reload();
   await expect(page.getByLabel('CVR-nummer')).toHaveValue('12345674');
   await page.goto('/settings/audit-log?group=company');
@@ -148,7 +154,7 @@ test('notification choices are personal and persist; critical in-app is locked (
   await expect(box).not.toBeChecked();
   await box.click();
   await page.getByRole('button', { name: 'Gem', exact: true }).click();
-  await expect(page.getByText('Notifikationerne er gemt')).toBeVisible();
+  await expect(page.getByText('Notifikationerne er gemt').filter({ visible: true })).toBeVisible();
   await page.reload();
   await expect(page.getByLabel('Enkelt record fejlet: E-mail')).toBeChecked();
   // Bo is a reader: thresholds are read-only for him.
@@ -160,8 +166,12 @@ test('requiring MFA for the whole team sends a reader to enrolment', async ({ pa
   await page.goto('/settings/security');
   const toggle = page.getByRole('switch', { name: 'Kræv totrin for hele teamet' });
   await toggle.click();
-  await expect(page.getByText('Sikkerhedsindstillingerne er gemt')).toBeVisible();
-  await expect(page.getByText(/Bo Dahl.*har ikke slået totrin til endnu/)).toBeVisible();
+  await expect(
+    page.getByText('Sikkerhedsindstillingerne er gemt').filter({ visible: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/Bo Dahl.*har ikke slået totrin til endnu/).filter({ visible: true }),
+  ).toBeVisible();
 
   const bo = await (await browser.newContext()).newPage();
   await bo.goto('/login');
@@ -191,7 +201,9 @@ test('a reader sees personal settings but not the team or audit log', async ({ p
   const nav = page.getByRole('navigation', { name: 'Sekundær navigation' });
   await expect(nav.getByRole('link')).toHaveText(['Notifikationer', 'Sikkerhed', 'Min profil']);
   await page.goto('/settings/team');
-  await expect(page.getByText('Du har ikke adgang til denne side')).toBeVisible();
+  await expect(
+    page.getByText('Du har ikke adgang til denne side').filter({ visible: true }),
+  ).toBeVisible();
   const csv = await page.request.get('/settings/audit-log/export');
   expect(csv.status()).not.toBe(200);
 });

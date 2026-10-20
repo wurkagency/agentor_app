@@ -1,6 +1,7 @@
 import { CATALOGUE, manifestFor } from '@agentor/connectors';
 import { listConnections } from '@agentor/db';
 import { EmptyState, Icon } from '@agentor/ui';
+import { Responsive } from '@agentor/ui/mobile';
 import { Plug, Plus } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { ButtonLink } from '@/components/button-link';
@@ -9,6 +10,7 @@ import { CheckingRefresh } from '@/components/connections/checking-refresh';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { requireAppContext } from '@/server/auth/session';
 import { db } from '@/server/infra';
+import { ConnectionsMobile } from './mobile';
 
 const ORDER = CATALOGUE.map((c) => c.id);
 
@@ -31,7 +33,10 @@ export default async function ConnectionsPage() {
     </ButtonLink>
   ) : undefined;
 
-  return (
+  const sorted = [...rows].sort(
+    (a, b) => ORDER.indexOf(a.connectorId) - ORDER.indexOf(b.connectorId),
+  );
+  const desktop = (
     <PageBody>
       <CheckingRefresh active={rows.some((r) => r.status === 'checking')} />
       <PageHeader
@@ -49,16 +54,24 @@ export default async function ConnectionsPage() {
         </EmptyState>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[...rows]
-            .sort((a, b) => ORDER.indexOf(a.connectorId) - ORDER.indexOf(b.connectorId))
-            .map((c) => {
-              const m = manifestFor(c.connectorId);
-              return m ? (
-                <ConnectionCard key={c.id} c={c} manifest={m} canManage={canManage} />
-              ) : null;
-            })}
+          {sorted.map((c) => {
+            const m = manifestFor(c.connectorId);
+            return m ? (
+              <ConnectionCard key={c.id} c={c} manifest={m} canManage={canManage} />
+            ) : null;
+          })}
         </div>
       )}
     </PageBody>
   );
+  const mobile = (
+    <ConnectionsMobile
+      rows={sorted.flatMap((c) => {
+        const m = manifestFor(c.connectorId);
+        return m ? [{ c, m }] : [];
+      })}
+      canManage={canManage}
+    />
+  );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }
