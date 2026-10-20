@@ -24,6 +24,7 @@ export class ExpressionError extends Error {
 const SANDBOX = `
 const { parentPort, workerData } = require('node:worker_threads');
 const jsonata = require(workerData.jsonata);
+parentPort.postMessage({ ready: true });
 parentPort.on('message', async ({ id, source, input }) => {
   try {
     const value = await jsonata(source).evaluate(input);
@@ -34,14 +35,22 @@ parentPort.on('message', async ({ id, source, input }) => {
 });
 `;
 
-let sandbox: Worker | null = null;
+/** Starting the thread and loading JSONata; not counted against an expression's time limit. */
+const STARTUP_LIMIT_MS = 10_000;
+
+let sandbox: { worker: Worker; ready: Promise<void> } | null = null;
 let nextId = 0;
 const pending = new Map<
   number,
-  { resolve: (v: unknown) => void; reject: (e: Error) => void; timer: NodeJS.Timeout }
+  {
+    resolve: (v: unknown) => void;
+    reject: (e: Error) => void;
+    timer: NodeJS.Timeout;
+    worker: Worker;
+  }
 >();
 
-function thread(): Worker {
+function thread(): { worker: Worker; ready: Promise<void> } {
   if (sandbox) return sandbox;
   const jsonataPath = createRequire(import.meta.url).resolve('jsonata');
   const w = new Worker(SANDBOX, {
@@ -50,42 +59,64 @@ function thread(): Worker {
     resourceLimits: { maxOldGenerationSizeMb: 64, stackSizeMb: 4 },
   });
   w.unref();
-  w.on('message', (m: { id: number; ok: boolean; value?: unknown; error?: string }) => {
-    const p = pending.get(m.id);
-    if (!p) return;
-    pending.delete(m.id);
-    clearTimeout(p.timer);
-    if (m.ok) p.resolve(m.value);
-    else p.reject(new Error(m.error ?? 'invalid expression'));
-  });
+  let markReady = () => {};
+  const ready = new Promise<void>((resolve) => (markReady = resolve));
+  w.on(
+    'message',
+    (m: { ready?: true; id: number; ok: boolean; value?: unknown; error?: string }) => {
+      if (m.ready) return markReady();
+      const p = pending.get(m.id);
+      if (!p) return;
+      pending.delete(m.id);
+      clearTimeout(p.timer);
+      if (m.ok) p.resolve(m.value);
+      else p.reject(new Error(m.error ?? 'invalid expression'));
+    },
+  );
+  // Only this thread's expressions fail; a thread that replaced it after a timeout keeps working.
   const fail = (err: Error) => {
     for (const [id, p] of pending) {
+      if (p.worker !== w) continue;
       clearTimeout(p.timer);
       p.reject(err);
       pending.delete(id);
     }
-    sandbox = null;
+    if (sandbox?.worker === w) sandbox = null;
   };
   w.on('error', fail);
   w.on('exit', () => fail(new Error('expression stopped')));
-  sandbox = w;
-  return w;
+  sandbox = { worker: w, ready };
+  return sandbox;
 }
 
 /** Evaluates one expression in the sandbox thread; a timeout kills the thread. */
-export function evaluateSandboxed(source: string, input: unknown): Promise<unknown> {
-  if (source.length > EXPRESSION_MAX_LENGTH)
-    return Promise.reject(new Error('expression is too long'));
-  const w = thread();
+export async function evaluateSandboxed(source: string, input: unknown): Promise<unknown> {
+  if (source.length > EXPRESSION_MAX_LENGTH) throw new Error('expression is too long');
+  const t = thread();
+  const w = t.worker;
+  // The time limit is for the expression, not for starting the thread: a cold start on a slow
+  // machine used to fail the first record of a run as "took too long".
+  let startup: NodeJS.Timeout | undefined;
+  await Promise.race([
+    t.ready,
+    new Promise<never>((_, reject) => {
+      startup = setTimeout(() => {
+        if (sandbox?.worker === w) sandbox = null;
+        void w.terminate();
+        reject(new Error('expression sandbox did not start'));
+      }, STARTUP_LIMIT_MS);
+      startup.unref();
+    }),
+  ]).finally(() => clearTimeout(startup));
   const id = ++nextId;
   return new Promise((resolve, reject) => {
     const timer = setTimeout(() => {
       pending.delete(id);
       reject(new Error('expression took too long'));
-      sandbox = null;
+      if (sandbox?.worker === w) sandbox = null;
       void w.terminate();
     }, TIME_LIMIT_MS);
-    pending.set(id, { resolve, reject, timer });
+    pending.set(id, { resolve, reject, timer, worker: w });
     w.postMessage({ id, source, input });
   });
 }
