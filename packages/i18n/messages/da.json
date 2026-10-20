@@ -1774,7 +1774,44 @@
       "statNew": "{count} denne måned",
       "statMax": "Højst 24 t",
       "statCasesSplit": "{progress} i gang · {waiting} venter på kunden · {fresh} nye",
-      "openApp": "Åbn app"
+      "openApp": "Åbn app",
+      "create": {
+        "open": "Opret kunde",
+        "title": "Opret kunde",
+        "help": "Virksomheden oprettes med abonnementet og afventer betaling. Ejeren får en mail, opretter sit login og betaler med kort. Først da er virksomheden aktiv.",
+        "cancel": "Annullér",
+        "submit": "Opret og send invitation",
+        "name": "Firmanavn",
+        "address": "Adresse",
+        "postalCode": "Postnr.",
+        "city": "By",
+        "ownerEmail": "Ejerens e-mail",
+        "ownerEmailHelp": "Ejeren får invitationen og bliver ejer af virksomheden.",
+        "billingEmail": "E-mail til fakturaer (valgfri)",
+        "billingEmailHelp": "Tom: ejerens e-mail.",
+        "plan": "Abonnement",
+        "interval": "Betaling",
+        "month": "Månedlig",
+        "year": "Årlig",
+        "cvr": {
+          "label": "CVR-nummer (valgfrit)",
+          "help": "Slå op for at udfylde navn og adresse.",
+          "lookup": "Slå op",
+          "found": "Fundet: {name}",
+          "ceased": "{name} er ophørt i CVR.",
+          "notFound": "Intet fundet. Udfyld felterne selv.",
+          "cvrFormat": "CVR-nummeret skal være 8 cifre.",
+          "unavailable": "CVR-opslaget svarer ikke. Udfyld felterne selv."
+        },
+        "errors": {
+          "generic": "Kunden kunne ikke oprettes. Prøv igen.",
+          "invalid": "Tjek felterne: firmanavn og ejerens e-mail skal udfyldes.",
+          "OWNER_EMAIL_INVALID": "Ejerens e-mail er ikke gyldig.",
+          "PLAN_INVALID": "Vælg et abonnement.",
+          "TENANT_NAME_REQUIRED": "Skriv firmanavnet.",
+          "NOT_SUPERADMIN": "Kun superadmin kan oprette kunder."
+        }
+      }
     },
     "customer": {
       "back": "Kunder",
@@ -1860,7 +1897,9 @@
       "notesTitle": "Noter om kunden",
       "notesHelp": "Kun for Agentor. Fastgjorte noter vises på kundens sager.",
       "notesEmpty": "Ingen noter endnu.",
-      "pinned": "fastgjort"
+      "pinned": "fastgjort",
+      "created": "Kunden er oprettet, og ejeren har fået en mail med invitationen. Virksomheden er aktiv, når ejeren har betalt.",
+      "createdNoMail": "Kunden er oprettet, men mailen til ejeren kunne ikke sendes. Tjek mailopsætningen, og opret invitationen igen."
     },
     "access": {
       "title": "Anmod om supportadgang",

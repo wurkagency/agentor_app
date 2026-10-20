@@ -144,3 +144,63 @@ test('Superadmin opens a customer app directly, without a request', async ({ bro
   await expect(customer.getByText('Kasper Nyborg').first()).toBeVisible();
   await customer.context().close();
 });
+
+test('Superadmin creates a customer; the owner accepts, pays and the company is active', async ({
+  browser,
+  page,
+}) => {
+  test.setTimeout(150_000);
+  const { adminQuery } = await import('./support');
+  const { latestMailTo } = await import('./mailpit');
+  const { axe, PASSWORD, terms } = await import('./signup-flow');
+  const owner = `e2e-staffcreated-${Date.now()}@nordlys-cykler.dk`;
+  const name = `E2E Kunde ${Date.now()} ApS`;
+  await login(page, 'kasper');
+  await page.goto('/platform/customers');
+  await page.getByRole('button', { name: 'Opret kunde' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Opret kunde' });
+  await dialog.getByLabel('CVR-nummer (valgfrit)').fill('12345678');
+  await dialog.getByRole('button', { name: 'Slå op' }).click();
+  await expect(dialog.getByText('Fundet: Nordlys Cykler ApS')).toBeVisible();
+  await axe(page);
+  await page.screenshot({ path: test.info().outputPath('create-customer.png') });
+  await dialog.getByLabel('Firmanavn').fill(name);
+  await dialog.getByLabel('Ejerens e-mail').fill(owner);
+  await dialog.getByRole('combobox', { name: 'Betaling' }).click();
+  await page.getByRole('option', { name: 'Årlig' }).click();
+  await dialog.getByRole('button', { name: 'Opret og send invitation' }).click();
+  await expect(page).toHaveURL(/\/platform\/customers\/[0-9a-f-]{36}\?created=1$/);
+  await expect(page.getByText('Kunden er oprettet, og ejeren har fået en mail')).toBeVisible();
+  const [t] = await adminQuery<{ id: string; signup_state: string }>(
+    'select id, signup_state from tenants where name = $1',
+    [name],
+  );
+  expect(t!.signup_state).toBe('pending_payment');
+
+  // The owner, in their own browser: invitation → login → SU5 → card → active.
+  const mail = await latestMailTo(owner, 20_000);
+  const link = /https?:\/\/\S+\/invite\/[A-Za-z0-9_-]+/.exec(mail.text)![0];
+  const ctx = await browser.newContext();
+  const p = await ctx.newPage();
+  try {
+    await p.goto(new URL(link).pathname);
+    await expect(p.getByText(`${name} har inviteret dig som ejer.`)).toBeVisible();
+    await p.getByLabel('Dit navn').fill('Ida Ejer');
+    await p.getByLabel('Vælg adgangskode').fill(PASSWORD);
+    await p.getByRole('button', { name: 'Opret konto og acceptér' }).click();
+    await expect(p).toHaveURL(/\/signup\/payment$/, { timeout: 20_000 });
+    const v = p.locator('[data-view="desktop"]');
+    await (await terms(v)).click();
+    await p.getByRole('button', { name: 'Godkend kort' }).click();
+    await expect(p).toHaveURL(/\/signup\/welcome$/, { timeout: 30_000 });
+    const [after] = await adminQuery<{ signup_state: string }>(
+      'select signup_state from tenants where id = $1',
+      [t!.id],
+    );
+    expect(after!.signup_state).toBe('active');
+  } finally {
+    await ctx.close();
+    await adminQuery('delete from tenants where id = $1', [t!.id]);
+    await adminQuery('delete from auth.users where email = $1', [owner]);
+  }
+});

@@ -9,6 +9,7 @@ import {
 import { formatDate, formatDateTime, formatRelative, formatTime, type Locale } from '@agentor/i18n';
 import {
   Card,
+  Banner,
   CardHeader,
   EmptyState,
   Icon,
@@ -50,7 +51,7 @@ export default async function CustomerPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; created?: string }>;
 }) {
   const { id } = await params;
   if (!isUuid(id)) notFound();
@@ -103,8 +104,11 @@ export default async function CustomerPage({
     return t.has(key as 'log.support_requested') ? t(key as 'log.support_requested') : a;
   };
 
+  const created =
+    sp.created === '1' ? t('created') : sp.created === 'nomail' ? t('createdNoMail') : null;
   return (
     <PageBody>
+      {created && <Banner tone={sp.created === '1' ? 'info' : 'warn'}>{created}</Banner>}
       <Link
         href="/platform/customers"
         className="inline-flex items-center gap-1.5 text-table text-fg-2 no-underline"

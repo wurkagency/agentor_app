@@ -1,5 +1,5 @@
 import nodemailer, { type Transporter } from 'nodemailer';
-import { env } from './env';
+import { env, isProduction } from './env';
 
 /**
  * Transactional e-mail over SMTP: Mailpit locally, Brevo SMTP in production
@@ -7,8 +7,15 @@ import { env } from './env';
  */
 let transport: Transporter | undefined;
 
+/** Mailpit (docker compose) in development and tests. */
+const DEV_SMTP = 'smtp://127.0.0.1:51025';
+
 function transporter(): Transporter {
-  transport ??= nodemailer.createTransport(env().SMTP_URL);
+  const url = env().SMTP_URL;
+  // In production a missing SMTP_URL would send everything to a local port that nothing listens
+  // on, and signup codes would vanish without a trace. Fail loudly instead.
+  if (!url && isProduction()) throw new Error('SMTP_URL is not set: no mail can be sent');
+  transport ??= nodemailer.createTransport(url ?? DEV_SMTP);
   return transport;
 }
 

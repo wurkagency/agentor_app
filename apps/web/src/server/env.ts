@@ -10,7 +10,8 @@ const schema = z.object({
   DATABASE_URL_WEB: z.string().min(1),
   REDIS_URL: z.string().min(1),
   BETTER_AUTH_SECRET: z.string().min(32, 'BETTER_AUTH_SECRET must be at least 32 characters'),
-  SMTP_URL: z.string().min(1).default('smtp://127.0.0.1:51025'),
+  /** Mailpit locally when unset; required in production (no silent default there). */
+  SMTP_URL: z.string().min(1).optional(),
   MAIL_FROM: z.string().default('Agentor <no-reply@agentor.dk>'),
   QUICKPAY_MODE: z.enum(['mock', 'test', 'live']).default('mock'),
   QUICKPAY_API_KEY: z.string().optional(),

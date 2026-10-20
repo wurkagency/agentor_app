@@ -49,7 +49,7 @@ export const invitations = pgTable(
     unique('invitations_token_hash_key').on(t.tokenHash),
     foreignKey({ columns: [t.tenantId], foreignColumns: [tenants.id] }).onDelete('cascade'),
     index('invitations_tenant_email_idx').on(t.tenantId, t.email),
-    check('invitations_role_check', sql`${t.role} in ('admin', 'developer', 'reader')`),
+    check('invitations_role_check', sql`${t.role} in ('owner', 'admin', 'developer', 'reader')`),
     check(
       'invitations_scope_check',
       sql`${t.flowScope} = 'all' or ${t.role} in ('developer', 'reader')`,

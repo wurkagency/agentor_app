@@ -1,4 +1,5 @@
 import { DEFAULT_SUPPORT_RATE_ORE } from '@agentor/core';
+import { randomBytes } from 'node:crypto';
 import { and, asc, desc, eq, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { withoutTenant, withTenant, type Database, type Transaction } from '../client.js';
 import {
@@ -20,6 +21,7 @@ import {
   type StaffRole,
   type TimeKind,
 } from '../schema/index.js';
+import { hashInviteToken } from './team.js';
 
 /**
  * Agentor Platform (README decisions 16–17). Staff work outside any customer tenant; the
@@ -1564,4 +1566,45 @@ export async function myOpenSession(db: Database, userId: string) {
       .limit(1),
   );
   return s ?? null;
+}
+
+/* ---- Create a customer (Superadmin, /platform/customers) ------------------------------------------- */
+
+export interface NewCustomer {
+  name: string;
+  cvr: string | null;
+  addressLine: string | null;
+  postalCode: string | null;
+  city: string | null;
+  billingEmail: string | null;
+  ownerEmail: string;
+  planId: string;
+  interval: 'month' | 'year';
+}
+
+/**
+ * Creates the company waiting for payment, with its plan and an owner invitation, through
+ * app.platform_create_customer. Returns the raw invitation token for the e-mail (only its hash
+ * is stored).
+ */
+export async function createCustomer(
+  db: Database,
+  actor: StaffActor,
+  c: NewCustomer,
+): Promise<{ tenantId: string; token: string }> {
+  if (actor.role !== 'superadmin') throw new PlatformError('NOT_SUPERADMIN');
+  const token = randomBytes(32).toString('base64url');
+  return asStaff(db, actor.userId, async (tx) => {
+    const res = await tx.execute<{ id: string }>(
+      sql`select app.platform_create_customer(${c.name}, ${c.cvr ?? ''}, ${c.addressLine ?? ''}, ${c.postalCode ?? ''}, ${c.city ?? ''}, ${c.billingEmail ?? ''}, ${c.ownerEmail}, ${c.planId}, ${c.interval}, ${hashInviteToken(token)}, ${actor.name}) as id`,
+    );
+    const tenantId = res.rows[0]!.id;
+    await platformLog(tx, actor, 'customer.created', {
+      tenantId,
+      name: c.name,
+      plan: c.planId,
+      interval: c.interval,
+    });
+    return { tenantId, token };
+  });
 }

@@ -309,6 +309,13 @@
       "when": 1792522171678,
       "tag": "0043_invoice_number_width",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1792524699610,
+      "tag": "0044_platform_create_customer",
+      "breakpoints": true
     }
   ]
 }

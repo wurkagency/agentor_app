@@ -1,9 +1,10 @@
-import { activeGrantsAll, listCases, myGrants } from '@agentor/db';
+import { activeGrantsAll, listCases, listPlans, myGrants } from '@agentor/db';
 import { formatRelative, type Locale } from '@agentor/i18n';
 import { Banner, HeroCurve, Icon, KpiCard, SegmentBar } from '@agentor/ui';
 import { Download, Lock, MessageSquare, TriangleAlert, UserRound } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { ButtonLink } from '@/components/button-link';
+import { CreateCustomerButton } from '@/components/platform/create-customer-button';
 import { CustomersTable, type CustomerItem } from '@/components/platform/customers-table';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
@@ -96,10 +97,17 @@ export async function CustomersView({
         title={t('title')}
         subtitle={t('intro')}
         actions={
-          <ButtonLink variant="secondary" href="/platform/customers/export">
-            <Icon icon={Download} size={16} />
-            {t('export')}
-          </ButtonLink>
+          <span className="flex gap-2">
+            <ButtonLink variant="secondary" href="/platform/customers/export">
+              <Icon icon={Download} size={16} />
+              {t('export')}
+            </ButtonLink>
+            {actor.role === 'superadmin' && (
+              <CreateCustomerButton
+                plans={(await listPlans(db())).map((p) => ({ id: p.id, name: p.name }))}
+              />
+            )}
+          </span>
         }
       />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-kpi-hero-3">

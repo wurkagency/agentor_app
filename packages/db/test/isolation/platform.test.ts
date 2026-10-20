@@ -350,3 +350,70 @@ describe('Superadmin opens a customer directly (decision of 19 Oct 2026)', () =>
     expect(r[6]!.rows![0]!.scope).toBeNull();
   });
 });
+
+describe('create a customer (Superadmin, /platform/customers)', () => {
+  const TOKEN = 'a'.repeat(43);
+  const create = (user: string, email = 'ejer@nordlys-cykler.test'): Step => ({
+    as: 'web',
+    user,
+    sql: `select app.platform_create_customer('Nordlys Test ApS', '', '', '', '', '', $1, 'business', 'year', $2, 'Kasper') as id`,
+    values: [email, TOKEN],
+  });
+
+  it('a superadmin creates it waiting for payment, with an owner invitation and no purge', async () => {
+    const r = await steps([
+      makeStaff('superadmin'),
+      create(STAFF),
+      {
+        as: 'admin',
+        sql: `select t.signup_state, s.plan_id, s.interval, s.status, i.role, i.email,
+                     (select count(*)::int from app.pending_signups p where p.tenant_id = t.id) as pending,
+                     (select count(*)::int from memberships m where m.tenant_id = t.id) as members
+                from tenants t join subscriptions s on s.tenant_id = t.id
+                join invitations i on i.tenant_id = t.id where t.name = 'Nordlys Test ApS'`,
+      },
+    ]);
+    expect(r[1]!.error).toBeUndefined();
+    expect(r[2]!.rows![0]).toEqual({
+      signup_state: 'pending_payment',
+      plan_id: 'business',
+      interval: 'year',
+      status: 'incomplete',
+      role: 'owner',
+      email: 'ejer@nordlys-cykler.test',
+      pending: 0,
+      members: 0,
+    });
+  });
+
+  it('a supporter, a customer and a bad e-mail are refused', async () => {
+    const r = await steps([
+      makeStaff('supporter'),
+      create(STAFF),
+      create(ID.userAOwner),
+      {
+        as: 'admin',
+        sql: `update platform.staff set role = 'superadmin' where user_id = $1`,
+        values: [STAFF],
+      },
+      create(STAFF, 'not-an-email'),
+    ]);
+    expect(r[1]!.error?.message).toContain('NOT_SUPERADMIN');
+    expect(r[2]!.error?.message).toContain('NOT_SUPERADMIN');
+    expect(r[4]!.error?.message).toContain('OWNER_EMAIL_INVALID');
+  });
+
+  it('a tenant admin can never invite an owner', async () => {
+    const r = await steps([
+      {
+        as: 'web',
+        user: ID.userAOwner,
+        tenant: ID.tenantA,
+        sql: `insert into invitations (tenant_id, email, role, token_hash, expires_at, invited_by)
+              values ($1, 'ny-ejer@example.test', 'owner', $2, now() + interval '1 day', $3)`,
+        values: [ID.tenantA, 'b'.repeat(43), ID.userAOwner],
+      },
+    ]);
+    expect(r[0]!.error?.message).toContain('OWNER_INVITATION_PROTECTED');
+  });
+});

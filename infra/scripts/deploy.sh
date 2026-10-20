@@ -34,6 +34,14 @@ if ! psql "$DATABASE_URL_OWNER" -XAtqc 'select app.uuid_v7()' >/dev/null 2>&1; t
 fi
 unset DATABASE_URL_OWNER
 
+echo "== Settings"
+# Without SMTP_URL no signup code, invitation or receipt reaches anyone (it used to fail silently).
+if ! grep -qE '^SMTP_URL=smtps?://.+' "$D/shared/web.env.production"; then
+  echo "SMTP_URL is missing in $D/shared/web.env.production, so no e-mail can be sent."
+  echo "Add the Brevo SMTP URL (smtp://LOGIN:KEY@smtp-relay.brevo.com:587) and run agentor-deploy again."
+  exit 1
+fi
+
 echo "== Ports"
 # Shared server: refuse to start if another site already listens on Agentor's ports.
 for port in 3410 3411; do

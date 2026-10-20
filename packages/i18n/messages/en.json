@@ -1774,7 +1774,44 @@
       "statNew": "{count} this month",
       "statMax": "Max 24 h",
       "statCasesSplit": "{progress} in progress · {waiting} waiting for the customer · {fresh} new",
-      "openApp": "Open app"
+      "openApp": "Open app",
+      "create": {
+        "open": "Create customer",
+        "title": "Create customer",
+        "help": "The company is created with its subscription and waits for payment. The owner gets an e-mail, creates their login and pays by card. Only then is the company active.",
+        "cancel": "Cancel",
+        "submit": "Create and send invitation",
+        "name": "Company name",
+        "address": "Address",
+        "postalCode": "Postcode",
+        "city": "City",
+        "ownerEmail": "Owner e-mail",
+        "ownerEmailHelp": "The owner gets the invitation and becomes the company owner.",
+        "billingEmail": "Invoice e-mail (optional)",
+        "billingEmailHelp": "Empty: the owner e-mail.",
+        "plan": "Plan",
+        "interval": "Billing",
+        "month": "Monthly",
+        "year": "Yearly",
+        "cvr": {
+          "label": "CVR number (optional)",
+          "help": "Look up to fill in name and address.",
+          "lookup": "Look up",
+          "found": "Found: {name}",
+          "ceased": "{name} has ceased in CVR.",
+          "notFound": "Nothing found. Fill in the fields yourself.",
+          "cvrFormat": "The CVR number must be 8 digits.",
+          "unavailable": "The CVR lookup is not answering. Fill in the fields yourself."
+        },
+        "errors": {
+          "generic": "The customer could not be created. Try again.",
+          "invalid": "Check the fields: company name and owner e-mail are required.",
+          "OWNER_EMAIL_INVALID": "The owner e-mail is not valid.",
+          "PLAN_INVALID": "Choose a plan.",
+          "TENANT_NAME_REQUIRED": "Enter the company name.",
+          "NOT_SUPERADMIN": "Only a superadmin can create customers."
+        }
+      }
     },
     "customer": {
       "back": "Customers",
@@ -1860,7 +1897,9 @@
       "notesTitle": "Notes about the customer",
       "notesHelp": "Agentor only. Pinned notes show on the customer's cases.",
       "notesEmpty": "No notes yet.",
-      "pinned": "pinned"
+      "pinned": "pinned",
+      "created": "The customer is created and the owner has an e-mail with the invitation. The company is active once the owner has paid.",
+      "createdNoMail": "The customer is created, but the e-mail to the owner could not be sent. Check the mail setup and invite again."
     },
     "access": {
       "title": "Request support access",
