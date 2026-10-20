@@ -1,3 +1,4 @@
+import type { SignupReceipt } from '@agentor/db';
 import { sendMail } from './mail';
 
 /**
@@ -43,5 +44,43 @@ Agentor`,
 export function sendInBackground(p: Promise<void>, what: string): void {
   void p.catch((err: unknown) => {
     console.error(`${what} mail failed`, err instanceof Error ? err.message : err);
+  });
+}
+
+const kr = (ore: number) =>
+  (ore / 100).toLocaleString('da-DK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const day = (d: Date) =>
+  d.toLocaleDateString('da-DK', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'Europe/Copenhagen',
+  });
+
+/** The receipt for the first payment (Q20), sent once to the billing e-mail. */
+export async function sendSignupReceipt(
+  to: string,
+  r: SignupReceipt,
+  billingUrl: string,
+): Promise<void> {
+  const period = r.interval === 'year' ? 'årligt' : 'månedligt';
+  await sendMail({
+    to,
+    subject: `Kvittering for dit abonnement hos Agentor${r.invoiceNumber ? ` (faktura ${r.invoiceNumber})` : ''}`,
+    text: `Hej
+
+Tak for din betaling. ${r.companyName} har nu ${r.planName}, betalt ${period}.
+
+Faktura: ${r.invoiceNumber ?? '–'}
+Periode: ${day(r.periodStart)} – ${day(r.periodEnd)}
+Beløb uden moms: ${kr(r.amountOre)} kr.
+Moms 25 %: ${kr(r.vatOre)} kr.
+Betalt i alt: ${kr(r.amountOre + r.vatOre)} kr.${r.paidAt ? `\nBetalt: ${day(r.paidAt)}` : ''}
+
+Fakturaen som PDF og dine betalinger finder du under Abonnement:
+${billingUrl}
+
+Venlig hilsen
+Agentor`,
   });
 }

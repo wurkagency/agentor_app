@@ -288,6 +288,27 @@
       "when": 1792499119564,
       "tag": "0040_signup_sessions",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1792520097807,
+      "tag": "0041_signup_receipt",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1792520390800,
+      "tag": "0042_connection_counts",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1792522171678,
+      "tag": "0043_invoice_number_width",
+      "breakpoints": true
     }
   ]
 }

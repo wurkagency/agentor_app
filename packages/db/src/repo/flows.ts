@@ -175,6 +175,7 @@ export function connectionStates(db: Database, ctx: Ctx) {
         name: connections.name,
         status: connections.status,
         brokenSince: connections.brokenSince,
+        recordCounts: connections.recordCounts,
       })
       .from(connections),
   );

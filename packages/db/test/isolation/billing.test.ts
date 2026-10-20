@@ -82,9 +82,16 @@ describe('private billing indexes', () => {
     expect(webResolve.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
   });
 
-  it('invoice numbers come from one sequence in AG-YYYY-NNNN format', async () => {
-    const { result } = await run('worker', null, 'select app.next_invoice_number() as n');
-    expect(result!.rows[0].n).toMatch(/^AG-\d{4}-\d{4,}$/);
+  it('invoices are INV/YYYY/XXXXX and credit notes CRED/YYYY/XXXXX, from two series', async () => {
+    const { result } = await run(
+      'worker',
+      null,
+      'select app.next_invoice_number() as i, app.next_credit_note_number() as c',
+    );
+    expect(result!.rows[0].i).toMatch(/^INV\/\d{4}\/\d{5,}$/);
+    expect(result!.rows[0].c).toMatch(/^CRED\/\d{4}\/\d{5,}$/);
+    const web = await run('web', null, 'select app.next_credit_note_number()');
+    expect(web.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
   });
 });
 

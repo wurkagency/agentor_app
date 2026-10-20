@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
+import { NowProvider } from '@/components/now';
 import { jakarta, jetbrains } from './fonts';
 import './globals.css';
 
@@ -18,10 +19,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang={locale} className={`${jakarta.variable} ${jetbrains.variable}`}>
       <body>
         <NextIntlClientProvider>
-          <TooltipProvider>
-            {children}
-            <Toaster label={t('notifications')} />
-          </TooltipProvider>
+          <NowProvider initial={Date.now()}>
+            <TooltipProvider>
+              {children}
+              <Toaster label={t('notifications')} />
+            </TooltipProvider>
+          </NowProvider>
         </NextIntlClientProvider>
       </body>
     </html>

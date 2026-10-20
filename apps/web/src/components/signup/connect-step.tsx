@@ -291,7 +291,20 @@ export function ConnectStep(p: ConnectStepProps) {
   const banner =
     p.step === 'accounting' && sourceConn && sourceOption ? (
       <SuccessBanner mobile={mobile}>
-        {ta.rich('banner', { name: sourceOption.name, strong: (c) => <strong>{c}</strong> })}
+        {(() => {
+          const n = sourceConn.counts;
+          const strong = (c: ReactNode) => <strong>{c}</strong>;
+          // Desktop names what the test found; the mobile board keeps the short banner.
+          if (!mobile && n && [n.order, n.customer, n.product].every((x) => typeof x === 'number'))
+            return ta.rich('bannerCounts', {
+              name: sourceOption.name,
+              orders: n.order!,
+              customers: n.customer!,
+              products: n.product!,
+              strong,
+            });
+          return ta.rich('banner', { name: sourceOption.name, strong });
+        })()}
       </SuccessBanner>
     ) : null;
   const errorBanner = p.connectError ? (

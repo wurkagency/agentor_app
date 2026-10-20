@@ -145,7 +145,8 @@
       "codeInvalid": "Koden passer ikke. Tjek, at uret på din telefon går rigtigt, og prøv med den nye kode.",
       "codeLocked": "For mange forkerte koder. Kontoen er låst i 15 minutter.",
       "required": "Udfyld feltet.",
-      "unverified": "Du skal bekræfte din e-mail, før du kan logge ind. Vi har sendt et nyt link."
+      "unverified": "Du skal bekræfte din e-mail, før du kan logge ind. Vi har sendt et nyt link.",
+      "ssoFailed": "Login hos udbyderen lykkedes ikke. Prøv igen."
     },
     "mfaTitle": "Bekræft, at det er dig",
     "mfaIntro": "Skriv koden fra din godkendelsesapp. Den skifter hvert 30. sekund.",
@@ -182,7 +183,11 @@
     "resetDone": "Din adgangskode er ændret. Du kan nu logge ind.",
     "resetInvalid": "Linket er udløbet eller allerede brugt. Bed om et nyt.",
     "backToLogin": "Tilbage til login",
-    "setupIntroTeam": "Din virksomhed kræver totrinsbekræftelse for alle i teamet. Det tager et minut."
+    "setupIntroTeam": "Din virksomhed kræver totrinsbekræftelse for alle i teamet. Det tager et minut.",
+    "setupRecent": "Du loggede ind med {provider} for lidt siden. Det bekræfter, at det er dig, så du kan sætte totrinsbekræftelse op uden adgangskode.",
+    "setupReauth": "Din konto har ingen adgangskode. Log ind med {provider} igen for at bekræfte, at det er dig.",
+    "setupReauthButton": "Log ind med {provider} igen",
+    "setupReauthExpired": "Det er mere end 10 minutter siden, du loggede ind. Log ind med {provider} igen."
   },
   "pages": {
     "comingTitle": "Denne side er på vej",
@@ -247,7 +252,9 @@
       "connection_broken": "Genautentificér",
       "record_failed": "Se fejl",
       "systematic_error": "Se fejl",
-      "connector_update": "Se"
+      "connector_update": "Se",
+      "support_requested": "Se anmodning",
+      "payment_failed": "Opdatér kort"
     },
     "resolved": "løst",
     "channels": "Push, e-mail og SMS"
@@ -3186,6 +3193,7 @@
     },
     "accounting": {
       "banner": "<strong>{name} er forbundet.</strong>",
+      "bannerCounts": "<strong>{name} er forbundet.</strong> Vi fandt {orders, number} ordrer, {customers, number} kunder og {products, number} produkter.",
       "title": "Forbind jeres regnskab",
       "lead": "Du valgte {name}. Vi henter kontoplan og momskoder, så fakturaer kan bogføres rigtigt.",
       "leadMobile": "Du valgte {name}. Vi henter kontoplan og momskoder.",

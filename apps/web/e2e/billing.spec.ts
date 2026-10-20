@@ -35,16 +35,16 @@ test('subscription page: plan, meters, blocked downgrade and invoices (D13)', as
   const invoices = page.getByRole('table');
   // Three subscription invoices and three support invoices (Finans, M9); drafts never show.
   await expect(invoices.getByRole('row')).toHaveCount(7);
-  await expect(invoices).toContainText('AG-2026-1043');
+  await expect(invoices).toContainText('INV/2026/01043');
   await expect(invoices).toContainText('Support · ');
   await expect(invoices).toContainText('198,75 kr.');
   await expect(invoices).toContainText('Betalt');
   await axe(page);
 
   const download = page.waitForEvent('download');
-  await invoices.getByRole('link', { name: 'Hent faktura AG-2026-1043 som PDF' }).click();
+  await invoices.getByRole('link', { name: 'Hent faktura INV/2026/01043 som PDF' }).click();
   const file = await download;
-  expect(file.suggestedFilename()).toBe('AG-2026-1043.pdf');
+  expect(file.suggestedFilename()).toBe('INV-2026-01043.pdf');
 });
 
 test('upgrade to Enterprise; Business is then blocked while over its seats', async ({ page }) => {

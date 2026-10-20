@@ -1,7 +1,7 @@
 import { env } from './env';
 
 /**
- * CVR lookup for onboarding (D14-Onboarding-1). Behind a small interface so development and
+ * CVR lookup for signup (SU3). Behind a small interface so development and
  * e2e never call the register, and the provider can change without touching the page.
  */
 export interface CvrCompany {
@@ -64,81 +64,70 @@ export class FixtureCvrProvider implements CvrProvider {
 }
 
 /**
- * Datafordeler GraphQL (CVR register, API key as `apiKey` query parameter). Chosen for signup
- * (PLAN-SIGNUP B2): the older CVR distribution closes next year.
- * FOLLOW-UP: the entity and field names below must be verified against the published schema at
- * https://graphql.datafordeler.dk/CVR/v1/schema before CVR_PROVIDER=datafordeler is enabled;
- * the fixture provider is the default until then (PLAN.md, CVR lookup).
+ * Virkdata's CVR API (https://virkdata.dk/dokumentation, v1.4.10): one GET endpoint, the key in
+ * the Authorization header, flat JSON. Chosen for signup instead of Datafordeler (PLAN-SIGNUP B2).
  */
-const QUERY = `query ($cvr: Int!) {
-  CVR_Virksomhed(first: 1, where: { CVRNummer: { eq: $cvr } }) {
-    nodes {
-      CVRNummer
-      virksomhedStartdato
-      virksomhedOphoersdato
-      CVR_Navn { vaerdi }
-      CVR_Adressering { vejnavn husnummerFra postnummer postdistrikt }
-    }
-  }
-}`;
-
-interface DfNode {
-  CVRNummer: number;
-  virksomhedStartdato?: string | null;
-  virksomhedOphoersdato?: string | null;
-  CVR_Navn?: { vaerdi?: string | null }[] | { vaerdi?: string | null } | null;
-  CVR_Adressering?:
-    | {
-        vejnavn?: string | null;
-        husnummerFra?: string | number | null;
-        postnummer?: string | number | null;
-        postdistrikt?: string | null;
-      }[]
-    | null;
+interface VirkdataCompany {
+  vat?: number | string | null;
+  status?: string | null;
+  name?: string | null;
+  address?: string | null;
+  zipcode?: number | string | null;
+  city?: string | null;
+  startdate?: string | null;
+  enddate?: string | null;
+  industrydesc?: string | null;
 }
 
-const first = <T>(v: T | T[] | null | undefined): T | undefined =>
-  Array.isArray(v) ? v[0] : (v ?? undefined);
+interface VirkdataError {
+  error_code?: number;
+  response?: string;
+}
 
-export class DatafordelerCvrProvider implements CvrProvider {
+/** Maps Virkdata's answer to the lookup result; null when it is another company. */
+export function fromVirkdata(cvr: string, c: VirkdataCompany): CvrCompany | null {
+  const name = c.name?.trim();
+  if (!name || String(c.vat ?? '') !== cvr) return null;
+  const ended = !!c.enddate || /oph(ø|oe)r|opløst|konkurs/i.test(c.status ?? '');
+  return {
+    cvr,
+    name,
+    addressLine: c.address?.trim() || null,
+    postalCode: c.zipcode != null ? String(c.zipcode) : null,
+    city: c.city?.trim() || null,
+    since: c.startdate ? Number(c.startdate.slice(0, 4)) || null : null,
+    active: !ended,
+    industry: c.industrydesc?.trim() || null,
+  };
+}
+
+export class VirkdataCvrProvider implements CvrProvider {
   constructor(
     private readonly apiKey: string,
-    private readonly endpoint = 'https://graphql.datafordeler.dk/CVR/v1',
+    private readonly endpoint = 'https://virkdata.dk/api/',
   ) {
-    if (!apiKey) throw new Error('DATAFORDELER_API_KEY is required');
+    if (!apiKey) throw new Error('VIRKDATA_API_KEY is required');
   }
 
   async lookup(cvr: string) {
     if (!CVR_RE.test(cvr)) return null;
     const url = new URL(this.endpoint);
-    url.searchParams.set('apiKey', this.apiKey);
+    url.searchParams.set('search', cvr);
+    url.searchParams.set('country', 'dk');
+    url.searchParams.set('format', 'json');
     const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/graphql-response+json, application/json',
-      },
-      body: JSON.stringify({ query: QUERY, variables: { cvr: Number(cvr) } }),
+      headers: { Authorization: this.apiKey, Accept: 'application/json' },
       signal: AbortSignal.timeout(8000),
       redirect: 'error',
     });
-    if (!res.ok) throw new Error(`CVR lookup failed (${res.status})`);
-    const json = (await res.json()) as { data?: { CVR_Virksomhed?: { nodes?: DfNode[] } } };
-    const n = json.data?.CVR_Virksomhed?.nodes?.[0];
-    if (!n) return null;
-    const a = first(n.CVR_Adressering);
-    const street = [a?.vejnavn, a?.husnummerFra].filter(Boolean).join(' ');
-    return {
-      cvr,
-      name: first(n.CVR_Navn)?.vaerdi ?? '',
-      addressLine: street || null,
-      postalCode: a?.postnummer != null ? String(a.postnummer) : null,
-      city: a?.postdistrikt ?? null,
-      since: n.virksomhedStartdato ? Number(n.virksomhedStartdato.slice(0, 4)) : null,
-      active: !n.virksomhedOphoersdato,
-      // FOLLOW-UP (B2): the industry field is added once the schema is verified with a key.
-      industry: null,
-    };
+    const json = (await res.json().catch(() => null)) as
+      (VirkdataCompany & VirkdataError) | (VirkdataCompany & VirkdataError)[] | null;
+    const body = Array.isArray(json) ? json.find((c) => String(c.vat) === cvr) : json;
+    // 3002 no_results: not found. Any other error code (key, quota, rate limit) is an outage.
+    if (body?.error_code === 3002) return null;
+    if (!res.ok || !body || body.error_code)
+      throw new Error(`CVR lookup failed (${body?.error_code ?? res.status})`);
+    return fromVirkdata(cvr, body);
   }
 }
 
@@ -148,8 +137,8 @@ export function cvrProvider(): CvrProvider {
   if (!provider) {
     const e = env();
     provider =
-      e.CVR_PROVIDER === 'datafordeler'
-        ? new DatafordelerCvrProvider(e.DATAFORDELER_API_KEY ?? '')
+      e.CVR_PROVIDER === 'virkdata'
+        ? new VirkdataCvrProvider(e.VIRKDATA_API_KEY ?? '')
         : new FixtureCvrProvider();
   }
   return provider;

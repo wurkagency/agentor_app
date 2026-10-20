@@ -36,6 +36,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { Fragment, useMemo, useState, useTransition } from 'react';
 import { FilterMenu } from '@/components/filter-menu';
 import { pauseFlows, resumeFlows, retryFailures, runFlowsNow, setRoutePause } from './actions';
+import { useNow } from '@/components/now';
 
 export interface FlowTableRow {
   id: string;
@@ -91,7 +92,7 @@ export function FlowsTable({
     () => new Set(rows.filter((r) => r.status === 'error').map((r) => r.id)),
   );
 
-  const now = new Date();
+  const now = useNow();
   const rel = (iso: string | null) => {
     if (!iso) return t('never');
     const d = new Date(iso);

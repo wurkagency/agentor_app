@@ -145,7 +145,8 @@
       "codeInvalid": "That code doesn't match. Check that your phone's clock is right and try the new code.",
       "codeLocked": "Too many wrong codes. The account is locked for 15 minutes.",
       "required": "Fill in this field.",
-      "unverified": "You need to confirm your e-mail before you can sign in. We have sent a new link."
+      "unverified": "You need to confirm your e-mail before you can sign in. We have sent a new link.",
+      "ssoFailed": "Sign-in with the provider did not work. Try again."
     },
     "mfaTitle": "Confirm it's you",
     "mfaIntro": "Enter the code from your authenticator app. It changes every 30 seconds.",
@@ -182,7 +183,11 @@
     "resetDone": "Your password has been changed. You can log in now.",
     "resetInvalid": "The link has expired or was already used. Ask for a new one.",
     "backToLogin": "Back to log in",
-    "setupIntroTeam": "Your company requires two-step verification for everyone on the team. It takes a minute."
+    "setupIntroTeam": "Your company requires two-step verification for everyone on the team. It takes a minute.",
+    "setupRecent": "You signed in with {provider} a moment ago. That confirms it is you, so you can set up two-step verification without a password.",
+    "setupReauth": "Your account has no password. Sign in with {provider} again to confirm it is you.",
+    "setupReauthButton": "Sign in with {provider} again",
+    "setupReauthExpired": "It is more than 10 minutes since you signed in. Sign in with {provider} again."
   },
   "pages": {
     "comingTitle": "This page is on its way",
@@ -247,7 +252,9 @@
       "connection_broken": "Reconnect",
       "record_failed": "See errors",
       "systematic_error": "See errors",
-      "connector_update": "See"
+      "connector_update": "See",
+      "support_requested": "Review request",
+      "payment_failed": "Update card"
     },
     "resolved": "resolved",
     "channels": "Push, e-mail and SMS"
@@ -3186,6 +3193,7 @@
     },
     "accounting": {
       "banner": "<strong>{name} is connected.</strong>",
+      "bannerCounts": "<strong>{name} is connected.</strong> We found {orders, number} orders, {customers, number} customers and {products, number} products.",
       "title": "Connect your accounting",
       "lead": "You chose {name}. We fetch the chart of accounts and VAT codes, so invoices are booked correctly.",
       "leadMobile": "You chose {name}. We fetch the chart of accounts and VAT codes.",

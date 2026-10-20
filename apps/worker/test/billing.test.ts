@@ -82,7 +82,7 @@ describe('QuickPay callbacks', () => {
 describe('signup (PLAN-SIGNUP §4.2)', () => {
   const charge = {
     invoiceId: 'i1',
-    number: 'AG-2026-1001',
+    number: 'INV/2026/01001',
     orderId: 'AGCHARGE0001',
     amountOre: 198750,
     providerSubscriptionId: 'qp1',
@@ -154,7 +154,7 @@ describe('signup purge (B1)', () => {
 describe('monthly charge', () => {
   const charge = {
     invoiceId: 'i1',
-    number: 'AG-2026-1001',
+    number: 'INV/2026/01001',
     orderId: 'AGORDER0002',
     amountOre: 19875,
     providerSubscriptionId: 'qp1',

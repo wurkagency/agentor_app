@@ -304,3 +304,77 @@ describe('repository: createSignupCompany', () => {
     }
   });
 });
+
+describe('receipt for the first payment (Q20)', () => {
+  const Q = {
+    tenant: '0190a000-0000-7000-8000-0000000c0011',
+    owner: '0190a000-0000-7000-8000-0000000c0012',
+    invoice: '0190a000-0000-7000-8000-0000000c0013',
+  };
+  const OWNER_Q = { tenantId: Q.tenant, userId: Q.owner };
+
+  beforeAll(async () => {
+    await admin('begin');
+    await admin(
+      `insert into auth.users (id, email, name, email_verified) values ($1, 'receipt-owner@example.test', 'Receipt Owner', true)`,
+      [Q.owner],
+    );
+    await admin(
+      `insert into tenants (id, name, signup_state, signup_state_at) values ($1, 'Kvittering ApS', 'active', now())`,
+      [Q.tenant],
+    );
+    await admin(
+      `insert into memberships (tenant_id, user_id, role, flow_scope) values ($1, $2, 'owner', 'all')`,
+      [Q.tenant, Q.owner],
+    );
+    await admin(
+      `insert into invoices (tenant_id, id, number, period_start, period_end, description, amount_ore, vat_ore, status)
+       values ($1, $2, 'AG-TEST-Q', now(), now() + interval '1 month', 'Business · månedlig', 15900, 3975, 'paid')`,
+      [Q.tenant, Q.invoice],
+    );
+    await admin('commit');
+  });
+
+  afterAll(async () => {
+    await admin('delete from tenants where id = $1', [Q.tenant]);
+    await admin('delete from auth.users where id = $1', [Q.owner]);
+  });
+
+  it('is claimed once by a member, again only after a release', async () => {
+    const r = await runSteps('web', [
+      { ctx: OWNER_Q, text: `select app.claim_signup_receipt() as id` },
+      { ctx: OWNER_Q, text: `select app.claim_signup_receipt() as id` },
+      { ctx: OWNER_Q, text: `select app.release_signup_receipt()` },
+      { ctx: OWNER_Q, text: `select app.claim_signup_receipt() as id` },
+    ]);
+    expect(r.error).toBeUndefined();
+    expect(r.results[0]!.rows[0].id).toBe(Q.invoice);
+    expect(r.results[1]!.rows[0].id).toBeNull();
+    expect(r.results[3]!.rows[0].id).toBe(Q.invoice);
+  });
+
+  it('never for another tenant, a company without signup, or the worker', async () => {
+    const outsider = await run(
+      'web',
+      { tenantId: Q.tenant, userId: ID.userAOwner },
+      `select app.claim_signup_receipt() as id`,
+    );
+    expect(outsider.result!.rows[0].id).toBeNull();
+    const seeded = await run('web', OWNER_A, `select app.claim_signup_receipt() as id`);
+    expect(seeded.result!.rows[0].id).toBeNull();
+    const worker = await run('worker', OWNER_Q, `select app.claim_signup_receipt()`);
+    expect(worker.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
+  });
+});
+
+describe('invoice numbers', () => {
+  it('keep every digit past 99999 (no truncation)', async () => {
+    // Sequences are not transactional; moving one forward is harmless, it only ever grows.
+    const cur = await admin(`select last_value from app.invoice_number_seq`);
+    const next = Math.max(Number(cur.rows[0].last_value), 99_999);
+    await admin(`select setval('app.invoice_number_seq', $1)`, [next]);
+    const r = await run('worker', OWNER_A, `select app.next_invoice_number() as n`);
+    expect(r.error).toBeUndefined();
+    expect(r.result!.rows[0].n).toMatch(new RegExp(`^INV/\\d{4}/${next + 1}$`));
+  });
+});

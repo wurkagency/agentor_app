@@ -159,7 +159,7 @@ describe('billing lifecycle', () => {
       orderId: first!.orderId,
       resumed: true,
     });
-    expect(first!.number).toMatch(/^AG-\d{4}-\d{4,}$/);
+    expect(first!.number).toMatch(/^INV\/\d{4}\/\d{5,}$/);
   });
 
   it('a failed charge marks the subscription past due; a later success recovers it', async () => {
@@ -234,7 +234,7 @@ describe('billing lifecycle', () => {
       now,
     );
     expect(charge).toMatchObject({ amountOre: 80000, providerSubscriptionId: 'qp-sub-1' });
-    expect(charge!.number).toMatch(/^AG-\d{4}-\d{4,}$/);
+    expect(charge!.number).toMatch(/^INV\/\d{4}\/\d{5,}$/);
     // Sent once: a repeated job does nothing.
     expect(await sendSupportInvoice(worker.db, tenantId, inv!.id, () => 'AGSUP0000002')).toBeNull();
     await applyChargeResult(

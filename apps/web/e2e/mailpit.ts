@@ -32,3 +32,13 @@ export async function latestMailTo(
   }
   throw new Error(`No mail to ${address} within ${timeoutMs} ms`);
 }
+
+/** Subjects of all captured mails to an address, newest first. */
+export async function subjectsTo(address: string): Promise<string[]> {
+  const res = await fetch(`${API}/messages?limit=200`);
+  if (!res.ok) return [];
+  const { messages } = (await res.json()) as { messages: Summary[] };
+  return messages
+    .filter((m) => m.To.some((t) => t.Address.toLowerCase() === address.toLowerCase()))
+    .map((m) => m.Subject);
+}

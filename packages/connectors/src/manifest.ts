@@ -76,6 +76,11 @@ export interface ConnectorManifest {
   /** Implicit prerequisites, e.g. an invoice needs the customer and products in Dinero. */
   dependencies?: Partial<Record<Entity, Entity[]>>;
   rateLimit: { perMinute: number };
+  /**
+   * Entities the system can count cheaply (WooCommerce's X-WP-Total, Shopify's /count.json). The
+   * connection test reports them, e.g. OB2 "Vi fandt 1.284 ordrer, 812 kunder og 146 produkter".
+   */
+  counts?: Entity[];
   /** Webhook signature scheme for sources that push. */
   webhook?: { signatureHeader: string; scheme: 'hmac-sha256-base64' };
   changelog: { version: string; kind: 'additive' | 'breaking'; note: string }[];

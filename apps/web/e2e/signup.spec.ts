@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { latestMailTo } from './mailpit';
+import { latestMailTo, subjectsTo } from './mailpit';
 import {
   account,
   cleanupSignups,
@@ -53,6 +53,15 @@ test('e-mail signup: code, CVR, plan, QuickPay callback, active (SU1–SU6)', as
     [t!.id],
   );
   expect(pans[0]!.hits).toBe(0);
+  // One receipt for the first payment (Q20), also after SU6 and Overblik are opened again.
+  await expect
+    .poll(async () => (await subjectsTo(address)).filter((x) => x.startsWith('Kvittering')).length)
+    .toBe(1);
+  await page.reload();
+  await page.goto('/');
+  await page.waitForTimeout(1_500);
+  expect((await subjectsTo(address)).filter((x) => x.startsWith('Kvittering'))).toHaveLength(1);
+  expect((await latestMailTo(address)).text).toContain('Betalt i alt: 1.987,50 kr.');
   // An active company is sent away from signup.
   await page.goto('/signup/plan');
   await expect(page).not.toHaveURL(/\/signup\/plan/);

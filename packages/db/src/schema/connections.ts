@@ -42,6 +42,8 @@ export const connections = pgTable(
     configuredBy: uuid('configured_by'),
     configuredByName: text('configured_by_name'),
     lastCheckedAt: ts('last_checked_at'),
+    /** Records counted at the last successful test, for the entities the manifest can count. */
+    recordCounts: jsonb('record_counts').$type<Partial<Record<string, number>>>(),
     lastWebhookAt: ts('last_webhook_at'),
     tokenExpiresAt: ts('token_expires_at'),
     createdAt: createdAt(),

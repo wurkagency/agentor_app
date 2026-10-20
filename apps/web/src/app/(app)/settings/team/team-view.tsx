@@ -32,6 +32,7 @@ import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { PageHeader } from '@/components/shell/secondary-nav';
 import { inviteMember, removeTeamMember, updateMember, withdrawInvitation } from './actions';
+import { useNow } from '@/components/now';
 
 type Role = 'owner' | 'admin' | 'developer' | 'reader';
 
@@ -81,6 +82,7 @@ export function TeamView({
   const nav = useTranslations('nav');
   const common = useTranslations('common');
   const locale = useLocale() as Locale;
+  const now = useNow();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [editing, setEditing] = useState<MemberVM | null>(null);
   const [removing, setRemoving] = useState<MemberVM | null>(null);
@@ -105,7 +107,7 @@ export function TeamView({
     return {
       line: t('someFlows', { count: m.grants.length, names }),
       sub: exp
-        ? exp < new Date()
+        ? exp < now
           ? t('expired', { date: formatDate(exp, locale) })
           : t('expires', { date: formatDate(exp, locale) })
         : undefined,
@@ -117,7 +119,7 @@ export function TeamView({
     const d = new Date(iso);
     if (Date.now() - d.getTime() < 5 * 60 * 1000) return t('activeNow');
     if (Date.now() - d.getTime() > 7 * 24 * 3600 * 1000) return formatDate(d, locale);
-    return formatRelative(d, new Date(), locale);
+    return formatRelative(d, now, locale);
   };
 
   const canManage = (m: MemberVM) =>
@@ -368,6 +370,7 @@ function AccessFields({
   flows: { id: string; name: string }[];
 }) {
   const t = useTranslations('team');
+  const now = useNow();
   const scoped = role === 'developer' || role === 'reader';
   return (
     <>
@@ -412,7 +415,7 @@ function AccessFields({
                   aria-describedby={describedBy}
                   type="date"
                   value={value.accessExpiresAt}
-                  min={new Date().toISOString().slice(0, 10)}
+                  min={now.toISOString().slice(0, 10)}
                   onChange={(e) => onChange({ ...value, accessExpiresAt: e.target.value })}
                   className="w-48"
                 />

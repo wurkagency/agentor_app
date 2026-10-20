@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import QRCode from 'qrcode';
 import { useState, type FormEvent } from 'react';
+import { startSso } from '@/app/(signup)/actions';
 import { authClient } from '@/lib/auth-client';
 
 type Step =
@@ -16,7 +17,16 @@ type Step =
  * TOTP enrolment for owners and admins (§9.5). No board exists; built from the D14 focus-card
  * pattern: confirm password → scan QR → verify a code → save backup codes.
  */
-export function SetupFlow() {
+export function SetupFlow({
+  confirm,
+  provider,
+  ssoFailed,
+}: {
+  /** password: confirm with it; recent/reauth: no password, a fresh sign-in stands in for it. */
+  confirm: 'password' | 'recent' | 'reauth';
+  provider: 'google' | 'microsoft' | null;
+  ssoFailed: boolean;
+}) {
   const t = useTranslations('auth');
   const tc = useTranslations('common');
   const router = useRouter();
@@ -24,16 +34,25 @@ export function SetupFlow() {
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(ssoFailed ? t('errors.ssoFailed') : null);
+  const providerName = provider === 'microsoft' ? 'Microsoft' : 'Google';
 
   async function start(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    const res = await authClient.twoFactor.enable({ password });
+    const res = await authClient.twoFactor.enable(
+      confirm === 'password' ? { password } : { method: 'totp' },
+    );
     setBusy(false);
     if (res.error || !res.data || res.data.method !== 'totp') {
-      setError(res.error?.status === 429 ? t('errors.rateLimited') : t('errors.invalid'));
+      setError(
+        res.error?.status === 429
+          ? t('errors.rateLimited')
+          : res.error?.code === 'REAUTH_REQUIRED'
+            ? t('setupReauthExpired', { provider: providerName })
+            : t('errors.invalid'),
+      );
       return;
     }
     const uri = res.data.totpURI;
@@ -54,6 +73,49 @@ export function SetupFlow() {
       return;
     }
     setStep({ kind: 'codes', codes: step.codes });
+  }
+
+  async function reauth() {
+    if (!provider) return;
+    setBusy(true);
+    setError(null);
+    const r = await startSso({ provider, from: 'reauth' });
+    if (r.ok && r.data) window.location.assign(r.data.url);
+    else {
+      setBusy(false);
+      setError(t('errors.ssoFailed'));
+    }
+  }
+
+  if (step.kind === 'password' && confirm === 'reauth') {
+    return (
+      <div className="flex flex-col gap-5">
+        {error && <Banner tone="error">{error}</Banner>}
+        <p className="m-0">{t('setupReauth', { provider: providerName })}</p>
+        <Button
+          variant="primary"
+          size="l"
+          className="w-full"
+          loading={busy}
+          disabled={!provider}
+          onClick={reauth}
+        >
+          {t('setupReauthButton', { provider: providerName })}
+        </Button>
+      </div>
+    );
+  }
+
+  if (step.kind === 'password' && confirm === 'recent') {
+    return (
+      <form className="flex flex-col gap-5" onSubmit={start}>
+        {error && <Banner tone="error">{error}</Banner>}
+        <p className="m-0">{t('setupRecent', { provider: providerName })}</p>
+        <Button type="submit" variant="primary" size="l" className="w-full" loading={busy}>
+          {t('setupStart')}
+        </Button>
+      </form>
+    );
   }
 
   if (step.kind === 'password') {

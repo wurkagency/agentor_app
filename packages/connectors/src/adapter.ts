@@ -63,6 +63,11 @@ export interface ConnectorAdapter {
   /** One record by its source id; null when it no longer exists. */
   get<E extends Entity>(entity: E, sourceId: string): Promise<EntityRecord[E] | null>;
   lookup(list: 'accounts' | 'vatCodes' | 'templates'): Promise<LookupOption[]>;
+  /**
+   * How many records of an entity the account holds, for the entities in the manifest's `counts`;
+   * null when the system cannot say. Optional: a live client adds it when its API supports it.
+   */
+  count?(entity: Entity): Promise<number | null>;
   write<E extends Entity>(
     entity: E,
     record: EntityRecord[E],
@@ -191,6 +196,11 @@ class MockAdapter implements ConnectorAdapter {
     }
   }
 
+  async count(entity: Entity) {
+    if (!manifestFor(this.ctx.connectorId)?.counts?.includes(entity)) return null;
+    return this.all(entity).length;
+  }
+
   async lookup(list: 'accounts' | 'vatCodes' | 'templates') {
     if (list === 'accounts') return DINERO_ACCOUNTS;
     if (list === 'vatCodes')
@@ -231,6 +241,20 @@ export function adapterFor(ctx: AdapterContext): ConnectorAdapter {
   if (ctx.mode === 'live')
     throw new AdapterError(`${ctx.connectorId} has no live client yet`, 'NOT_AVAILABLE');
   return new MockAdapter(ctx);
+}
+
+/** Counts for the manifest's countable entities; a failed or missing count is left out. */
+export async function countRecords(
+  adapter: ConnectorAdapter,
+  entities: readonly Entity[] = [],
+): Promise<Partial<Record<Entity, number>>> {
+  const out: Partial<Record<Entity, number>> = {};
+  if (!adapter.count) return out;
+  for (const e of entities) {
+    const n = await adapter.count(e).catch(() => null);
+    if (typeof n === 'number' && Number.isFinite(n) && n >= 0) out[e] = n;
+  }
+  return out;
 }
 
 /** Webhook signature as WooCommerce and Shopify send it: base64 HMAC-SHA256 of the raw body. */

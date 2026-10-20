@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "test:e2e": "playwright test",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "cvr:check": "tsx scripts/check-cvr.ts"
   },
   "dependencies": {
     "@agentor/billing": "workspace:*",

@@ -4,7 +4,7 @@ import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { passkey } from '@better-auth/passkey';
 import { hash, verify, type Options as Argon2Options } from '@node-rs/argon2';
 import { betterAuth } from 'better-auth';
-import { APIError, createAuthMiddleware } from 'better-auth/api';
+import { APIError, createAuthMiddleware, getSessionFromCtx } from 'better-auth/api';
 import { nextCookies } from 'better-auth/next-js';
 import { emailOTP, genericOAuth, twoFactor } from 'better-auth/plugins';
 import { env, isProduction } from '../env';
@@ -13,7 +13,8 @@ import { notifyNewDevice } from './new-device';
 import { redisRateLimitStorage } from './rate-limit';
 import { clearFailures, isLocked, recordFailure } from './lockout';
 import { sendMail } from '../mail';
-import { markSessionMfaVerified, markSignupStarted } from '@agentor/db';
+import { markSessionMfaVerified, markSignupStarted, signInMethods } from '@agentor/db';
+import { isRecentSignIn, STEP_UP_PATHS } from './reauth';
 import { mockSsoConfig, SSO_PROVIDERS } from '../mock-sso';
 import { sendSignupCode } from '../signup-mail';
 
@@ -197,6 +198,17 @@ Agentor`,
     },
     hooks: {
       before: createAuthMiddleware(async (ctx) => {
+        if (STEP_UP_PATHS.has(ctx.path)) {
+          const s = await getSessionFromCtx(ctx);
+          if (s) {
+            const methods = await signInMethods(db(), s.user.id);
+            if (!methods.password && !isRecentSignIn(s.session.createdAt))
+              throw new APIError('FORBIDDEN', {
+                message: 'REAUTH_REQUIRED',
+                code: 'REAUTH_REQUIRED',
+              });
+          }
+        }
         if (ctx.path === '/sign-in/email') {
           const email = String(
             (ctx.body as { email?: unknown } | undefined)?.email ?? '',
@@ -266,6 +278,9 @@ Agentor`,
         // 8 codes (D12-Sikkerhed), stored encrypted rather than as plain JSON.
         backupCodeOptions: { amount: 8, storeBackupCodes: 'encrypted' },
         trustDeviceMaxAge: 30 * 24 * 3600, // "Husk denne enhed i 30 dage" (D14-MFA)
+        // Google/Microsoft-only accounts have no password; the before-hook asks for a recent
+        // sign-in instead. Accounts with a password still confirm with it.
+        allowPasswordless: true,
       }),
       passkey({ rpID: appUrl.hostname, rpName: 'Agentor', origin: appUrl.origin }),
       emailOTP({

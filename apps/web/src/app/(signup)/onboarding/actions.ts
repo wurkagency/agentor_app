@@ -62,6 +62,8 @@ export interface OnboardingConnection {
   status: 'checking' | 'ok' | 'broken';
   /** Chart of accounts fetched (OB2/OB3 "kontoplan hentet"). */
   accounts: boolean;
+  /** Orders, customers and products found by the connection test, where it can count. */
+  counts: Partial<Record<string, number>> | null;
 }
 
 export async function onboardingConnections(): Promise<ActionResult<OnboardingConnection[]>> {
@@ -82,6 +84,7 @@ export async function onboardingConnections(): Promise<ActionResult<OnboardingCo
       name: x.name,
       status: x.status as OnboardingConnection['status'],
       accounts: !!lookups[x.id]?.accounts?.length,
+      counts: x.recordCounts ?? null,
     })),
   };
 }

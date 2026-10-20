@@ -190,7 +190,7 @@ export async function resendSignupCode(): Promise<ActionResult<{ waitSeconds: nu
 
 const ssoSchema = z.object({
   provider: z.enum(SSO_PROVIDERS),
-  from: z.enum(['signup', 'login']),
+  from: z.enum(['signup', 'login', 'reauth']),
 });
 
 /**
@@ -204,9 +204,16 @@ export async function startSso(input: unknown): Promise<ActionResult<{ url: stri
   if (e.SSO_MODE === 'off') return { ok: false, error: 'ssoOff' };
   const ip = (await clientIp()) ?? 'unknown';
   if (!(await limit(`sso:ip:${ip}`, 60, 20)).allowed) return { ok: false, error: 'rateLimited' };
-  const callbackURL = parsed.data.from === 'signup' ? '/signup/company' : '/';
+  // reauth: a fresh sign-in in place of a password before two-step verification (reauth.ts).
+  const from = parsed.data.from;
+  const callbackURL =
+    from === 'signup' ? '/signup/company' : from === 'reauth' ? '/login/mfa/setup' : '/';
   const errorCallbackURL =
-    parsed.data.from === 'signup' ? '/signup?sso=failed' : '/login?sso=failed';
+    from === 'signup'
+      ? '/signup?sso=failed'
+      : from === 'reauth'
+        ? '/login/mfa/setup?sso=failed'
+        : '/login?sso=failed';
   const h = await headers();
   // The mock identity provider registers under the same ids (generic OAuth = social provider).
   const res = await auth().api.signInSocial({

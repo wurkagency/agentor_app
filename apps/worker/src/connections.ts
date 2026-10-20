@@ -1,4 +1,4 @@
-import { adapterFor, manifestFor, verifyWebhookSignature } from '@agentor/connectors';
+import { adapterFor, countRecords, manifestFor, verifyWebhookSignature } from '@agentor/connectors';
 import {
   createEngineRun,
   flowsReading,
@@ -89,20 +89,23 @@ async function testConnection(deps: ConnectionDeps, tenantId: string, connection
     });
     return;
   }
-  const result = await adapterFor({
+  const tested = adapterFor({
     connectorId: conn.connectorId,
     credentials: creds,
     mode: deps.connectorMode,
-  }).test();
+  });
+  const result = await tested.test();
+  const manifest = manifestFor(conn.connectorId);
+  // What the account holds (OB2 "Vi fandt … ordrer"), only where the manifest says it can count.
+  const counts = result.ok ? await countRecords(tested, manifest?.counts) : {};
   await recordConnectionTest(
     deps.db,
     tenantId,
     connectionId,
     result.ok
-      ? { ok: true, accountId: result.account.id, accountName: result.account.name }
+      ? { ok: true, accountId: result.account.id, accountName: result.account.name, counts }
       : { ok: false, reason: REASONS[result.reason] },
   );
-  const manifest = manifestFor(conn.connectorId);
   if (result.ok) {
     // Live lookups the editor maps against (chart of accounts, §4.5), cached per connection.
     const lists = new Set(

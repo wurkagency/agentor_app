@@ -17,6 +17,7 @@ import { redirect } from 'next/navigation';
 import { allSystems } from '@/components/signup/catalogue';
 import { db } from '@/server/infra';
 import { requireSignupStep } from '@/server/signup';
+import { ensureSignupReceipt } from '@/server/signup-receipt';
 
 export async function generateMetadata() {
   const t = await getTranslations('signupFlow.welcome');
@@ -33,6 +34,7 @@ export default async function SignupWelcomePage() {
     listInvoices(db(), ctx),
   ]);
   if (!overview || !company) redirect('/');
+  await ensureSignupReceipt(ctx, session!.user.email);
   const t = await getTranslations('signupFlow.welcome');
   const tp = await getTranslations('signupFlow.plan');
   const locale = (await getLocale()) as Locale;

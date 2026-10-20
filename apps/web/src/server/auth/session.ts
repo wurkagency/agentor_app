@@ -24,6 +24,8 @@ export interface SessionUser {
 export interface UserSession {
   sessionId: string;
   token: string;
+  /** When the user signed in (recent-sign-in check, reauth.ts). */
+  createdAt: Date;
   activeTenantId: string | null;
   /** Google or Microsoft login (PLAN-SIGNUP B10). */
   ssoLogin: boolean;
@@ -79,6 +81,7 @@ export const getUserSession = cache(async (): Promise<UserSession | null> => {
   return {
     sessionId: session.id,
     token: session.token,
+    createdAt: new Date(session.createdAt),
     activeTenantId: extra.activeTenantId ?? null,
     ssoLogin: Boolean(extra.ssoLogin),
     mfaVerifiedAt: extra.mfaVerifiedAt ? new Date(extra.mfaVerifiedAt) : null,

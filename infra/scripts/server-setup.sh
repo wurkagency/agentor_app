@@ -148,8 +148,23 @@ else
   AUTH_SECRET=$(openssl rand -base64 48 | tr -d '\n')
   common() {
     printf '%s\n' "APP_URL=https://$DOMAIN" "REDIS_URL=$REDIS_URL" "BETTER_AUTH_SECRET=$AUTH_SECRET" \
-      "CONNECTOR_MODE=mock" "QUICKPAY_MODE=${QUICKPAY_MODE:-test}" "CVR_PROVIDER=fixture" \
+      "CONNECTOR_MODE=mock" "QUICKPAY_MODE=${QUICKPAY_MODE:-test}" \
       "INGEST_PUBLIC_URL=https://$DOMAIN" "INGEST_INTERNAL_URL=http://127.0.0.1:3411" "LOG_LEVEL=info"
+    # CVR lookup on SU3 (PLAN-SIGNUP B2): Virkdata when a key is given, fictional fixtures otherwise.
+    if [ -n "${VIRKDATA_API_KEY:-}" ]; then
+      echo "CVR_PROVIDER=virkdata"; echo "VIRKDATA_API_KEY=$VIRKDATA_API_KEY"
+    else echo "CVR_PROVIDER=fixture"; fi
+    # Terms until agentor.dk publishes them (B12): a marked placeholder, accepted only in QuickPay
+    # test mode (Q19). Set LEGAL_SUBSCRIPTION_TERMS_URL and LEGAL_PRIVACY_URL before going live.
+    if [ "${QUICKPAY_MODE:-test}" = test ]; then echo "LEGAL_DEV_VERSION=${LEGAL_DEV_VERSION:-placeholder}"; fi
+    # Google and Microsoft on /signup and /login (B10), only with their OAuth clients.
+    if [ -n "${GOOGLE_CLIENT_ID:-}${MICROSOFT_CLIENT_ID:-}" ]; then echo "SSO_MODE=live"; fi
+    if [ -n "${GOOGLE_CLIENT_ID:-}" ]; then
+      echo "GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID"; echo "GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET:-}"
+    fi
+    if [ -n "${MICROSOFT_CLIENT_ID:-}" ]; then
+      echo "MICROSOFT_CLIENT_ID=$MICROSOFT_CLIENT_ID"; echo "MICROSOFT_CLIENT_SECRET=${MICROSOFT_CLIENT_SECRET:-}"
+    fi
     # Only when given: an empty value is invalid, and without it mail goes nowhere.
     if [ -n "${SMTP_URL:-}" ]; then echo "SMTP_URL=$SMTP_URL"; fi
     # The worker refuses QUICKPAY_MODE=mock in production; test or live needs the API key.

@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { markAllNotificationsRead } from '@/app/actions/notifications';
+import { useNow } from '@/components/now';
 
 export interface NotificationItem {
   id: string;
@@ -55,7 +56,7 @@ export function NotificationsPopover({
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const action = items.filter((i) => i.needsAction && !i.resolved);
-  const now = new Date();
+  const now = useNow();
 
   const list = (rows: NotificationItem[]) =>
     rows.length === 0 ? (

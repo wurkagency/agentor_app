@@ -18,6 +18,7 @@ import {
   type Priority,
 } from './case-bits';
 import { NewCaseDialog } from './new-case-dialog';
+import { useNow } from '@/components/now';
 
 export interface BoardCase {
   id: string;
@@ -75,7 +76,7 @@ export function CaseBoard({
   const [local, setLocal] = useState<Record<string, CaseStatusKey>>({});
   const [newOpen, setNewOpen] = useState(false);
   const [, start] = useTransition();
-  const now = new Date();
+  const now = useNow();
 
   const list = useMemo(
     () =>

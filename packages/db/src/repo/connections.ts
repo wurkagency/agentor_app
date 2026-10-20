@@ -313,7 +313,14 @@ export async function recordConnectionTest(
   db: Database,
   tenantId: string,
   connectionId: string,
-  result: { ok: true; accountId: string; accountName: string } | { ok: false; reason: string },
+  result:
+    | {
+        ok: true;
+        accountId: string;
+        accountName: string;
+        counts?: Partial<Record<string, number>> | undefined;
+      }
+    | { ok: false; reason: string },
   now = new Date(),
 ): Promise<void> {
   await withTenant(db, { tenantId }, async (tx) => {
@@ -331,6 +338,9 @@ export async function recordConnectionTest(
           brokenSince: null,
           accountId: result.accountId,
           name: result.accountName,
+          ...(result.counts && Object.keys(result.counts).length
+            ? { recordCounts: result.counts }
+            : {}),
           lastCheckedAt: now,
           updatedAt: now,
         })

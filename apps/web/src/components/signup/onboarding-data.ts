@@ -49,6 +49,7 @@ export async function onboardingData(ctx: { tenantId: string; userId: string }) 
     name: x.name,
     status: x.status as OnboardingConnection['status'],
     accounts: !!lookups[x.id]?.accounts?.length,
+    counts: x.recordCounts ?? null,
   }));
   const pick = (cat: string) => {
     const connected = connections.find((c) => c.category === cat && c.status !== 'broken');

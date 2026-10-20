@@ -5,6 +5,7 @@ import { Avatar, Icon, Segmented, cn } from '@agentor/ui';
 import { ArrowRight, Clock, KeyRound, Lock, UserRound } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useState } from 'react';
+import { useNow } from '@/components/now';
 
 export interface TimelineEvent {
   id: string;
@@ -24,6 +25,7 @@ type Filter = 'all' | 'customer' | 'notes' | 'time';
 export function CaseTimeline({ events }: { events: TimelineEvent[] }) {
   const t = useTranslations('platform.case');
   const locale = useLocale() as Locale;
+  const now = useNow();
   const [filter, setFilter] = useState<Filter>('all');
   const shown = events.filter((e) =>
     filter === 'customer'
@@ -36,7 +38,7 @@ export function CaseTimeline({ events }: { events: TimelineEvent[] }) {
   );
   const when = (iso: string) => {
     const d = new Date(iso);
-    const today = d.toDateString() === new Date().toDateString();
+    const today = d.toDateString() === now.toDateString();
     return today
       ? t('todayAt', { time: formatTime(d, locale) })
       : `${formatDate(d, locale)} ${formatTime(d, locale)}`;

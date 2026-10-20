@@ -26,6 +26,7 @@ import { routeTarget } from '@/components/flows/helpers';
 import { PageBody, PageHeader, SecondaryBar } from '@/components/shell/secondary-nav';
 import { TransactionMeter } from '@/components/shell/transaction-meter';
 import { requireAppContext } from '@/server/auth/session';
+import { ensureSignupReceipt } from '@/server/signup-receipt';
 import { billingOverview } from '@/server/billing-overview';
 import { connectionMap, NEEDS_ACTION, PERIOD_DAYS, periodOf, viewsFor } from '@/server/flows';
 import { db } from '@/server/infra';
@@ -58,6 +59,12 @@ export default async function OverviewPage({
   searchParams: Promise<{ period?: string }>;
 }) {
   const ctx = await requireAppContext();
+  // Backup for the receipt when SU6 was never opened (Q20); a no-op once it is sent.
+  if (!ctx.support)
+    await ensureSignupReceipt(
+      { tenantId: ctx.tenant.tenantId, userId: ctx.user.id },
+      ctx.user.email,
+    );
   const period = periodOf((await searchParams).period);
   const days = PERIOD_DAYS[period];
   const c = { tenantId: ctx.tenant.tenantId, userId: ctx.user.id };

@@ -94,7 +94,7 @@ test('a reminder and a payment link go to the customer by e-mail', async ({ page
   await hav.getByRole('button', { name: 'Send rykker' }).click();
   await expect(page.getByText('Sendt til faktura@hav-hudpleje.test')).toBeVisible();
   const mail = await latestMailTo('faktura@hav-hudpleje.test');
-  expect(mail.subject).toMatch(/^Påmindelse: faktura AG-/);
+  expect(mail.subject).toMatch(/^Påmindelse: faktura INV\/\d{4}\/\d{5,} /);
   await page.reload();
   await expect(
     page.getByRole('row', { name: new RegExp(PLATFORM_TENANTS.hav.name) }).first(),

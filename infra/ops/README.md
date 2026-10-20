@@ -38,3 +38,15 @@ These steps run on the Ubuntu/Plesk VM, not in CI. They are the ops half of the 
 ## 7. Deploy (§10.5)
 
 GitHub Actions builds and tests. A restricted deploy user runs: `git pull` → `pnpm install --frozen-lockfile` → `pnpm db:migrate` (as `agentor_owner`) → `pnpm build` → `pm2 reload` for each user. Releases live in versioned folders with a `current` symlink, so rollback is one symlink switch.
+
+## 8. Signup in production with QuickPay test mode (PLAN-SIGNUP Q19)
+
+There is no staging. Until launch, production runs signup end to end with QuickPay in test mode.
+
+- `QUICKPAY_MODE=test` in `web.env.production` and `worker.env.production`, with the test account's `QUICKPAY_API_KEY` (both) and `QUICKPAY_PRIVATE_KEY` (web). QuickPay posts its callbacks to `https://app.agentor.dk/billing/quickpay` (agentor-ingest), which must be reachable from the internet.
+- Pay with QuickPay's published test cards (QuickPay manager → Help → Test cards). Callbacks carry `test_mode: true`. In `live` mode these are refused (`parseCallback`), so a test card can never activate a company after launch.
+- Terms: while agentor.dk has no documents, `LEGAL_DEV_VERSION` lets SU5 store the version as `test:<value>`. Only in test mode: with `QUICKPAY_MODE=live` acceptance is refused until `LEGAL_SUBSCRIPTION_TERMS_URL` and `LEGAL_PRIVACY_URL` point at agentor.dk pages with `<meta name="agentor-document-version">`.
+- CVR: `CVR_PROVIDER=virkdata` with `VIRKDATA_API_KEY`. Check the key with `pnpm --filter @agentor/web cvr:check` (does not count against the quota).
+- Manual check each release: sign up with a real inbox → code → CVR → plan → test card → SU6 shows "Betalt" → receipt mail arrives once → MFA → onboarding. Abandon one signup at payment and confirm it is deleted after 24 hours.
+
+**Before launch (switch to live):** set `QUICKPAY_MODE=live` and the live keys; set the two `LEGAL_*_URL`s and remove `LEGAL_DEV_VERSION`; delete the companies created in test mode (`select id, name from tenants where signup_state_at is not null`, after checking the list); `pm2 reload` both users.

@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 import { followCaseAction, updateCaseAction } from '@/app/platform/actions';
 import type { CaseStatusKey, Priority } from './case-bits';
+import { useNow } from '@/components/now';
 
 const toLocalInput = (iso: string | null) => {
   if (!iso) return '';
@@ -41,6 +42,7 @@ export function CaseMetaBar({
   const t = useTranslations('platform.case');
   const tc = useTranslations('common');
   const locale = useLocale() as Locale;
+  const now = useNow();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [due, setDue] = useState(toLocalInput(dueAt));
@@ -130,9 +132,7 @@ export function CaseMetaBar({
           onBlur={() => patch({ dueAt: due ? new Date(due).toISOString() : null })}
           className="h-9 rounded-sm border-0 bg-bg-base px-2 font-sans text-table text-fg-1 shadow-ring-chip"
         />
-        {dueAt && (
-          <span className="text-fg-1">{formatRelative(new Date(dueAt), new Date(), locale)}</span>
-        )}
+        {dueAt && <span className="text-fg-1">{formatRelative(new Date(dueAt), now, locale)}</span>}
       </label>
       <span className="ml-auto flex items-center gap-2 text-meta text-fg-2">
         {t('followers')}

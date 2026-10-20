@@ -23,6 +23,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { openAsSuperadminAction, openSupportViewAction } from '@/app/platform/actions';
 import { FilterMenu } from '../filter-menu';
 import { RequestAccessDialog, type AccessTarget } from './request-access-dialog';
+import { useNow } from '@/components/now';
 
 export interface CustomerItem {
   tenantId: string;
@@ -70,7 +71,7 @@ export function CustomersTable({
   const [mine, setMine] = useState(false);
   const [target, setTarget] = useState<AccessTarget | null>(null);
   const [pending, start] = useTransition();
-  const now = new Date();
+  const now = useNow();
 
   const plans = [...new Set(items.map((i) => i.plan))].sort();
   const needsAttention = items.filter((i) => i.status === 'broken' || i.status === 'error');

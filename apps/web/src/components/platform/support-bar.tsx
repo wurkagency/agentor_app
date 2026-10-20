@@ -27,6 +27,7 @@ import {
   supportSessionInfoAction,
   type SessionEndInfo,
 } from '@/app/platform/actions';
+import { useNow } from '@/components/now';
 
 export interface SwitcherGrant {
   grantId: string;
@@ -282,6 +283,7 @@ function EndSessionDialog({ onClose }: { onClose: () => void }) {
   const t = useTranslations('platform.supportBar');
   const tc = useTranslations('common');
   const locale = useLocale() as Locale;
+  const now = useNow();
   const [info, setInfo] = useState<SessionEndInfo | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [caseId, setCaseId] = useState<string>('none');
@@ -446,7 +448,7 @@ function EndSessionDialog({ onClose }: { onClose: () => void }) {
               {t('endGrant')}{' '}
               <span className="text-fg-2">
                 {t('endGrantHelp', {
-                  when: formatRelative(new Date(info.expiresAt), new Date(), locale),
+                  when: formatRelative(new Date(info.expiresAt), now, locale),
                 })}
               </span>
             </span>

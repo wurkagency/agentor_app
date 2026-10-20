@@ -121,6 +121,16 @@ export const getSignupContext = cache(async (): Promise<SignupContext> => {
  */
 export async function requireSignupStep(step: SignupStep): Promise<SignupContext> {
   const ctx = await getSignupContext();
+  const s = ctx.session;
+  // As in requireAppContext: after Google or Microsoft, an owner or admin with two-step
+  // verification confirms it once before onboarding too (B10).
+  if (
+    s?.user.twoFactorEnabled &&
+    s.ssoLogin &&
+    !s.mfaVerifiedAt &&
+    (ctx.tenant?.role === 'owner' || ctx.tenant?.role === 'admin')
+  )
+    redirect('/login/mfa?sso=1');
   const target = signupRedirect(step, ctx.snapshot);
   if (target) redirect(target);
   return ctx;

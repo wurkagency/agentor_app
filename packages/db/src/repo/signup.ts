@@ -518,3 +518,62 @@ export async function getOnboardingState(db: Database, ctx: Ctx): Promise<Onboar
     companyName: t.name,
   };
 }
+
+/* ---- Receipt for the first payment (Q20) ------------------------------------------------------------ */
+
+export interface SignupReceipt {
+  invoiceNumber: string | null;
+  amountOre: number;
+  vatOre: number;
+  periodStart: Date;
+  periodEnd: Date;
+  paidAt: Date | null;
+  companyName: string;
+  billingEmail: string | null;
+  planName: string;
+  interval: 'month' | 'year';
+}
+
+/**
+ * Claims the one receipt mail for a company that became active through signup. Returns what the
+ * mail needs only to the call that claimed it; null when it was sent already or does not apply.
+ */
+export async function claimSignupReceipt(db: Database, ctx: Ctx): Promise<SignupReceipt | null> {
+  return withTenant(db, ctx, async (tx) => {
+    const res = await tx.execute<{ id: string | null }>(
+      sql`select app.claim_signup_receipt() as id`,
+    );
+    const invoiceId = res.rows[0]?.id;
+    if (!invoiceId) return null;
+    const [row] = await tx
+      .select({
+        invoiceNumber: invoices.number,
+        amountOre: invoices.amountOre,
+        vatOre: invoices.vatOre,
+        periodStart: invoices.periodStart,
+        periodEnd: invoices.periodEnd,
+        paidAt: invoices.paidAt,
+        companyName: tenants.name,
+        billingEmail: tenants.billingEmail,
+        planId: subscriptions.planId,
+        interval: subscriptions.interval,
+      })
+      .from(invoices)
+      .innerJoin(tenants, eq(tenants.id, invoices.tenantId))
+      .innerJoin(subscriptions, eq(subscriptions.tenantId, invoices.tenantId))
+      .where(eq(invoices.id, invoiceId))
+      .limit(1);
+    if (!row) return null;
+    const plan = (await loadPlansTx(tx)).find((p) => p.id === row.planId);
+    return {
+      ...row,
+      planName: plan?.name ?? row.planId,
+      interval: row.interval === 'year' ? 'year' : 'month',
+    };
+  });
+}
+
+/** The receipt mail failed: the next page view claims it again. */
+export async function releaseSignupReceipt(db: Database, ctx: Ctx): Promise<void> {
+  await withTenant(db, ctx, (tx) => tx.execute(sql`select app.release_signup_receipt()`));
+}

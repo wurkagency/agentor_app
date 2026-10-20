@@ -53,6 +53,8 @@ export const tenants = pgTable(
      */
     signupState: text('signup_state').notNull().default('active'),
     signupStateAt: timestamp('signup_state_at', { withTimezone: true, mode: 'date' }),
+    /** The receipt for the first payment was mailed (once, by app.claim_signup_receipt). */
+    signupReceiptSentAt: timestamp('signup_receipt_sent_at', { withTimezone: true, mode: 'date' }),
     /** Systems chosen on SU3 (connector ids); pre-select onboarding and drive recommendations. */
     chosenConnectors: text('chosen_connectors')
       .array()

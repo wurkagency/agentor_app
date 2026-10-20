@@ -9,7 +9,8 @@ import { env, isProduction } from './env';
  *   <meta name="agentor-document-version" content="2026-11-01">
  *
  * FOLLOW-UP (T3): the real URLs, the agreed meta tag, and whether the DPA is accepted here too.
- * Until then development and tests use LEGAL_DEV_VERSION, and production refuses to accept.
+ * Until then development, tests and production in QuickPay test mode use LEGAL_DEV_VERSION;
+ * production with live payments refuses to accept.
  */
 
 export class LegalUnavailableError extends Error {
@@ -75,9 +76,16 @@ export async function currentTermsForAcceptance(): Promise<AcceptedDocument[]> {
   return Promise.all(
     docs.map(async (d) => {
       if (!d.url) {
-        // No document yet: only outside production, and marked as such in the stored version.
-        if (isProduction() || !e.LEGAL_DEV_VERSION) throw new LegalUnavailableError();
-        return { document: d.document, url: 'about:blank', version: `dev:${e.LEGAL_DEV_VERSION}` };
+        // No document yet: a placeholder version, marked as such, outside production, and in
+        // production only while QuickPay runs in test mode (Q19). With live payments it is refused.
+        const placeholderAllowed = !isProduction() || e.QUICKPAY_MODE === 'test';
+        if (!placeholderAllowed || !e.LEGAL_DEV_VERSION) throw new LegalUnavailableError();
+        const prefix = isProduction() ? 'test' : 'dev';
+        return {
+          document: d.document,
+          url: 'about:blank',
+          version: `${prefix}:${e.LEGAL_DEV_VERSION}`,
+        };
       }
       return { document: d.document, url: d.url, version: await versionOf(d.url) };
     }),

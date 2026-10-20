@@ -169,7 +169,7 @@ await inTenant(n.id, async () => {
     `insert into usage_counters (tenant_id, period, transactions) values ($1, $2, 712)`,
     [n.id, period],
   );
-  for (const [i, num] of ['AG-2026-1043', 'AG-2026-0912', 'AG-2026-0788'].entries()) {
+  for (const [i, num] of ['INV/2026/01043', 'INV/2026/00912', 'INV/2026/00788'].entries()) {
     // Charged in advance: the newest invoice is for the current period (D13: "1. okt.").
     const start = month(-i);
     const end = month(1 - i);
@@ -254,7 +254,7 @@ await inTenant(o.id, async () => {
   );
 });
 
-// The hand-written invoice numbers above (AG-2026-0788…1043) sit below 2000. Move the sequence past
+// The hand-written invoice numbers above (INV/2026/00788…01043) sit below 2000. Move the sequence past
 // them before anything draws from it (Finans below), or a fresh database (CI) starts at 1000 and
 // collides with them.
 await owner.query(

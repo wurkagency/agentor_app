@@ -1,6 +1,7 @@
 import { and, asc, eq, ne } from 'drizzle-orm';
 import { withoutTenant, withTenant, type Database } from '../client.js';
 import {
+  authAccounts,
   authSessions,
   authUsers,
   memberships,
@@ -137,4 +138,19 @@ export async function markSessionMfaVerified(db: Database, sessionId: string): P
     .update(authSessions)
     .set({ mfaVerifiedAt: new Date() })
     .where(eq(authSessions.id, sessionId));
+}
+
+/** How a user can sign in: with a password, and with which identity providers. */
+export async function signInMethods(
+  db: Database,
+  userId: string,
+): Promise<{ password: boolean; providers: string[] }> {
+  const rows = await db
+    .select({ providerId: authAccounts.providerId })
+    .from(authAccounts)
+    .where(eq(authAccounts.userId, userId));
+  return {
+    password: rows.some((r) => r.providerId === 'credential'),
+    providers: rows.map((r) => r.providerId).filter((p) => p !== 'credential'),
+  };
 }

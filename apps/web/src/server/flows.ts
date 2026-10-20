@@ -25,6 +25,8 @@ export interface ConnectionRef {
   logo: string;
   status: 'ok' | 'broken' | 'checking';
   brokenSince: Date | null;
+  /** From the last connection test, where the connector can count (OB2). */
+  recordCounts?: Partial<Record<string, number>> | null;
 }
 
 export interface RouteView {
@@ -180,6 +182,7 @@ export const connectionMap = cache(async (tenantId: string, userId: string) => {
         logo: manifestFor(c.connectorId)?.logo ?? '',
         status: c.status,
         brokenSince: c.brokenSince,
+        recordCounts: c.recordCounts,
       },
     ]),
   );

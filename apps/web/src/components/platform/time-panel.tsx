@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 import { addTimeAction, startTimerAction, stopTimerAction } from '@/app/platform/actions';
+import { useNow } from '@/components/now';
 
 export interface TimeRow {
   id: string;
@@ -175,7 +176,7 @@ export function AddTimeDialog({
   const tc = useTranslations('common');
   const locale = useLocale() as Locale;
   const router = useRouter();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = useNow().toISOString().slice(0, 10);
   const [duration, setDuration] = useState('0:15');
   const [date, setDate] = useState(today);
   const [kind, setKind] = useState('phone');

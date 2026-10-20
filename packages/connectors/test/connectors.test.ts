@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest';
 import {
   adapterFor,
   CATALOGUE,
+  countRecords,
   MANIFESTS,
+  manifestFor,
   MOCK_ORDERS,
   saleKind,
   verifyWebhookSignature,
@@ -82,5 +84,17 @@ describe('webhook signatures', () => {
     expect(verifyWebhookSignature(`${body} `, sig, 'whsec')).toBe(false);
     expect(verifyWebhookSignature(body, sig, 'other')).toBe(false);
     expect(verifyWebhookSignature(body, undefined, 'whsec')).toBe(false);
+  });
+});
+
+describe('record counts (OB2)', () => {
+  it('counts only what the manifest declares, and nothing for connectors that cannot', async () => {
+    const woo = adapterFor({ connectorId: 'woocommerce', credentials: {}, mode: 'mock' });
+    const counts = await countRecords(woo, manifestFor('woocommerce')?.counts);
+    expect(Object.keys(counts).sort()).toEqual(['customer', 'order', 'product']);
+    expect(counts.order).toBeGreaterThan(0);
+    const dinero = adapterFor({ connectorId: 'dinero', credentials: {}, mode: 'mock' });
+    expect(await countRecords(dinero, manifestFor('dinero')?.counts)).toEqual({});
+    expect(await countRecords(dinero, ['order'])).toEqual({});
   });
 });

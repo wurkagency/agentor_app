@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, useTransition, type ReactNode } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { decideSupport, logoutOtherSessions, logoutSession, setSecurity } from './actions';
+import { useNow } from '@/components/now';
 
 interface Grant {
   id: string;
@@ -86,6 +87,7 @@ export function SecurityView({
   const t = useTranslations('security');
   const common = useTranslations('common');
   const locale = useLocale() as Locale;
+  const now = useNow();
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [codesOpen, setCodesOpen] = useState(false);
@@ -180,7 +182,7 @@ export function SecurityView({
                 <span className="text-meta font-medium text-fg-2">{s.ip ?? '–'}</span>
               </span>
               <span className="text-meta font-medium text-fg-2">
-                {s.current ? t('now') : formatRelative(new Date(s.lastActive), new Date(), locale)}
+                {s.current ? t('now') : formatRelative(new Date(s.lastActive), now, locale)}
               </span>
               {s.current ? (
                 <span className="text-meta font-semibold">{t('thisDevice')}</span>

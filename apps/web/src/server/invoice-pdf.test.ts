@@ -9,7 +9,7 @@ describe('invoice PDF', () => {
   });
 
   it('writes a structurally valid PDF with a correct xref table', () => {
-    const pdf = renderPdf([{ text: 'Faktura AG-2026-1043', x: 56, y: 780 }]).toString('latin1');
+    const pdf = renderPdf([{ text: 'Faktura INV/2026/01043', x: 56, y: 780 }]).toString('latin1');
     expect(pdf.startsWith('%PDF-1.4')).toBe(true);
     expect(pdf.trimEnd().endsWith('%%EOF')).toBe(true);
     const xrefAt = Number(/startxref\n(\d+)/.exec(pdf)![1]);
