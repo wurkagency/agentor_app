@@ -440,3 +440,41 @@ Ikke gjort endnu / kendt:
 
 - **B10's totrinsbekræftelse efter SSO** er bygget, men ikke e2e-testet med en ejer, der har totrin. Den kommer med S3's MFA-trin (B9: passkey først i opsætningen).
 - **`/onboarding/*`** findes ikke endnu. "Start opsætningen" fører via `/` til MFA-opsætning og derefter til en side, der ikke findes, indtil S3.
+
+## 16. Status for S3 (20. okt. 2026)
+
+Bygget på `v1.0` oven på S2 (`6d4aaf7`), ikke committet.
+
+- **Sider** i `apps/web/src/app/(signup)/onboarding/` (`webshop`, `accounting`, `template`, `test`, `done`), hver med `Responsive`. Den gamle `(focus)/onboarding` er fjernet.
+- **MFA (B9):** "Start opsætningen" på SU6 → `/login/mfa/setup?next=/onboarding/webshop` → OB1.
+- **Forbindelser (B4, B11):**
+  - `/connect/[connector]/start` gemmer state i Redis (bruger, tenant, retur, 10 min).
+  - `/connect/[connector]/callback` tjekker state, opretter forbindelsen og sender tilbage.
+  - Mock-udbyderens samtykkeside er stand-in for WooCommerces og Dineros egne.
+  - Returen afhænger af state, ikke af cookien. Mobil lander på `/connect/done`.
+- **Skabelon:** `recommendTemplates` og `accountHints` som data i `templates.ts`. "Som kladde" er forvalgt.
+- **Testkørsel:** de 10 seneste ordrer. Intet skrives (e2e tjekker `entity_links = 0` og ingen `created`/`updated`).
+  - "Vælg konto" skriver kontoen i kladdens mapping og kører testen igen. Én konto til EU-salg dækker alle tre rækker.
+- **Gå live:** kun ruter, hvis destination kan holde en kladde (fakturaer, kreditnotaer), går i `draft`; kunder går `live`. Valideres og publiceres som version 1.
+- **OB5:** "Live som kladde", invitér team (Læser), "Tilføj {CRM}" for systemet fra SU3, QR-kode (statisk SVG, Q17).
+- **Spring over:** lander på Overblik med påmindelseskortet, som fører tilbage til trinnet.
+- **Tekster** i `onboardingFlow` (da/en).
+- **Fundet og rettet undervejs:**
+  - `cn()` kendte ikke `text-su-*`, så tailwind-merge fjernede `text-fg-1` fra knapper. På navy blev teksten hvid på lime (1,37:1). Størrelserne er nu registreret.
+  - Nøglen `accounts.euB2b` blev afvist af valideringen (tal i navnet), så "Vælg konto" gjorde intet.
+  - "Gå live" satte kunderuten til `draft`, som Dinero ikke understøtter.
+  - Mobilrækkerne i testkørslen: vælgeren dækkede ordre og kunde.
+- **Tests:** `e2e/onboarding.spec.ts`, 3 test på desktop og mobil (390, 360, 430): 5 af 5 bestået. axe uden fund på alle 10 skærme. Screenshots OB1–OB5 og MO1–MO5 i `docs/screenshots/signup/`.
+
+Afvigelser fra tegnefladerne:
+
+| Tegneflade | Afvigelse                          | Hvorfor                                                   |
+| ---------- | ---------------------------------- | --------------------------------------------------------- |
+| OB2/MO2    | Banneret viser ingen antal         | Ingen connector kan tælle ordrer, kunder og produkter     |
+| OB4/MO4    | "Vælg konto" kører hele testen igen | Rækken alene kan ikke køres; testen tager få sekunder     |
+
+Ikke gjort endnu / kendt:
+
+- **Passkey først** i MFA-opsætningen (B9) er ikke bygget; opsætningen er TOTP som før.
+- **SSO-brugere kan ikke sætte totrin op:** opsætningen kræver adgangskoden, og en Google-/Microsoft-bruger har ingen. Det rammer B9 og B10.
+- **B10's totrinsbekræftelse efter SSO** er stadig ikke e2e-testet.

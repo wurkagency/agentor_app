@@ -4,7 +4,6 @@ import { formatNumber } from '@agentor/i18n';
 import { cn, Icon } from '@agentor/ui';
 import { Check, Minus } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import { RadioGroup as RadioPrimitive } from 'radix-ui';
 import type { ReactNode } from 'react';
 
 export interface PlanCardData {
@@ -52,65 +51,6 @@ export function PlanPrice({ priceOre, suffix }: { priceOre: number; suffix: stri
       </span>
       <span className="text-meta text-fg-2">{suffix}</span>
     </span>
-  );
-}
-
-/** Selectable plan cards; the whole card is the radio (D14-Onboarding-2). */
-export function PlanRadioCards({
-  plans,
-  value,
-  onChange,
-  recommended,
-  recommendedLabel,
-  label,
-}: {
-  plans: PlanCardData[];
-  value: string;
-  onChange: (id: string) => void;
-  recommended: string | null;
-  recommendedLabel: ReactNode;
-  label: string;
-}) {
-  const t = useTranslations('plans');
-  const lines = usePlanLines();
-  return (
-    <RadioPrimitive.Root
-      value={value}
-      onValueChange={onChange}
-      aria-label={label}
-      className="grid gap-3 md:grid-cols-3"
-    >
-      {plans.map((p) => (
-        <RadioPrimitive.Item
-          key={p.id}
-          value={p.id}
-          className={cn(
-            'flex cursor-pointer flex-col gap-3 rounded-node border-0 bg-surface p-4 text-left shadow-ring-chip',
-            'data-[state=checked]:shadow-ring-dark-2',
-          )}
-        >
-          <span className="flex items-center justify-between gap-2">
-            <span className="text-body font-semibold">{p.name}</span>
-            <span
-              aria-hidden
-              className={cn(
-                'grid size-4.5 place-items-center rounded-full shadow-ring-off',
-                value === p.id && 'shadow-radio-on',
-              )}
-            />
-          </span>
-          <PlanPrice priceOre={p.priceOre} suffix={t('perMonthShort')} />
-          <ul className="m-0 flex list-none flex-col gap-1 p-0 text-table text-fg-1">
-            {lines(p).map((l) => (
-              <li key={l}>{l}</li>
-            ))}
-          </ul>
-          {recommended === p.id && (
-            <span className="mt-auto text-meta text-fg-2">{recommendedLabel}</span>
-          )}
-        </RadioPrimitive.Item>
-      ))}
-    </RadioPrimitive.Root>
   );
 }
 

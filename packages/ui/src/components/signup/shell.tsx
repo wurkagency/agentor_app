@@ -28,6 +28,8 @@ export interface SignupShellProps {
   panel?: ReactNode | undefined;
   /** OB3/OB4: the form column takes 1.25fr and up to 680 px (template cards, test run table). */
   wide?: boolean | undefined;
+  /** OB1–OB4 start at the top; signup steps are centred. */
+  alignTop?: boolean | undefined;
   mainId?: string | undefined;
 }
 
@@ -37,6 +39,7 @@ export function SignupShell({
   children,
   panel,
   wide = false,
+  alignTop = false,
   mainId = 'main',
 }: SignupShellProps) {
   return (
@@ -51,7 +54,13 @@ export function SignupShell({
           <SignupLogo />
           {topRight && <span className="text-table text-fg-2">{topRight}</span>}
         </header>
-        <main id={mainId} className="flex flex-1 items-center justify-center px-signup pt-6 pb-12">
+        <main
+          id={mainId}
+          className={cn(
+            'flex flex-1 justify-center px-signup pt-6 pb-12',
+            alignTop ? 'items-start' : 'items-center',
+          )}
+        >
           <div
             className={cn(
               'flex w-full flex-col gap-5',

@@ -30,6 +30,7 @@ import { billingOverview } from '@/server/billing-overview';
 import { connectionMap, NEEDS_ACTION, PERIOD_DAYS, periodOf, viewsFor } from '@/server/flows';
 import { db } from '@/server/infra';
 import { NewCustomer } from './new-customer';
+import { OnboardingReminder } from '@/components/signup/onboarding-reminder';
 import { PeriodSelector } from './period-selector';
 
 export async function generateMetadata() {
@@ -88,6 +89,7 @@ export default async function OverviewPage({
     return (
       <>
         {header}
+        <OnboardingReminder ctx={ctx} />
         <NewCustomer
           ctx={ctx}
           firstName={firstName}
@@ -216,6 +218,7 @@ export default async function OverviewPage({
   return (
     <>
       {header}
+      <OnboardingReminder ctx={ctx} />
       <PageBody>
         <PageHeader
           title={

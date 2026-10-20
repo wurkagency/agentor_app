@@ -56,6 +56,7 @@
   --color-white-14: rgb(255 255 255 / 0.14);
   /* Signup trust panel (SU/OB): cards and secondary text on navy. */
   --color-white-7: rgb(255 255 255 / 0.07);
+  --color-white-18: rgb(255 255 255 / 0.18);
   --color-on-navy-soft: rgb(255 255 255 / 0.72);
   --color-on-navy-strong: rgb(255 255 255 / 0.86);
   --color-lime-glow: rgb(208 232 74 / 0.2);
@@ -134,6 +135,10 @@
   --text-su-title--line-height: 1.15;
   --text-su-title--letter-spacing: -0.025em;
   --text-su-title--font-weight: 700;
+  --text-su-done: 36px;
+  --text-su-done--line-height: 1.15;
+  --text-su-done--letter-spacing: -0.025em;
+  --text-su-done--font-weight: 700;
   --text-su-panel: 30px;
   --text-su-panel--line-height: 1.2;
   --text-su-panel--letter-spacing: -0.02em;
@@ -275,6 +280,12 @@
   --shadow-radio-on-lg: inset 0 0 0 7px var(--color-fg-1);
   --shadow-ring-strong-2: inset 0 0 0 2px var(--color-border-strong);
   --shadow-hairline-t-navy: inset 0 1px 0 var(--color-white-14);
+  /* Onboarding diagram nodes (OB1–OB4): white ring while connecting, lime when it works. */
+  --shadow-node-on: 0 0 0 3px var(--color-primary);
+  --shadow-node-active: 0 0 0 3px var(--color-white);
+  --shadow-node-off: 0 0 0 3px var(--color-white-18);
+  --shadow-node-error: 0 0 0 3px var(--color-error-fg);
+  --shadow-cutout-navy: 0 0 0 3px var(--color-navy);
 
   /* ---- Named sizes that are fixed by the spec but off the 4 px grid ------------------ */
   --spacing-badge: 22px; /* ModeBadge height (§4) */
@@ -308,6 +319,7 @@
   --container-signup: 560px;
   --container-signup-wide: 680px;
   --container-welcome: 1040px;
+  --container-done: 1080px;
   --container-signup-panel: 480px;
 
   /* ---- Motion (designspecifikation §2.6) --------------------------------------------- */
@@ -551,4 +563,7 @@
 }
 @utility grid-cols-welcome {
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+}
+@utility grid-cols-done-hero {
+  grid-template-columns: minmax(0, 1fr) auto;
 }

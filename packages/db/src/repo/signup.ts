@@ -408,3 +408,113 @@ export async function purgeSignupUsers(db: Database, now = new Date()): Promise<
   );
   return Number(res.rows[0]?.n ?? 0);
 }
+
+/* ---- Onboarding (OB1–OB5) ------------------------------------------------------------------------- */
+
+const STEP_ORDER = ['webshop', 'accounting', 'template', 'test', 'done'] as const;
+
+async function ownerOnly(tx: Parameters<Parameters<typeof withTenant>[2]>[0], userId: string) {
+  const [m] = await tx
+    .select({ role: memberships.role })
+    .from(memberships)
+    .where(eq(memberships.userId, userId));
+  if (m?.role !== 'owner') throw new SignupError('NOT_OWNER');
+}
+
+/**
+ * Moves onboarding on to `step`, never back (an earlier step can be reopened, it just doesn't
+ * rewind the progress). "done" also sets onboarding_completed_at. Owner only.
+ */
+export async function advanceOnboarding(
+  db: Database,
+  actor: Actor,
+  step: (typeof STEP_ORDER)[number],
+): Promise<OnboardingStep> {
+  return withTenant(db, actor, async (tx) => {
+    await ownerOnly(tx, actor.userId);
+    const [t] = await tx
+      .select({ step: tenants.onboardingStep, state: tenants.signupState })
+      .from(tenants)
+      .limit(1);
+    if (!t || t.state !== 'active' || !t.step) throw new SignupError('NOT_PENDING');
+    const cur = STEP_ORDER.indexOf(t.step as OnboardingStep);
+    const next = STEP_ORDER.indexOf(step);
+    if (next <= cur) return t.step as OnboardingStep;
+    const now = new Date();
+    await tx
+      .update(tenants)
+      .set({
+        onboardingStep: step,
+        ...(step === 'done' ? { onboardingCompletedAt: now } : {}),
+        updatedAt: now,
+      })
+      .where(eq(tenants.id, actor.tenantId));
+    if (step === 'done')
+      await writeAudit(tx, actor, {
+        action: 'company.onboarded',
+        objectType: 'tenant',
+        objectId: actor.tenantId,
+      });
+    return step;
+  });
+}
+
+/** "Spring over": the owner lands on Overblik, which shows a reminder until onboarding is done. */
+export async function skipOnboarding(db: Database, actor: Actor): Promise<void> {
+  await withTenant(db, actor, async (tx) => {
+    await ownerOnly(tx, actor.userId);
+    const res = await tx
+      .update(tenants)
+      .set({ onboardingSkippedAt: new Date(), updatedAt: new Date() })
+      .where(and(eq(tenants.id, actor.tenantId), sql`${tenants.onboardingSkippedAt} is null`))
+      .returning({ id: tenants.id });
+    if (res.length)
+      await writeAudit(tx, actor, {
+        action: 'company.onboarding_skipped',
+        objectType: 'tenant',
+        objectId: actor.tenantId,
+      });
+  });
+}
+
+/** Back from the reminder on Overblik: onboarding resumes where it stopped. */
+export async function resumeOnboarding(db: Database, actor: Actor): Promise<void> {
+  await withTenant(db, actor, async (tx) => {
+    await ownerOnly(tx, actor.userId);
+    await tx
+      .update(tenants)
+      .set({ onboardingSkippedAt: null, updatedAt: new Date() })
+      .where(eq(tenants.id, actor.tenantId));
+  });
+}
+
+/** The draft flow created from the template on OB3 (one per onboarding). */
+export async function setOnboardingFlow(db: Database, actor: Actor, flowId: string) {
+  await withTenant(db, actor, async (tx) => {
+    await ownerOnly(tx, actor.userId);
+    await tx
+      .update(tenants)
+      .set({ onboardingFlowId: flowId, updatedAt: new Date() })
+      .where(eq(tenants.id, actor.tenantId));
+  });
+}
+
+export interface OnboardingState {
+  step: OnboardingStep | null;
+  skipped: boolean;
+  flowId: string | null;
+  chosenConnectors: string[];
+  companyName: string;
+}
+
+export async function getOnboardingState(db: Database, ctx: Ctx): Promise<OnboardingState | null> {
+  const [t] = await withTenant(db, ctx, (tx) => tx.select().from(tenants).limit(1));
+  if (!t) return null;
+  return {
+    step: t.onboardingStep as OnboardingStep | null,
+    skipped: t.onboardingSkippedAt !== null,
+    flowId: t.onboardingFlowId,
+    chosenConnectors: t.chosenConnectors,
+    companyName: t.name,
+  };
+}

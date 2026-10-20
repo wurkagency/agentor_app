@@ -1,8 +1,18 @@
-import AxeBuilder from '@axe-core/playwright';
-import { expect, test, type Locator, type Page } from '@playwright/test';
-import { mkdirSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { expect, test } from '@playwright/test';
 import { latestMailTo } from './mailpit';
+import {
+  account,
+  cleanupSignups,
+  code,
+  company,
+  email,
+  fullSignup,
+  plan,
+  PASSWORD,
+  tenantOf,
+  terms,
+  view,
+} from './signup-flow';
 import { adminQuery, USERS } from './support';
 
 /**
@@ -12,160 +22,10 @@ import { adminQuery, USERS } from './support';
  * PLAYWRIGHT_SHOTS=1 writes a screenshot per board to docs/screenshots/signup/.
  */
 
-const PASSWORD = 'e2e-signup-password-2026';
-const SHOTS = process.env.PLAYWRIGHT_SHOTS === '1';
-const SHOT_DIR = resolve(process.cwd(), '../../docs/screenshots/signup');
-if (SHOTS) mkdirSync(SHOT_DIR, { recursive: true });
-
-let n = 0;
-const email = (tag: string) => `e2e-${tag}-${Date.now()}-${++n}@nordlys-cykler.dk`;
-
-async function axe(page: Page) {
-  const r = await new AxeBuilder({ page })
-    .withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa'])
-    .analyze();
-  expect(r.violations.map((v) => `${v.id}: ${v.nodes[0]?.target.join(' ')}`)).toEqual([]);
-}
-
-async function shot(page: Page, board: string) {
-  if (SHOTS) await page.screenshot({ path: `${SHOT_DIR}/${board}.png`, fullPage: true });
-}
-
-/** The visible branch (desktop from 768 px, mobile below). */
-const view = (page: Page, mobile: boolean): Locator =>
-  page.locator(`[data-view="${mobile ? 'mobile' : 'desktop'}"]`);
-
-async function codeFromMail(address: string) {
-  const mail = await latestMailTo(address, 15_000);
-  const code = /\b(\d{6})\b/.exec(mail.subject)?.[1];
-  expect(code, 'code in the subject').toBeTruthy();
-  return code!;
-}
-
-async function account(page: Page, v: Locator, address: string) {
-  await page.goto('/signup');
-  await expect(v.getByRole('heading', { level: 1, name: 'Kom i gang med Agentor' })).toBeVisible();
-  await v.getByLabel('Dit navn').fill('Mette Holm');
-  await v.getByLabel('Email').fill(address);
-  await v.getByLabel('Adgangskode').fill(PASSWORD);
-  await v.getByRole('button', { name: 'Opret konto' }).click();
-  await expect(page).toHaveURL(/\/signup\/verify$/);
-}
-
-async function code(page: Page, v: Locator, address: string) {
-  await expect(v.getByText(address)).toBeVisible();
-  // Paste fills all six cells and submits.
-  const c = await codeFromMail(address);
-  await v.getByLabel('Ciffer 1 af 6').focus();
-  await page.evaluate((text) => {
-    const el = document.activeElement as HTMLInputElement;
-    const data = new DataTransfer();
-    data.setData('text', text);
-    el.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true }));
-  }, c);
-  await expect(page).toHaveURL(/\/signup\/company$/);
-}
-
-async function company(page: Page, v: Locator, mobile: boolean) {
-  await v.getByLabel('CVR-nummer').fill('12345678');
-  await v.getByLabel('CVR-nummer').press('Enter');
-  await expect(v.getByText('Fundet')).toBeVisible();
-  await expect(v.getByText('Nordlys Cykler ApS')).toBeVisible();
-  for (const s of ['WooCommerce', 'Dinero', 'HubSpot'])
-    await v.getByRole('button', { name: s, exact: true }).click();
-  await v.getByRole('radio', { name: mobile ? '100–1.000' : '100–1.000' }).click();
-  if (!mobile)
-    await expect(v.getByText('WooCommerce, Dinero og HubSpot passer sammen')).toBeVisible();
-}
-
-async function plan(page: Page, v: Locator, mobile: boolean) {
-  await expect(page).toHaveURL(/\/signup\/plan$/);
-  await expect(v.getByText('Anbefalet til jer')).toBeVisible();
-  await expect(v.getByText('2 måneder gratis')).toBeVisible();
-  const cont = v.getByRole('button', {
-    name: mobile ? 'Fortsæt med Business' : 'Fortsæt med Business årligt',
-  });
-  await expect(cont).toBeVisible();
-  return cont;
-}
-
-async function terms(v: Locator) {
-  const pay = v.getByRole('button', { name: /^Betal 1\.987,50 kr\. og start$/ });
-  await expect(pay).toBeDisabled();
-  await v.getByLabel('Jeg accepterer').check();
-  await expect(pay).toBeDisabled();
-  await v.getByLabel('Jeg har læst').check();
-  await expect(pay).toBeEnabled();
-  return pay;
-}
-
-async function tenantOf(address: string) {
-  const rows = await adminQuery<{
-    id: string;
-    signup_state: string;
-    onboarding_step: string | null;
-  }>(
-    `select t.id, t.signup_state, t.onboarding_step from tenants t
-       join memberships m on m.tenant_id = t.id join auth.users u on u.id = m.user_id
-      where u.email = $1`,
-    [address],
-  );
-  return rows[0];
-}
-
-async function fullSignup(page: Page, mobile: boolean, prefix: 'SU' | 'MS') {
-  const v = view(page, mobile);
-  const address = email(mobile ? 'mobile' : 'desktop');
-  await page.goto('/signup');
-  await axe(page);
-  await shot(page, `${prefix}1-Opret-konto`);
-  await account(page, v, address);
-  await axe(page);
-  await shot(page, `${prefix}2-Bekraeft-mail`);
-  await code(page, v, address);
-  await company(page, v, mobile);
-  await axe(page);
-  await shot(page, `${prefix}3-Virksomhed`);
-  await v.getByRole('button', { name: 'Fortsæt', exact: true }).click();
-  const cont = await plan(page, v, mobile);
-  await axe(page);
-  await shot(page, `${prefix}4-Abonnement`);
-  await cont.click();
-  await expect(page).toHaveURL(/\/signup\/payment$/);
-  await expect(v.getByText('Moms 25 %')).toBeVisible();
-  await expect(v.getByText('I alt i dag')).toBeVisible();
-  const pay = await terms(v);
-  await axe(page);
-  await shot(page, `${prefix}5-Betaling`);
-  expect((await tenantOf(address))?.signup_state).toBe('pending_payment');
-  await pay.click();
-  await expect(page).toHaveURL(/\/checkout\/mock/);
-  await page.getByRole('button', { name: 'Godkend kort' }).click();
-  // The return only waits; the verified callback activates and the page moves on.
-  await expect(page).toHaveURL(/\/signup\/welcome$/, { timeout: 30_000 });
-  await expect(v.getByRole('heading', { level: 1, name: 'Velkommen, Mette' })).toBeVisible();
-  await expect(v.getByText('1.987,50 kr.')).toBeVisible();
-  await axe(page);
-  await shot(page, `${prefix}6-Velkommen`);
-  expect(await tenantOf(address)).toMatchObject({
-    signup_state: 'active',
-    onboarding_step: 'webshop',
-  });
-  return address;
-}
-
 test.describe.configure({ mode: 'serial' });
 
-/** Companies and accounts this spec creates, so other specs see only the seed (and reruns stay clean). */
-async function cleanup() {
-  await adminQuery(
-    `delete from tenants t using memberships m, auth.users u
-      where m.tenant_id = t.id and u.id = m.user_id and u.email like 'e2e-%@nordlys-cykler.dk'`,
-  );
-  await adminQuery(`delete from auth.users where email like 'e2e-%@nordlys-cykler.dk'`);
-}
-test.beforeAll(cleanup);
-test.afterAll(cleanup);
+test.beforeAll(cleanupSignups);
+test.afterAll(cleanupSignups);
 
 test('e-mail signup: code, CVR, plan, QuickPay callback, active (SU1–SU6)', async ({ page }) => {
   test.setTimeout(120_000);
@@ -233,8 +93,7 @@ test('the browser return without a callback leaves the company inactive', async 
   await page.waitForTimeout(5_000);
   expect((await tenantOf(address))?.signup_state).toBe('pending_payment');
   // No app route is reachable.
-  // /onboarding/* is added to this list in S3, when the onboarding routes exist.
-  for (const path of ['/', '/integrations', '/connections']) {
+  for (const path of ['/', '/integrations', '/connections', '/onboarding/webshop']) {
     await page.goto(path);
     await expect(page).toHaveURL(/\/signup\/payment/);
   }

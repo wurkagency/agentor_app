@@ -12,7 +12,23 @@ export interface Template {
   routes: { entity: Entity; targetEntity: Entity; to: string }[];
   tags: Entity[];
   popular?: boolean;
+  /** Higher first when several templates fit the systems chosen on SU3 (OB3 "Anbefalet"). */
+  priority?: number;
+  /**
+   * Accounts filled in for the customer on OB3, by the label of the destination's own account
+   * (e.g. Dinero's "Salg"). Keys left out (EU B2B sales) are for the customer to choose on OB4.
+   */
+  accountHints?: Record<string, string>;
 }
+
+/** Common Danish account names: what most webshops book where. The customer can change all. */
+const ERP_HINTS: Record<string, string> = {
+  'accounts.domestic': 'Salg',
+  'accounts.vatFree': 'Momsfrit salg',
+  'accounts.export': 'Salg udland',
+  'accounts.shipping': 'Fragt',
+  'accounts.shippingVatFree': 'Fragt momsfri',
+};
 
 export const TEMPLATES: Template[] = [
   {
@@ -27,6 +43,8 @@ export const TEMPLATES: Template[] = [
     ],
     tags: ['order', 'creditNote', 'customer'],
     popular: true,
+    priority: 10,
+    accountHints: ERP_HINTS,
   },
   {
     id: 'webshop-economic',
@@ -38,6 +56,8 @@ export const TEMPLATES: Template[] = [
       { entity: 'customer', targetEntity: 'customer', to: 'economic' },
     ],
     tags: ['order', 'customer'],
+    priority: 8,
+    accountHints: ERP_HINTS,
   },
   {
     id: 'shopify-dinero',
@@ -49,6 +69,8 @@ export const TEMPLATES: Template[] = [
       { entity: 'customer', targetEntity: 'customer', to: 'dinero' },
     ],
     tags: ['order', 'customer'],
+    priority: 9,
+    accountHints: ERP_HINTS,
   },
   {
     id: 'shopify-economic',
@@ -60,6 +82,8 @@ export const TEMPLATES: Template[] = [
       { entity: 'creditNote', targetEntity: 'creditNote', to: 'economic' },
     ],
     tags: ['order', 'creditNote'],
+    priority: 7,
+    accountHints: ERP_HINTS,
   },
   {
     id: 'customers-hubspot',
@@ -71,6 +95,7 @@ export const TEMPLATES: Template[] = [
       { entity: 'order', targetEntity: 'order', to: 'hubspot' },
     ],
     tags: ['customer', 'order'],
+    priority: 5,
   },
   {
     id: 'customers-brevo',
@@ -92,4 +117,18 @@ export const TEMPLATES: Template[] = [
 
 export function templateById(id: string | null | undefined) {
   return TEMPLATES.find((t) => t.id === id) ?? null;
+}
+
+/**
+ * Templates for the systems a company chose on SU3 and has connected (OB3), best first: every
+ * system the template needs is chosen, more of them is better, then priority. Pure data matching.
+ */
+export function recommendTemplates(chosen: readonly string[]): Template[] {
+  const has = new Set(chosen);
+  return TEMPLATES.filter(
+    (t) => t.source.some((s) => has.has(s)) && t.destinations.every((d) => has.has(d)),
+  )
+    .map((t) => ({ t, score: t.destinations.length * 100 + (t.priority ?? 0) }))
+    .sort((a, b) => b.score - a.score)
+    .map((x) => x.t);
 }

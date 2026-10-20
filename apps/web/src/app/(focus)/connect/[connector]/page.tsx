@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation';
 import { FocusCard } from '@/components/focus-card';
 import { requireRole } from '@/server/auth/session';
 import { env } from '@/server/env';
+import { peekOAuthState } from '@/server/oauth';
 import { ConsentForm } from './consent-form';
 
 export async function generateMetadata() {
@@ -22,13 +23,17 @@ export default async function ConnectPage({
   searchParams,
 }: {
   params: Promise<{ connector: string }>;
-  searchParams: Promise<{ reconnect?: string }>;
+  searchParams: Promise<{ reconnect?: string; state?: string }>;
 }) {
-  await requireRole(['owner', 'admin', 'developer']);
   const { connector } = await params;
+  const { reconnect, state } = await searchParams;
+  // Started from /connect/[connector]/start (onboarding, PLAN-SIGNUP B11): the state says who
+  // asked, so this stand-in for the provider works without the app's session, like the real one.
+  const started = state ? await peekOAuthState(state) : null;
+  if (state && (!started || started.connectorId !== connector)) notFound();
+  if (!started) await requireRole(['owner', 'admin', 'developer']);
   const m = manifestFor(connector);
-  if (!m || m.auth.type !== 'oauth2' || env().CONNECTOR_MODE !== 'mock') notFound();
-  const { reconnect } = await searchParams;
+  if (!m || (!started && m.auth.type !== 'oauth2') || env().CONNECTOR_MODE !== 'mock') notFound();
   const t = await getTranslations('connections');
   return (
     <FocusCard
@@ -46,6 +51,7 @@ export default async function ConnectPage({
         connectorId={m.id}
         reconnectId={reconnect && isUuid(reconnect) ? reconnect : null}
         name={m.name}
+        state={started ? state! : null}
       />
     </FocusCard>
   );

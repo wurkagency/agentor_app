@@ -3191,5 +3191,228 @@
       "later": "{name} can wait",
       "laterText": "Add it once the flow runs"
     }
+  },
+  "onboardingFlow": {
+    "skip": "Skip and go to the overview",
+    "skipShort": "Skip",
+    "steps": {
+      "webshop": "Webshop",
+      "accounting": "Accounting",
+      "template": "Template",
+      "test": "Test run"
+    },
+    "counter": "Setup {n} of 4",
+    "next": "Next: {name}",
+    "last": "Last step",
+    "navLabel": "Setup {n} of 4",
+    "navLabelMobile": "Setup {n} of 4: {name}",
+    "diagram": {
+      "label": "Connections",
+      "agentor": "Agentor",
+      "agentorDetail": "Checks, maps and sends",
+      "connecting": "Connecting now",
+      "connected": "Connected",
+      "connectedAccounts": "Connected · chart of accounts fetched",
+      "failed": "The connection didn't work",
+      "webshop": "Webshop",
+      "erp": "Accounting",
+      "later": "Later"
+    },
+    "connect": {
+      "chosen": "Chosen at sign-up",
+      "selected": "Chosen",
+      "oauth": "Sign in with {name}",
+      "oauthShort": "Sign in",
+      "apiKey": "API key",
+      "soon": "Coming soon",
+      "connecting": "Connecting …",
+      "testing": "Testing the connection …",
+      "retry": "Try again",
+      "continue": "Continue",
+      "doneTitle": "Connected",
+      "doneText": "{name} is connected. Go back to the Agentor app; it finds the connection by itself.",
+      "doneErrorTitle": "The link has expired",
+      "doneErrorText": "Start the connection again from Agentor.",
+      "backToApp": "Back to Agentor",
+      "errors": {
+        "broken": "The connection didn't work. Check the details and try again.",
+        "denied": "Access wasn't approved. Try again when you are ready.",
+        "forbidden": "Only the owner, an admin or a developer can create connections.",
+        "httpsRequired": "The address must start with https://.",
+        "badUrl": "That doesn't look like an address. Write e.g. https://nordlys-cykler.dk.",
+        "notAvailable": "The connection to this system isn't open yet.",
+        "unknown": "Something went wrong. Try again."
+      }
+    },
+    "webshop": {
+      "title": "Connect your webshop",
+      "lead": "You chose {name}. We read orders, customers and products, but write nothing back without your permission.",
+      "leadMobile": "You chose {name}. We write nothing back without your permission.",
+      "leadNone": "Choose your webshop. We read orders, customers and products, but write nothing back without your permission.",
+      "shopUrl": "Shop address",
+      "explain": "You are sent to {name} to approve access. Agentor only asks to read orders, customers and products.",
+      "explainMobile": "You approve access at {name}. Read access to orders, customers and products only.",
+      "connect": "Connect {name}",
+      "other": "Using another webshop?",
+      "seeAll": "See all {count} webshops",
+      "showFewer": "Show fewer",
+      "panelTitle": "How it fits together",
+      "panelLead": "Each connection turns green when it works. Agentor sits in the middle and checks every record before it is sent on.",
+      "caption": "Each connection turns green when it works. Agentor checks every record in the middle."
+    },
+    "accounting": {
+      "banner": "<strong>{name} is connected.</strong>",
+      "title": "Connect your accounting",
+      "lead": "You chose {name}. We fetch the chart of accounts and VAT codes, so invoices are booked correctly.",
+      "leadMobile": "You chose {name}. We fetch the chart of accounts and VAT codes.",
+      "leadNone": "Choose your accounting system. We fetch the chart of accounts and VAT codes, so invoices are booked correctly.",
+      "loginTitle": "Sign in to {name}",
+      "loginHint": "Choose the company {company} when {name} asks",
+      "perm1": "Read the chart of accounts, VAT codes and contacts",
+      "perm2": "Create invoices as drafts (you decide whether they are booked)",
+      "perm2Short": "Create invoices as drafts",
+      "perm3": "Never delete or change booked entries",
+      "perm3Short": "Never delete booked entries",
+      "login": "Sign in to {name}",
+      "panelTitle": "Halfway",
+      "panelLead": "The webshop is connected. When {name} is green too, the two can talk through Agentor.",
+      "caption": "Halfway. When {name} is green too, the two can talk through Agentor.",
+      "seeAll": "See all {count} accounting systems",
+      "showFewer": "Show fewer"
+    },
+    "template": {
+      "title": "Choose your first flow",
+      "lead": "The template sets up routes and mapping. You can change everything afterwards in the editor.",
+      "leadMobile": "The template sets up routes and mapping. You can change everything afterwards.",
+      "recommended": "Recommended",
+      "requires": "Needs {name}",
+      "erpTitle": "Webshop → accounting",
+      "erpBody": "Orders become invoices in {erp}, customers become contacts and products become items. Credit notes follow.",
+      "erpBodyMobile": "Orders become invoices, customers contacts and products items. Credit notes follow.",
+      "crmTitle": "Webshop → CRM",
+      "crmBody": "Customers and orders to {crm} as contacts and deals.",
+      "marketingTitle": "Customers to newsletter",
+      "marketingBody": "Customers are subscribed in {name}.",
+      "routes": {
+        "order": {
+          "erp": "Orders → Invoices",
+          "crm": "Orders → Deals"
+        },
+        "customer": {
+          "erp": "Customers → Contacts",
+          "crm": "Customers → Contacts",
+          "marketing": "Customers → Contacts"
+        },
+        "product": {
+          "erp": "Products → Items"
+        },
+        "creditNote": {
+          "erp": "Refunds → Credit notes"
+        }
+      },
+      "invoiceQuestion": "How should invoices be created in {erp}?",
+      "asDraft": "As drafts, not booked",
+      "asDraftShort": "As drafts",
+      "bookNow": "Book straight away",
+      "invoiceHelp": "Recommended for the first days. You can switch once you have seen the result.",
+      "invoiceHelpShort": "Recommended for the first days.",
+      "back": "Back",
+      "submit": "Use the template and test run",
+      "submitShort": "Use and test run",
+      "submitting": "Creating the flow …",
+      "panelTitle": "Both are connected",
+      "panelLead": "Now we only decide what goes where. The template covers what most webshops need.",
+      "none": "Connect a webshop and an accounting system first. Then we find the template that fits.",
+      "errors": {
+        "missingSource": "The webshop isn't connected yet.",
+        "missing": "One of the connections is missing. Go back and connect it.",
+        "generic": "Something went wrong. Try again."
+      }
+    },
+    "test": {
+      "title": "Test run with your 10 latest orders",
+      "titleMobile": "Test run with 10 orders",
+      "lead": "Nothing has been written to {erp} yet. This is what it would look like.",
+      "running": "The test run is running …",
+      "empty": "The webshop has no orders to test with yet. You can go live, and new orders are sent as they arrive.",
+      "ready": "Ready for {erp}",
+      "readyShort": "Ready",
+      "readyDraft": "Invoices as drafts",
+      "readyLive": "Invoices",
+      "needs": "Needs an account",
+      "needsShort": "Needs account",
+      "needsDetail": "{count} EU sale needs an account",
+      "needsNone": "None",
+      "errors": "Errors",
+      "errorsDetail": "{count} errors",
+      "errorsNone": "None",
+      "head": {
+        "order": "Order",
+        "customer": "Customer",
+        "amount": "Amount",
+        "account": "Account",
+        "result": "Result"
+      },
+      "state": {
+        "ready": "Ready",
+        "needsAccount": "Choose account",
+        "failed": "Error"
+      },
+      "euB2b": "EU sale: choose account",
+      "euB2bShort": "EU sale",
+      "missingAccount": "Account missing",
+      "chooseAccount": "Choose account",
+      "chooseFor": "Account for EU sales",
+      "more": "+ {count} orders ready",
+      "back": "Back",
+      "goLiveDraft": "Go live as drafts",
+      "goLive": "Go live",
+      "goLiveBlocked": "Choose an account for EU sales first. Then we run the test again.",
+      "confirmLive": "Invoices are booked straight away in {erp}. Go live?",
+      "confirmLiveTitle": "Book straight away",
+      "confirm": "Go live",
+      "cancel": "Cancel",
+      "publishing": "Going live …",
+      "panelTitle": "Almost there",
+      "panelLead": "The test run shows exactly what is sent. When you go live, the flow starts with new orders.",
+      "tableCaption": "Test run: the latest orders and what would be sent",
+      "failed": "The test run couldn't complete. Try again.",
+      "errorsList": {
+        "VALIDATION": "Something is still missing in the flow. Choose the account and try again.",
+        "generic": "Something went wrong. Try again."
+      }
+    },
+    "done": {
+      "liveDraft": "Live as drafts",
+      "live": "Live",
+      "title": "{flow} is running",
+      "leadDraft": "New orders from {shop} become draft invoices in {erp} within {minutes} minutes. We let you know if something needs you.",
+      "leadLive": "New orders from {shop} become invoices in {erp} within {minutes} minutes. We let you know if something needs you.",
+      "leadDraftMobile": "New orders become draft invoices in {erp} within {minutes} minutes. We let you know if something needs you.",
+      "leadLiveMobile": "New orders become invoices in {erp} within {minutes} minutes. We let you know if something needs you.",
+      "overview": "Go to the overview",
+      "inviteTitle": "Invite your team",
+      "inviteText": "E.g. your bookkeeper, so accounting errors reach them straight away.",
+      "inviteTextMobile": "E.g. your bookkeeper, so errors arrive straight away",
+      "inviteEmail": "A colleague's e-mail",
+      "invitePlaceholder": "colleague@{domain}",
+      "inviteSend": "Send invitation",
+      "inviteSent": "The invitation was sent.",
+      "inviteError": "The invitation couldn't be sent. Check the e-mail, or invite from Team.",
+      "addTitle": "Add {name}",
+      "addText": "You chose {name} at sign-up. Send customers and orders on once accounting runs smoothly.",
+      "addTextMobile": "Send customers and orders on later",
+      "addConnect": "Connect {name}",
+      "qrTitle": "Get notified on your phone",
+      "qrText": "Scan the code and add Agentor to your home screen for push on errors.",
+      "qrLabel": "QR code for app.agentor.dk",
+      "installTitle": "Add Agentor to the home screen",
+      "installText": "Get push notifications if something fails"
+    },
+    "reminder": {
+      "title": "The setup isn't finished",
+      "text": "Still to do: {step}. It takes a few minutes.",
+      "resume": "Continue the setup"
+    }
   }
 }

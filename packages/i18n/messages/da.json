@@ -3191,5 +3191,228 @@
       "later": "{name} kan vente",
       "laterText": "Tilføj den, når flowet kører"
     }
+  },
+  "onboardingFlow": {
+    "skip": "Spring over og gå til overblik",
+    "skipShort": "Spring over",
+    "steps": {
+      "webshop": "Webshop",
+      "accounting": "Regnskab",
+      "template": "Skabelon",
+      "test": "Testkørsel"
+    },
+    "counter": "Opsætning {n} af 4",
+    "next": "Næste: {name}",
+    "last": "Sidste trin",
+    "navLabel": "Opsætning {n} af 4",
+    "navLabelMobile": "Opsætning {n} af 4: {name}",
+    "diagram": {
+      "label": "Forbindelser",
+      "agentor": "Agentor",
+      "agentorDetail": "Tjekker, mapper og sender",
+      "connecting": "Forbinder nu",
+      "connected": "Forbundet",
+      "connectedAccounts": "Forbundet · kontoplan hentet",
+      "failed": "Forbindelsen virkede ikke",
+      "webshop": "Webshop",
+      "erp": "Regnskab",
+      "later": "Senere"
+    },
+    "connect": {
+      "chosen": "Valgt ved oprettelse",
+      "selected": "Valgt",
+      "oauth": "Log ind med {name}",
+      "oauthShort": "Log ind",
+      "apiKey": "API-nøgle",
+      "soon": "På vej",
+      "connecting": "Forbinder …",
+      "testing": "Vi tester forbindelsen …",
+      "retry": "Prøv igen",
+      "continue": "Fortsæt",
+      "doneTitle": "Forbundet",
+      "doneText": "{name} er forbundet. Gå tilbage til Agentor-appen; den finder forbindelsen af sig selv.",
+      "doneErrorTitle": "Linket er udløbet",
+      "doneErrorText": "Start forbindelsen igen fra Agentor.",
+      "backToApp": "Tilbage til Agentor",
+      "errors": {
+        "broken": "Forbindelsen virkede ikke. Tjek oplysningerne, og prøv igen.",
+        "denied": "Adgangen blev ikke godkendt. Prøv igen, når du er klar.",
+        "forbidden": "Kun ejeren, en administrator eller en udvikler kan oprette forbindelser.",
+        "httpsRequired": "Adressen skal starte med https://.",
+        "badUrl": "Det ligner ikke en adresse. Skriv fx https://nordlys-cykler.dk.",
+        "notAvailable": "Forbindelsen til systemet er ikke åbnet endnu.",
+        "unknown": "Noget gik galt. Prøv igen."
+      }
+    },
+    "webshop": {
+      "title": "Forbind jeres webshop",
+      "lead": "Du valgte {name}. Vi henter ordrer, kunder og produkter, men skriver ikke noget tilbage uden din tilladelse.",
+      "leadMobile": "Du valgte {name}. Vi skriver ikke noget tilbage uden din tilladelse.",
+      "leadNone": "Vælg jeres webshop. Vi henter ordrer, kunder og produkter, men skriver ikke noget tilbage uden din tilladelse.",
+      "shopUrl": "Butikkens adresse",
+      "explain": "Du sendes til {name} og godkender adgang. Agentor beder kun om læseadgang til ordrer, kunder og produkter.",
+      "explainMobile": "Du godkender adgang hos {name}. Kun læseadgang til ordrer, kunder og produkter.",
+      "connect": "Forbind {name}",
+      "other": "Bruger I en anden webshop?",
+      "seeAll": "Se alle {count} webshops",
+      "showFewer": "Vis færre",
+      "panelTitle": "Sådan hænger det sammen",
+      "panelLead": "Hver forbindelse bliver grøn, når den virker. Agentor sidder i midten og tjekker hver record, før den sendes videre.",
+      "caption": "Hver forbindelse bliver grøn, når den virker. Agentor tjekker hver record i midten."
+    },
+    "accounting": {
+      "banner": "<strong>{name} er forbundet.</strong>",
+      "title": "Forbind jeres regnskab",
+      "lead": "Du valgte {name}. Vi henter kontoplan og momskoder, så fakturaer kan bogføres rigtigt.",
+      "leadMobile": "Du valgte {name}. Vi henter kontoplan og momskoder.",
+      "leadNone": "Vælg jeres regnskabsprogram. Vi henter kontoplan og momskoder, så fakturaer kan bogføres rigtigt.",
+      "loginTitle": "Log ind hos {name}",
+      "loginHint": "Vælg virksomheden {company}, når {name} spørger",
+      "perm1": "Læse kontoplan, momskoder og kontakter",
+      "perm2": "Oprette fakturaer som kladde (du bestemmer, om de bogføres)",
+      "perm2Short": "Oprette fakturaer som kladde",
+      "perm3": "Aldrig slette eller ændre bogførte posteringer",
+      "perm3Short": "Aldrig slette bogførte posteringer",
+      "login": "Log ind hos {name}",
+      "panelTitle": "Halvvejs",
+      "panelLead": "Webshoppen er forbundet. Når {name} også er grøn, kan de to tale sammen gennem Agentor.",
+      "caption": "Halvvejs. Når {name} også er grøn, kan de to tale sammen gennem Agentor.",
+      "seeAll": "Se alle {count} regnskabsprogrammer",
+      "showFewer": "Vis færre"
+    },
+    "template": {
+      "title": "Vælg jeres første flow",
+      "lead": "Skabelonen sætter ruter og mapping op. Du kan rette alt bagefter i editoren.",
+      "leadMobile": "Skabelonen sætter ruter og mapping op. Du kan rette alt bagefter.",
+      "recommended": "Anbefalet",
+      "requires": "Kræver {name}",
+      "erpTitle": "Webshop → regnskab",
+      "erpBody": "Ordrer bliver til fakturaer i {erp}, kunder til kontakter og produkter til varer. Kreditnotaer følger med.",
+      "erpBodyMobile": "Ordrer bliver til fakturaer, kunder til kontakter og produkter til varer. Kreditnotaer følger med.",
+      "crmTitle": "Webshop → CRM",
+      "crmBody": "Kunder og ordrer til {crm} som kontakter og handler.",
+      "marketingTitle": "Kunder til nyhedsbrev",
+      "marketingBody": "Kunder tilmeldes i {name}.",
+      "routes": {
+        "order": {
+          "erp": "Ordrer → Fakturaer",
+          "crm": "Ordrer → Handler"
+        },
+        "customer": {
+          "erp": "Kunder → Kontakter",
+          "crm": "Kunder → Kontakter",
+          "marketing": "Kunder → Kontakter"
+        },
+        "product": {
+          "erp": "Produkter → Varer"
+        },
+        "creditNote": {
+          "erp": "Refusioner → Kreditnotaer"
+        }
+      },
+      "invoiceQuestion": "Hvordan skal fakturaer oprettes i {erp}?",
+      "asDraft": "Som kladde, uden bogføring",
+      "asDraftShort": "Som kladde",
+      "bookNow": "Bogfør med det samme",
+      "invoiceHelp": "Anbefalet de første dage. Du kan skifte, når du har set resultatet.",
+      "invoiceHelpShort": "Anbefalet de første dage.",
+      "back": "Tilbage",
+      "submit": "Brug skabelonen og testkør",
+      "submitShort": "Brug og testkør",
+      "submitting": "Opretter flowet …",
+      "panelTitle": "Begge er forbundet",
+      "panelLead": "Nu skal vi bare bestemme, hvad der sendes hvorhen. Skabelonen dækker det, de fleste webshops har brug for.",
+      "none": "Forbind en webshop og et regnskab først. Så finder vi skabelonen, der passer.",
+      "errors": {
+        "missingSource": "Webshoppen er ikke forbundet endnu.",
+        "missing": "En af forbindelserne mangler. Gå tilbage og forbind den.",
+        "generic": "Noget gik galt. Prøv igen."
+      }
+    },
+    "test": {
+      "title": "Testkørsel med jeres 10 seneste ordrer",
+      "titleMobile": "Testkørsel med 10 ordrer",
+      "lead": "Intet er skrevet til {erp} endnu. Sådan ville det se ud.",
+      "running": "Testkørslen kører …",
+      "empty": "Webshoppen har ingen ordrer at teste med endnu. Du kan gå live, så sendes nye ordrer, når de kommer.",
+      "ready": "Klar til {erp}",
+      "readyShort": "Klar",
+      "readyDraft": "Fakturaer som kladde",
+      "readyLive": "Fakturaer",
+      "needs": "Kræver en konto",
+      "needsShort": "Kræver konto",
+      "needsDetail": "{count} EU-salg mangler konto",
+      "needsNone": "Ingen",
+      "errors": "Fejl",
+      "errorsDetail": "{count} fejl",
+      "errorsNone": "Ingen",
+      "head": {
+        "order": "Ordre",
+        "customer": "Kunde",
+        "amount": "Beløb",
+        "account": "Konto",
+        "result": "Resultat"
+      },
+      "state": {
+        "ready": "Klar",
+        "needsAccount": "Vælg konto",
+        "failed": "Fejl"
+      },
+      "euB2b": "EU-salg: vælg konto",
+      "euB2bShort": "EU-salg",
+      "missingAccount": "Mangler konto",
+      "chooseAccount": "Vælg konto",
+      "chooseFor": "Konto for EU-salg",
+      "more": "+ {count} ordrer klar",
+      "back": "Tilbage",
+      "goLiveDraft": "Gå live som kladde",
+      "goLive": "Gå live",
+      "goLiveBlocked": "Vælg en konto for EU-salg først. Så kører vi testen igen.",
+      "confirmLive": "Fakturaer bogføres med det samme i {erp}. Vil du gå live?",
+      "confirmLiveTitle": "Bogfør med det samme",
+      "confirm": "Gå live",
+      "cancel": "Annullér",
+      "publishing": "Går live …",
+      "panelTitle": "Næsten klar",
+      "panelLead": "Testkørslen viser præcis, hvad der sendes. Når du går live, starter flowet med nye ordrer.",
+      "tableCaption": "Testkørsel: de seneste ordrer, og hvad der ville blive sendt",
+      "failed": "Testkørslen kunne ikke gennemføres. Prøv igen.",
+      "errorsList": {
+        "VALIDATION": "Der mangler stadig noget i flowet. Vælg kontoen, og prøv igen.",
+        "generic": "Noget gik galt. Prøv igen."
+      }
+    },
+    "done": {
+      "liveDraft": "Live som kladde",
+      "live": "Live",
+      "title": "{flow} kører",
+      "leadDraft": "Nye ordrer fra {shop} bliver til fakturakladder i {erp} inden for {minutes} minutter. Vi giver besked, hvis noget kræver dig.",
+      "leadLive": "Nye ordrer fra {shop} bliver til fakturaer i {erp} inden for {minutes} minutter. Vi giver besked, hvis noget kræver dig.",
+      "leadDraftMobile": "Nye ordrer bliver til fakturakladder i {erp} inden for {minutes} minutter. Vi giver besked, hvis noget kræver dig.",
+      "leadLiveMobile": "Nye ordrer bliver til fakturaer i {erp} inden for {minutes} minutter. Vi giver besked, hvis noget kræver dig.",
+      "overview": "Gå til overblik",
+      "inviteTitle": "Invitér dit team",
+      "inviteText": "Fx jeres bogholder, så fejl i regnskabet når frem med det samme.",
+      "inviteTextMobile": "Fx jeres bogholder, så fejl når frem med det samme",
+      "inviteEmail": "E-mail til en kollega",
+      "invitePlaceholder": "kollega@{domain}",
+      "inviteSend": "Send invitation",
+      "inviteSent": "Invitationen er sendt.",
+      "inviteError": "Invitationen kunne ikke sendes. Tjek e-mailen, eller invitér fra Team.",
+      "addTitle": "Tilføj {name}",
+      "addText": "Du valgte {name} ved oprettelsen. Send kunder og ordrer videre, når regnskabet kører stabilt.",
+      "addTextMobile": "Send kunder og ordrer videre senere",
+      "addConnect": "Forbind {name}",
+      "qrTitle": "Få besked på telefonen",
+      "qrText": "Scan koden, og føj Agentor til hjemmeskærmen for push ved fejl.",
+      "qrLabel": "QR-kode til app.agentor.dk",
+      "installTitle": "Føj Agentor til hjemmeskærmen",
+      "installText": "Få push-beskeder, hvis noget fejler"
+    },
+    "reminder": {
+      "title": "Opsætningen er ikke færdig",
+      "text": "Du mangler: {step}. Det tager få minutter.",
+      "resume": "Fortsæt opsætningen"
+    }
   }
 }
