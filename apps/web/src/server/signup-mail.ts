@@ -43,7 +43,8 @@ Agentor`,
 /** Fire and forget: a mail outage must not change what the visitor sees. */
 export function sendInBackground(p: Promise<void>, what: string): void {
   void p.catch((err: unknown) => {
-    console.error(`${what} mail failed`, err instanceof Error ? err.message : err);
+    // Constant format string: `what` must not be read as format specifiers (Semgrep).
+    console.error('%s mail failed: %s', what, err instanceof Error ? err.message : String(err));
   });
 }
 
