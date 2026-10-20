@@ -389,9 +389,11 @@
     "english": "English",
     "saved": "Company details saved",
     "errors": {
-      "cvr": "A CVR number has 8 digits.",
+      "cvr": "A CVR number has 8 digits, e.g. 12 34 56 74 or DK12345674.",
       "name": "Enter the company name.",
-      "email": "Enter a valid email."
+      "email": "Enter a valid email.",
+      "cvr_checksum": "That CVR number does not exist. Check the digits.",
+      "cvr_foreign": "Danish CVR numbers only. Foreign VAT numbers are not supported yet."
     }
   },
   "notifications": {
@@ -1800,8 +1802,10 @@
           "found": "Found: {name}",
           "ceased": "{name} has ceased in CVR.",
           "notFound": "Nothing found. Fill in the fields yourself.",
-          "cvrFormat": "The CVR number must be 8 digits.",
-          "unavailable": "The CVR lookup is not answering. Fill in the fields yourself."
+          "cvrFormat": "A CVR number has 8 digits, e.g. 12 34 56 74 or DK12345674.",
+          "unavailable": "The CVR lookup is not answering. Fill in the fields yourself.",
+          "cvrChecksum": "That CVR number does not exist. Check the digits.",
+          "cvrForeign": "Danish CVR numbers only. Foreign VAT numbers are not supported yet."
         },
         "errors": {
           "generic": "The customer could not be created. Try again.",
@@ -3165,11 +3169,13 @@
       "and": "and",
       "errors": {
         "name": "Enter the company name.",
-        "cvrFormat": "A CVR number has 8 digits.",
+        "cvrFormat": "A CVR number has 8 digits, e.g. 12 34 56 74 or DK12345674.",
         "SIGNUP_PENDING": "You already have a company being set up.",
         "TENANT_LIMIT": "You can't create more companies with this account.",
         "rateLimited": "Too many lookups. Fill in name and address yourself, or try again shortly.",
-        "generic": "Something went wrong. Try again."
+        "generic": "Something went wrong. Try again.",
+        "cvrChecksum": "That CVR number does not exist. Check the digits.",
+        "cvrForeign": "Danish CVR numbers only. Foreign VAT numbers are not supported yet."
       }
     },
     "plan": {

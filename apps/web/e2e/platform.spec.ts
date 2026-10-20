@@ -161,6 +161,9 @@ test('Superadmin creates a customer; the owner accepts, pays and the company is 
   const dialog = page.getByRole('dialog', { name: 'Opret kunde' });
   await dialog.getByLabel('CVR-nummer (valgfrit)').fill('12345678');
   await dialog.getByRole('button', { name: 'Slå op' }).click();
+  await expect(dialog.getByText('Det CVR-nummer findes ikke. Tjek cifrene.')).toBeVisible();
+  await dialog.getByLabel('CVR-nummer (valgfrit)').fill('DK 12 34 56 74');
+  await dialog.getByRole('button', { name: 'Slå op' }).click();
   await expect(dialog.getByText('Fundet: Nordlys Cykler ApS')).toBeVisible();
   await axe(page);
   await page.screenshot({ path: test.info().outputPath('create-customer.png') });

@@ -6,7 +6,7 @@ const { fromVirkdata, VirkdataCvrProvider } = await import('./cvr');
 
 /** Fictional company in Virkdata's response shape (never real data). */
 const NORDLYS = {
-  vat: 12345678,
+  vat: 12345674,
   status: 'Normal',
   name: 'Nordlys Cykler ApS',
   address: 'Cykelvej 12B',
@@ -21,8 +21,8 @@ describe('CVR via Virkdata', () => {
   afterEach(() => vi.unstubAllGlobals());
 
   it('maps name, address, start year, status and industry', () => {
-    expect(fromVirkdata('12345678', NORDLYS)).toEqual({
-      cvr: '12345678',
+    expect(fromVirkdata('12345674', NORDLYS)).toEqual({
+      cvr: '12345674',
       name: 'Nordlys Cykler ApS',
       addressLine: 'Cykelvej 12B',
       postalCode: '8000',
@@ -42,16 +42,16 @@ describe('CVR via Virkdata', () => {
         enddate: '2020-06-30',
       }),
     ).toMatchObject({ active: false, addressLine: null, industry: null, since: null });
-    expect(fromVirkdata('12345678', { ...NORDLYS, vat: 87654321 })).toBeNull();
+    expect(fromVirkdata('12345674', { ...NORDLYS, vat: 87654311 })).toBeNull();
   });
 
   it('sends the key in Authorization and asks by CVR number in Denmark', async () => {
     const fetchMock = vi.fn(async () => Response.json(NORDLYS));
     vi.stubGlobal('fetch', fetchMock);
     const p = new VirkdataCvrProvider('demo-key', 'https://cvr.example.test/api/');
-    expect((await p.lookup('12345678'))?.name).toBe('Nordlys Cykler ApS');
+    expect((await p.lookup('12345674'))?.name).toBe('Nordlys Cykler ApS');
     const [url, init] = fetchMock.mock.calls[0] as unknown as [URL, RequestInit];
-    expect(url.searchParams.get('search')).toBe('12345678');
+    expect(url.searchParams.get('search')).toBe('12345674');
     expect(url.searchParams.get('country')).toBe('dk');
     expect((init.headers as Record<string, string>).Authorization).toBe('demo-key');
     expect(await p.lookup('abc')).toBeNull();
@@ -60,10 +60,29 @@ describe('CVR via Virkdata', () => {
   it('treats no_results as not found and other error codes as an outage', async () => {
     vi.stubGlobal('fetch', async () => Response.json({ error_code: 3002, response: 'no_results' }));
     const p = new VirkdataCvrProvider('demo-key');
-    expect(await p.lookup('12345678')).toBeNull();
+    expect(await p.lookup('12345674')).toBeNull();
     vi.stubGlobal('fetch', async () =>
       Response.json({ error_code: 7002, response: 'daily_quota_exceeded' }),
     );
-    await expect(p.lookup('12345678')).rejects.toThrow('7002');
+    await expect(p.lookup('12345674')).rejects.toThrow('7002');
+  });
+});
+
+describe('Virkdata authorization form', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('retries once with "api KEY" when Virkdata answers invalid_api_format (1002), then keeps it', async () => {
+    const seen: string[] = [];
+    vi.stubGlobal('fetch', async (_url: URL, init: RequestInit) => {
+      const auth = (init.headers as Record<string, string>).Authorization!;
+      seen.push(auth);
+      return auth.startsWith('api ')
+        ? Response.json({ vat: 12345674, name: 'Nordlys Cykler ApS', enddate: null })
+        : Response.json({ error_code: 1002, response: 'invalid_api_format' });
+    });
+    const p = new VirkdataCvrProvider('demo-key');
+    expect((await p.lookup('DK 12 34 56 74'))?.name).toBe('Nordlys Cykler ApS');
+    expect(await p.lookup('12345674')).not.toBeNull();
+    expect(seen).toEqual(['demo-key', 'api demo-key', 'api demo-key']);
   });
 });

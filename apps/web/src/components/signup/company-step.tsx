@@ -15,6 +15,7 @@ import {
   type CvrState,
   type SystemOption,
 } from '@agentor/ui/signup';
+import { CVR_ERROR_CODES, parseCvr, type CvrProblem } from '@agentor/core';
 import { useTranslations } from 'next-intl';
 import { useMemo, useState, useTransition, type ReactNode } from 'react';
 import { lookupSignupCvr, saveSignupCompany } from '@/app/(signup)/actions';
@@ -81,12 +82,15 @@ export function CompanyStep({
   }>({});
   const [pending, start] = useTransition();
 
+  const cvrError = (reason: CvrProblem) => t(`errors.${CVR_ERROR_CODES[reason]}`);
+
   const lookup = () => {
-    const clean = cvr.replace(/\s/g, '');
-    if (!/^\d{8}$/.test(clean)) {
-      setErrors((e) => ({ ...e, cvr: t('errors.cvrFormat') }));
+    const parsed = parseCvr(cvr);
+    if (!parsed.ok) {
+      setErrors((e) => ({ ...e, cvr: cvrError(parsed.reason) }));
       return;
     }
+    const clean = parsed.cvr;
     setErrors((e) => ({ ...e, cvr: undefined }));
     setCvrState({ kind: 'searching' });
     start(async () => {
@@ -111,8 +115,8 @@ export function CompanyStep({
       } else {
         // Not found or the register is down: type it in, signup goes on (prompt §3).
         setCvrState({ kind: r.ok || r.error === 'cvrNotFound' ? 'notFound' : 'unavailable' });
-        if (!r.ok && r.error === 'cvrFormat')
-          setErrors((e) => ({ ...e, cvr: t('errors.cvrFormat') }));
+        if (!r.ok && ['cvrFormat', 'cvrChecksum', 'cvrForeign'].includes(r.error))
+          setErrors((e) => ({ ...e, cvr: t(`errors.${r.error}` as 'errors.cvrFormat') }));
         setManual(true);
       }
     });
@@ -125,11 +129,17 @@ export function CompanyStep({
       setErrors({ name: t('errors.name') });
       return;
     }
+    // A typed CVR is either valid or an error to fix; it is never dropped without a word.
+    const typed = cvr.trim() ? parseCvr(cvr) : null;
+    if (typed && !typed.ok) {
+      setErrors({ cvr: cvrError(typed.reason) });
+      return;
+    }
     setErrors({});
     start(async () => {
       const r = await saveSignupCompany({
         name,
-        cvr: cvrState.kind === 'found' || /^\d{8}$/.test(cvr.replace(/\s/g, '')) ? cvr : '',
+        cvr: typed?.ok ? typed.cvr : '',
         addressLine: company.addressLine,
         postalCode: company.postalCode,
         city: company.city,
@@ -137,9 +147,11 @@ export function CompanyStep({
         chosenConnectors: systems,
       });
       if (r && !r.ok) {
-        const key = ['cvrFormat', 'SIGNUP_PENDING', 'TENANT_LIMIT'].includes(r.error)
-          ? r.error
-          : 'generic';
+        if (['cvrFormat', 'cvrChecksum', 'cvrForeign'].includes(r.error)) {
+          setErrors({ cvr: t(`errors.${r.error}` as 'errors.cvrFormat') });
+          return;
+        }
+        const key = ['SIGNUP_PENDING', 'TENANT_LIMIT'].includes(r.error) ? r.error : 'generic';
         setErrors({ form: t(`errors.${key}` as 'errors.generic') });
       }
     });

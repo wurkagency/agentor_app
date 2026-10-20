@@ -37,7 +37,24 @@ export async function codeFromMail(address: string) {
   return code!;
 }
 
+/**
+ * A full run signs up from one IP far more often than any person (10 codes per 15 minutes): the
+ * signup counters are cleared before each signup, as global-setup does once per run. Login and
+ * TOTP limits are left alone.
+ */
+export async function clearSignupLimits() {
+  const { Redis } = await import('ioredis');
+  const r = new Redis(process.env.REDIS_URL ?? 'redis://127.0.0.1:6379');
+  try {
+    const keys = await r.keys('agentor:rl:signup:*');
+    if (keys.length) await r.del(...keys);
+  } finally {
+    r.disconnect();
+  }
+}
+
 export async function account(page: Page, v: Locator, address: string) {
+  await clearSignupLimits();
   await page.goto('/signup');
   await expect(v.getByRole('heading', { level: 1, name: 'Kom i gang med Agentor' })).toBeVisible();
   await v.getByLabel('Dit navn').fill('Mette Holm');
@@ -62,7 +79,7 @@ export async function code(page: Page, v: Locator, address: string) {
 }
 
 export async function company(page: Page, v: Locator, mobile: boolean) {
-  await v.getByLabel('CVR-nummer').fill('12345678');
+  await v.getByLabel('CVR-nummer').fill('12345674');
   await v.getByLabel('CVR-nummer').press('Enter');
   await expect(v.getByText('Fundet')).toBeVisible();
   await expect(v.getByText('Nordlys Cykler ApS')).toBeVisible();

@@ -1,6 +1,6 @@
 'use server';
 
-import { ORDER_BUCKETS } from '@agentor/core';
+import { ORDER_BUCKETS, parseCvr } from '@agentor/core';
 import {
   chooseSignupPlan,
   createSignupCompany,
@@ -24,7 +24,7 @@ import { clientIp, type ActionResult } from '@/server/actor';
 import { auth } from '@/server/auth/auth';
 import { redisRateLimitStorage } from '@/server/auth/rate-limit';
 import { startCardSetupFor } from '@/server/billing';
-import { CVR_RE, cvrProvider, type CvrCompany } from '@/server/cvr';
+import { CVR_ERROR, cvrProvider, optionalCvr, type CvrCompany } from '@/server/cvr';
 import { env } from '@/server/env';
 import { db } from '@/server/infra';
 import { currentTermsForAcceptance, LegalUnavailableError } from '@/server/legal';
@@ -235,8 +235,9 @@ export async function startSso(input: unknown): Promise<ActionResult<{ url: stri
 /** "Fundet" / not found / lookup down. A failed lookup never blocks: the form takes manual entry. */
 export async function lookupSignupCvr(cvr: string): Promise<ActionResult<CvrCompany>> {
   const ctx = await requireSignupStep('company');
-  const clean = String(cvr).replace(/\s/g, '');
-  if (!CVR_RE.test(clean)) return { ok: false, error: 'cvrFormat' };
+  const parsed = parseCvr(String(cvr));
+  if (!parsed.ok) return { ok: false, error: CVR_ERROR[parsed.reason] };
+  const clean = parsed.cvr;
   if (!(await limit(`cvr:user:${ctx.session!.user.id}`, 3600, 20)).allowed)
     return { ok: false, error: 'rateLimited' };
   try {
@@ -259,12 +260,7 @@ const optional = (max: number) =>
 
 const companySchema = z.object({
   name: z.string().trim().min(2).max(160),
-  cvr: z
-    .string()
-    .trim()
-    .transform((s) => s.replace(/\s/g, ''))
-    .refine((s) => s === '' || CVR_RE.test(s), 'cvrFormat')
-    .transform((s) => (s === '' ? null : s)),
+  cvr: optionalCvr,
   addressLine: optional(160),
   postalCode: optional(10),
   city: optional(80),

@@ -39,15 +39,19 @@ export function CreateCustomerButton({ plans }: { plans: { id: string; name: str
   const [f, setF] = useState<Form>(empty);
   const [error, setError] = useState<string | null>(null);
   const [note, setNote] = useState<string | null>(null);
+  const [cvrError, setCvrError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const set = (k: keyof Form) => (e: { target: { value: string } }) =>
     setF((x) => ({ ...x, [k]: e.target.value }));
+  const isCvrError = (code: string) => ['cvrFormat', 'cvrChecksum', 'cvrForeign'].includes(code);
 
   const lookup = () =>
     start(async () => {
       setError(null);
       setNote(null);
+      setCvrError(null);
       const r = await lookupCustomerCvr(f.cvr);
+      if (!r.ok && isCvrError(r.error)) return setCvrError(t(`cvr.${r.error}` as 'cvr.cvrFormat'));
       if (!r.ok || !r.data)
         return setNote(t(`cvr.${r.ok ? 'notFound' : r.error}` as 'cvr.notFound'));
       const c = r.data;
@@ -65,6 +69,10 @@ export function CreateCustomerButton({ plans }: { plans: { id: string; name: str
     start(async () => {
       setError(null);
       const r = await createCustomerAction(f);
+      if (!r.ok && isCvrError(r.error)) {
+        setCvrError(t(`cvr.${r.error}` as 'cvr.cvrFormat'));
+        return;
+      }
       if (!r.ok || !r.data) {
         setError(t(`errors.${r.ok ? 'generic' : r.error}` as 'errors.generic'));
         return;
@@ -108,21 +116,28 @@ export function CreateCustomerButton({ plans }: { plans: { id: string; name: str
           }
         >
           {error && <Banner tone="error">{error}</Banner>}
-          <Field label={t('cvr.label')} help={note ?? t('cvr.help')}>
+          <Field
+            label={t('cvr.label')}
+            help={note ?? t('cvr.help')}
+            {...(cvrError ? { error: cvrError } : {})}
+          >
             {({ id, describedBy }) => (
               <span className="flex gap-2">
                 <Input
                   id={id}
                   aria-describedby={describedBy}
                   inputMode="numeric"
-                  maxLength={8}
+                  maxLength={16}
                   value={f.cvr}
-                  onChange={set('cvr')}
+                  onChange={(e) => {
+                    setCvrError(null);
+                    set('cvr')(e);
+                  }}
                 />
                 <Button
                   variant="secondary"
                   size="m"
-                  disabled={!/^\d{8}$/.test(f.cvr) || pending}
+                  disabled={!f.cvr.trim() || pending}
                   onClick={lookup}
                 >
                   {t('cvr.lookup')}

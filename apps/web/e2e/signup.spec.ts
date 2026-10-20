@@ -173,3 +173,43 @@ test('mobile signup screens: no sideways scroll, 44 px targets, step at the bott
     .evaluate((h) => getComputedStyle(h).paddingTop);
   expect(pad).toBe('40px');
 });
+
+test('CVR on SU3: VAT form and spaces accepted, typos and foreign VAT refused, outage falls back to manual entry', async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  const v = view(page, false);
+  const address = email('cvr');
+  await account(page, v, address);
+  await code(page, v, address);
+  const field = v.getByLabel('CVR-nummer');
+  // Eight digits that fail modulus 11.
+  await field.fill('12345678');
+  await field.press('Enter');
+  await expect(v.getByText('Det CVR-nummer findes ikke. Tjek cifrene.')).toBeVisible();
+  // Another country's VAT number.
+  await field.fill('SE556677889901');
+  await field.press('Enter');
+  await expect(v.getByText('Kun danske CVR-numre.', { exact: false })).toBeVisible();
+  // The register is down: signup goes on with manual entry.
+  await field.fill('99999993');
+  await field.press('Enter');
+  await expect(
+    v.getByText('CVR-opslaget svarer ikke lige nu. Udfyld navn og adresse selv.'),
+  ).toBeVisible();
+  await expect(v.getByLabel('Virksomhedens navn')).toBeVisible();
+  // The VAT form with spaces is the same company, found and stored as 8 digits.
+  await field.fill('DK 12 34 56 74');
+  await field.press('Enter');
+  await expect(v.getByText('Fundet')).toBeVisible();
+  await expect(v.getByText('Nordlys Cykler ApS')).toBeVisible();
+  await v.getByRole('button', { name: 'WooCommerce', exact: true }).click();
+  await v.getByRole('button', { name: 'Fortsæt', exact: true }).click();
+  await expect(page).toHaveURL(/\/signup\/plan$/);
+  const [t] = await adminQuery<{ cvr: string }>(
+    `select t.cvr from tenants t join memberships m on m.tenant_id = t.id
+       join auth.users u on u.id = m.user_id where u.email = $1`,
+    [address],
+  );
+  expect(t!.cvr).toBe('12345674');
+});

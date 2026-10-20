@@ -4,7 +4,8 @@ import { createCustomer, listPlans, PlatformError } from '@agentor/db';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import type { ActionResult } from '@/server/actor';
-import { cvrProvider, CVR_RE, type CvrCompany } from '@/server/cvr';
+import { parseCvr } from '@agentor/core';
+import { CVR_ERROR, cvrProvider, optionalCvr, type CvrCompany } from '@/server/cvr';
 import { env } from '@/server/env';
 import { db } from '@/server/infra';
 import { sendMail } from '@/server/mail';
@@ -19,11 +20,7 @@ const optional = (max: number) =>
 
 const customerSchema = z.object({
   name: z.string().trim().min(1).max(160),
-  cvr: z
-    .string()
-    .trim()
-    .refine((v) => v === '' || CVR_RE.test(v))
-    .transform((v) => v || null),
+  cvr: optionalCvr,
   addressLine: optional(160),
   postalCode: optional(10),
   city: optional(80),
@@ -50,7 +47,10 @@ export async function createCustomerAction(
 ): Promise<ActionResult<{ tenantId: string; mailed: boolean }>> {
   const { actor } = await requireStaff(true);
   const parsed = customerSchema.safeParse(input);
-  if (!parsed.success) return { ok: false, error: 'invalid' };
+  if (!parsed.success) {
+    const cvr = parsed.error.issues.find((i) => i.path[0] === 'cvr')?.message;
+    return { ok: false, error: cvr ?? 'invalid' };
+  }
   const c = parsed.data;
   let created: { tenantId: string; token: string };
   try {
@@ -93,8 +93,9 @@ Agentor`,
 /** CVR lookup in the dialog, as on SU3; a failed lookup only means manual entry. */
 export async function lookupCustomerCvr(cvr: string): Promise<ActionResult<CvrCompany>> {
   await requireStaff(true);
-  const clean = String(cvr).replace(/\s/g, '');
-  if (!CVR_RE.test(clean)) return { ok: false, error: 'cvrFormat' };
+  const valid = parseCvr(String(cvr));
+  if (!valid.ok) return { ok: false, error: CVR_ERROR[valid.reason] };
+  const clean = valid.cvr;
   try {
     const found = await cvrProvider().lookup(clean);
     return found ? { ok: true, data: found } : { ok: false, error: 'notFound' };

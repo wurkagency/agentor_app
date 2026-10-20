@@ -389,9 +389,11 @@
     "english": "Engelsk",
     "saved": "Virksomhedens oplysninger er gemt",
     "errors": {
-      "cvr": "Et CVR-nummer har 8 cifre.",
+      "cvr": "Et CVR-nummer har 8 cifre, fx 12 34 56 74 eller DK12345674.",
       "name": "Skriv virksomhedens navn.",
-      "email": "Skriv en gyldig e-mail."
+      "email": "Skriv en gyldig e-mail.",
+      "cvr_checksum": "Det CVR-nummer findes ikke. Tjek cifrene.",
+      "cvr_foreign": "Kun danske CVR-numre. Udenlandske momsnumre understøttes ikke endnu."
     }
   },
   "notifications": {
@@ -1800,8 +1802,10 @@
           "found": "Fundet: {name}",
           "ceased": "{name} er ophørt i CVR.",
           "notFound": "Intet fundet. Udfyld felterne selv.",
-          "cvrFormat": "CVR-nummeret skal være 8 cifre.",
-          "unavailable": "CVR-opslaget svarer ikke. Udfyld felterne selv."
+          "cvrFormat": "Et CVR-nummer har 8 cifre, fx 12 34 56 74 eller DK12345674.",
+          "unavailable": "CVR-opslaget svarer ikke. Udfyld felterne selv.",
+          "cvrChecksum": "Det CVR-nummer findes ikke. Tjek cifrene.",
+          "cvrForeign": "Kun danske CVR-numre. Udenlandske momsnumre understøttes ikke endnu."
         },
         "errors": {
           "generic": "Kunden kunne ikke oprettes. Prøv igen.",
@@ -3165,11 +3169,13 @@
       "and": "og",
       "errors": {
         "name": "Skriv virksomhedens navn.",
-        "cvrFormat": "Et CVR-nummer har 8 cifre.",
+        "cvrFormat": "Et CVR-nummer har 8 cifre, fx 12 34 56 74 eller DK12345674.",
         "SIGNUP_PENDING": "Du har allerede en virksomhed i gang med at blive oprettet.",
         "TENANT_LIMIT": "Du kan ikke oprette flere virksomheder med denne konto.",
         "rateLimited": "For mange opslag. Udfyld navn og adresse selv, eller prøv igen om lidt.",
-        "generic": "Noget gik galt. Prøv igen."
+        "generic": "Noget gik galt. Prøv igen.",
+        "cvrChecksum": "Det CVR-nummer findes ikke. Tjek cifrene.",
+        "cvrForeign": "Kun danske CVR-numre. Udenlandske momsnumre understøttes ikke endnu."
       }
     },
     "plan": {

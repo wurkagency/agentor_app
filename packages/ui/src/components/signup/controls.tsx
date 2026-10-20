@@ -19,6 +19,7 @@ import {
   type KeyboardEvent,
   type ReactNode,
 } from 'react';
+import { cvrOrNull } from '@agentor/core';
 import { Slot } from 'radix-ui';
 import { cn } from '../../lib/cn';
 import { Icon } from '../icon';
@@ -384,10 +385,11 @@ export function CvrField({
         mobile={mobile}
         inputMode="numeric"
         autoComplete="off"
-        maxLength={11}
+        // Room for "DK 12 34 56 74"; parseCvr strips the prefix and separators.
+        maxLength={16}
         onChange={(e) => onChange(e.target.value)}
         onBlur={() => {
-          if (/^\d{8}$/.test(value.replace(/\s/g, '')) && state.kind === 'idle') onLookup();
+          if (cvrOrNull(value) && state.kind === 'idle') onLookup();
         }}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {

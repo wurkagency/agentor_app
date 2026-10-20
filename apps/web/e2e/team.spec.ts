@@ -121,11 +121,18 @@ test('company details save and appear in the audit log', async ({ page }) => {
   await page.goto('/settings/company');
   await page.getByLabel('CVR-nummer').fill('1234');
   await page.getByLabel('CVR-nummer').blur();
-  await expect(page.getByText('Et CVR-nummer har 8 cifre.')).toBeVisible();
+  await expect(page.getByText('Et CVR-nummer har 8 cifre')).toBeVisible();
+  // Eight digits that fail modulus 11 are a typo, not a CVR number.
   await page.getByLabel('CVR-nummer').fill('12345678');
+  await page.getByLabel('CVR-nummer').blur();
+  await expect(page.getByText('Det CVR-nummer findes ikke. Tjek cifrene.')).toBeVisible();
+  // The VAT form with spaces is the same number and is stored as 8 digits.
+  await page.getByLabel('CVR-nummer').fill('DK 12 34 56 74');
   await page.getByLabel('By', { exact: true }).fill('Aarhus N');
   await page.getByRole('button', { name: 'Gem', exact: true }).click();
   await expect(page.getByText('Virksomhedens oplysninger er gemt')).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('CVR-nummer')).toHaveValue('12345674');
   await page.goto('/settings/audit-log?group=company');
   await expect(page.getByRole('table')).toContainText('Ændrede virksomhedens oplysninger');
 });

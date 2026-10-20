@@ -1,3 +1,5 @@
+import { CVR_ERROR_CODES, parseCvr } from '@agentor/core';
+import { z } from 'zod';
 import { env } from './env';
 
 /**
@@ -21,12 +23,24 @@ export interface CvrProvider {
   lookup(cvr: string): Promise<CvrCompany | null>;
 }
 
-export const CVR_RE = /^\d{8}$/;
+export const CVR_ERROR = CVR_ERROR_CODES;
 
-/** Fictional companies only (never real customer data in seed or tests). */
+/**
+ * Optional CVR field for zod: empty is null, otherwise the normalised 8 digits ("DK 12 34 56 74"
+ * → "12345674"); an invalid number fails with its CVR_ERROR code as the message.
+ */
+export const optionalCvr = z.string().transform((s, ctx) => {
+  if (s.trim() === '') return null;
+  const r = parseCvr(s);
+  if (r.ok) return r.cvr;
+  ctx.addIssue({ code: 'custom', message: CVR_ERROR[r.reason] });
+  return z.NEVER;
+});
+
+/** Fictional companies only (never real customer data in seed or tests); numbers pass modulus 11. */
 const FIXTURES: CvrCompany[] = [
   {
-    cvr: '12345678',
+    cvr: '12345674',
     name: 'Nordlys Cykler ApS',
     addressLine: 'Cykelvej 12',
     postalCode: '8000',
@@ -36,7 +50,7 @@ const FIXTURES: CvrCompany[] = [
     industry: 'Detailhandel med cykler',
   },
   {
-    cvr: '87654321',
+    cvr: '87654311',
     name: 'Nordlys Outlet ApS',
     addressLine: 'Havnegade 3',
     postalCode: '5000',
@@ -46,7 +60,7 @@ const FIXTURES: CvrCompany[] = [
     industry: 'Detailhandel med cykler',
   },
   {
-    cvr: '11112222',
+    cvr: '11112226',
     name: 'Lukket Butik ApS',
     addressLine: 'Gammel Torv 1',
     postalCode: '1000',
@@ -57,9 +71,16 @@ const FIXTURES: CvrCompany[] = [
   },
 ];
 
+/** Valid by modulus 11; the fixture register answers it with an outage. */
+export const FIXTURE_UNAVAILABLE = '99999993';
+
 export class FixtureCvrProvider implements CvrProvider {
   async lookup(cvr: string) {
-    return FIXTURES.find((c) => c.cvr === cvr) ?? null;
+    const parsed = parseCvr(cvr);
+    // A fixed number that behaves like the register being down, so e2e can show manual entry.
+    if (parsed.ok && parsed.cvr === FIXTURE_UNAVAILABLE)
+      throw new Error('CVR lookup failed (fixture)');
+    return parsed.ok ? (FIXTURES.find((c) => c.cvr === parsed.cvr) ?? null) : null;
   }
 }
 
@@ -109,19 +130,37 @@ export class VirkdataCvrProvider implements CvrProvider {
     if (!apiKey) throw new Error('VIRKDATA_API_KEY is required');
   }
 
-  async lookup(cvr: string) {
-    if (!CVR_RE.test(cvr)) return null;
-    const url = new URL(this.endpoint);
-    url.searchParams.set('search', cvr);
-    url.searchParams.set('country', 'dk');
-    url.searchParams.set('format', 'json');
+  /** Which Authorization form the key works with; remembered after a 1002 answer. */
+  private authForm: 'bare' | 'prefixed' = 'bare';
+
+  private async get(url: URL, form: 'bare' | 'prefixed') {
     const res = await fetch(url, {
-      headers: { Authorization: this.apiKey, Accept: 'application/json' },
+      headers: {
+        Authorization: form === 'bare' ? this.apiKey : `api ${this.apiKey}`,
+        Accept: 'application/json',
+      },
       signal: AbortSignal.timeout(8000),
       redirect: 'error',
     });
     const json = (await res.json().catch(() => null)) as
       (VirkdataCompany & VirkdataError) | (VirkdataCompany & VirkdataError)[] | null;
+    return { res, json };
+  }
+
+  async lookup(cvr: string) {
+    const parsed = parseCvr(cvr);
+    if (!parsed.ok) return null;
+    cvr = parsed.cvr;
+    const url = new URL(this.endpoint);
+    url.searchParams.set('search', cvr);
+    url.searchParams.set('country', 'dk');
+    url.searchParams.set('format', 'json');
+    let { res, json } = await this.get(url, this.authForm);
+    // The docs show both "Authorization: KEY" and "api" + key; 1002 means the other form.
+    if (!Array.isArray(json) && json?.error_code === 1002) {
+      this.authForm = this.authForm === 'bare' ? 'prefixed' : 'bare';
+      ({ res, json } = await this.get(url, this.authForm));
+    }
     const body = Array.isArray(json) ? json.find((c) => String(c.vat) === cvr) : json;
     // 3002 no_results: not found. Any other error code (key, quota, rate limit) is an outage.
     if (body?.error_code === 3002) return null;
