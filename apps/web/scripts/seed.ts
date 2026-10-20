@@ -245,15 +245,17 @@ await inTenant(o.id, async () => {
   );
 });
 
+// The hand-written invoice numbers above (AG-2026-0788…1043) sit below 2000. Move the sequence past
+// them before anything draws from it (Finans below), or a fresh database (CI) starts at 1000 and
+// collides with them.
+await owner.query(
+  `select setval('app.invoice_number_seq', greatest(2000, (select last_value from app.invoice_number_seq)))`,
+);
+
 // Agentor Platform: staff, more fictional customers, cases and support time (M8).
 await seedPlatform(owner, inTenant);
 // Finans (M9): subscription details and a year of invoices.
 await seedFinance(owner, inTenant);
-
-// Seeded invoice numbers sit below the sequence, so new invoices never collide with them.
-await owner.query(
-  `select setval('app.invoice_number_seq', greatest(2000, (select last_value from app.invoice_number_seq)))`,
-);
 
 await owner.end();
 console.log(

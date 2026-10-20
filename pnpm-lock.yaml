@@ -508,8 +508,8 @@ importers:
         specifier: workspace:*
         version: link:../core
       jsonata:
-        specifier: 2.0.6
-        version: 2.0.6
+        specifier: 2.2.2
+        version: 2.2.2
       zod:
         specifier: ^4.0.0
         version: 4.6.6
@@ -3830,8 +3830,8 @@ packages:
     engines: {node: '>=6'}
     hasBin: true
 
-  jsonata@2.0.6:
-    resolution: {integrity: sha512-WhQB5tXQ32qjkx2GYHFw2XbL90u+LLzjofAYwi+86g6SyZeXHz9F1Q0amy3dWRYczshOC3Haok9J4pOCgHtwyQ==}
+  jsonata@2.2.2:
+    resolution: {integrity: sha512-XDFH2PuaAXv0AXJEWwElXbqADmKFGKMLMkFb+qOz0EhjQW2EIJ6pgtordLU+4u3IVERyBfqy6bi6kZKEncvRqA==}
     engines: {node: '>= 8'}
 
   keyv@5.6.0:
@@ -7545,7 +7545,7 @@ snapshots:
 
   json5@2.2.3: {}
 
-  jsonata@2.0.6: {}
+  jsonata@2.2.2: {}
 
   keyv@5.6.0:
     dependencies:
