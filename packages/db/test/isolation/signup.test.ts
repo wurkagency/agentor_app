@@ -271,3 +271,36 @@ describe('purge after 24 hours (B1)', () => {
     expect(web.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
   });
 });
+
+describe('repository: createSignupCompany', () => {
+  it('stores the chosen systems and order interval through the web role', async () => {
+    const { createDatabase } = await import('../../src/client.js');
+    const { createSignupCompany, getSignupCompany } = await import('../../src/repo/signup.js');
+    const { roleUrl } = await import('./env.js');
+    const { inject } = await import('vitest');
+    const web = createDatabase(roleUrl('web', inject('isolationDb')), { max: 1 });
+    let tenantId = '';
+    try {
+      tenantId = await createSignupCompany(web.db, P.fresh, 'fresh@example.test', {
+        name: 'Repo Test ApS',
+        cvr: null,
+        addressLine: null,
+        postalCode: null,
+        city: null,
+        ordersPerMonth: '100-1000',
+        chosenConnectors: ['woocommerce', 'dinero', 'hubspot'],
+        locale: 'da',
+      });
+      const c = await getSignupCompany(web.db, { tenantId, userId: P.fresh });
+      expect(c).toMatchObject({
+        signupState: 'pending_plan',
+        ordersPerMonth: '100-1000',
+        chosenConnectors: ['woocommerce', 'dinero', 'hubspot'],
+        billingEmail: 'fresh@example.test',
+      });
+    } finally {
+      if (tenantId) await admin('delete from tenants where id = $1', [tenantId]);
+      await web.close();
+    }
+  });
+});

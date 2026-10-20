@@ -19,6 +19,8 @@ export function proxy(request: NextRequest) {
     `img-src 'self' data: blob:`,
     `font-src 'self'`,
     `connect-src 'self'${dev ? ' ws: wss:' : ''}`,
+    // Terms and privacy policy from agentor.dk in the payment modal (PLAN-SIGNUP B6).
+    `frame-src https://agentor.dk https://www.agentor.dk`,
     `frame-ancestors 'none'`,
     `base-uri 'self'`,
     `form-action 'self'`,

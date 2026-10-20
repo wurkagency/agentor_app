@@ -1,4 +1,4 @@
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import type { GenericOAuthConfig } from 'better-auth/plugins';
 import { z } from 'zod';
 import { env, isProduction } from './env';
@@ -25,8 +25,15 @@ export function mockSsoConfig(appUrl: string): GenericOAuthConfig[] {
     authorizationUrl: new URL(`/dev/oauth/authorize?provider=${providerId}`, appUrl).toString(),
     tokenUrl: new URL('/dev/oauth/token', appUrl).toString(),
     userInfoUrl: new URL('/dev/oauth/userinfo', appUrl).toString(),
-    scopes: ['openid', 'email', 'profile'],
+    scopes: ['email', 'profile'],
     pkce: true,
+    // The access token is the signed identity; read it directly instead of over HTTP.
+    getUserInfo: async (tokens) => {
+      const id = decodeMockToken(tokens.accessToken);
+      if (!id || id.provider !== providerId) return null;
+      const sub = createHash('sha256').update(`${id.provider}:${id.email}`).digest('hex');
+      return { id: sub, sub, email: id.email, emailVerified: true, name: id.name };
+    },
   }));
 }
 

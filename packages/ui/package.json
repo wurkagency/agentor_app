@@ -9,7 +9,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./mobile": "./src/components/mobile/index.ts",
-    "./styles.css": "./src/styles/index.css"
+    "./styles.css": "./src/styles/index.css",
+    "./signup": "./src/components/signup/index.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",

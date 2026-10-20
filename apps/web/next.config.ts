@@ -17,6 +17,10 @@ const config: NextConfig = {
   transpilePackages: ['@agentor/ui', '@agentor/i18n', '@agentor/core'],
   experimental: { authInterrupts: true },
   agentRules: false,
+  // Server function arguments (passwords, codes) must never reach a log, not even in development.
+  logging: { serverFunctions: false },
+  // Keeps board screenshots clean.
+  devIndicators: false,
   // Database driver and repositories run as plain Node modules on the server.
   serverExternalPackages: ['@agentor/db', '@agentor/jobs', 'bullmq', 'pg', '@node-rs/argon2'],
 };

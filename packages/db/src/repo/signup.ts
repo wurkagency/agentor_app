@@ -128,7 +128,7 @@ export async function createSignupCompany(
       db,
       async (tx) => {
         const res = await tx.execute<{ t: string }>(
-          sql`select app.create_tenant(${c.name}, ${c.cvr ?? ''}, ${c.addressLine ?? ''}, ${c.postalCode ?? ''}, ${c.city ?? ''}, ${billingEmail}, ${c.locale}, ${'Europe/Copenhagen'}, ${c.ordersPerMonth ?? ''}, ${c.chosenConnectors}::text[]) as t`,
+          sql`select app.create_tenant(${c.name}, ${c.cvr ?? ''}, ${c.addressLine ?? ''}, ${c.postalCode ?? ''}, ${c.city ?? ''}, ${billingEmail}, ${c.locale}, ${'Europe/Copenhagen'}, ${c.ordersPerMonth ?? ''}, array(select jsonb_array_elements_text(${JSON.stringify(c.chosenConnectors)}::jsonb))) as t`,
         );
         return res.rows[0]!.t;
       },

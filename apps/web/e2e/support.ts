@@ -106,3 +106,20 @@ export async function ownerSql(tenantId: string, text: string, values: unknown[]
     await client.end();
   }
 }
+
+/** Reads ground truth as the superuser (bypasses RLS), for assertions only. Local and CI only. */
+export async function adminQuery<T = Record<string, unknown>>(
+  text: string,
+  values: unknown[] = [],
+): Promise<T[]> {
+  const { default: pg } = await import('pg');
+  const url = new URL(process.env.DATABASE_ADMIN_URL!);
+  url.pathname = new URL(process.env.DATABASE_URL_OWNER!).pathname;
+  const client = new pg.Client({ connectionString: url.toString() });
+  await client.connect();
+  try {
+    return (await client.query(text, values)).rows as T[];
+  } finally {
+    await client.end();
+  }
+}

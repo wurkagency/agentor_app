@@ -32,6 +32,10 @@ env:
   QUICKPAY_PRIVATE_KEY: ci-mock-callback-signing-key
   CVR_PROVIDER: fixture
   CONNECTOR_MODE: mock
+  # Signup (PLAN-SIGNUP): Google/Microsoft through the local mock identity provider, and a dev
+  # version for the terms until agentor.dk publishes them.
+  SSO_MODE: mock
+  LEGAL_DEV_VERSION: ci
   MAILPIT_API: http://127.0.0.1:8025/api/v1
 
 jobs:

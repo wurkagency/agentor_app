@@ -1,6 +1,7 @@
 'use client';
 
 import { Banner, Button, Field, Input } from '@agentor/ui';
+import { SsoButton } from '@agentor/ui/signup';
 import { KeyRound } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -8,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
 import { authClient } from '@/lib/auth-client';
 import { syncLocale } from '@/app/actions/session';
+import { startSso } from '@/app/(signup)/actions';
 import { rememberNext } from '@/lib/safe-next';
 
 type ErrorKey = 'invalid' | 'locked' | 'rateLimited' | 'passkey' | 'unverified' | 'generic';
@@ -29,13 +31,38 @@ function toErrorKey(
   return 'generic';
 }
 
-export function LoginForm({ next = '/' }: { next?: string }) {
+export function LoginForm({
+  next = '/',
+  ssoEnabled = false,
+  ssoFailed = false,
+}: {
+  next?: string;
+  /** Google and Microsoft (PLAN-SIGNUP B10). */
+  ssoEnabled?: boolean;
+  ssoFailed?: boolean;
+}) {
   const t = useTranslations('auth');
+  const ts = useTranslations('signupFlow.account');
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [busy, setBusy] = useState<'password' | 'passkey' | null>(null);
+  const [busy, setBusy] = useState<'password' | 'passkey' | 'google' | 'microsoft' | null>(null);
   const [error, setError] = useState<ErrorKey | null>(null);
+  const [ssoError, setSsoError] = useState(ssoFailed);
+
+  async function onSso(provider: 'google' | 'microsoft') {
+    setError(null);
+    setSsoError(false);
+    setBusy(provider);
+    rememberNext(next);
+    const r = await startSso({ provider, from: 'login' });
+    if (r.ok && r.data) {
+      window.location.assign(r.data.url);
+      return;
+    }
+    setBusy(null);
+    setSsoError(true);
+  }
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
@@ -75,6 +102,7 @@ export function LoginForm({ next = '/' }: { next?: string }) {
   return (
     <form className="flex flex-col gap-5" onSubmit={onSubmit} noValidate>
       {error && <Banner tone="error">{t(`errors.${error}`)}</Banner>}
+      {ssoError && <Banner tone="error">{ts('errors.ssoFailed')}</Banner>}
       <Field label={t('email')}>
         {({ id }) => (
           <Input
@@ -133,6 +161,23 @@ export function LoginForm({ next = '/' }: { next?: string }) {
       >
         {t('passkey')}
       </Button>
+      {ssoEnabled && (
+        <div className="grid grid-cols-2 gap-2.5">
+          {(['google', 'microsoft'] as const).map((p) => (
+            <SsoButton
+              key={p}
+              provider={p}
+              mobile
+              logoUrl={`/logos/${p}.svg`}
+              label={ts(p === 'google' ? 'googleShort' : 'microsoftShort')}
+              accessibleLabel={ts(p)}
+              loading={busy === p}
+              disabled={busy !== null && busy !== p}
+              onClick={() => void onSso(p)}
+            />
+          ))}
+        </div>
+      )}
       <p className="m-0 text-center text-table font-medium text-fg-2">
         {t('newHere')}{' '}
         <Link href="/signup" className="font-semibold text-fg-1">
