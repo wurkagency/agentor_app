@@ -17,8 +17,10 @@ async function precache() {
   const cache = await caches.open(VERSION);
   await cache.addAll(PRECACHE);
   const html = await (await fetch(OFFLINE_URL, { credentials: 'omit' })).text();
-  const assets = [...html.matchAll(/\/_next\/static\/[^"'\s)]+/g)].map((m) => m[0]);
-  await cache.addAll([...new Set(assets)]);
+  // Paths also appear inside the inline RSC payload as \"…\": stop at quotes and backslashes.
+  const assets = [...html.matchAll(/\/_next\/static\/[^"'\s)\\]+/g)].map((m) => m[0]);
+  // One missing file must not cost the whole install (the shell then just isn't offline-ready).
+  await Promise.all([...new Set(assets)].map((a) => cache.add(a).catch(() => undefined)));
 }
 
 self.addEventListener('install', (event) => {
@@ -77,16 +79,31 @@ self.addEventListener('push', (event) => {
     data = {};
   }
   const title = typeof data.title === 'string' ? data.title : 'Agentor';
-  const url = typeof data.url === 'string' && data.url.startsWith('/') && !data.url.startsWith('//') ? data.url : '/notifications';
+  const url =
+    typeof data.url === 'string' && data.url.startsWith('/') && !data.url.startsWith('//')
+      ? data.url
+      : '/notifications';
+  const body = typeof data.body === 'string' ? data.body : '';
   event.waitUntil(
-    self.registration.showNotification(title, {
-      body: typeof data.body === 'string' ? data.body : '',
-      tag: typeof data.tag === 'string' ? data.tag : undefined,
-      icon: '/icons/icon-192.png',
-      badge: '/icons/badge-96.png',
-      data: { url },
-      lang: 'da',
-    }),
+    Promise.all([
+      self.registration
+        .showNotification(title, {
+          body,
+          tag: typeof data.tag === 'string' ? data.tag : undefined,
+          icon: '/icons/icon-192.png',
+          badge: '/icons/badge-96.png',
+          data: { url },
+          lang: 'da',
+        })
+        // Notifications blocked: nothing to show, the open app still hears about it below.
+        .catch(() => undefined),
+      // An open app refreshes its bell and lists at once.
+      self.clients
+        .matchAll({ type: 'window', includeUncontrolled: true })
+        .then((list) =>
+          list.forEach((c) => c.postMessage({ type: 'agentor:push', title, body, url })),
+        ),
+    ]),
   );
 });
 

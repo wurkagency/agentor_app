@@ -268,6 +268,10 @@ await seedFinance(owner, inTenant);
 // Self-service signup in each state (PLAN-SIGNUP S4).
 if (SIGNUP) await seedSignup(owner, inTenant);
 
+// Fresh statistics: a just-seeded database has none, and the RLS checks (has_flow_access) then
+// get plans slow enough to hit the 15 s statement timeout on Overblik (fresh CI databases too).
+await owner.query('analyze');
+
 await owner.end();
 console.log(
   `Seeded ${Object.keys(SEED_USERS).length} users, ${Object.keys(TENANTS).length} tenants, ${Object.keys(FLOWS).length} flows.`,

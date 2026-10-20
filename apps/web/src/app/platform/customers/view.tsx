@@ -10,6 +10,8 @@ import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
 import { customersFor, initials, planNames, statsFor, tenantNames } from '@/server/platform-data';
+import { Responsive } from '@agentor/ui/mobile';
+import { CustomersMobile } from './mobile';
 
 /**
  * Kunder (P1): name, plan and overall status only. Customer data needs a support grant, which
@@ -19,10 +21,13 @@ export async function CustomersView({
   view,
   query,
   expired,
+  filter = 'all',
 }: {
   view: 'all' | 'mine' | 'recent';
   query: string;
   expired: boolean;
+  /** Mobile chips (MP01). */
+  filter?: 'all' | 'attention' | 'mine';
 }) {
   const { actor } = await requireStaff();
   const t = await getTranslations('platform.customers');
@@ -90,7 +95,7 @@ export async function CustomersView({
   const broken = customers.filter((c) => c.status === 'broken').length;
   const errors = customers.filter((c) => c.status === 'error').length;
 
-  return (
+  const desktop = (
     <PageBody>
       {expired && <Banner tone="warn">{t('expired')}</Banner>}
       <PageHeader
@@ -195,5 +200,13 @@ export async function CustomersView({
       </div>
       <CustomersTable items={items} initialQuery={query} superadmin={actor.role === 'superadmin'} />
     </PageBody>
+  );
+  return (
+    <Responsive
+      desktop={desktop}
+      mobile={
+        <CustomersMobile items={items} query={query} filter={view === 'mine' ? 'mine' : filter} />
+      }
+    />
   );
 }

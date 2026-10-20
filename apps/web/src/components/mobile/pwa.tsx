@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { unsubscribePush } from '@/app/actions/push';
 import { clearDeviceData, clearOfflineSnapshot } from '@/lib/device-data';
@@ -9,6 +10,16 @@ const OWNER_KEY = 'agentor:device-owner';
 
 /** Registers the service worker once per page load (PLAN-MOBILE M3). */
 export function PwaRegister({ dev }: { dev: boolean }) {
+  const router = useRouter();
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    // A push while the app is open: refresh, so the bell and lists show it at once.
+    const onMessage = (e: MessageEvent) => {
+      if ((e.data as { type?: string } | null)?.type === 'agentor:push') router.refresh();
+    };
+    navigator.serviceWorker.addEventListener('message', onMessage);
+    return () => navigator.serviceWorker.removeEventListener('message', onMessage);
+  }, [router]);
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return;
     // In development the worker skips its shell cache, so HMR chunks are never served stale.
