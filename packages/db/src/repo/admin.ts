@@ -389,3 +389,13 @@ export async function connectorStatus(db: Database, actor: StaffActor): Promise<
   }
   return [...by.values()].sort((a, b) => a.connectorId.localeCompare(b.connectorId));
 }
+
+/** A staff member's own change (profile, password, 2FA, passkeys, sessions) in the platform audit log. */
+export async function logStaffEvent(
+  db: Database,
+  actor: StaffActor,
+  action: string,
+  detail: Record<string, unknown> = {},
+): Promise<void> {
+  await asStaff(db, actor.userId, (tx) => log(tx, actor, action, detail));
+}

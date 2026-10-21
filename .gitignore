@@ -6,6 +6,8 @@ dist/
 coverage/
 playwright-report/
 test-results/
+# Uploaded files in development (STORAGE_DIR); production keeps them under /var/lib/agentor
+.data/
 *.tsbuildinfo
 next-env.d.ts
 

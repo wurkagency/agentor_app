@@ -42,6 +42,15 @@ if ! grep -qE '^SMTP_URL=smtps?://.+' "$D/shared/web.env.production"; then
   exit 1
 fi
 
+# Profile photos go to the storage area (PLAN-2026-10-21 §5.4); agentor-web must be able to write.
+STORAGE_DIR=$(grep -E '^STORAGE_DIR=' "$D/shared/web.env.production" | cut -d= -f2-)
+if [ -z "$STORAGE_DIR" ] || ! runuser -u agentor-web -- test -w "$STORAGE_DIR"; then
+  echo "STORAGE_DIR is missing in web.env.production or not writable by agentor-web."
+  echo "Run server-setup.sh again, or: install -d -m 750 -o agentor-web /var/lib/agentor/storage"
+  echo "and add STORAGE_DIR=/var/lib/agentor/storage to $D/shared/web.env.production."
+  exit 1
+fi
+
 echo "== Ports"
 # Shared server: refuse to start if another site already listens on Agentor's ports.
 for port in 3410 3411; do

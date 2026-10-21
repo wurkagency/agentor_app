@@ -27,3 +27,4 @@ export * from './repo/platform.js';
 export * from './repo/finance.js';
 export * from './repo/signup.js';
 export * from './repo/admin.js';
+export * from './repo/profile.js';

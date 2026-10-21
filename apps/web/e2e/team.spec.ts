@@ -199,7 +199,8 @@ test('a reader sees personal settings but not the team or audit log', async ({ p
   await login(page, 'bo');
   await page.goto('/settings/notifications');
   const nav = page.getByRole('navigation', { name: 'Sekundær navigation' });
-  await expect(nav.getByRole('link')).toHaveText(['Notifikationer', 'Sikkerhed', 'Min profil']);
+  // Min profil is its own page (/profile, D15) since PLAN-2026-10-21 M3.
+  await expect(nav.getByRole('link')).toHaveText(['Notifikationer', 'Sikkerhed']);
   await page.goto('/settings/team');
   await expect(
     page.getByText('Du har ikke adgang til denne side').filter({ visible: true }),

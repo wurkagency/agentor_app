@@ -15,3 +15,4 @@ export * from './components/states';
 export * from './components/data';
 export * from './components/dashboard';
 export * from './components/logotype';
+export * from './components/profile';

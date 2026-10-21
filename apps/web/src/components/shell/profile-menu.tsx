@@ -108,7 +108,7 @@ export function ProfileMenu({
         )}
         <DropdownMenuItem
           icon={<Icon icon={UserRound} size={16} />}
-          onSelect={() => router.push('/settings/profile')}
+          onSelect={() => router.push('/profile')}
         >
           {t('myProfile')}
         </DropdownMenuItem>
@@ -173,7 +173,7 @@ export function ProfileMenu({
             })
           }
         >
-          {t('logout')}
+          {t('logout.button')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

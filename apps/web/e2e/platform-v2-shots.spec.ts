@@ -105,3 +105,30 @@ test('M2 Administration (Superadmin)', async ({ page }) => {
   await page.goto('/platform/admin/reports/revenue');
   await shot(page, 'F7-Rapporter');
 });
+
+/** A phone board at 390 × 844 next to the board, plus the app alone at 360 × 780. */
+async function phone(page: Page, path: string, board: string) {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(path);
+  await shot(page, board, true);
+  await page.setViewportSize({ width: 360, height: 780 });
+  await page.goto(path);
+  await page.evaluate(() => document.fonts.ready);
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: `${OUT}/${board}-360.png`, fullPage: true });
+  await page.setViewportSize({ width: 1440, height: 900 });
+}
+
+test('M3 Profile, staff (PR1, MP29)', async ({ page }) => {
+  await login(page, 'anne');
+  await page.goto('/platform/profile');
+  await shot(page, 'PR1-Profil', true);
+  await phone(page, '/platform/profile', 'MP29-Profil');
+});
+
+test('M3 Profile, customer (D15, MA36)', async ({ page }) => {
+  await login(page, 'mette');
+  await page.goto('/profile');
+  await shot(page, 'D15-Profil', true);
+  await phone(page, '/profile', 'MA36-Profil');
+});

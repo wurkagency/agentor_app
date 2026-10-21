@@ -14,3 +14,4 @@ export {
   twoFactors as authTwoFactors,
   passkeys as authPasskeys,
 } from './auth.js';
+export * from './profile.js';

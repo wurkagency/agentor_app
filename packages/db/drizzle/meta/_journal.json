@@ -351,6 +351,27 @@
       "when": 1792596739650,
       "tag": "0049_status_connectors",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1792598725778,
+      "tag": "0050_profile",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1792598742803,
+      "tag": "0051_profile_security",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1792601176328,
+      "tag": "0052_profile_user_fk",
+      "breakpoints": true
     }
   ]
 }

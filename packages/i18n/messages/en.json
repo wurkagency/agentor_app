@@ -98,7 +98,11 @@
     "settings": "Settings",
     "billing": "Plan and usage",
     "language": "Language",
-    "logout": "Log out",
+    "logout": {
+      "title": "Sign out",
+      "help": "Sign out on this device. Use \"Sign out all others\" above if you've lost a device.",
+      "button": "Sign out"
+    },
     "danish": "Dansk",
     "english": "English",
     "roles": {
@@ -118,7 +122,253 @@
     "changePassword": "Change password",
     "passwordChanged": "Your password was changed. Other sessions were logged out.",
     "passwordError": "The current password is wrong.",
-    "support": "Contact support"
+    "support": "Contact support",
+    "titleCustomer": "My profile",
+    "titleStaff": "Profile",
+    "edit": "Edit profile",
+    "nav": {
+      "label": "Profile",
+      "overview": "Overview",
+      "details": "Personal details",
+      "security": "Sign-in and security",
+      "notifications": "Notifications"
+    },
+    "achievementsTitle": "Achievements",
+    "achievementsEarned": "{earned} of {total} earned",
+    "progress": "{value} of {threshold}",
+    "noAchievements": "No achievements yet.",
+    "engagementTitle": "Engagement",
+    "lastWeeks": "Last 12 weeks",
+    "less": "Less",
+    "more": "More",
+    "heatDay": "{date}: {count, plural, =0 {no actions} one {# action} other {# actions}}",
+    "heatLabel": "Activity over the last 12 weeks: {days, plural, =0 {no active days} one {# active day} other {# active days}}",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "today": "Today",
+    "lang": {
+      "da": "Dansk",
+      "en": "English"
+    },
+    "chip": {
+      "twoFactorOn": "Two-step on",
+      "twoFactorPasskey": "Two-step with passkey",
+      "twoFactorOff": "Two-step off"
+    },
+    "role": {
+      "superadmin": "Superadmin",
+      "supporter": "Supporter"
+    },
+    "staff": {
+      "eyebrow": "{role} · Agentor Platform",
+      "since": "At Agentor since {date}",
+      "kpiResolved": "Cases resolved in {month}",
+      "kpiResolvedShort": "Cases resolved in {month}",
+      "kpiTime": "Registered time",
+      "kpiReply": "Median reply time",
+      "kpiSatisfied": "Satisfied customers",
+      "kpiStreak": "In a row with resolved cases",
+      "streak": "{count, plural, one {# day} other {# days}} in a row",
+      "streakSub": "with resolved cases · your best is {best}",
+      "totalResolved": "Cases resolved in total",
+      "sessions": "Support sessions",
+      "sessionsValue": "{count} · {pct} % logged automatically",
+      "busiest": "Busiest day"
+    },
+    "customer": {
+      "since": "Customer since {date}",
+      "kpiRecords": "Records in the last 7 days",
+      "kpiFlows": "Flows live",
+      "kpiFixed": "Errors fixed yourself",
+      "kpiClean": "Runs without errors",
+      "streak": "{count, plural, one {# day} other {# days}} in a row",
+      "streakSub": "without broken connections · record {best}",
+      "totalRecords": "Records in total",
+      "flowsCreated": "Flows created",
+      "flowsCreatedValue": "{count} · {drafts, plural, one {# draft} other {# drafts}}",
+      "lastSignIn": "Last signed in"
+    },
+    "achievements": {
+      "cases_100": {
+        "title": "100 resolved cases",
+        "description": "Resolve 100 cases",
+        "earned": "{total} in total since {since}"
+      },
+      "fast_replies": {
+        "title": "Lightning fast",
+        "description": "Reply time under 45 min. for 4 weeks"
+      },
+      "customer_favorite": {
+        "title": "Customers' favourite",
+        "description": "90 % satisfied customers"
+      },
+      "knowledge_sharer": {
+        "title": "Knowledge sharer",
+        "description": "10 solutions reused from the archive"
+      },
+      "no_missed_deadlines": {
+        "title": "No missed deadlines",
+        "description": "30 days in a row"
+      },
+      "team_player": {
+        "title": "Team player",
+        "description": "Help 5 colleagues on their cases"
+      },
+      "first_flow_live": {
+        "title": "First flow live",
+        "description": "Put your first flow live"
+      },
+      "records_1000_day": {
+        "title": "1,000 records",
+        "description": "Synced in one day"
+      },
+      "team_assembled": {
+        "title": "Team assembled",
+        "description": "3 colleagues and advisers invited"
+      },
+      "quick_fixer": {
+        "title": "Quick on the draw",
+        "description": "Errors fixed within 1 hour, 5 times"
+      },
+      "clean_week": {
+        "title": "Reconciled without deviations",
+        "description": "7 days in a row"
+      },
+      "team_two_factor": {
+        "title": "Two-step for the whole team",
+        "description": "Every user has two-step login"
+      }
+    },
+    "avatar": {
+      "change": "Change profile photo",
+      "title": "Profile photo",
+      "help": "PNG or JPG, at least 256 × 256 px. Shown to your team and in the audit log.",
+      "upload": "Upload photo",
+      "remove": "Remove",
+      "saved": "Your profile photo is saved",
+      "removed": "Your profile photo is removed",
+      "error": {
+        "TYPE": "The image must be PNG or JPG.",
+        "TOO_LARGE": "The image can be at most 5 MB.",
+        "TOO_SMALL": "The image must be at least 256 × 256 px.",
+        "UNREADABLE": "The image couldn't be read. Try another one."
+      }
+    },
+    "details": {
+      "heading": "Personal details",
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "save": "Save changes",
+      "saved": "Your details are saved",
+      "error": "The details weren't saved. Check the fields and try again.",
+      "givenName": "First name",
+      "familyName": "Last name",
+      "name": "Name",
+      "email": "E-mail",
+      "emailHelp": "Change your sign-in e-mail under Sign-in and security.",
+      "phone": "Phone",
+      "none": "Not given",
+      "language": "Language",
+      "timeZone": "Time zone",
+      "languageAndZone": "Language and time zone",
+      "city": "City",
+      "title": "Title",
+      "role": "Role in the company"
+    },
+    "tz": {
+      "Europe_Copenhagen": "Europe/Copenhagen (CET)",
+      "Europe_Stockholm": "Europe/Stockholm (CET)",
+      "Europe_Oslo": "Europe/Oslo (CET)",
+      "Europe_Berlin": "Europe/Berlin (CET)",
+      "Europe_London": "Europe/London (GMT)",
+      "UTC": "UTC"
+    },
+    "security": {
+      "heading": "Sign-in and security",
+      "strong": "Well protected",
+      "weak": "Could be better protected",
+      "password": "Password",
+      "passwordChanged": "Last changed {date}",
+      "noPassword": "You sign in with Google or Microsoft",
+      "changePassword": "Change password",
+      "changePasswordHelp": "Enter your current password and a new one of at least 12 characters.",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "passwordHelp": "At least 12 characters. A sentence is easy to remember and hard to guess.",
+      "passwordTooShort": "The password must be at least 12 characters.",
+      "logoutOthersToo": "Sign out on all other devices",
+      "passwordSaved": "Your password is changed",
+      "passwordError": "The password is wrong.",
+      "twoFactor": "Two-step verification",
+      "twoFactorOn": "Code from an authenticator app",
+      "twoFactorOnShort": "Authenticator app",
+      "twoFactorOff": "Off",
+      "twoFactorRequired": "Code from an authenticator app · required for your account",
+      "disableTwoFactor": "Turn off two-step",
+      "disableTwoFactorHelp": "Without two-step your account is only protected by the password. Confirm with your password.",
+      "disable": "Turn off",
+      "twoFactorDisabled": "Two-step is off",
+      "newCodes": "Make new recovery codes",
+      "codesHelp": "The old recovery codes stop working. Confirm with your password.",
+      "codesSave": "Keep the codes somewhere safe. Each code works once.",
+      "codesDone": "I've saved them",
+      "makeCodes": "Make codes",
+      "passkeys": "Passkeys",
+      "passkey": "Passkey",
+      "noPasskeys": "No passkeys yet",
+      "addPasskey": "Add passkey",
+      "add": "Add",
+      "remove": "Remove",
+      "removePasskey": "Remove passkey {name}",
+      "passkeyAdded": "Your passkey is added",
+      "passkeyRemoved": "The passkey is removed",
+      "passkeyError": "The passkey wasn't added.",
+      "sessions": "Active sessions",
+      "thisDevice": "{label} (this one)",
+      "otherDevices": "{count, plural, =0 {Only this device} one {# other device} other {# other devices}}",
+      "logoutOthers": "Sign out all others",
+      "logoutShort": "Sign out",
+      "loggedOutOthers": "{count, plural, =0 {There were no other sessions} one {# other session signed out} other {# other sessions signed out}}",
+      "loginEmail": "Sign-in e-mail",
+      "verified": "confirmed",
+      "unverified": "not confirmed",
+      "changeEmail": "Change e-mail",
+      "changeShort": "Change",
+      "emailHelp": "You sign in with {email}. We send a code to the new address before it changes.",
+      "newEmail": "New e-mail",
+      "sendCode": "Send code",
+      "emailCode": "Code",
+      "emailCodeSent": "Enter the code we sent to {email}.",
+      "emailCodeError": "The code is wrong or has expired.",
+      "emailError": "We couldn't send a code to that address.",
+      "emailFresh": "Sign in again before you change e-mail.",
+      "emailChanged": "Your sign-in e-mail is changed",
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "save": "Save",
+      "error": "That didn't work. Try again."
+    },
+    "notify": {
+      "heading": "Notifications",
+      "all": "All settings",
+      "staffNone": "Platform notifications can't be set yet.",
+      "error": "The setting wasn't saved.",
+      "connection_broken": "Connection broken",
+      "systematic_error": "Systematic error",
+      "quota": "Quota over 80 %",
+      "weekly_summary": "Weekly summary"
+    },
+    "channel": {
+      "app": "app",
+      "email": "e-mail",
+      "push": "push",
+      "sms": "SMS",
+      "none": "Only in the app"
+    },
+    "device": {
+      "unknown": "Unknown device",
+      "browser": "Browser",
+      "on": "{browser} on {os}"
+    }
   },
   "auth": {
     "footerLanguage": "English",

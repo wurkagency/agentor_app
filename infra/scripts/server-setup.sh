@@ -172,6 +172,7 @@ else
   }
   umask 077
   { common; echo "DATABASE_URL_WEB=$(url agentor_web "$PW_WEB")"; echo "KEK_PUBLIC_KEY=$KEK_PUBLIC_KEY"
+    echo "STORAGE_DIR=/var/lib/agentor/storage"
     if [ -n "${QUICKPAY_PRIVATE_KEY:-}" ]; then echo "QUICKPAY_PRIVATE_KEY=$QUICKPAY_PRIVATE_KEY"; fi
   } > "$D/shared/web.env.production"
   { common; echo "DATABASE_URL_WORKER=$(url agentor_worker "$PW_WORKER")"; echo "KEK_FILE=$KEK"; } > "$D/shared/worker.env.production"
@@ -188,6 +189,11 @@ fi
 
 # nginx: this Plesk version has no CLI option for additional directives; they are pasted in the
 # UI once (Apache & nginx Settings, Proxy mode off) from infra/plesk/nginx-directives.conf.
+
+echo "== Storage area for uploads (profile photos)"
+# Only agentor-web reads and writes it; the app serves the files itself after its access check.
+# pgBackRest backs up the database only: include this directory in the server backup.
+install -d -m 750 -o agentor-web -g agentor-web /var/lib/agentor /var/lib/agentor/storage
 
 echo "== Deploy commands and PM2 at boot"
 install -m 700 "$REPO/infra/scripts/deploy.sh" /usr/local/bin/agentor-deploy

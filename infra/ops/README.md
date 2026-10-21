@@ -19,6 +19,7 @@ These steps run on the Ubuntu/Plesk VM, not in CI. They are the ops half of the 
 - Unix sockets only. Create the roles with `infra/db/roles.sql`, using strong passwords from the password manager.
 - Rotate the production database password that was shared during the agentor.dk handover (§10.5).
 - `pg_stat_statements` on. Backups with pgBackRest to encrypted EU object storage: weekly full, daily differential, continuous WAL. RPO 15 min, RTO 4 h.
+- Uploaded files (profile photos) live in `/var/lib/agentor/storage` (`STORAGE_DIR`), outside the database. pgBackRest doesn't cover them: include the directory in the server's file backup.
 - **Restore test every quarter, documented.** The Phase 0 gate requires one passing restore test.
 
 ## 4. Redis 7, dedicated (§10.2)

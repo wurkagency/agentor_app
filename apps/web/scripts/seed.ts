@@ -86,6 +86,10 @@ for (const u of [...Object.values(USERS), ...Object.values(SIGNUP_USERS)]) {
   const existing = await ctx.internalAdapter.findUserByEmail(u.email);
   if (existing) await ctx.internalAdapter.deleteUser(existing.user.id);
 }
+// By id too: a test may have changed a seeded user's login e-mail (profile e2e).
+for (const u of Object.values(SEED_USERS)) {
+  if (await ctx.internalAdapter.findUserById(u.id)) await ctx.internalAdapter.deleteUser(u.id);
+}
 
 // --- identity (auth schema) ---------------------------------------------------------------------
 const passwordHash = await ctx.password.hash(SEED_PASSWORD);

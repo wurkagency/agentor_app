@@ -49,12 +49,27 @@ const twMerge = extendTailwindMerge({
             'su-price',
             'su-price-m',
             'su-code-m',
+            // Profile dashboard (PR1, D15, MP29, MA36).
+            'profile-name',
+            'profile-stat',
+            'profile-card',
+            'profile-streak',
           ],
         },
       ],
       shadow: [
         {
           shadow: [
+            // Profile dashboard and the floating tab bar (PLAN-2026-10-21).
+            'profile-hero',
+            'avatar-ring',
+            'camera',
+            'medal',
+            'medal-locked',
+            'soft-line',
+            'stat-line',
+            'tabbar-float',
+            'tabbar-navy',
             'sm',
             'card',
             'overlay',

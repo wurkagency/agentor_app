@@ -98,7 +98,11 @@
     "settings": "Indstillinger",
     "billing": "Abonnement og forbrug",
     "language": "Sprog",
-    "logout": "Log ud",
+    "logout": {
+      "title": "Log ud",
+      "help": "Log ud på denne enhed. Brug \"Log ud alle andre\" ovenfor, hvis du har mistet en enhed.",
+      "button": "Log ud"
+    },
     "danish": "Dansk",
     "english": "English",
     "roles": {
@@ -118,7 +122,253 @@
     "changePassword": "Skift adgangskode",
     "passwordChanged": "Din adgangskode er ændret. Andre sessioner er logget ud.",
     "passwordError": "Den nuværende adgangskode er forkert.",
-    "support": "Kontakt support"
+    "support": "Kontakt support",
+    "titleCustomer": "Min profil",
+    "titleStaff": "Profil",
+    "edit": "Redigér profil",
+    "nav": {
+      "label": "Profil",
+      "overview": "Overblik",
+      "details": "Personlige oplysninger",
+      "security": "Login og sikkerhed",
+      "notifications": "Notifikationer"
+    },
+    "achievementsTitle": "Præstationer",
+    "achievementsEarned": "{earned} af {total} opnået",
+    "progress": "{value} af {threshold}",
+    "noAchievements": "Ingen præstationer endnu.",
+    "engagementTitle": "Engagement",
+    "lastWeeks": "Sidste 12 uger",
+    "less": "Mindre",
+    "more": "Mere",
+    "heatDay": "{date}: {count, plural, =0 {ingen handlinger} one {# handling} other {# handlinger}}",
+    "heatLabel": "Aktivitet de sidste 12 uger: {days, plural, =0 {ingen aktive dage} one {# aktiv dag} other {# aktive dage}}",
+    "days": "{count, plural, one {# dag} other {# dage}}",
+    "today": "I dag",
+    "lang": {
+      "da": "Dansk",
+      "en": "English"
+    },
+    "chip": {
+      "twoFactorOn": "Totrin slået til",
+      "twoFactorPasskey": "Totrin med passkey",
+      "twoFactorOff": "Totrin slået fra"
+    },
+    "role": {
+      "superadmin": "Superadmin",
+      "supporter": "Supporter"
+    },
+    "staff": {
+      "eyebrow": "{role} · Agentor Platform",
+      "since": "Hos Agentor siden {date}",
+      "kpiResolved": "Løste sager i {month}",
+      "kpiResolvedShort": "Løste sager i {month}",
+      "kpiTime": "Registreret tid",
+      "kpiReply": "Median svartid",
+      "kpiSatisfied": "Tilfredse kunder",
+      "kpiStreak": "I træk med løste sager",
+      "streak": "{count, plural, one {# dag} other {# dage}} i træk",
+      "streakSub": "med løste sager · din bedste er {best}",
+      "totalResolved": "Sager løst i alt",
+      "sessions": "Supportsessioner",
+      "sessionsValue": "{count} · {pct} % logget automatisk",
+      "busiest": "Travleste dag"
+    },
+    "customer": {
+      "since": "Kunde siden {date}",
+      "kpiRecords": "Records de sidste 7 dage",
+      "kpiFlows": "Flows live",
+      "kpiFixed": "Fejl løst selv",
+      "kpiClean": "Kørsler uden fejl",
+      "streak": "{count, plural, one {# dag} other {# dage}} i træk",
+      "streakSub": "uden afbrudte forbindelser · rekord {best}",
+      "totalRecords": "Records i alt",
+      "flowsCreated": "Flows oprettet",
+      "flowsCreatedValue": "{count} · {drafts, plural, one {# kladde} other {# kladder}}",
+      "lastSignIn": "Sidst logget ind"
+    },
+    "achievements": {
+      "cases_100": {
+        "title": "100 løste sager",
+        "description": "Løs 100 sager",
+        "earned": "{total} i alt siden {since}"
+      },
+      "fast_replies": {
+        "title": "Lynhurtig",
+        "description": "Svartid under 45 min. i 4 uger"
+      },
+      "customer_favorite": {
+        "title": "Kundernes favorit",
+        "description": "90 % tilfredse kunder"
+      },
+      "knowledge_sharer": {
+        "title": "Vidensdeler",
+        "description": "10 løsninger genbrugt fra arkivet"
+      },
+      "no_missed_deadlines": {
+        "title": "Ingen overskredne frister",
+        "description": "30 dage i træk"
+      },
+      "team_player": {
+        "title": "Teamspiller",
+        "description": "Hjælp 5 kolleger på deres sager"
+      },
+      "first_flow_live": {
+        "title": "Første flow live",
+        "description": "Sæt jeres første flow live"
+      },
+      "records_1000_day": {
+        "title": "1.000 records",
+        "description": "Synkroniseret på én dag"
+      },
+      "team_assembled": {
+        "title": "Team samlet",
+        "description": "3 kolleger og rådgivere inviteret"
+      },
+      "quick_fixer": {
+        "title": "Hurtig på aftrækkeren",
+        "description": "Fejl rettet inden 1 time, 5 gange"
+      },
+      "clean_week": {
+        "title": "Afstemt uden afvigelser",
+        "description": "7 dage i træk"
+      },
+      "team_two_factor": {
+        "title": "Totrin for hele teamet",
+        "description": "Alle brugere har totrin"
+      }
+    },
+    "avatar": {
+      "change": "Skift profilbillede",
+      "title": "Profilbillede",
+      "help": "PNG eller JPG, mindst 256 × 256 px. Vises for dit team og i audit-loggen.",
+      "upload": "Upload billede",
+      "remove": "Fjern",
+      "saved": "Dit profilbillede er gemt",
+      "removed": "Dit profilbillede er fjernet",
+      "error": {
+        "TYPE": "Billedet skal være PNG eller JPG.",
+        "TOO_LARGE": "Billedet må højst fylde 5 MB.",
+        "TOO_SMALL": "Billedet skal være mindst 256 × 256 px.",
+        "UNREADABLE": "Billedet kunne ikke læses. Prøv et andet."
+      }
+    },
+    "details": {
+      "heading": "Personlige oplysninger",
+      "edit": "Redigér",
+      "cancel": "Annullér",
+      "save": "Gem ændringer",
+      "saved": "Dine oplysninger er gemt",
+      "error": "Oplysningerne blev ikke gemt. Tjek felterne og prøv igen.",
+      "givenName": "Fornavn",
+      "familyName": "Efternavn",
+      "name": "Navn",
+      "email": "E-mail",
+      "emailHelp": "Login-e-mailen skifter du under Login og sikkerhed.",
+      "phone": "Telefon",
+      "none": "Ikke angivet",
+      "language": "Sprog",
+      "timeZone": "Tidszone",
+      "languageAndZone": "Sprog og tidszone",
+      "city": "By",
+      "title": "Titel",
+      "role": "Rolle i virksomheden"
+    },
+    "tz": {
+      "Europe_Copenhagen": "Europa/København (CET)",
+      "Europe_Stockholm": "Europa/Stockholm (CET)",
+      "Europe_Oslo": "Europa/Oslo (CET)",
+      "Europe_Berlin": "Europa/Berlin (CET)",
+      "Europe_London": "Europa/London (GMT)",
+      "UTC": "UTC"
+    },
+    "security": {
+      "heading": "Login og sikkerhed",
+      "strong": "Stærkt beskyttet",
+      "weak": "Kan beskyttes bedre",
+      "password": "Adgangskode",
+      "passwordChanged": "Sidst ændret {date}",
+      "noPassword": "Du logger ind med Google eller Microsoft",
+      "changePassword": "Skift adgangskode",
+      "changePasswordHelp": "Skriv din nuværende adgangskode og en ny på mindst 12 tegn.",
+      "currentPassword": "Nuværende adgangskode",
+      "newPassword": "Ny adgangskode",
+      "passwordHelp": "Mindst 12 tegn. En sætning er nem at huske og svær at gætte.",
+      "passwordTooShort": "Adgangskoden skal være mindst 12 tegn.",
+      "logoutOthersToo": "Log ud på alle andre enheder",
+      "passwordSaved": "Din adgangskode er ændret",
+      "passwordError": "Adgangskoden er forkert.",
+      "twoFactor": "Totrinsbekræftelse",
+      "twoFactorOn": "Kode fra godkendelsesapp",
+      "twoFactorOnShort": "Godkendelsesapp",
+      "twoFactorOff": "Slået fra",
+      "twoFactorRequired": "Kode fra godkendelsesapp · kræves for din konto",
+      "disableTwoFactor": "Slå totrin fra",
+      "disableTwoFactorHelp": "Uden totrin er din konto kun beskyttet af adgangskoden. Bekræft med din adgangskode.",
+      "disable": "Slå fra",
+      "twoFactorDisabled": "Totrin er slået fra",
+      "newCodes": "Lav nye reservekoder",
+      "codesHelp": "De gamle reservekoder holder op med at virke. Bekræft med din adgangskode.",
+      "codesSave": "Gem koderne et sikkert sted. Hver kode virker én gang.",
+      "codesDone": "Jeg har gemt dem",
+      "makeCodes": "Lav koder",
+      "passkeys": "Passkeys",
+      "passkey": "Passkey",
+      "noPasskeys": "Ingen passkeys endnu",
+      "addPasskey": "Tilføj passkey",
+      "add": "Tilføj",
+      "remove": "Fjern",
+      "removePasskey": "Fjern passkey {name}",
+      "passkeyAdded": "Din passkey er tilføjet",
+      "passkeyRemoved": "Passkeyen er fjernet",
+      "passkeyError": "Passkeyen blev ikke tilføjet.",
+      "sessions": "Aktive sessioner",
+      "thisDevice": "{label} (denne)",
+      "otherDevices": "{count, plural, =0 {Kun denne enhed} one {# anden enhed} other {# andre enheder}}",
+      "logoutOthers": "Log ud alle andre",
+      "logoutShort": "Log ud",
+      "loggedOutOthers": "{count, plural, =0 {Der var ingen andre sessioner} one {# anden session er logget ud} other {# andre sessioner er logget ud}}",
+      "loginEmail": "Login-e-mail",
+      "verified": "bekræftet",
+      "unverified": "ikke bekræftet",
+      "changeEmail": "Skift e-mail",
+      "changeShort": "Skift",
+      "emailHelp": "Du logger ind med {email}. Vi sender en kode til den nye adresse, før den skiftes.",
+      "newEmail": "Ny e-mail",
+      "sendCode": "Send kode",
+      "emailCode": "Kode",
+      "emailCodeSent": "Skriv koden, vi har sendt til {email}.",
+      "emailCodeError": "Koden er forkert eller udløbet.",
+      "emailError": "Vi kunne ikke sende en kode til den adresse.",
+      "emailFresh": "Log ind igen, før du skifter e-mail.",
+      "emailChanged": "Din login-e-mail er skiftet",
+      "confirm": "Bekræft",
+      "cancel": "Annullér",
+      "save": "Gem",
+      "error": "Det lykkedes ikke. Prøv igen."
+    },
+    "notify": {
+      "heading": "Notifikationer",
+      "all": "Alle indstillinger",
+      "staffNone": "Platformens notifikationer kan ikke indstilles endnu.",
+      "error": "Indstillingen blev ikke gemt.",
+      "connection_broken": "Forbindelse afbrudt",
+      "systematic_error": "Systematisk fejl",
+      "quota": "Kvote over 80 %",
+      "weekly_summary": "Ugentlig opsummering"
+    },
+    "channel": {
+      "app": "app",
+      "email": "e-mail",
+      "push": "push",
+      "sms": "SMS",
+      "none": "Kun i app'en"
+    },
+    "device": {
+      "unknown": "Ukendt enhed",
+      "browser": "Browser",
+      "on": "{browser} på {os}"
+    }
   },
   "auth": {
     "footerLanguage": "Dansk",

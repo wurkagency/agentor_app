@@ -17,11 +17,18 @@ import { markSessionMfaVerified, markSignupStarted, signInMethods } from '@agent
 import { isRecentSignIn, STEP_UP_PATHS } from './reauth';
 import { mockSsoConfig, SSO_PROVIDERS } from '../mock-sso';
 import { sendSignupCode } from '../signup-mail';
+import {
+  auditSecurityEvent,
+  auditTwoFactorEnabled,
+  sendEmailChangeCode,
+  twoFactorRequired,
+} from './security-events';
 
 /**
  * Better Auth's e-mail OTP endpoints would sign a user in with just a mailed code, past the
  * password and second factor. They are closed over HTTP; signup calls them only from its own
- * server actions with its own checks (PLAN-SIGNUP §5).
+ * server actions with its own checks (PLAN-SIGNUP §5). Changing the login e-mail stays open: it
+ * needs a fresh session and a code sent to the new address (profile, PLAN-2026-10-21 M3).
  */
 const CLOSED_PATHS = [
   '/email-otp/send-verification-otp',
@@ -31,8 +38,6 @@ const CLOSED_PATHS = [
   '/email-otp/request-password-reset',
   '/forget-password/email-otp',
   '/email-otp/reset-password',
-  '/email-otp/request-email-change',
-  '/email-otp/change-email',
 ];
 
 /** Endpoints that end in a session for a social or mock-IdP sign-in. */
@@ -209,6 +214,15 @@ Agentor`,
               });
           }
         }
+        // Staff, and members of a company that requires it, keep two-step login (PLAN Q9).
+        if (ctx.path === '/two-factor/disable') {
+          const s = await getSessionFromCtx(ctx);
+          if (s && (await twoFactorRequired(s.user.id)))
+            throw new APIError('FORBIDDEN', {
+              message: 'TWO_FACTOR_REQUIRED',
+              code: 'TWO_FACTOR_REQUIRED',
+            });
+        }
         if (ctx.path === '/sign-in/email') {
           const email = String(
             (ctx.body as { email?: unknown } | undefined)?.email ?? '',
@@ -239,6 +253,16 @@ Agentor`,
         ) {
           await markSessionMfaVerified(db(), ctx.context.session.session.id);
         }
+        // Profile › Login og sikkerhed: every change to the account in the audit log.
+        if (!(ctx.context.returned instanceof APIError))
+          await auditSecurityEvent(
+            ctx.path,
+            ctx.context.session as Parameters<typeof auditSecurityEvent>[1],
+            ctx.body,
+            Boolean(ctx.context.newSession),
+          ).catch((err: unknown) =>
+            console.error('security audit failed', err instanceof Error ? err.message : err),
+          );
       }),
     },
     databaseHooks: {
@@ -248,6 +272,20 @@ Agentor`,
             // A new account from Google or Microsoft is a signup: purged after 24 h unless its
             // company becomes active (B1). E-mail signups are marked by their own action.
             if (isSsoCallback(ctx?.path)) await markSignupStarted(db(), user.id);
+          },
+        },
+        update: {
+          after: async (user, ctx) => {
+            const active =
+              (ctx?.context.session?.session as { activeTenantId?: string | null } | undefined)
+                ?.activeTenantId ?? null;
+            await auditTwoFactorEnabled(
+              user as { id: string; name: string; twoFactorEnabled?: boolean },
+              ctx?.path,
+              active,
+            ).catch((err: unknown) =>
+              console.error('security audit failed', err instanceof Error ? err.message : err),
+            );
           },
         },
       },
@@ -292,7 +330,10 @@ Agentor`,
         overrideDefaultEmailVerification: true,
         sendVerificationOTP: async ({ email, otp, type }) => {
           if (type === 'email-verification') await sendSignupCode(email, otp);
+          if (type === 'change-email') await sendEmailChangeCode(email, otp);
         },
+        // Profile "Skift e-mail": a code to the new address before the change (D15/PR1).
+        changeEmail: { enabled: true },
       }),
       // Always registered (typed API); providers only in mock mode.
       genericOAuth({ config: e.SSO_MODE === 'mock' ? mockSsoConfig(e.APP_URL) : [] }),

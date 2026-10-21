@@ -220,22 +220,28 @@ export function initialsOf(name: string): string {
   ).toUpperCase();
 }
 
+/**
+ * Initials in a circle, or the person's profile photo when `src` is given (/api/avatar/<id>,
+ * PR1/D15). Decorative: the name is always next to it.
+ */
 export function Avatar({
   name,
   size = 28,
   tone = 'light',
+  src,
   className,
 }: {
   name: string;
   size?: 28 | 32 | 40;
   tone?: 'light' | 'navy' | 'support';
+  src?: string | null | undefined;
   className?: string;
 }) {
   return (
     <span
       aria-hidden
       className={cn(
-        'inline-grid flex-none place-items-center rounded-full font-semibold',
+        'relative inline-grid flex-none place-items-center overflow-hidden rounded-full font-semibold',
         size === 28
           ? 'size-7 text-micro'
           : size === 32
@@ -250,6 +256,7 @@ export function Avatar({
       )}
     >
       {initialsOf(name)}
+      {src && <img src={src} alt="" className="absolute inset-0 size-full object-cover" />}
     </span>
   );
 }

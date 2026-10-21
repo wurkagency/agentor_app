@@ -35,6 +35,8 @@ export const PLATFORM_REDIRECTS: [string, string][] = [
   ['/platform/finance/reports', '/platform/admin/reports/legacy'],
   ['/platform/finance/reports/export', '/platform/admin/reports/legacy?format=csv'],
   ['/platform/finance/reports/pdf', '/platform/admin/reports/legacy?format=pdf'],
+  // Min profil is now the profile dashboard (D15, README decision 25).
+  ['/settings/profile', '/profile'],
 ];
 
 const config: NextConfig = {
@@ -49,7 +51,15 @@ const config: NextConfig = {
   // Keeps board screenshots clean.
   devIndicators: false,
   // Database driver and repositories run as plain Node modules on the server.
-  serverExternalPackages: ['@agentor/db', '@agentor/jobs', 'bullmq', 'pg', '@node-rs/argon2'],
+  serverExternalPackages: [
+    '@agentor/db',
+    '@agentor/jobs',
+    '@agentor/storage',
+    'bullmq',
+    'pg',
+    '@node-rs/argon2',
+    'sharp',
+  ],
   // Platform sitemap v2 (README decision 24): the old URLs answer 308 for one release. The query
   // string is passed on. Finans/Administration still answer 404 for a Supporter at the new URL.
   redirects: async () => [

@@ -18,6 +18,8 @@ const schema = z.object({
   /** Only the mock checkout signs callbacks in the web process; real ones come from QuickPay. */
   QUICKPAY_PRIVATE_KEY: z.string().optional(),
   /** Where the web process reaches agentor-ingest (mock checkout only). */
+  /** The storage area for uploaded files (profile photos). Required in production. */
+  STORAGE_DIR: z.string().min(1).optional(),
   INGEST_INTERNAL_URL: z.url().default('http://127.0.0.1:3100'),
   /** Public base URL of agentor-ingest, given to QuickPay as callback host. */
   INGEST_PUBLIC_URL: z.url().default('http://127.0.0.1:3100'),
