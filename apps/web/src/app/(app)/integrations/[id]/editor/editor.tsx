@@ -106,6 +106,7 @@ const TABS: InspectorTab[] = ['general', 'mapping', 'filters', 'run', 'history']
 
 export function Editor(p: EditorProps) {
   const t = useTranslations('editor');
+  const tf = useTranslations('flows');
   const locale = useLocale() as 'da' | 'en';
   const router = useRouter();
   const conns: ConnMap = useMemo(
@@ -521,8 +522,12 @@ export function Editor(p: EditorProps) {
               value={developer ? 'developer' : 'basic'}
               onValueChange={(v) => setDeveloper(v === 'developer')}
               options={[
-                { value: 'basic', label: 'Basic' },
-                { value: 'developer', label: 'Developer', icon: <Icon icon={Code} size={14} /> },
+                { value: 'basic', label: tf('basic') },
+                {
+                  value: 'developer',
+                  label: tf('developer'),
+                  icon: <Icon icon={Code} size={14} />,
+                },
               ]}
             />
             {!readOnly && (

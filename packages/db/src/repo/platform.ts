@@ -1725,3 +1725,119 @@ export async function createCustomer(
     return { tenantId, token };
   });
 }
+
+/* ---- Customer administration (Superadmin) --------------------------------------------------- */
+
+export type CustomerDetails = Omit<NewCustomer, 'ownerEmail' | 'planId' | 'interval'>;
+
+/** The company's details on P2, through app.platform_customer_update. */
+export async function updateCustomer(
+  db: Database,
+  actor: StaffActor,
+  tenantId: string,
+  c: CustomerDetails,
+): Promise<void> {
+  if (actor.role !== 'superadmin') throw new PlatformError('NOT_SUPERADMIN');
+  await asStaff(db, actor.userId, async (tx) => {
+    await tx.execute(
+      sql`select app.platform_customer_update(${tenantId}::uuid, ${c.name}, ${c.cvr ?? ''}, ${c.addressLine ?? ''}, ${c.postalCode ?? ''}, ${c.city ?? ''}, ${c.billingEmail ?? ''}, ${actor.name})`,
+    );
+    await platformLog(tx, actor, 'customer.updated', { tenantId, name: c.name });
+  });
+}
+
+/** Suspends or reactivates a customer; a reason is required to suspend. */
+export async function setCustomerStatus(
+  db: Database,
+  actor: StaffActor,
+  tenantId: string,
+  status: 'active' | 'suspended',
+  reason: string,
+): Promise<void> {
+  if (actor.role !== 'superadmin') throw new PlatformError('NOT_SUPERADMIN');
+  await asStaff(db, actor.userId, async (tx) => {
+    await tx.execute(
+      sql`select app.platform_customer_set_status(${tenantId}::uuid, ${status}, ${reason}, ${actor.name})`,
+    );
+    await platformLog(
+      tx,
+      actor,
+      status === 'suspended' ? 'customer.suspended' : 'customer.reactivated',
+      {
+        tenantId,
+        reason: reason || null,
+      },
+    );
+  });
+}
+
+/**
+ * A new owner invitation while the company has no owner (the earlier ones are revoked). Returns
+ * the address and the raw token for the e-mail.
+ */
+export async function resendOwnerInvitation(
+  db: Database,
+  actor: StaffActor,
+  tenantId: string,
+  email: string,
+): Promise<{ email: string; token: string }> {
+  if (actor.role !== 'superadmin') throw new PlatformError('NOT_SUPERADMIN');
+  const token = randomBytes(32).toString('base64url');
+  return asStaff(db, actor.userId, async (tx) => {
+    const res = await tx.execute<{ email: string }>(
+      sql`select app.platform_customer_resend_owner_invitation(${tenantId}::uuid, ${email}, ${hashInviteToken(token)}, ${actor.name}) as email`,
+    );
+    const sent = res.rows[0]!.email;
+    await platformLog(tx, actor, 'customer.invitation_resent', { tenantId });
+    return { email: sent, token };
+  });
+}
+
+/** Deletes a customer that has never been invoiced; the name must be typed to confirm. */
+export async function deleteCustomer(
+  db: Database,
+  actor: StaffActor,
+  tenantId: string,
+  confirmName: string,
+): Promise<string> {
+  if (actor.role !== 'superadmin') throw new PlatformError('NOT_SUPERADMIN');
+  return asStaff(db, actor.userId, async (tx) => {
+    const res = await tx.execute<{ name: string }>(
+      sql`select app.platform_customer_delete(${tenantId}::uuid, ${confirmName}) as name`,
+    );
+    const name = res.rows[0]!.name;
+    await platformLog(tx, actor, 'customer.deleted', { tenantId, name });
+    return name;
+  });
+}
+
+export interface CustomerAdminInfo {
+  status: 'active' | 'suspended' | 'deleting';
+  signupState: 'pending_plan' | 'pending_payment' | 'active';
+  name: string;
+  cvr: string | null;
+  addressLine: string | null;
+  postalCode: string | null;
+  city: string | null;
+  billingEmail: string | null;
+  /** Issued invoices; a customer with any can be suspended but not deleted. */
+  invoices: number;
+  hasOwner: boolean;
+  ownerInvite: { email: string; expiresAt: string; open: boolean } | null;
+}
+
+/** What P2's administration shows (Superadmin): status, details and the owner invitation. */
+export async function customerAdminInfo(
+  db: Database,
+  actor: StaffActor,
+  tenantId: string,
+): Promise<CustomerAdminInfo | null> {
+  if (actor.role !== 'superadmin') throw new PlatformError('NOT_SUPERADMIN');
+  return asStaff(db, actor.userId, async (tx) => {
+    const res = await tx.execute<{ info: CustomerAdminInfo | null }>(
+      sql`select app.platform_customer_admin_info(${tenantId}::uuid) as info`,
+    );
+    const info = res.rows[0]?.info ?? null;
+    return info ? { ...info, invoices: Number(info.invoices) } : null;
+  });
+}

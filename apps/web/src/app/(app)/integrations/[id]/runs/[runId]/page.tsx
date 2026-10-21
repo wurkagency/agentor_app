@@ -1,6 +1,6 @@
 import { getRun, isUuid } from '@agentor/db';
 import { formatDate, formatMoney, formatTime, type Locale } from '@agentor/i18n';
-import { StatusPill } from '@agentor/ui';
+import { StatusPill, cn } from '@agentor/ui';
 import {
   DeskNote,
   MobileCard,
@@ -17,6 +17,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import { routeTarget } from '@/components/flows/helpers';
+import { recordFacts } from '@/components/flows/record-facts';
 import { explain } from '@/components/flows/record-error';
 import { AppTopBar } from '@/components/mobile/chrome';
 import { DesktopRedirect } from '@/components/mobile/desktop-redirect';
@@ -153,13 +154,35 @@ export default async function RunPage({
               .filter(Boolean)
               .join(' · ')}
           </p>
+          <MobileCard>
+            <dl className="m-0 flex flex-col px-4 pb-3">
+              {recordFacts(
+                record,
+                (k, v) => tr(k as 'facts.recordId', v),
+                locale,
+                routeName(record.routeId),
+              ).map((x) => (
+                <div
+                  key={x.k}
+                  className="flex justify-between gap-3 pt-2.5 text-table leading-snug"
+                >
+                  <dt className="flex-none text-fg-2">{x.k}</dt>
+                  <dd
+                    className={cn(
+                      'm-0 min-w-0 break-all text-right',
+                      x.mono && 'font-mono text-mono',
+                    )}
+                  >
+                    {x.v}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </MobileCard>
           <DebugBlocks
             debug={record.debug}
-            labels={{ request: t('request'), response: t('response'), none: t('noDebug') }}
+            labels={{ request: t('request'), response: t('response'), none: tr('noDebug') }}
           />
-          <p className="m-0 font-mono text-mono text-fg-2">
-            {t('id', { id: record.id.slice(0, 12) })}
-          </p>
           {canEdit && record.outcome === 'failed' && (
             <div className="mt-auto">
               <RetryFailedButton flowId={id} routeId={record.routeId} label={t('retryOne')} big />

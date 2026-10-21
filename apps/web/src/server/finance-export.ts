@@ -124,7 +124,7 @@ export async function timelogCsv(actor: StaffActor, m: Month): Promise<string> {
       'Kunde',
       'Sag',
       'Dato',
-      'Supporter',
+      'Support Agent',
       'Kilde',
       'Registreret min.',
       'Afregnet min.',
@@ -169,7 +169,7 @@ export async function reportCsv(actor: StaffActor, m: Month): Promise<string> {
     ['Kunde', 'Afregnet min.', 'Beløb ekskl. moms'],
     ...r.topCustomers.map((c) => [c.name, c.billedMinutes, kr(c.netOre)]),
     [],
-    ['Supporter', 'Fakturerbar min.', 'Ikke fakturerbar min.', 'Sager'],
+    ['Support Agent', 'Fakturerbar min.', 'Ikke fakturerbar min.', 'Sager'],
     ...r.perStaff.map((s) => [s.name, s.billable, s.nonBillable, s.cases]),
   ]);
 }

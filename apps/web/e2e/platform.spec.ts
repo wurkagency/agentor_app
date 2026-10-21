@@ -141,7 +141,7 @@ test('Superadmin opens a customer app directly, without a request', async ({ bro
     .getByRole('button', { name: 'Åbn app' })
     .click();
   const bar = page.getByRole('region', { name: 'Supportvisning' });
-  await expect(bar).toContainText('Superadmin · direkte adgang');
+  await expect(bar).toContainText('Super Administrator · direkte adgang');
   await page.getByRole('button', { name: 'Afslut supportvisning' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Kassér tid' }).click();
 

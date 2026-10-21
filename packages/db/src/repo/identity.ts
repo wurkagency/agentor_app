@@ -45,6 +45,8 @@ export interface MembershipContext {
   signupState: 'pending_plan' | 'pending_payment' | 'active';
   onboardingStep: 'webshop' | 'accounting' | 'template' | 'test' | 'done' | null;
   onboardingSkipped: boolean;
+  /** Suspended by Agentor (Platform › Kunde): no one in the company can use the app. */
+  suspended: boolean;
 }
 
 /** The user's membership in a tenant, or null. The tenant comes from the session, never input. */
@@ -64,6 +66,7 @@ export async function getMembership(
         signupState: tenants.signupState,
         onboardingStep: tenants.onboardingStep,
         onboardingSkippedAt: tenants.onboardingSkippedAt,
+        status: tenants.status,
       })
       .from(memberships)
       .innerJoin(tenants, eq(tenants.id, memberships.tenantId))
@@ -72,9 +75,17 @@ export async function getMembership(
   );
   const row = rows[0];
   if (!row) return null;
-  const { onboardingCompletedAt, onboardingSkippedAt, signupState, onboardingStep, ...rest } = row;
+  const {
+    onboardingCompletedAt,
+    onboardingSkippedAt,
+    signupState,
+    onboardingStep,
+    status,
+    ...rest
+  } = row;
   return {
     ...rest,
+    suspended: status !== 'active',
     userId,
     onboardingCompleted: onboardingCompletedAt !== null,
     signupState: signupState as MembershipContext['signupState'],

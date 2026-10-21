@@ -166,7 +166,7 @@ test('OR groups and JSONata fields in developer view', async ({ page }) => {
   await inspector.getByRole('button', { name: 'Tilføj filter' }).click();
   await inspector.getByRole('button', { name: 'Tilføj eller-gruppe' }).click();
   await expect(inspector.getByText('eller', { exact: true }).first()).toBeVisible();
-  await page.getByRole('radio', { name: 'Developer' }).click();
+  await page.getByRole('radio', { name: 'Udvikler' }).click();
   await expect(inspector.getByRole('textbox', { name: 'Udtryk' })).toHaveValue(/\) or \(/);
 
   // Developer mapping: a JSONata field with a live preview from the sandbox.

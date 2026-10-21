@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, CopyButton, Icon, StatusPill, Table, Td, Th, Tr } from '@agentor/ui';
+import { Card, CopyButton, Icon, StatusPill, Table, Td, Th, Tr, cn } from '@agentor/ui';
 import { Settings2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
@@ -47,6 +47,7 @@ export interface RunsViewProps {
     mappingField: string | null;
     code: string | null;
     debug: string | null;
+    facts: { k: string; v: string; mono?: boolean }[];
   } | null;
 }
 
@@ -210,7 +211,17 @@ export function RunsView({ flowId, developer, canEdit, runs, selected, record }:
               <h4 className="m-0 text-table font-semibold">{tr('technical')}</h4>
               {developer ? (
                 <>
-                  {record.code && <span className="font-mono text-mono">{record.code}</span>}
+                  <dl className="m-0 grid grid-cols-form-row gap-x-4 gap-y-1.5 text-table">
+                    {record.facts.map((f) => (
+                      <div key={f.k} className="contents">
+                        <dt className="text-fg-2">{f.k}</dt>
+                        <dd className={cn('m-0 break-all', f.mono && 'font-mono text-mono')}>
+                          {f.v}
+                        </dd>
+                      </div>
+                    ))}
+                  </dl>
+                  {!record.debug && <p className="m-0 text-meta text-fg-2">{tr('noDebug')}</p>}
                   {record.debug && (
                     <div className="relative">
                       <pre className="m-0 overflow-x-auto rounded-sm bg-navy p-4 font-mono text-mono text-on-navy">

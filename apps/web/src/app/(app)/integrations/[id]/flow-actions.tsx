@@ -1,11 +1,11 @@
 'use client';
 
-import { Button, Icon, Segmented, toast } from '@agentor/ui';
+import { Button, Dialog, Icon, Segmented, toast } from '@agentor/ui';
 import { Code, History, Pause, Pencil, Play, RotateCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import {
   pauseFlows,
   restoreVersionAction,
@@ -35,6 +35,8 @@ export function FlowActions({
   const pathname = usePathname();
   const params = useSearchParams();
   const [pending, start] = useTransition();
+  // Pausing stops a live flow; it is confirmed first so a stray click can't do it.
+  const [confirmPause, setConfirmPause] = useState(false);
 
   const act = (fn: typeof pauseFlows, done: string) =>
     start(async () => {
@@ -79,7 +81,7 @@ export function FlowActions({
               variant="secondary"
               size="m"
               disabled={pending}
-              onClick={() => act(pauseFlows, 'pausedToast')}
+              onClick={() => setConfirmPause(true)}
             >
               <Icon icon={Pause} size={16} />
               {t('pause')}
@@ -95,6 +97,31 @@ export function FlowActions({
           </Button>
         </>
       )}
+      <Dialog
+        open={confirmPause}
+        onOpenChange={setConfirmPause}
+        title={t('pauseConfirmTitle')}
+        description={t('pauseConfirmBody')}
+        closeLabel={tc('close')}
+        footer={
+          <>
+            <Button variant="secondary" size="m" onClick={() => setConfirmPause(false)}>
+              {tc('cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              size="m"
+              loading={pending}
+              onClick={() => {
+                setConfirmPause(false);
+                act(pauseFlows, 'pausedToast');
+              }}
+            >
+              {t('pause')}
+            </Button>
+          </>
+        }
+      />
       {canEdit && (
         <Button variant="primary" size="m" asChild>
           <Link href={`/integrations/${id}/editor`}>

@@ -606,3 +606,72 @@ describe('create a customer (Superadmin, /platform/customers)', () => {
     expect(r[0]!.error?.message).toContain('OWNER_INVITATION_PROTECTED');
   });
 });
+
+describe('customer administration (0053): Super Administrator only', () => {
+  const TOKEN = 'b'.repeat(43);
+  const call = (user: string, sql: string, values: unknown[] = []): Step => ({
+    as: 'web',
+    user,
+    sql,
+    values,
+  });
+
+  it('a Support Agent and a tenant owner can call none of the functions', async () => {
+    const fns = [
+      `select app.platform_customer_update($1, 'X', '', '', '', '', '', 'X')`,
+      `select app.platform_customer_set_status($1, 'suspended', 'X', 'X')`,
+      `select app.platform_customer_resend_owner_invitation($1, '', '${TOKEN}', 'X')`,
+      `select app.platform_customer_delete($1, 'X')`,
+      `select app.platform_customer_admin_info($1)`,
+    ];
+    const r = await steps([
+      makeStaff('supporter'),
+      ...fns.map((sql) => call(STAFF, sql, [ID.tenantA])),
+      ...fns.map((sql) => ({ ...call(ID.userAOwner, sql, [ID.tenantA]), tenant: ID.tenantA })),
+    ]);
+    for (const x of r.slice(1)) expect(x.error?.message).toContain('NOT_SUPERADMIN');
+  });
+
+  it('suspends with a reason, keeps invoiced customers, and deletes a new one', async () => {
+    const r = await steps([
+      makeStaff('superadmin'),
+      call(STAFF, `select app.platform_customer_set_status($1, 'suspended', '', 'Kasper')`, [
+        ID.tenantA,
+      ]),
+      call(STAFF, `select app.platform_customer_set_status($1, 'suspended', 'Test', 'Kasper')`, [
+        ID.tenantA,
+      ]),
+      { as: 'admin', sql: `select status from tenants where id = $1`, values: [ID.tenantA] },
+      call(STAFF, `select app.platform_customer_delete($1, 'wrong')`, [ID.tenantA]),
+      {
+        as: 'admin',
+        sql: `select name from tenants where id = $1`,
+        values: [ID.tenantA],
+      },
+      call(
+        STAFF,
+        `select app.platform_create_customer('Slet Mig ApS', '', '', '', '', '', 'slet@x.test', 'business', 'month', $1, 'Kasper') as id`,
+        [TOKEN],
+      ),
+      {
+        as: 'admin',
+        user: STAFF,
+        sql: `select app.platform_customer_delete((select id from tenants where name = 'Slet Mig ApS'), 'slet mig aps') as name`,
+      },
+      { as: 'admin', sql: `select count(*)::int as n from tenants where name = 'Slet Mig ApS'` },
+    ]);
+    expect(r[1]!.error?.message).toContain('REASON_REQUIRED');
+    expect(r[2]!.error).toBeUndefined();
+    expect(r[3]!.rows![0]!.status).toBe('suspended');
+    expect(r[4]!.error?.message).toContain('CONFIRM_NAME_MISMATCH');
+    const tenantAName = r[5]!.rows![0]!.name as string;
+    expect(r[7]!.rows![0]!.name).toBe('Slet Mig ApS');
+    expect(r[8]!.rows![0]!.n).toBe(0);
+    // An invoiced customer can't be deleted, even with the right name.
+    const invoiced = await steps([
+      makeStaff('superadmin'),
+      call(STAFF, `select app.platform_customer_delete($1, $2)`, [ID.tenantA, tenantAName]),
+    ]);
+    expect(invoiced[1]!.error?.message).toContain('HAS_INVOICES');
+  });
+});

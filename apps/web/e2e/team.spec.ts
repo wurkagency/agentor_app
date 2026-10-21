@@ -78,6 +78,42 @@ test('invite a reader by e-mail; they create an account and join (D11-Inviter)',
   ).toContainText('Læser');
 });
 
+test('an account an earlier attempt left half-made is finished from the invitation', async ({
+  page,
+  browser,
+}) => {
+  const email = `halv.konto.${Date.now()}@example.test`;
+  await ownerSql(TENANTS.nordlys.id, `update subscriptions set plan_id = 'enterprise'`);
+  await login(page, 'mette');
+  await page.goto('/settings/team');
+  await page.getByRole('button', { name: 'Invitér' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Invitér bruger' });
+  await dialog.getByLabel('E-mail').fill(email);
+  await dialog.getByText('Læser', { exact: true }).click();
+  await dialog.getByText('Alle flows', { exact: true }).click();
+  await dialog.getByRole('button', { name: 'Send invitation' }).click();
+  await expect(page.getByText(`Invitationen er sendt til ${email}`)).toBeVisible();
+  // An earlier attempt created the login, then failed before the invitation was accepted.
+  await adminQuery(
+    `insert into auth.users (id, name, email, email_verified) values (gen_random_uuid(), 'Halv', $1, true)`,
+    [email],
+  );
+
+  const link = /https?:\/\/\S+\/invite\/[A-Za-z0-9_-]+/.exec((await latestMailTo(email)).text)![0];
+  const invitee = await (await browser.newContext()).newPage();
+  await invitee.goto(new URL(link).pathname);
+  await invitee.getByLabel('Dit navn').fill('Hel Konto');
+  await invitee.getByLabel('Vælg adgangskode').fill('En-lang-adgangskode-42');
+  await invitee.getByRole('button', { name: 'Opret konto og acceptér' }).click();
+  await expect(invitee).toHaveURL(/\/$/);
+  const rows = await adminQuery<{ name: string }>(
+    `select u.name from auth.users u join memberships m on m.user_id = u.id where lower(u.email) = $1`,
+    [email],
+  );
+  expect(rows).toEqual([{ name: 'Hel Konto' }]);
+  await invitee.context().close();
+});
+
 test('change a role and access in one go; the audit log records it', async ({ page }) => {
   await login(page, 'mette');
   await page.goto('/settings/team');

@@ -126,7 +126,7 @@ const SCREENS: Screen[] = [
     board: 'MA05-Flow',
     user: 'mette',
     path: `/integrations/${FLOWS.webshop.id}`,
-    texts: ['Sidst kørt', 'Records i dag', /^Gentag \d+ fejlede$/, 'Pausér flow', 'Ruter'],
+    texts: ['Sidst kørt', 'Records i dag', /^Gentag \d+ fejlede$/, 'Sæt på pause', 'Ruter'],
   },
   {
     board: 'MA20-Flow-Ruter',
@@ -156,7 +156,7 @@ const SCREENS: Screen[] = [
     board: 'MA25-Koersel-Udvikler',
     user: 'mette',
     path: async (page) => `${await failureHref(page)}?view=developer`,
-    texts: ['Basic', 'Developer', 'Fejlet', 'ACCOUNT_NOT_FOUND'],
+    texts: ['Basis', 'Udvikler', 'Fejlet', 'ACCOUNT_NOT_FOUND'],
   },
   {
     board: 'MA07-Aktivitet',
@@ -588,7 +588,7 @@ const SCREENS: Screen[] = [
     path: '/platform/admin/users',
     texts: [
       'Brugere',
-      'Kun Superadmin kan se og ændre denne side',
+      'Kun Super Administrator kan se og ændre denne side',
       'Kasper Nyborg',
       'Anne Sørensen',
       'Line Ravn',
@@ -609,7 +609,7 @@ const SCREENS: Screen[] = [
       'Liste',
       /^Arkiv · \d+$/,
       'Kategori',
-      'Supporter',
+      'Support Agent',
       'Løsning',
       'Åbn sag',
       /^Viser \d+ af \d+ sager · i alt /,

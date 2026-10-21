@@ -81,7 +81,7 @@ test('bulk pause and resume (D2-Valg)', async ({ page }) => {
   await page.getByRole('checkbox', { name: 'Vælg Kunder til nyhedsbrev' }).click();
   const bar = page.getByRole('region', { name: 'Handlinger for valgte flows' });
   await expect(bar).toContainText('2 flows valgt');
-  await bar.getByRole('button', { name: 'Pause' }).click();
+  await bar.getByRole('button', { name: 'Sæt på pause' }).click();
   await expect(page.getByText('2 flows er sat på pause').filter({ visible: true })).toBeVisible();
   await expect(page.getByRole('row', { name: /Kreditnotaer · 1 rute/ })).toContainText('Pauset');
   await page.getByRole('checkbox', { name: 'Vælg Kreditnotaer' }).click();
@@ -119,11 +119,9 @@ test('flow detail explains the failure and how to fix it (D7-Flow-Fejl, D8)', as
     'href',
     /tab=mapping&field=accounts.euB2b/,
   );
-  await expect(
-    page.getByText('Vises i Developer-visning.').filter({ visible: true }),
-  ).toBeVisible();
+  await expect(page.getByText('Vises i Udvikler-visning.').filter({ visible: true })).toBeVisible();
   await axe(page);
-  await page.getByRole('radio', { name: 'Developer' }).click();
+  await page.getByRole('radio', { name: 'Udvikler' }).click();
   await expect(page.getByText('ACCOUNT_NOT_FOUND').filter({ visible: true })).toBeVisible();
 
   // Retrying with the stale account fails again: the cause has to be fixed in the editor.
@@ -182,6 +180,6 @@ test('readers see flows but cannot change them', async ({ page }) => {
   await expect(page.getByRole('checkbox', { name: /^Vælg / })).toHaveCount(0);
   await expect(page.getByRole('link', { name: 'Nyt flow' })).toHaveCount(0);
   await page.goto(`/integrations/${WEBSHOP}`);
-  await expect(page.getByRole('button', { name: 'Pause' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Sæt på pause' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /^Gentag/ })).toHaveCount(0);
 });

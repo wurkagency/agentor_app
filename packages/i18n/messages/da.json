@@ -155,8 +155,8 @@
       "twoFactorOff": "Totrin slået fra"
     },
     "role": {
-      "superadmin": "Superadmin",
-      "supporter": "Supporter"
+      "superadmin": "Super Administrator",
+      "supporter": "Support Agent"
     },
     "staff": {
       "eyebrow": "{role} · Agentor Platform",
@@ -1097,13 +1097,13 @@
     },
     "mixed": "Blandet",
     "viewLabel": "Visning",
-    "basic": "Basic",
-    "developer": "Developer",
+    "basic": "Basis",
+    "developer": "Udvikler",
     "collapseAll": "Fold alle ind",
     "expandAll": "Fold alle ud",
     "bulkLabel": "Handlinger for valgte flows",
     "selected": "{count, plural, one {# flow valgt} other {# flows valgt}}",
-    "pause": "Pause",
+    "pause": "Sæt på pause",
     "resume": "Genoptag",
     "runNow": "Kør nu",
     "clearSelection": "Fjern valg",
@@ -1180,7 +1180,9 @@
     "yesterday": "i går",
     "restore": "Gendan som kladde",
     "restoreVersion": "Gendan version {n} som kladde",
-    "restoreLocked": "En anden redigerer flowet. Prøv igen om lidt."
+    "restoreLocked": "En anden redigerer flowet. Prøv igen om lidt.",
+    "pauseConfirmTitle": "Sæt flowet på pause?",
+    "pauseConfirmBody": "Flowet holder pause, til du genoptager det. Du kan genoptage det når som helst."
   },
   "recordErrors": {
     "what": {
@@ -1315,10 +1317,28 @@
     "howToFix": "Sådan løser du det",
     "openSetting": "Åbn indstilling",
     "technical": "Tekniske detaljer",
-    "technicalHint": "Vises i Developer-visning.",
+    "technicalHint": "Vises i Udvikler-visning.",
     "skippedZero": "Sprunget over · total 0 kr.",
     "waitingBroken": "Venter · forbindelse afbrudt",
-    "testWould": "Test · ville oprette"
+    "testWould": "Test · ville oprette",
+    "showRun": "Vis kørsel {time}",
+    "facts": {
+      "recordId": "Record-id",
+      "runId": "Kørsel-id",
+      "route": "Rute",
+      "entity": "Entitet",
+      "sourceId": "Kilde-id",
+      "sourceVersion": "Kildeversion",
+      "destinationId": "Destinations-id",
+      "outcome": "Udfald",
+      "errorCode": "Fejlkode",
+      "errorParams": "Fejlparametre",
+      "attempts": "Forsøg",
+      "duration": "Varighed",
+      "createdAt": "Oprettet",
+      "resolvedAt": "Løst"
+    },
+    "noDebug": "Der er ikke gemt request og response for denne record."
   },
   "activity": {
     "title": "Aktivitet",
@@ -1944,8 +1964,8 @@
     "account": "Profil og indstillinger",
     "logout": "Log ud",
     "role": {
-      "superadmin": "Superadmin",
-      "supporter": "Supporter"
+      "superadmin": "Super Administrator",
+      "supporter": "Support Agent"
     },
     "gear": {
       "label": "Agentor Platform",
@@ -1961,7 +1981,7 @@
       "status": "Systemstatus",
       "statusSub": "Kører, køer og connectors",
       "users": "Platformbrugere og roller",
-      "usersSub": "Kun for Superadmin",
+      "usersSub": "Kun for Super Administrator",
       "settings": "Platformindstillinger",
       "settingsSub": "Timepris, regler og planer",
       "note": "Du har ingen stående adgang til kundedata. Alt, du ser i en kundes app, logges.",
@@ -2142,7 +2162,10 @@
       "notesEmpty": "Ingen noter endnu.",
       "pinned": "fastgjort",
       "created": "Kunden er oprettet, og ejeren har fået en mail med invitationen. Virksomheden er aktiv, når ejeren har betalt.",
-      "createdNoMail": "Kunden er oprettet, men mailen til ejeren kunne ikke sendes. Tjek mailopsætningen, og opret invitationen igen."
+      "createdNoMail": "Kunden er oprettet, men mailen til ejeren kunne ikke sendes. Tjek mailopsætningen, og opret invitationen igen.",
+      "suspendedBanner": "Kunden er suspenderet. Ingen i virksomheden kan åbne appen, og der startes ingen kørsler, før kunden genaktiveres.",
+      "ownerInvitePending": "Ejeren er ikke oprettet endnu. Invitationen til {email} virker til {date}.",
+      "ownerInviteExpired": "Ejeren er ikke oprettet endnu, og invitationen til {email} virker ikke længere. Send en ny under Administrér."
     },
     "access": {
       "title": "Anmod om supportadgang",
@@ -2318,7 +2341,7 @@
       "search": "Søg fx \"kreditnota\" eller \"Nordlys\"",
       "customer": "Kunde",
       "category": "Kategori",
-      "supporter": "Supporter",
+      "supporter": "Support Agent",
       "period": "Periode",
       "all": "Alle",
       "last30": "Sidste 30 dage",
@@ -2332,7 +2355,7 @@
       "colCustomer": "Kunde",
       "colCategory": "Kategori",
       "colStatus": "Status",
-      "colSupporter": "Supporter",
+      "colSupporter": "Support Agent",
       "colCreated": "Oprettet",
       "colResolved": "Løst",
       "colTime": "Tid",
@@ -2461,7 +2484,7 @@
       "plan": "Abonnement: {plan}",
       "perCustomerTitle": "Tid pr. kunde",
       "perCustomerIntro": "Denne måneds supporttid. Fakturerbar tid kommer på kundens næste Agentor-faktura.",
-      "noRate": "Der er ingen timepris endnu, så fakturerbar tid faktureres ikke. Superadmin sætter den under Administration › Produkt.",
+      "noRate": "Der er ingen timepris endnu, så fakturerbar tid faktureres ikke. Super Administrator sætter den under Administration › Produkt.",
       "rate": "Timepris: {rate} ekskl. moms.",
       "emptyMonth": "Ingen tid denne måned",
       "emptyMonthBody": "Tid på kundesager vises her.",
@@ -2485,14 +2508,14 @@
       "rolesTab": "Roller",
       "audit": "Platform-audit-log",
       "title": "Brugere",
-      "intro": "Agentors egne medarbejdere. Kun Superadmin kan se og ændre denne side. Totrin er påkrævet.",
+      "intro": "Agentors egne medarbejdere. Kun Super Administrator kan se og ændre denne side. Totrin er påkrævet.",
       "invite": "Invitér medarbejder",
       "inviteHelp": "Medarbejderen skal have et Agentor-login i forvejen.",
       "email": "E-mail",
       "role": "Rolle",
       "roles": {
-        "superadmin": "Superadmin",
-        "supporter": "Supporter"
+        "superadmin": "Super Administrator",
+        "supporter": "Support Agent"
       },
       "probation": "Prøvetid til",
       "probationHelp": "Valgfri",
@@ -2501,8 +2524,8 @@
       "saved": "Gemt",
       "errors": {
         "USER_NOT_FOUND": "Der findes intet login med den e-mail.",
-        "LAST_SUPERADMIN": "Der skal altid være mindst én Superadmin.",
-        "NOT_SUPERADMIN": "Kun Superadmin kan det.",
+        "LAST_SUPERADMIN": "Der skal altid være mindst én Super Administrator.",
+        "NOT_SUPERADMIN": "Kun Super Administrator kan det.",
         "generic": "Det lykkedes ikke. Prøv igen."
       },
       "colStaff": "Medarbejder",
@@ -2519,8 +2542,8 @@
       "mfaOn": "Slået til",
       "mfaOff": "Mangler",
       "menu": "Handlinger for {email}",
-      "makeSupporter": "Gør til Supporter",
-      "makeSuperadmin": "Gør til Superadmin",
+      "makeSupporter": "Gør til Support Agent",
+      "makeSuperadmin": "Gør til Super Administrator",
       "disable": "Deaktivér",
       "rightsTitle": "Rettigheder pr. rolle",
       "right": "Rettighed",
@@ -2547,8 +2570,8 @@
       "hourlyRateHelp": "Kr. pr. time ekskl. moms (800 kr. inkl.). Hver registrering oprundes til 15 min. og faktureres den 1. i næste måned.",
       "notSet": "Ikke sat",
       "approvalAlways": "Kunder, der kræver godkendelse, skal altid godkende. Det kan ikke slås fra her.",
-      "noStanding": "Supportere har ingen stående adgang",
-      "noStandingBody": "Supportere skal have en godkendt, tidsbegrænset adgang til kundens data. Superadmin kan åbne enhver kundes app direkte. Alle handlinger logges hos kunden med medarbejderens navn.",
+      "noStanding": "Support Agents har ingen stående adgang",
+      "noStandingBody": "Support Agents skal have en godkendt, tidsbegrænset adgang til kundens data. Super Administrator kan åbne enhver kundes app direkte. Alle handlinger logges hos kunden med medarbejderens navn.",
       "rolesTitle": "Roller",
       "rolesIntro": "Hvad hver rolle må. Databasen håndhæver det, tabellen forklarer det.",
       "auditIntro": "Ændringer af medarbejdere og platformindstillinger.",
@@ -2569,11 +2592,11 @@
     },
     "settings": {
       "title": "Platformindstillinger",
-      "intro": "Timepris for fakturerbar supporttid og regler for supportadgang. Kun Superadmin.",
+      "intro": "Timepris for fakturerbar supporttid og regler for supportadgang. Kun Super Administrator.",
       "supportTitle": "Support",
       "supportMeta": "Timepris og adgangsregler",
       "plansTitle": "Planer",
-      "plansMeta": "Pris og grænser pr. plan. Kun Superadmin kan ændre dem.",
+      "plansMeta": "Pris og grænser pr. plan. Kun Super Administrator kan ændre dem.",
       "colPlan": "Plan",
       "colPrice": "Pris pr. md. ekskl. moms",
       "colSeats": "Brugere",
@@ -2668,7 +2691,7 @@
       "billable": "Fakturerbar tid",
       "endGrant": "Afslut også supportadgangen nu",
       "endGrantHelp": "(ellers udløber den {when})",
-      "contextSuperadmin": "Superadmin · direkte adgang · alt logges i kundens audit-log",
+      "contextSuperadmin": "Super Administrator · direkte adgang · alt logges i kundens audit-log",
       "direct": "Åbn",
       "allCustomers": "Alle kunder"
     },
@@ -2916,7 +2939,7 @@
         "notBillableLegend": "Fejl hos Agentor og goodwill",
         "month": "Måned",
         "search": "Søg kunde",
-        "supporter": "Supporter",
+        "supporter": "Support Agent",
         "allSupporters": "Alle supportere",
         "sortedByAmount": "Sorteret efter beløb",
         "expand": "Fold ud",
@@ -3143,14 +3166,14 @@
       "emptyActive": "Ingen aktive eller ventende adgange",
       "emptyActiveBody": "Anmod om adgang fra en kunde eller en sag.",
       "emptyExpired": "Ingen udløbne adgange de sidste 30 dage.",
-      "footer": "Kunder, der kræver godkendelse, skal altid godkende. Ingen har stående adgang, heller ikke Superadmin.",
+      "footer": "Kunder, der kræver godkendelse, skal altid godkende. Ingen har stående adgang, heller ikke Super Administrator.",
       "today": "i dag {time}",
       "tomorrow": "i morgen {time}",
       "youShort": "(dig)"
     },
     "product": {
       "title": "Produkt",
-      "intro": "Priser på support og abonnementer, og hvad hver plan indeholder. Kun Superadmin kan ændre dem.",
+      "intro": "Priser på support og abonnementer, og hvad hver plan indeholder. Kun Super Administrator kan ændre dem.",
       "history": "Historik",
       "historyIntro": "Hver gemt ændring er en ny version med dato og navn.",
       "historyEmpty": "Ingen versioner endnu.",
@@ -3352,7 +3375,7 @@
         "perStaff": "Tid pr. supporter",
         "perCategory": "Tid pr. kategori",
         "topCustomers": "Største kunder i support",
-        "colStaff": "Supporter",
+        "colStaff": "Support Agent",
         "colBillable": "Fakturerbar",
         "colNonBillable": "Ikke fakturerbar",
         "colCases": "Sager",
@@ -3427,6 +3450,59 @@
       },
       "pdfMobile": "Gem som PDF",
       "csvMobile": "Eksportér CSV"
+    },
+    "customerAdmin": {
+      "menu": "Administrér",
+      "edit": "Redigér oplysninger",
+      "resend": "Send ny invitation til ejeren",
+      "suspend": "Suspendér kunde",
+      "reactivate": "Genaktivér kunde",
+      "delete": "Slet kunde",
+      "editTitle": "Redigér kundens oplysninger",
+      "name": "Firmanavn",
+      "cvr": "CVR-nummer",
+      "address": "Adresse",
+      "postalCode": "Postnr.",
+      "city": "By",
+      "billingEmail": "Faktura-e-mail",
+      "save": "Gem ændringer",
+      "saved": "Kundens oplysninger er gemt",
+      "resendTitle": "Send ny invitation til ejeren",
+      "resendHelp": "Ejeren får et nyt link, der virker i 14 dage. Tidligere links holder op med at virke.",
+      "inviteOpen": "Den nuværende invitation til {email} virker stadig.",
+      "inviteClosed": "Invitationen til {email} virker ikke længere.",
+      "ownerEmail": "Ejerens e-mail",
+      "resendButton": "Send invitation",
+      "resent": "Invitationen er sendt til {email}",
+      "suspendTitle": "Suspendér {name}?",
+      "suspendHelp": "Ingen i virksomheden kan åbne appen, og der startes ingen kørsler, før du genaktiverer kunden. Data og abonnement bliver liggende.",
+      "reason": "Begrundelse",
+      "reasonHelp": "Skrives i kundens audit-log og i platformens log.",
+      "suspendButton": "Suspendér",
+      "suspended": "Kunden er suspenderet",
+      "reactivateTitle": "Genaktivér {name}?",
+      "reactivateHelp": "Virksomheden kan bruge appen igen, og flows kører som før.",
+      "reactivated": "Kunden er genaktiveret",
+      "deleteTitle": "Slet {name}?",
+      "deleteHelp": "Kunden slettes med flows, forbindelser, nøgler, sager og log. Det kan ikke fortrydes. Brugernes logins bliver liggende uden virksomheden.",
+      "deleteBlocked": "Kunden har {count, plural, one {# udstedt faktura} other {# udstedte fakturaer}}, som skal gemmes efter bogføringsloven. Suspendér kunden i stedet.",
+      "confirmName": "Skriv \"{name}\" for at bekræfte",
+      "deleteButton": "Slet kunde",
+      "deleted": "{name} er slettet",
+      "error": {
+        "generic": "Det lykkedes ikke. Prøv igen.",
+        "invalid": "Tjek felterne, og prøv igen.",
+        "TENANT_NAME_REQUIRED": "Skriv firmanavnet.",
+        "BILLING_EMAIL_INVALID": "Faktura-e-mailen er ikke gyldig.",
+        "OWNER_EMAIL_INVALID": "Ejerens e-mail er ikke gyldig.",
+        "HAS_OWNER": "Virksomheden har allerede en ejer.",
+        "REASON_REQUIRED": "Skriv en begrundelse.",
+        "CONFIRM_NAME_MISMATCH": "Navnet passer ikke.",
+        "HAS_INVOICES": "Kunden har udstedte fakturaer og kan ikke slettes. Suspendér kunden i stedet.",
+        "QUICKPAY_UNAVAILABLE": "Kortet hos QuickPay kunne ikke annulleres, så intet er slettet. Prøv igen om lidt.",
+        "TENANT_NOT_FOUND": "Kunden findes ikke længere.",
+        "NOT_SUPERADMIN": "Kun Super Administrator kan gøre det."
+      }
     }
   },
   "support": {
@@ -3573,7 +3649,7 @@
       "recordsToday": "Records i dag",
       "recordsValue": "{records} · {failed} fejlet",
       "retryN": "Gentag {count} fejlede",
-      "pause": "Pausér flow",
+      "pause": "Sæt på pause",
       "resume": "Genoptag flow",
       "routes": "Ruter",
       "details": "Detaljer",
@@ -3643,8 +3719,8 @@
       "company": "Firma i {country}",
       "person": "Privatkunde i {country}",
       "viewLabel": "Visning",
-      "basic": "Basic",
-      "developer": "Developer",
+      "basic": "Basis",
+      "developer": "Udvikler",
       "request": "Request",
       "response": "Response",
       "noDebug": "Ingen tekniske detaljer for denne record.",
@@ -4209,7 +4285,7 @@
       "pendingMeta": "Anmodet {when}",
       "noGrantTitle": "Ingen adgang til kundens data",
       "noGrantBody": "Anmod om adgang for at se flows, kørsler og fejl.",
-      "directBody": "Som Superadmin kan du åbne appen direkte. Det står i kundens audit-log.",
+      "directBody": "Som Super Administrator kan du åbne appen direkte. Det står i kundens audit-log.",
       "tabFlows": "Flows {count}",
       "tabCases": "Sager {count}",
       "tabNotes": "Noter {count}",
@@ -4230,7 +4306,7 @@
     "supportView": {
       "title": "Supportvisning · {name}",
       "context": "{scope} · sag {case} · {left} tilbage",
-      "contextSuperadmin": "Superadmin · direkte adgang · alt logges",
+      "contextSuperadmin": "Super Administrator · direkte adgang · alt logges",
       "leftHours": "{h} t",
       "leftMinutes": "{m} min.",
       "end": "Afslut",
@@ -4386,7 +4462,7 @@
     },
     "platformUsers": {
       "count": "{count, plural, one {# medarbejder} other {# medarbejdere}}",
-      "intro": "Kun Superadmin kan se og ændre denne side. Totrin er påkrævet.",
+      "intro": "Kun Super Administrator kan se og ændre denne side. Totrin er påkrævet.",
       "activeNow": "Aktiv nu",
       "probation": "Prøvetid til {date}",
       "rights": {
@@ -4400,14 +4476,14 @@
         "changePlans": "Ændre planer og priser",
         "seeAudit": "Se platform-audit-log"
       },
-      "rightsCell": "Superadmin: {superadmin}. Supporter: {supporter}.",
+      "rightsCell": "Super Administrator: {superadmin}. Support Agent: {supporter}.",
       "rulesMeta": "Maks. 24 timer · sag og begrundelse kræves",
       "maxDuration": "Maks. varighed",
       "on": "Til",
       "off": "Slået fra",
       "warnAt": "Advar ved",
       "warnAtValue": "{count, plural, one {mere end # adgang pr. medarbejder} other {mere end # adgange pr. medarbejder}}",
-      "noStanding": "Ingen stående adgang. Supportere skal have en godkendt, tidsbegrænset adgang. Superadmin kan åbne en kundes app direkte, og det logges hos kunden.",
+      "noStanding": "Ingen stående adgang. Support Agents skal have en godkendt, tidsbegrænset adgang. Super Administrator kan åbne en kundes app direkte, og det logges hos kunden.",
       "inviteSave": "Invitér",
       "changeRole": "Skift rolle",
       "disableTitle": "Deaktivér {name}?",
@@ -4985,5 +5061,9 @@
       "text": "Du mangler: {step}. Det tager få minutter.",
       "resume": "Fortsæt opsætningen"
     }
+  },
+  "suspended": {
+    "title": "Kontoen er suspenderet",
+    "body": "Agentor har suspenderet virksomhedens konto, så appen kan ikke åbnes lige nu. Kontakt support@agentor.dk for at få den åbnet igen."
   }
 }

@@ -5,6 +5,7 @@ import {
   isUuid,
   listCases,
   listCustomerNotes,
+  customerAdminInfo,
 } from '@agentor/db';
 import { formatDate, formatDateTime, formatRelative, formatTime, type Locale } from '@agentor/i18n';
 import {
@@ -40,6 +41,7 @@ import { flowViews, connectionMap, NEEDS_ACTION } from '@/server/flows';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
 import { customersFor, initials, planNames, tenantNames } from '@/server/platform-data';
+import { CustomerAdmin } from '@/components/platform/customer-admin';
 import { CustomerMobile, type CustomerTab } from './mobile';
 import type { MobileGrant } from './mobile-actions';
 
@@ -83,6 +85,7 @@ export default async function CustomerPage({
   const openCases = cases.filter(
     (c) => c.status === 'new' || c.status === 'in_progress' || c.status === 'waiting',
   );
+  const admin = actor.role === 'superadmin' ? await customerAdminInfo(db(), actor, id) : null;
   const contacts = active ? await customerContacts(db(), actor.userId, id) : [];
   const views = active ? await flowViews(id, actor.userId, 7) : [];
   const conns = active ? await connectionMap(id, actor.userId) : new Map();
@@ -113,6 +116,17 @@ export default async function CustomerPage({
   const desktop = (
     <PageBody>
       {created && <Banner tone={sp.created === '1' ? 'info' : 'warn'}>{created}</Banner>}
+      {admin?.status === 'suspended' && <Banner tone="warn">{t('suspendedBanner')}</Banner>}
+      {admin && !admin.hasOwner && admin.ownerInvite && (
+        <Banner tone="info">
+          {admin.ownerInvite.open
+            ? t('ownerInvitePending', {
+                email: admin.ownerInvite.email,
+                date: formatDate(new Date(admin.ownerInvite.expiresAt), locale),
+              })
+            : t('ownerInviteExpired', { email: admin.ownerInvite.email })}
+        </Banner>
+      )}
       <Link
         href="/platform/customers"
         className="inline-flex items-center gap-1.5 text-table text-fg-2 no-underline"
@@ -144,6 +158,21 @@ export default async function CustomerPage({
           </div>
         </div>
         <span className="flex items-center gap-3">
+          {admin && (
+            <CustomerAdmin
+              tenantId={id}
+              status={admin.status}
+              name={admin.name}
+              cvr={admin.cvr}
+              addressLine={admin.addressLine}
+              postalCode={admin.postalCode}
+              city={admin.city}
+              billingEmail={admin.billingEmail}
+              invoices={admin.invoices}
+              hasOwner={admin.hasOwner}
+              ownerInvite={admin.ownerInvite}
+            />
+          )}
           <NoteButton tenantId={id} />
           {active ? (
             <OpenAppButton grantId={active.grantId} />

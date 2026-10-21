@@ -126,6 +126,8 @@ export const requireAppContext = cache(async (): Promise<AppContext> => {
         signupState: 'active',
         onboardingStep: null,
         onboardingSkipped: true,
+        // Staff may still help a suspended customer, under a grant as always.
+        suspended: false,
       },
       support: {
         grantId: grant.grantId,
@@ -161,6 +163,8 @@ export const requireAppContext = cache(async (): Promise<AppContext> => {
     mfa: s.user.twoFactorEnabled,
   });
   if (membership.signupState !== 'active') redirect(SIGNUP_PATHS[step]);
+  // Suspended by Agentor: nothing in the app opens until Agentor reactivates the company.
+  if (membership.suspended) redirect('/suspended');
   const privileged = membership.role === 'owner' || membership.role === 'admin';
   // Google or Microsoft proved the e-mail, not our second factor: confirm it once (B10).
   if (privileged && s.user.twoFactorEnabled && s.ssoLogin && !s.mfaVerifiedAt)

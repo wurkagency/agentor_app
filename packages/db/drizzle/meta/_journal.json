@@ -372,6 +372,13 @@
       "when": 1792601176328,
       "tag": "0052_profile_user_fk",
       "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1792613895466,
+      "tag": "0053_customer_admin",
+      "breakpoints": true
     }
   ]
 }

@@ -146,7 +146,7 @@ export async function RunsMobile({
               <CardButton href={`${base}/${r.id}`} linkAs={Link}>
                 {r.recordsFailed > 0
                   ? t('seeErrors')
-                  : tr('runAt', { time: formatTime(r.startedAt, locale) })}
+                  : tr('showRun', { time: formatTime(r.startedAt, locale) })}
               </CardButton>
             </CardActions>
           </ExpandCard>

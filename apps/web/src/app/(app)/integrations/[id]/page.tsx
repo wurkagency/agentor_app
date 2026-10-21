@@ -21,6 +21,7 @@ import { getLocale, getTranslations } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { LinkTabs } from '@/components/link-tabs';
 import { explain } from '@/components/flows/record-error';
+import { recordFacts } from '@/components/flows/record-facts';
 import { routeTarget } from '@/components/flows/helpers';
 import { PageBody } from '@/components/shell/secondary-nav';
 import { requireAppContext } from '@/server/auth/session';
@@ -403,6 +404,7 @@ async function RunsTab({
   routes: { id: string; label: string }[];
 }) {
   const te = await getTranslations('recordErrors');
+  const trf = await getTranslations('runs');
   const locale = (await getLocale()) as 'da' | 'en';
   const since = new Date(Date.now() - 86_400_000);
   const runs = await listRuns(db(), ctx, flowId, since);
@@ -480,6 +482,12 @@ async function RunsTab({
               mappingField: explanation.mappingField,
               code: record.errorCode,
               debug: record.debug ? JSON.stringify(record.debug, null, 2) : null,
+              facts: recordFacts(
+                record,
+                (k, v) => trf(k as 'facts.recordId', v),
+                locale,
+                routes.find((x) => x.id === record.routeId)?.label,
+              ),
             }
           : null
       }

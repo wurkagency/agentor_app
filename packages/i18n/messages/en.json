@@ -155,8 +155,8 @@
       "twoFactorOff": "Two-step off"
     },
     "role": {
-      "superadmin": "Superadmin",
-      "supporter": "Supporter"
+      "superadmin": "Super Administrator",
+      "supporter": "Support Agent"
     },
     "staff": {
       "eyebrow": "{role} · Agentor Platform",
@@ -1180,7 +1180,9 @@
     "yesterday": "yesterday",
     "restore": "Restore as draft",
     "restoreVersion": "Restore version {n} as draft",
-    "restoreLocked": "Someone else is editing the flow. Try again shortly."
+    "restoreLocked": "Someone else is editing the flow. Try again shortly.",
+    "pauseConfirmTitle": "Pause this flow?",
+    "pauseConfirmBody": "The flow stays paused until you resume it. You can resume it at any time."
   },
   "recordErrors": {
     "what": {
@@ -1318,7 +1320,25 @@
     "technicalHint": "Shown in Developer view.",
     "skippedZero": "Skipped · total 0 kr.",
     "waitingBroken": "Waiting · connection broken",
-    "testWould": "Test · would create"
+    "testWould": "Test · would create",
+    "showRun": "Show run {time}",
+    "facts": {
+      "recordId": "Record id",
+      "runId": "Run id",
+      "route": "Route",
+      "entity": "Entity",
+      "sourceId": "Source id",
+      "sourceVersion": "Source version",
+      "destinationId": "Destination id",
+      "outcome": "Outcome",
+      "errorCode": "Error code",
+      "errorParams": "Error parameters",
+      "attempts": "Attempts",
+      "duration": "Duration",
+      "createdAt": "Created",
+      "resolvedAt": "Resolved"
+    },
+    "noDebug": "No request and response were stored for this record."
   },
   "activity": {
     "title": "Activity",
@@ -1944,8 +1964,8 @@
     "account": "Profile and settings",
     "logout": "Log out",
     "role": {
-      "superadmin": "Superadmin",
-      "supporter": "Supporter"
+      "superadmin": "Super Administrator",
+      "supporter": "Support Agent"
     },
     "gear": {
       "label": "Agentor Platform",
@@ -1961,7 +1981,7 @@
       "status": "System status",
       "statusSub": "Runs, queues and connectors",
       "users": "Platform users and roles",
-      "usersSub": "Superadmin only",
+      "usersSub": "Super Administrator only",
       "settings": "Platform settings",
       "settingsSub": "Hourly rate, rules and plans",
       "note": "You have no standing access to customer data. Everything you see in a customer's app is logged.",
@@ -2142,7 +2162,10 @@
       "notesEmpty": "No notes yet.",
       "pinned": "pinned",
       "created": "The customer is created and the owner has an e-mail with the invitation. The company is active once the owner has paid.",
-      "createdNoMail": "The customer is created, but the e-mail to the owner could not be sent. Check the mail setup and invite again."
+      "createdNoMail": "The customer is created, but the e-mail to the owner could not be sent. Check the mail setup and invite again.",
+      "suspendedBanner": "The customer is suspended. No one in the company can open the app, and no runs start until the customer is reactivated.",
+      "ownerInvitePending": "The owner hasn't signed up yet. The invitation to {email} works until {date}.",
+      "ownerInviteExpired": "The owner hasn't signed up yet, and the invitation to {email} no longer works. Send a new one under Manage."
     },
     "access": {
       "title": "Request support access",
@@ -2318,7 +2341,7 @@
       "search": "Search e.g. \"credit note\" or \"Nordlys\"",
       "customer": "Customer",
       "category": "Category",
-      "supporter": "Supporter",
+      "supporter": "Support Agent",
       "period": "Period",
       "all": "All",
       "last30": "Last 30 days",
@@ -2332,7 +2355,7 @@
       "colCustomer": "Customer",
       "colCategory": "Category",
       "colStatus": "Status",
-      "colSupporter": "Supporter",
+      "colSupporter": "Support Agent",
       "colCreated": "Created",
       "colResolved": "Resolved",
       "colTime": "Time",
@@ -2461,7 +2484,7 @@
       "plan": "Subscription: {plan}",
       "perCustomerTitle": "Time per customer",
       "perCustomerIntro": "This month's support time. Billable time goes on the customer's next Agentor invoice.",
-      "noRate": "There is no hourly rate yet, so billable time isn't invoiced. Superadmin sets it under Administration › Product.",
+      "noRate": "There is no hourly rate yet, so billable time isn't invoiced. Super Administrator sets it under Administration › Product.",
       "rate": "Hourly rate: {rate} excl. VAT.",
       "emptyMonth": "No time this month",
       "emptyMonthBody": "Time on customer cases shows here.",
@@ -2485,14 +2508,14 @@
       "rolesTab": "Roles",
       "audit": "Platform audit log",
       "title": "Users",
-      "intro": "Agentor's own staff. Only Superadmin can see and change this page. Two-step login is required.",
+      "intro": "Agentor's own staff. Only Super Administrator can see and change this page. Two-step login is required.",
       "invite": "Invite staff member",
       "inviteHelp": "The staff member needs an Agentor login already.",
       "email": "E-mail",
       "role": "Role",
       "roles": {
-        "superadmin": "Superadmin",
-        "supporter": "Supporter"
+        "superadmin": "Super Administrator",
+        "supporter": "Support Agent"
       },
       "probation": "Probation until",
       "probationHelp": "Optional",
@@ -2501,8 +2524,8 @@
       "saved": "Saved",
       "errors": {
         "USER_NOT_FOUND": "There's no login with that e-mail.",
-        "LAST_SUPERADMIN": "There must always be at least one Superadmin.",
-        "NOT_SUPERADMIN": "Only Superadmin can do that.",
+        "LAST_SUPERADMIN": "There must always be at least one Super Administrator.",
+        "NOT_SUPERADMIN": "Only Super Administrator can do that.",
         "generic": "That didn't work. Try again."
       },
       "colStaff": "Staff member",
@@ -2519,8 +2542,8 @@
       "mfaOn": "On",
       "mfaOff": "Missing",
       "menu": "Actions for {email}",
-      "makeSupporter": "Make Supporter",
-      "makeSuperadmin": "Make Superadmin",
+      "makeSupporter": "Make Support Agent",
+      "makeSuperadmin": "Make Super Administrator",
       "disable": "Disable",
       "rightsTitle": "Rights per role",
       "right": "Right",
@@ -2547,8 +2570,8 @@
       "hourlyRateHelp": "Kr. per hour ex. VAT (800 kr. incl.). Each registration is rounded up to 15 min. and billed on the 1st of the next month.",
       "notSet": "Not set",
       "approvalAlways": "Customers that require approval always have to approve. That can't be turned off here.",
-      "noStanding": "Supporters have no standing access",
-      "noStandingBody": "Supporters need an approved, time-limited access to a customer's data. Superadmin can open any customer's app directly. Every action is logged at the customer with the staff member's name.",
+      "noStanding": "Support Agents have no standing access",
+      "noStandingBody": "Support Agents need an approved, time-limited access to a customer's data. Super Administrator can open any customer's app directly. Every action is logged at the customer with the staff member's name.",
       "rolesTitle": "Roles",
       "rolesIntro": "What each role may do. The database enforces it; the table explains it.",
       "auditIntro": "Changes to staff and platform settings.",
@@ -2569,11 +2592,11 @@
     },
     "settings": {
       "title": "Platform settings",
-      "intro": "Hourly rate for billable support time and rules for support access. Superadmin only.",
+      "intro": "Hourly rate for billable support time and rules for support access. Super Administrator only.",
       "supportTitle": "Support",
       "supportMeta": "Hourly rate and access rules",
       "plansTitle": "Plans",
-      "plansMeta": "Price and limits per plan. Only Superadmin can change them.",
+      "plansMeta": "Price and limits per plan. Only Super Administrator can change them.",
       "colPlan": "Plan",
       "colPrice": "Price per month excl. VAT",
       "colSeats": "Users",
@@ -2668,7 +2691,7 @@
       "billable": "Billable time",
       "endGrant": "Also end the support access now",
       "endGrantHelp": "(otherwise it expires {when})",
-      "contextSuperadmin": "Superadmin · direct access · everything is logged in the customer's audit log",
+      "contextSuperadmin": "Super Administrator · direct access · everything is logged in the customer's audit log",
       "direct": "Open",
       "allCustomers": "All customers"
     },
@@ -2916,7 +2939,7 @@
         "notBillableLegend": "Agentor's mistakes and goodwill",
         "month": "Month",
         "search": "Search customer",
-        "supporter": "Supporter",
+        "supporter": "Support Agent",
         "allSupporters": "All supporters",
         "sortedByAmount": "Sorted by amount",
         "expand": "Expand",
@@ -3143,14 +3166,14 @@
       "emptyActive": "No active or pending access",
       "emptyActiveBody": "Request access from a customer or a case.",
       "emptyExpired": "No expired access in the last 30 days.",
-      "footer": "Customers who require approval always have to approve. Nobody has standing access, not even Superadmin.",
+      "footer": "Customers who require approval always have to approve. Nobody has standing access, not even Super Administrator.",
       "today": "today {time}",
       "tomorrow": "tomorrow {time}",
       "youShort": "(you)"
     },
     "product": {
       "title": "Product",
-      "intro": "Prices for support and subscriptions, and what each plan includes. Only Superadmin can change them.",
+      "intro": "Prices for support and subscriptions, and what each plan includes. Only Super Administrator can change them.",
       "history": "History",
       "historyIntro": "Every saved change is a new version with its date and name.",
       "historyEmpty": "No versions yet.",
@@ -3352,7 +3375,7 @@
         "perStaff": "Time per supporter",
         "perCategory": "Time per category",
         "topCustomers": "Largest customers in support",
-        "colStaff": "Supporter",
+        "colStaff": "Support Agent",
         "colBillable": "Billable",
         "colNonBillable": "Not billable",
         "colCases": "Cases",
@@ -3427,6 +3450,59 @@
       },
       "pdfMobile": "Save as PDF",
       "csvMobile": "Export CSV"
+    },
+    "customerAdmin": {
+      "menu": "Manage",
+      "edit": "Edit details",
+      "resend": "Send the owner a new invitation",
+      "suspend": "Suspend customer",
+      "reactivate": "Reactivate customer",
+      "delete": "Delete customer",
+      "editTitle": "Edit the customer's details",
+      "name": "Company name",
+      "cvr": "CVR number",
+      "address": "Address",
+      "postalCode": "Postcode",
+      "city": "City",
+      "billingEmail": "Billing e-mail",
+      "save": "Save changes",
+      "saved": "The customer's details are saved",
+      "resendTitle": "Send the owner a new invitation",
+      "resendHelp": "The owner gets a new link that works for 14 days. Earlier links stop working.",
+      "inviteOpen": "The current invitation to {email} still works.",
+      "inviteClosed": "The invitation to {email} no longer works.",
+      "ownerEmail": "Owner's e-mail",
+      "resendButton": "Send invitation",
+      "resent": "The invitation is sent to {email}",
+      "suspendTitle": "Suspend {name}?",
+      "suspendHelp": "No one in the company can open the app, and no runs start until you reactivate the customer. Data and subscription are kept.",
+      "reason": "Reason",
+      "reasonHelp": "Written to the customer's audit log and the platform log.",
+      "suspendButton": "Suspend",
+      "suspended": "The customer is suspended",
+      "reactivateTitle": "Reactivate {name}?",
+      "reactivateHelp": "The company can use the app again, and flows run as before.",
+      "reactivated": "The customer is reactivated",
+      "deleteTitle": "Delete {name}?",
+      "deleteHelp": "The customer is deleted with its flows, connections, keys, cases and log. This can't be undone. The users' logins are kept without the company.",
+      "deleteBlocked": "The customer has {count, plural, one {# issued invoice} other {# issued invoices}}, which must be kept under the Danish Bookkeeping Act. Suspend the customer instead.",
+      "confirmName": "Type \"{name}\" to confirm",
+      "deleteButton": "Delete customer",
+      "deleted": "{name} is deleted",
+      "error": {
+        "generic": "That didn't work. Try again.",
+        "invalid": "Check the fields and try again.",
+        "TENANT_NAME_REQUIRED": "Enter the company name.",
+        "BILLING_EMAIL_INVALID": "The billing e-mail isn't valid.",
+        "OWNER_EMAIL_INVALID": "The owner's e-mail isn't valid.",
+        "HAS_OWNER": "The company already has an owner.",
+        "REASON_REQUIRED": "Enter a reason.",
+        "CONFIRM_NAME_MISMATCH": "The name doesn't match.",
+        "HAS_INVOICES": "The customer has issued invoices and can't be deleted. Suspend the customer instead.",
+        "QUICKPAY_UNAVAILABLE": "The card at QuickPay couldn't be cancelled, so nothing was deleted. Try again shortly.",
+        "TENANT_NOT_FOUND": "The customer no longer exists.",
+        "NOT_SUPERADMIN": "Only a Super Administrator can do that."
+      }
     }
   },
   "support": {
@@ -4209,7 +4285,7 @@
       "pendingMeta": "Requested {when}",
       "noGrantTitle": "No access to the customer's data",
       "noGrantBody": "Request access to see flows, runs and errors.",
-      "directBody": "As Superadmin you can open the app directly. It shows in the customer's audit log.",
+      "directBody": "As Super Administrator you can open the app directly. It shows in the customer's audit log.",
       "tabFlows": "Flows {count}",
       "tabCases": "Cases {count}",
       "tabNotes": "Notes {count}",
@@ -4230,7 +4306,7 @@
     "supportView": {
       "title": "Support view · {name}",
       "context": "{scope} · case {case} · {left} left",
-      "contextSuperadmin": "Superadmin · direct access · everything is logged",
+      "contextSuperadmin": "Super Administrator · direct access · everything is logged",
       "leftHours": "{h}h",
       "leftMinutes": "{m} min",
       "end": "End",
@@ -4386,7 +4462,7 @@
     },
     "platformUsers": {
       "count": "{count, plural, one {# staff member} other {# staff members}}",
-      "intro": "Only Superadmin can see and change this page. Two-step verification is required.",
+      "intro": "Only Super Administrator can see and change this page. Two-step verification is required.",
       "activeNow": "Active now",
       "probation": "Probation until {date}",
       "rights": {
@@ -4400,14 +4476,14 @@
         "changePlans": "Change plans and prices",
         "seeAudit": "See platform audit log"
       },
-      "rightsCell": "Superadmin: {superadmin}. Supporter: {supporter}.",
+      "rightsCell": "Super Administrator: {superadmin}. Support Agent: {supporter}.",
       "rulesMeta": "Max. 24 hours · case and reason required",
       "maxDuration": "Max. duration",
       "on": "On",
       "off": "Off",
       "warnAt": "Warn at",
       "warnAtValue": "{count, plural, one {more than # grant per staff member} other {more than # grants per staff member}}",
-      "noStanding": "No standing access. Supporters need an approved, time-limited grant. Superadmin can open a customer app directly, and it is logged at the customer.",
+      "noStanding": "No standing access. Support Agents need an approved, time-limited grant. Super Administrator can open a customer app directly, and it is logged at the customer.",
       "inviteSave": "Invite",
       "changeRole": "Change role",
       "disableTitle": "Deactivate {name}?",
@@ -4985,5 +5061,9 @@
       "text": "Still to do: {step}. It takes a few minutes.",
       "resume": "Continue the setup"
     }
+  },
+  "suspended": {
+    "title": "The account is suspended",
+    "body": "Agentor has suspended the company's account, so the app can't be opened right now. Contact support@agentor.dk to have it reopened."
   }
 }

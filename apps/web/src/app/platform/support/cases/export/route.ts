@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       'Kunde',
       'Kategori',
       'Status',
-      'Supporter',
+      'Support Agent',
       'Oprettet',
       'Løst',
       'Minutter',

@@ -70,10 +70,16 @@ export async function claimRun(
 export async function createScheduledRun(db: Database, tenantId: string, flowId: string) {
   return withTenant(db, { tenantId }, async (tx) => {
     const [f] = await tx
-      .select({ versionId: flows.publishedVersionId, pausedAt: flows.pausedAt })
+      .select({
+        versionId: flows.publishedVersionId,
+        pausedAt: flows.pausedAt,
+        tenantStatus: tenants.status,
+      })
       .from(flows)
+      .innerJoin(tenants, eq(tenants.id, flows.tenantId))
       .where(eq(flows.id, flowId));
-    if (!f?.versionId || f.pausedAt) return null;
+    // Paused flows and suspended companies (Platform › Kunde) get no runs.
+    if (!f?.versionId || f.pausedAt || f.tenantStatus !== 'active') return null;
     const [r] = await tx
       .insert(runs)
       .values({ tenantId, flowId, versionId: f.versionId, kind: 'scheduled', status: 'queued' })

@@ -12,6 +12,7 @@ import {
   syncItems,
   syncPayloads,
   type RecordOutcome,
+  tenants,
 } from '../schema/index.js';
 import { addUsageTx, type ClaimedRun, type RecordInsert } from './engine.js';
 
@@ -488,10 +489,16 @@ export async function createEngineRun(
 ): Promise<string | null> {
   return withTenant(db, { tenantId }, async (tx) => {
     const [f] = await tx
-      .select({ versionId: flows.publishedVersionId, pausedAt: flows.pausedAt })
+      .select({
+        versionId: flows.publishedVersionId,
+        pausedAt: flows.pausedAt,
+        tenantStatus: tenants.status,
+      })
       .from(flows)
+      .innerJoin(tenants, eq(tenants.id, flows.tenantId))
       .where(eq(flows.id, flowId));
-    if (!f?.versionId || f.pausedAt) return null;
+    // Paused flows and suspended companies (Platform › Kunde) get no runs.
+    if (!f?.versionId || f.pausedAt || f.tenantStatus !== 'active') return null;
     // One automatic retry run at a time per flow.
     if (kind === 'retry') {
       const [busy] = await tx

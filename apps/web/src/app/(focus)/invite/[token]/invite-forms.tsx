@@ -65,7 +65,8 @@ export function CreateAccount({ token, email }: { token: string; email: string }
       setError(null);
       const r = await createAccountAndAccept({ token, name, password });
       if (r.ok) {
-        router.replace('/');
+        // Created and accepted; if signing in failed, the login page finishes it.
+        router.replace(r.data?.signedIn === false ? '/login' : '/');
         router.refresh();
       } else setError(KNOWN.includes(r.error as (typeof KNOWN)[number]) ? r.error : 'generic');
     });
