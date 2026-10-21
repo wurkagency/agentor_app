@@ -1,6 +1,7 @@
 import type { ErrorGroup } from '@agentor/db';
 import { cn } from '@agentor/ui';
 import {
+  ChipGroup,
   MobileCard,
   MobileEmpty,
   MobileFootnote,
@@ -10,20 +11,35 @@ import {
 } from '@agentor/ui/mobile';
 import { CircleCheck } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
+import Link from 'next/link';
 import { PlatformTopBar } from '@/components/mobile/chrome';
+import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
+import { DateRangeForm } from '@/components/platform/date-range-form';
 
 /**
- * MP05 Fejl: the last 24 hours across customers, as error codes and counts only. Which customers
- * a code hits stays on the server (decision 16).
+ * MP05 Fejl: error codes and counts across customers for 24 timer, 7 dage, 30 dage or a Fra/til
+ * period, as on S7. Which customers a code hits stays on the server (decision 16).
  */
 export async function ErrorsMobile({
   groups,
   describe,
+  period,
+  from,
+  to,
+  max,
+  aside,
 }: {
   groups: ErrorGroup[];
   describe: (code: string) => string;
+  /** The chip in use, or null when a Fra/til period is. */
+  period: '24h' | '7d' | '30d' | null;
+  from: string;
+  to: string;
+  max: string;
+  aside: string;
 }) {
   const t = await getTranslations('mobile.platform.errors');
+  const tp = await getTranslations('platform.errors');
   const records = groups.reduce((a, g) => a + g.records, 0);
   const customers = new Set(groups.flatMap((g) => g.tenantIds)).size;
   const noCase = groups.filter((g) => g.caseNumbers.length === 0).length;
@@ -39,7 +55,26 @@ export async function ErrorsMobile({
 
   return (
     <MobileShell topBar={<PlatformTopBar />}>
-      <MobilePageTitle title={t('title')} aside={t('last24')} />
+      <PlatformSubTabs />
+      <MobilePageTitle title={t('title')} aside={aside} />
+      <ChipGroup
+        label={tp('period')}
+        linkAs={Link}
+        value={period}
+        items={(['24h', '7d', '30d'] as const).map((p) => ({
+          key: p,
+          label: tp(`p${p}`),
+          href: `/platform/support/errors?period=${p}`,
+        }))}
+      />
+      <DateRangeForm
+        mobile
+        action="/platform/support/errors"
+        from={from}
+        to={to}
+        max={max}
+        labels={{ legend: tp('period'), from: tp('from'), to: tp('to'), apply: tp('apply') }}
+      />
       <MobileCard>
         <dl className="m-0 grid grid-cols-3 divide-x divide-border">
           {[

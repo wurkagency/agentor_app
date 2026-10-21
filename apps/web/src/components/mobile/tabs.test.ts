@@ -16,6 +16,7 @@ describe('activeAppTab', () => {
     expect(activeAppTab('/support-access/abc')).toBe('more');
     expect(activeAppTab('/billing')).toBe('more');
     expect(activeAppTab('/more')).toBe('more');
+    expect(activeAppTab('/profile')).toBe('profile');
     expect(activeAppTab('/integrationsx')).toBeNull();
   });
 });

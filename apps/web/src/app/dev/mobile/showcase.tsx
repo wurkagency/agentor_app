@@ -33,7 +33,7 @@ import {
   StackedValue,
   StatusHero,
   Switch,
-  TabBar,
+  MobileTabBar,
   TimelineEvent,
   TimerBar,
   TimerBarAction,
@@ -46,6 +46,10 @@ import {
 } from '@agentor/ui/mobile';
 import {
   Activity,
+  Building,
+  CircleUserRound,
+  Headphones,
+  Settings,
   Check,
   CircleCheck,
   CircleX,
@@ -53,13 +57,11 @@ import {
   Headset,
   House,
   Inbox,
-  Kanban,
   Menu,
   RefreshCw,
   Timer,
   TriangleAlert,
   Unplug,
-  Users,
   Workflow,
   Bell,
   Mail,
@@ -81,12 +83,14 @@ const APP_TABS: TabItem[] = [
   { key: 'integrations', href: '#', label: 'Integrationer', icon: Workflow },
   { key: 'activity', href: '#', label: 'Aktivitet', icon: Activity },
   { key: 'more', href: '#', label: 'Mere', icon: Menu },
+  { key: 'profile', href: '#', label: 'Profil', icon: CircleUserRound },
 ];
 const PLATFORM_TABS: TabItem[] = [
-  { key: 'customers', href: '#', label: 'Kunder', icon: Users },
-  { key: 'cases', href: '#', label: 'Sager', icon: Kanban },
-  { key: 'errors', href: '#', label: 'Fejl', icon: CircleX },
+  { key: 'customers', href: '#', label: 'Kunder', icon: Building },
+  { key: 'support', href: '#', label: 'Support', icon: Headphones },
   { key: 'finance', href: '#', label: 'Finans', icon: CreditCard },
+  { key: 'admin', href: '#', label: 'Admin', icon: Settings },
+  { key: 'profile', href: '#', label: 'Profil', icon: CircleUserRound },
 ];
 
 const WEEK = [
@@ -155,7 +159,7 @@ export function MobileShowcase() {
         subtitle="Alle komponenter i alle tilstande · MA01–MA15, MP01–MP07"
       />
 
-      <Section id="shell" title="MobileShell · TopBar · TabBar">
+      <Section id="shell" title="MobileShell · TopBar · MobileTabBar">
         <State label="Kunde · logo og klokke (MA02)">
           <Frame>
             <TopBar logo={{ href: '#', label: 'Agentor, gå til Overblik' }} bell={bell} />
@@ -185,7 +189,7 @@ export function MobileShowcase() {
                 label: 'Agentor Platform, gå til Kunder',
                 badge: <PlatformBadge>Platform</PlatformBadge>,
               }}
-              actions={<TopBarAvatar initials="AS" label="Profil: Anne Sørensen" />}
+              actions={<TopBarAvatar initials="AS" label="Profil: Anne Sørensen" href="#" />}
             />
           </Frame>
         </State>
@@ -200,14 +204,14 @@ export function MobileShowcase() {
             />
           </Frame>
         </State>
-        <State label="TabBar · kunde, Overblik aktiv">
+        <State label="MobileTabBar · kunde, Overblik aktiv">
           <Frame>
-            <TabBar items={APP_TABS} active="overview" label="Hovedmenu" fixed={false} />
+            <MobileTabBar items={APP_TABS} active="overview" label="Hovedmenu" fixed={false} />
           </Frame>
         </State>
-        <State label="TabBar · Platform, Superadmin, Finans aktiv">
+        <State label="MobileTabBar · Platform, Superadmin, Finans aktiv">
           <Frame>
-            <TabBar
+            <MobileTabBar
               items={PLATFORM_TABS}
               active="finance"
               label="Platformmenu"
@@ -216,11 +220,11 @@ export function MobileShowcase() {
             />
           </Frame>
         </State>
-        <State label="TabBar · Platform, Supporter (ingen Finans)">
+        <State label="MobileTabBar · Platform, Supporter (ingen Finans)">
           <Frame>
-            <TabBar
-              items={PLATFORM_TABS.slice(0, 3)}
-              active="cases"
+            <MobileTabBar
+              items={PLATFORM_TABS.filter((t) => t.key !== 'finance' && t.key !== 'admin')}
+              active="support"
               label="Platformmenu, supporter"
               variant="platform"
               fixed={false}

@@ -3212,7 +3212,19 @@
       "colEffective": "From",
       "colBy": "By",
       "noticeSubject": "New price for Agentor {plan}",
-      "noticeBody": "Hello {company}\n\nThe price of Agentor {plan} changes from {old} to {new} incl. VAT per month.\n\nThe new price applies from your first renewal after {date}. Until then you pay the price you have today.\n\nYou can see your subscription under Subscription and usage in Agentor.\n\nKind regards\nAgentor"
+      "noticeBody": "Hello {company}\n\nThe price of Agentor {plan} changes from {old} to {new} incl. VAT per month.\n\nThe new price applies from your first renewal after {date}. Until then you pay the price you have today.\n\nYou can see your subscription under Subscription and usage in Agentor.\n\nKind regards\nAgentor",
+      "autoCalculated": "Calculated automatically",
+      "roundingUnitShort": "min.",
+      "externalUsersSub": "Access to selected flows",
+      "mobileNote": "New prices apply to new subscriptions only, unless you choose otherwise when you save.",
+      "featureShort": {
+        "externalUsers": "External users",
+        "moreDestinations": "More than 3 destinations",
+        "sso": "SSO with Microsoft Entra",
+        "whiteLabel": "White label",
+        "supportAudit": "Support access and audit log",
+        "eanInvoice": "Pay by invoice (EAN)"
+      }
     },
     "adminStatus": {
       "title": "System Status",
@@ -3296,7 +3308,9 @@
       "noIncidentsBody": "Create an incident when something affects customers, or plan maintenance.",
       "colTime": "Time",
       "colIncident": "Incident",
-      "colImpact": "Impact"
+      "colImpact": "Impact",
+      "runsHourShort": "{count, plural, one {# run} other {# runs}} in the last hour",
+      "webhooksShort": "{count} today · {rejected} rejected"
     },
     "reports": {
       "title": "Reports",
@@ -3350,7 +3364,16 @@
         "colBilled": "Billed",
         "colAmount": "Amount ex. VAT",
         "empty": "No support time in the period",
-        "emptyBody": "Choose another period."
+        "emptyBody": "Choose another period.",
+        "perStaffMeta": "{count, plural, one {# supporter} other {# supporters}} · {pct} % automatic",
+        "timeCases": "{time} · {count, plural, one {# case} other {# cases}}",
+        "timeCasesShort": "{time} · {count}",
+        "topMeta": "{name} {pct} %",
+        "customerLine": "{time} · {amount}",
+        "billableShort": "Billable",
+        "roundingShort": "Rounding {pct} %",
+        "medianShort": "Median {time}",
+        "nonBillableShort": "Errors and goodwill"
       },
       "invoicing": {
         "intro": "Every invoice in the period with its status and time to payment. Amounts incl. VAT. Save as PDF or export to CSV.",
@@ -3384,7 +3407,15 @@
         "colDays": "Days to payment",
         "colAmount": "Amount",
         "colStatus": "Status",
-        "footer": "Showing {shown} of {total} invoices. The export holds every invoice in the period with payment method and payment date."
+        "footer": "Showing {shown} of {total} invoices. The export holds every invoice in the period with payment method and payment date.",
+        "medianShort": "Median {median} days",
+        "chip": {
+          "all": "All {count}",
+          "outstanding": "Outstanding {count}",
+          "paid": "Paid {count}"
+        },
+        "notPaid": "not paid",
+        "due": "due {date}"
       },
       "revenue": {
         "total": "Total revenue",
@@ -3393,7 +3424,9 @@
         "active": "{count} active at month end",
         "outstanding": "Outstanding",
         "outstandingSub": "Incl. VAT"
-      }
+      },
+      "pdfMobile": "Save as PDF",
+      "csvMobile": "Export CSV"
     }
   },
   "support": {
@@ -4022,7 +4055,7 @@
         "stable": "Stable",
         "falling": "Falling",
         "note": "Shows only error codes and counts, never customer data.",
-        "empty": "No errors in the last day"
+        "empty": "No errors in this period"
       },
       "finance": {
         "title": "Finance",
@@ -4064,6 +4097,16 @@
         "sentLink": "The payment link was sent to {email}",
         "failed": "It couldn’t be sent. Try again.",
         "none": "No overdue payments"
+      },
+      "access": {
+        "mine": "Mine {count}",
+        "all": "All {count}",
+        "pending": "Waiting",
+        "actions": "{count} actions",
+        "waitingCustomer": "waiting for the customer",
+        "expiredOn": "expired {date}",
+        "endedOn": "ended {date}",
+        "request": "Request"
       }
     },
     "team": {
@@ -4291,7 +4334,8 @@
       "planCases": "Plan · cases",
       "line": "{registered} → {billed} · {amount}",
       "invoice": "See invoice",
-      "footnote": "Time without a case and time marked as not billable is left out."
+      "footnote": "Time without a case and time marked as not billable is left out.",
+      "rateAside": "DKK {rate}/h incl. VAT"
     },
     "supportInvoice": {
       "position": "{state} · {n} of {total} in the run on {date}",
@@ -4329,7 +4373,8 @@
       "nextRunMeta": "{subs} subs. · {support} support",
       "needsAction": "{count, plural, one {# invoice needs action} other {# invoices need action}}",
       "needsActionMeta": "Reminders and payment links · {amount}",
-      "noPayments": "No payments yet"
+      "noPayments": "No payments yet",
+      "inclVat": "Incl. VAT"
     },
     "reports": {
       "subtitle": "Per month",
@@ -4377,7 +4422,11 @@
       "search": "Search title, resolution and notes",
       "filterLabel": "Filter",
       "resolution": "Resolution",
-      "open": "Open case"
+      "open": "Open case",
+      "title": "Cases",
+      "list": "List",
+      "archiveCount": "Archive · {count}",
+      "viewLabel": "View"
     },
     "myTime": {
       "sessionAt": "Session running at {name}",
@@ -4406,7 +4455,9 @@
       "newHelp": "On a case or without one",
       "edit": "Edit time",
       "stopSave": "Stop and save",
-      "noOpenCases": "No open cases for this customer"
+      "noOpenCases": "No open cases for this customer",
+      "weekShort": "Week {n}",
+      "deskScope": "Team and Per customer are tables shown on a computer. Your own time is under My time."
     },
     "resolve": {
       "title": "Resolve case",
@@ -4420,6 +4471,29 @@
       "notesSub": "Never sent to the customer · {count, plural, one {# note} other {# notes}}",
       "resolveSend": "Resolve and send",
       "failed": "The case could not be resolved. Try again."
+    },
+    "subTabs": {
+      "support": {
+        "label": "Support",
+        "cases": "Cases",
+        "access": "Access",
+        "errors": "Errors",
+        "time": "Time"
+      },
+      "finance": {
+        "label": "Finance",
+        "overview": "Overview",
+        "subscriptions": "Subscriptions",
+        "support": "Support",
+        "invoicing": "Invoicing"
+      },
+      "admin": {
+        "label": "Admin",
+        "status": "Status",
+        "users": "Users",
+        "product": "Product",
+        "reports": "Reports"
+      }
     }
   },
   "signupFlow": {

@@ -8,11 +8,14 @@ import {
   MobileEmpty,
   MobileFootnote,
   MobileShell,
+  MobilePageTitle,
+  Segmented,
 } from '@agentor/ui/mobile';
 import { Archive, Search } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { PlatformTopBar } from '@/components/mobile/chrome';
+import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
 import { ArchiveFilters, type FilterDef } from './mobile-filters';
 import type { ArchiveQuery } from './rows';
 
@@ -82,15 +85,22 @@ export async function ArchiveMobile({
   ) as [string, string][];
 
   return (
-    <MobileShell
-      topBar={
-        <PlatformTopBar
-          back="/platform/support/cases"
-          title={t('title')}
-          subtitle={tm('count', { count })}
-        />
-      }
-    >
+    <MobileShell topBar={<PlatformTopBar />}>
+      <PlatformSubTabs />
+      <MobilePageTitle title={tm('title')} />
+      <Segmented
+        label={tm('viewLabel')}
+        linkAs={Link}
+        value="archive"
+        items={[
+          { key: 'list', label: tm('list'), href: '/platform/support/cases' },
+          {
+            key: 'archive',
+            label: tm('archiveCount', { count }),
+            href: '/platform/support/cases?view=archive',
+          },
+        ]}
+      />
       <form action="/platform/support/cases?view=archive" role="search" className="flex">
         <label className="flex h-11 flex-1 items-center gap-2 rounded-full bg-surface px-4 text-fg-2 shadow-sm">
           <Search aria-hidden width={18} height={18} />

@@ -132,3 +132,40 @@ test('M3 Profile, customer (D15, MA36)', async ({ page }) => {
   await shot(page, 'D15-Profil', true);
   await phone(page, '/profile', 'MA36-Profil');
 });
+
+/** M4: every Platform phone screen of sitemap v2 with the floating tab bar and sub-tabs. */
+const PHONE_SCREENS: [string, string][] = [
+  ['/platform/customers', 'MP01-Kunder'],
+  ['/platform/support/cases', 'MP02-Sager'],
+  ['/platform/support/errors', 'MP05-Fejl'],
+  ['/platform/finance', 'MP06-Finans'],
+  ['/platform/finance/invoices?status=overdue', 'MP07-Forfaldne'],
+  ['/platform/admin/users', 'MP12-Platformbrugere'],
+  ['/platform/support/cases?view=archive', 'MP13-Sager-Arkiv'],
+  ['/platform/support/time', 'MP15-Min-tid'],
+  ['/platform/finance/subscriptions', 'MP18-Abonnementer'],
+  ['/platform/finance/support', 'MP19-Supportafregning'],
+  ['/platform/finance/invoicing', 'MP22-Betalinger'],
+  ['/platform/admin/reports/revenue', 'MP23-Rapporter'],
+  ['/platform/support/access', 'MP24-Adgange'],
+  ['/platform/admin/status', 'MP25-Systemstatus'],
+  ['/platform/admin/product', 'MP26-Produkt'],
+  ['/platform/admin/reports/support', 'MP27-Rapport-Support'],
+  ['/platform/admin/reports/invoicing', 'MP28-Rapport-Fakturering'],
+];
+
+test('M4 Platform phone screens (Superadmin)', async ({ page }) => {
+  test.setTimeout(600_000);
+  await login(page, 'kasper');
+  for (const [path, board] of PHONE_SCREENS.filter(
+    ([, b]) =>
+      !process.env.SHOTS_ONLY || process.env.SHOTS_ONLY.split(',').some((x) => b.startsWith(x)),
+  ))
+    await phone(page, path, board);
+});
+
+test('M4 customer tab bar (MX1) and Mere (MA10)', async ({ page }) => {
+  await login(page, 'mette');
+  await phone(page, '/integrations', 'MX1-Navigation-Kunde');
+  await phone(page, '/more', 'MA10-Mere');
+});

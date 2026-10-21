@@ -12,6 +12,7 @@ import {
   Th,
   Tr,
 } from '@agentor/ui';
+import { Responsive } from '@agentor/ui/mobile';
 import { Clock, History, Hourglass, KeyRound, Lock } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -20,10 +21,12 @@ import { Countdown } from '@/components/platform/countdown';
 import type { AccessTarget } from '@/components/platform/request-access-dialog';
 import { FilterStatus, UrlSegmented } from '@/components/platform/url-segmented';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
+import { remainingText } from '@/lib/remaining';
 import { copenhagenToday } from '@/server/date-range';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
 import { customersFor, initials, tenantNames } from '@/server/platform-data';
+import { AccessMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.grants');
@@ -138,7 +141,50 @@ export default async function AccessPage({
     </span>
   );
 
-  return (
+  const tm = await getTranslations('mobile.platform.access');
+  const shortDate = (d: Date) => formatDate(d, locale).replace(/ \d{4}$/, '');
+  const mobile = (
+    <AccessMobile
+      filter={filter}
+      mineCount={mineCount}
+      allCount={allCount}
+      active={active.length}
+      activeSub={myNext ? t('kpiActiveMine', { when: when(myNext.expiresAt) }) : t('kpiActiveNone')}
+      pending={pending.length}
+      pendingSub={pending[0]?.tenantName ?? t('kpiNone')}
+      open={openRows.map((g) => ({
+        grantId: g.grantId,
+        tenantId: g.tenantId,
+        tenantName: g.tenantName,
+        state: g.state === 'pending' ? 'pending' : 'active',
+        scope: scope(g),
+        caseLabel: caseLabel(g),
+        expires: g.state === 'pending' ? tm('waitingCustomer') : when(g.expiresAt),
+        left: g.state === 'pending' ? null : remainingText(g.expiresAt, now, locale),
+        soon: g.expiresAt.getTime() - now.getTime() <= 2 * 3_600_000,
+        staff: g.staffName,
+        mine: mine(g),
+        extensionRequested: Boolean(g.extensionRequestedAt),
+      }))}
+      closed={closedRows.map((g) => ({
+        grantId: g.grantId,
+        tenantName: g.tenantName,
+        meta: [
+          g.caseNumber !== null ? `#${g.caseNumber}` : null,
+          g.state === 'expired' ? scope(g) : null,
+          g.state === 'expired'
+            ? tm('expiredOn', { date: shortDate(g.closedAt ?? g.expiresAt) })
+            : tm('endedOn', { date: shortDate(g.closedAt ?? g.expiresAt) }),
+        ]
+          .filter(Boolean)
+          .join(' · '),
+        actions: g.actions,
+      }))}
+      targets={targets}
+    />
+  );
+
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('title')}
@@ -361,4 +407,5 @@ export default async function AccessPage({
       <p className="m-0 text-meta text-fg-2">{t('footer')}</p>
     </PageBody>
   );
+  return <Responsive desktop={desktop} mobile={mobile} />;
 }

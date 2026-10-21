@@ -12,12 +12,14 @@ import {
   MobileLogo,
   MobileRing,
   MobileShell,
+  MobilePageTitle,
 } from '@agentor/ui/mobile';
 import { Repeat } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import type { ComponentProps, ReactNode } from 'react';
 import { PlatformTopBar } from '@/components/mobile/chrome';
+import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
 import { growthOf, kr, monthYear, withParams } from '@/components/platform/finance/bits';
 import { MobileDiscount } from '@/components/platform/finance/mobile-actions';
 import { KpiPair, KrValue, SmallKpi } from '@/components/platform/finance/mobile-bits';
@@ -91,16 +93,10 @@ export async function SubscriptionsMobile({ d }: { d: SubscriptionsMobileData })
 
   return (
     <MobileShell
-      topBar={
-        <PlatformTopBar
-          back="/platform/finance"
-          title={tf('tab.subscriptions')}
-          subtitle={monthYear(d.month, locale)}
-          bell={false}
-          actions={<MobileDiscount customers={d.discountCustomers} />}
-        />
-      }
+      topBar={<PlatformTopBar actions={<MobileDiscount customers={d.discountCustomers} />} />}
     >
+      <PlatformSubTabs />
+      <MobilePageTitle title={tf('tab.subscriptions')} aside={monthYear(d.month, locale)} />
       <KpiPair>
         <MobileKpi
           featured

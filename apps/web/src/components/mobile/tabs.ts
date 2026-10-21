@@ -2,7 +2,7 @@
  * Which tab is active on which route, as on the boards: pages reached from Overblik (MA06 Fejl,
  * MA08 Genforbind, MA09 Notifikationer) keep Overblik lit, settings reached from Mere keep Mere.
  */
-export type AppTab = 'overview' | 'integrations' | 'activity' | 'more';
+export type AppTab = 'overview' | 'integrations' | 'activity' | 'more' | 'profile';
 export type PlatformTab = 'customers' | 'support' | 'finance' | 'admin' | 'profile';
 
 const under = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
@@ -16,6 +16,8 @@ export function activeAppTab(path: string): AppTab | null {
   if (/^\/integrations\/[^/]+\/runs\//.test(path)) return 'overview';
   if (under(path, '/integrations')) return 'integrations';
   if (under(path, '/activity')) return 'activity';
+  // MA36 Min profil (MX1: Profil last).
+  if (under(path, '/profile')) return 'profile';
   if (
     ['/more', '/settings', '/billing', '/support', '/support-access', '/install'].some((p) =>
       under(path, p),

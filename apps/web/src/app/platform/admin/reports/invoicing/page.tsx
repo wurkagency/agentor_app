@@ -1,5 +1,6 @@
 import { formatDate, formatNumber, type Locale } from '@agentor/i18n';
 import { Banner, Card, EmptyState, KpiCard, StatusPill, Table, Td, Th, Tr } from '@agentor/ui';
+import { Responsive } from '@agentor/ui/mobile';
 import { CircleCheck, Clock, FileText, Hourglass } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { ReportToolbar } from '@/components/platform/admin/report-toolbar';
@@ -21,6 +22,7 @@ import {
   reportRange,
   type InvoiceFilter,
 } from '@/server/reports';
+import { InvoicingReportMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.reports');
@@ -56,7 +58,13 @@ export default async function InvoicingReportPage({
   const opt = <T,>(key: string, v: T | undefined) => (v === undefined ? {} : { [key]: v });
   const days = (n: number) => formatNumber(n, locale, n % 1 ? 1 : 0);
 
-  return (
+  const invoicedGrowth = growthOf(
+    growthPct(r.invoicedOre, r.previous.invoicedOre),
+    (x) => `${x} %`,
+    locale,
+  );
+
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('title')}
@@ -70,10 +78,7 @@ export default async function InvoicingReportPage({
           compact
           icon={FileText}
           label={t('invoicing.invoiced')}
-          {...opt(
-            'growth',
-            growthOf(growthPct(r.invoicedOre, r.previous.invoicedOre), (x) => `${x} %`, locale),
-          )}
+          {...opt('growth', invoicedGrowth)}
           value={money(r.invoicedOre, locale)}
           footer={`${period} · ${t('invoicing.invoicedSub', { count: r.rows.length })}`}
         />
@@ -199,5 +204,21 @@ export default async function InvoicingReportPage({
         </p>
       </Card>
     </PageBody>
+  );
+  return (
+    <Responsive
+      desktop={desktop}
+      mobile={
+        <InvoicingReportMobile
+          r={r}
+          rows={rows}
+          filter={filter}
+          range={range}
+          query={query}
+          invoicedGrowth={invoicedGrowth}
+          now={now}
+        />
+      }
+    />
   );
 }

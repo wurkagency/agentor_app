@@ -26,7 +26,7 @@ export async function CustomersMobile({
 }: {
   items: CustomerItem[];
   query: string;
-  filter: 'all' | 'attention' | 'mine';
+  filter: 'all' | 'attention';
 }) {
   const t = await getTranslations('mobile.platform.customers');
   const ts = await getTranslations('status');
@@ -37,14 +37,11 @@ export async function CustomersMobile({
     (c) => !q || c.name.toLowerCase().includes(q) || (c.cvr ?? '').includes(q.replace(/\s/g, '')),
   );
   const attention = matches.filter((c) => ['error', 'broken', 'warn'].includes(c.status));
-  const mine = matches.filter(
-    (c) => c.grant && (c.grant.state === 'active' || c.grant.state === 'pending'),
-  );
-  const shown = filter === 'attention' ? attention : filter === 'mine' ? mine : matches;
+  const shown = filter === 'attention' ? attention : matches;
   const href = (f: string) => {
     const p = new URLSearchParams();
     if (q) p.set('q', query);
-    if (f !== 'all') p.set('filter', f);
+    if (f === 'all') p.set('filter', 'all');
     return `/platform/customers${p.size ? `?${p}` : ''}`;
   };
 
@@ -61,7 +58,7 @@ export async function CustomersMobile({
             placeholder={t('search')}
             className="min-w-0 flex-1 border-0 bg-transparent font-sans text-m-input text-fg-1 outline-none"
           />
-          {filter !== 'all' && <input type="hidden" name="filter" value={filter} />}
+          {filter === 'all' && <input type="hidden" name="filter" value="all" />}
         </label>
       </form>
       <ChipGroup
@@ -69,13 +66,12 @@ export async function CustomersMobile({
         value={filter}
         linkAs={Link}
         items={[
-          { key: 'all', label: t('all', { count: matches.length }), href: href('all') },
           {
             key: 'attention',
             label: t('attention', { count: attention.length }),
             href: href('attention'),
           },
-          { key: 'mine', label: t('mine', { count: mine.length }), href: href('mine') },
+          { key: 'all', label: t('all', { count: matches.length }), href: href('all') },
         ]}
       />
       {shown.length === 0 ? (

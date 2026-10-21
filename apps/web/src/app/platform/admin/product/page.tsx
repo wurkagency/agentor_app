@@ -1,12 +1,16 @@
 import { withVat } from '@agentor/core';
 import { listPlans, listPlanVersions, listSupportVersions } from '@agentor/db';
 import { formatDate, formatNumber, type Locale } from '@agentor/i18n';
+import { MobilePageTitle, MobileShell, Responsive } from '@agentor/ui/mobile';
 import { getLocale, getTranslations } from 'next-intl/server';
 import {
   ProductForm,
   type ProductHistoryRow,
   type ProductPlan,
 } from '@/components/platform/admin/product-form';
+import { PlatformTopBar } from '@/components/mobile/chrome';
+import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
+import { ProductFormMobile } from '@/components/platform/admin/product-form-mobile';
 import { PageBody } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
@@ -90,17 +94,26 @@ export default async function ProductPage() {
   ]
     .sort((a, b) => b.at.getTime() - a.at.getTime())
     .map((h) => h.row);
+  const formSupport = {
+    rateInclKr,
+    roundingMinutes: support?.roundingMinutes ?? 15,
+    nonBillable: support?.nonBillable ?? ['agentor_error', 'goodwill'],
+  };
   return (
-    <PageBody>
-      <ProductForm
-        support={{
-          rateInclKr,
-          roundingMinutes: support?.roundingMinutes ?? 15,
-          nonBillable: support?.nonBillable ?? ['agentor_error', 'goodwill'],
-        }}
-        plans={productPlans}
-        history={history}
-      />
-    </PageBody>
+    <Responsive
+      desktop={
+        <PageBody>
+          <ProductForm support={formSupport} plans={productPlans} history={history} />
+        </PageBody>
+      }
+      mobile={
+        // MP26: the same form, one plan at a time.
+        <MobileShell topBar={<PlatformTopBar />}>
+          <PlatformSubTabs />
+          <MobilePageTitle title={t('title')} />
+          <ProductFormMobile support={formSupport} plans={productPlans} history={history} />
+        </MobileShell>
+      }
+    />
   );
 }

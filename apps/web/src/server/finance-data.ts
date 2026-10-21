@@ -87,10 +87,19 @@ export function monthFromQuery(
 }
 
 /** ?from=&to= for a whole month, as the report links and exports use. */
-export function monthQuery(m: Month): string {
+/** A month's first and last day, YYYY-MM-DD. */
+export function monthRange(m: Month): { fromIso: string; toIso: string } {
   const last = new Date(Date.UTC(m.year, m.month, 0)).getUTCDate();
   const mm = String(m.month).padStart(2, '0');
-  return `from=${m.year}-${mm}-01&to=${m.year}-${mm}-${String(last).padStart(2, '0')}`;
+  return {
+    fromIso: `${m.year}-${mm}-01`,
+    toIso: `${m.year}-${mm}-${String(last).padStart(2, '0')}`,
+  };
+}
+
+export function monthQuery(m: Month): string {
+  const r = monthRange(m);
+  return `from=${r.fromIso}&to=${r.toIso}`;
 }
 
 export const monthsBack = (to: Month, n: number) =>

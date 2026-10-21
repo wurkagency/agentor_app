@@ -11,6 +11,7 @@ import {
   Th,
   Tr,
 } from '@agentor/ui';
+import { Responsive } from '@agentor/ui/mobile';
 import { CircleCheck, Clock, Hourglass, Timer } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { ReportToolbar } from '@/components/platform/admin/report-toolbar';
@@ -18,6 +19,7 @@ import { CustomerChip, growthOf, money } from '@/components/platform/finance/bit
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { requireStaff } from '@/server/platform';
 import { growthPct, reportRange, supportReport } from '@/server/reports';
+import { SupportReportMobile } from './mobile';
 
 export async function generateMetadata() {
   const t = await getTranslations('platform.reports');
@@ -59,7 +61,22 @@ export default async function SupportReportPage({
   const sum = (k: 'billable' | 'nonBillable' | 'cases') => r.perStaff.reduce((a, s) => a + s[k], 0);
   const opt = <T,>(key: string, v: T | undefined) => (v === undefined ? {} : { [key]: v });
 
-  return (
+  const growth = {
+    registered: pctGrowth(r.registeredMinutes, r.previous.registeredMinutes),
+    billed: pctGrowth(r.billedMinutes, r.previous.billedMinutes),
+    nonBillable: minutesGrowth(r.nonBillableMinutes, r.previous.nonBillableMinutes),
+    resolved:
+      r.casesResolved !== r.previous.casesResolved
+        ? {
+            direction:
+              r.casesResolved > r.previous.casesResolved ? ('up' as const) : ('down' as const),
+            tone: 'neutral' as const,
+            text: String(Math.abs(r.casesResolved - r.previous.casesResolved)),
+          }
+        : undefined,
+  };
+
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('title')}
@@ -245,5 +262,11 @@ export default async function SupportReportPage({
         </Card>
       </div>
     </PageBody>
+  );
+  return (
+    <Responsive
+      desktop={desktop}
+      mobile={<SupportReportMobile r={r} range={range} query={query} growth={growth} />}
+    />
   );
 }

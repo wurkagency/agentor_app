@@ -3,6 +3,7 @@
 import { cn } from '@agentor/ui';
 import {
   Activity,
+  Building,
   CircleUserRound,
   CreditCard,
   Headphones,
@@ -10,12 +11,11 @@ import {
   Menu,
   Search,
   Settings,
-  Users,
   Workflow,
 } from 'lucide-react';
 import {
   PlatformBadge,
-  TabBar,
+  MobileTabBar,
   TopBar,
   TopBarAction,
   TopBarAvatar,
@@ -128,7 +128,12 @@ export function PlatformTopBar({ back, bell = true, fallback = false, ...rest }:
       actions={
         rest.actions ??
         (user ? (
-          <TopBarAvatar initials={user.initials} label={t('profile', { name: user.name })} />
+          <TopBarAvatar
+            initials={user.initials}
+            label={t('profile', { name: user.name })}
+            href="/platform/profile"
+            linkAs={Link}
+          />
         ) : undefined)
       }
     />
@@ -139,7 +144,7 @@ export function AppTabBar({ className }: { className?: string }) {
   const t = useTranslations('mobile.tabs');
   const path = usePathname();
   return (
-    <TabBar
+    <MobileTabBar
       label={t('label')}
       linkAs={Link}
       active={activeAppTab(path)}
@@ -149,6 +154,7 @@ export function AppTabBar({ className }: { className?: string }) {
         { key: 'integrations', href: '/integrations', label: t('integrations'), icon: Workflow },
         { key: 'activity', href: '/activity', label: t('activity'), icon: Activity },
         { key: 'more', href: '/more', label: t('more'), icon: Menu },
+        { key: 'profile', href: '/profile', label: t('profile'), icon: CircleUserRound },
       ]}
     />
   );
@@ -164,14 +170,14 @@ export function PlatformTabBar({ className }: { className?: string }) {
   const { superadmin } = useContext(ChromeContext);
   if (platformHidesTabBar(path)) return null;
   return (
-    <TabBar
+    <MobileTabBar
       label={t('label')}
       linkAs={Link}
       variant="platform"
       active={activePlatformTab(path)}
       className={cn('md:hidden', className)}
       items={[
-        { key: 'customers', href: '/platform/customers', label: t('customers'), icon: Users },
+        { key: 'customers', href: '/platform/customers', label: t('customers'), icon: Building },
         { key: 'support', href: '/platform/support/cases', label: t('support'), icon: Headphones },
         ...(superadmin
           ? [

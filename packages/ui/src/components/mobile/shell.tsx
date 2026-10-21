@@ -27,7 +27,7 @@ export function Responsive({ mobile, desktop }: { mobile: ReactNode; desktop: Re
   );
 }
 
-/* ---- MobileShell: top bar 60 + content + tab bar 76 (MA02) --------------------------------------- */
+/* ---- MobileShell: top bar 60 + content + the floating tab bar (MA02, MX1) --------------------------------------- */
 
 export interface MobileShellProps {
   topBar?: ReactNode;
@@ -242,83 +242,30 @@ export function PlatformBadge({ children }: { children: ReactNode }) {
   );
 }
 
-/** Initials on white in the navy bar (MP01). Not interactive until Platform "Mere" exists (G7). */
-export function TopBarAvatar({ initials, label }: { initials: string; label: string }) {
+/** Initials on white in the navy bar (MP01); a link to the user's profile (MP29). */
+export function TopBarAvatar({
+  initials,
+  label,
+  href,
+  linkAs: L = 'a',
+}: {
+  initials: string;
+  label: string;
+  href: string;
+  linkAs?: LinkAs;
+}) {
   return (
-    <span className="grid size-11 flex-none place-items-center">
+    <L
+      href={href}
+      aria-label={label}
+      className="grid size-11 flex-none place-items-center rounded-full no-underline"
+    >
       <span
-        role="img"
-        aria-label={label}
+        aria-hidden
         className="grid size-8 place-items-center rounded-full bg-white text-micro font-semibold text-navy"
       >
         {initials}
       </span>
-    </span>
-  );
-}
-
-/* ---- TabBar: 4 tabs, active = lime pill behind the icon (navy pill on Platform) ------------------- */
-
-export interface TabItem {
-  key: string;
-  href: string;
-  label: string;
-  icon: LucideIcon;
-}
-
-export function TabBar({
-  items,
-  active,
-  label,
-  variant = 'app',
-  linkAs: L = 'a',
-  fixed = true,
-  className,
-}: {
-  items: TabItem[];
-  /** Key of the active tab, or null when none is (e.g. a page reached from the bell). */
-  active: string | null;
-  /** "Hovedmenu". */
-  label: string;
-  variant?: 'app' | 'platform';
-  linkAs?: LinkAs;
-  /** Fixed to the bottom of the viewport (the app); static in previews. */
-  fixed?: boolean;
-  className?: string;
-}) {
-  return (
-    <nav
-      aria-label={label}
-      className={cn(
-        'z-30 flex h-tabbar-safe flex-none bg-white pb-tabbar-safe shadow-tabbar box-border',
-        fixed && 'fixed inset-x-0 bottom-0',
-        className,
-      )}
-    >
-      {items.map((t) => {
-        const on = t.key === active;
-        return (
-          <L
-            key={t.key}
-            href={t.href}
-            {...(on ? { 'aria-current': 'page' } : {})}
-            className={cn(
-              'flex min-w-0 flex-1 flex-col items-center gap-0.75 pt-2 text-micro font-semibold no-underline',
-              on ? 'text-fg-1' : 'text-fg-2',
-            )}
-          >
-            <span
-              className={cn(
-                'grid h-7.5 w-13 place-items-center rounded-full',
-                on && (variant === 'platform' ? 'bg-navy text-on-navy' : 'bg-primary'),
-              )}
-            >
-              <Icon icon={t.icon} size={18} className="size-5" />
-            </span>
-            <span className="max-w-full truncate px-1">{t.label}</span>
-          </L>
-        );
-      })}
-    </nav>
+    </L>
   );
 }

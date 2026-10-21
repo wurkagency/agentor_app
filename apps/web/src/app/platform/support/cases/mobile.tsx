@@ -7,6 +7,7 @@ import Link from 'next/link';
 import type { BoardCase } from '@/components/platform/case-board';
 import { PriorityBadge } from '@/components/platform/case-bits';
 import { PlatformTopBar } from '@/components/mobile/chrome';
+import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
 import { mobileDue } from './due';
 import { MobileNewCase } from './mobile-new-case';
 
@@ -51,6 +52,7 @@ export async function CasesMobile({
 
   return (
     <MobileShell topBar={<PlatformTopBar />}>
+      <PlatformSubTabs />
       <MobilePageTitle
         title={t('title')}
         aside={

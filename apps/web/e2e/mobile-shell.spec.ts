@@ -55,22 +55,19 @@ test.describe('@mobile component sheet', () => {
   test('sizes match the boards', async ({ page }) => {
     const box = async (sel: ReturnType<Page['locator']>) => (await sel.boundingBox())!;
     const shell = page.getByTestId('shell');
-    // Top bar 60, tab bar 76 (no safe area in the emulator), active pill 52 × 30.
+    // Top bar 60; MobileTabBar v3 (MX1/MX2): a 56 px pill, the active tab a 40 px pill with label.
     const bar = shell.locator('header').first();
     expect((await box(bar)).height).toBe(60);
+    const bg = (l: ReturnType<Page['locator']>) =>
+      l.evaluate((el) => getComputedStyle(el).backgroundColor);
     const tabs = shell.getByRole('navigation', { name: 'Hovedmenu' });
-    expect((await box(tabs)).height).toBe(76);
-    const pill = tabs.locator('[aria-current="page"] > span:first-child');
-    expect(await box(pill)).toMatchObject({ width: 52, height: 30 });
-    expect(await pill.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
-      'rgb(208, 232, 74)',
-    );
-    const navyPill = shell
-      .getByRole('navigation', { name: 'Platformmenu', exact: true })
-      .locator('[aria-current="page"] > span:first-child');
-    expect(await navyPill.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
-      'rgb(19, 41, 58)',
-    );
+    expect((await box(tabs)).height).toBe(56);
+    const active = tabs.locator('[aria-current="page"]');
+    expect((await box(active)).height).toBe(40);
+    expect(await bg(active)).toBe('rgb(243, 241, 236)');
+    const navy = shell.getByRole('navigation', { name: 'Platformmenu', exact: true });
+    expect(await bg(navy)).toBe('rgb(19, 41, 58)');
+    expect(await bg(navy.locator('[aria-current="page"]'))).toBe('rgba(255, 255, 255, 0.1)');
     // Rows are at least 56, BigButtons 52.
     const row = page.getByTestId('rows').getByRole('link', { name: /Webshop → regnskab og CRM/ });
     expect((await box(row)).height).toBeGreaterThanOrEqual(56);
@@ -194,6 +191,91 @@ test.describe('@mobile responsive switch', () => {
     // And the routes themselves don't exist for a Supporter (same server check as desktop).
     const res = await page.goto('/platform/admin/reports/revenue');
     expect(res?.status()).toBe(404);
+  });
+});
+
+/**
+ * MobileTabBar v3 (PLAN-2026-10-21 M4, MX1/MX2): floating, the active tab with its label and
+ * aria-current, the others an icon with an aria-label in a 44 × 44 target, Profil last, and out of
+ * the way while typing.
+ */
+test.describe('@mobile tab bar v3', () => {
+  const tabBar = (page: Page) => page.getByRole('navigation', { name: 'Hovedmenu' });
+
+  async function checkTabs(page: Page, names: string[], active: string) {
+    const links = tabBar(page).getByRole('link');
+    await expect(links).toHaveCount(names.length);
+    for (const [i, name] of names.entries()) {
+      const link = links.nth(i);
+      await expect(link).toHaveAccessibleName(name);
+      if (name === active) {
+        await expect(link).toHaveAttribute('aria-current', 'page');
+        await expect(link).toHaveText(name);
+      } else {
+        await expect(link).not.toHaveAttribute('aria-current');
+        await expect(link).toHaveAttribute('aria-label', name);
+        await expect(link).toHaveText('');
+        const b = (await link.boundingBox())!;
+        expect([b.width, b.height]).toEqual([44, 44]);
+      }
+    }
+    // Floating: 14 px from the sides, at least 14 px above the bottom, 56 px high.
+    const nav = (await tabBar(page).boundingBox())!;
+    const vp = page.viewportSize()!;
+    expect(nav.height).toBe(56);
+    expect(nav.x).toBeGreaterThanOrEqual(14);
+    expect(vp.height - (nav.y + nav.height)).toBeGreaterThanOrEqual(14);
+  }
+
+  test('customer app: five tabs with Profil last', async ({ page }) => {
+    await login(page, 'mette');
+    await page.goto('/integrations');
+    const names = ['Overblik', 'Integrationer', 'Aktivitet', 'Mere', 'Profil'];
+    await checkTabs(page, names, 'Integrationer');
+    await tabBar(page).getByRole('link', { name: 'Profil' }).click();
+    await expect(page).toHaveURL(/\/profile$/);
+    await checkTabs(page, names, 'Profil');
+    // Mere's profile card opens the profile too (MA10 → MA36).
+    await page.goto('/more');
+    await page.getByRole('link', { name: /Mette Holm/ }).click();
+    await expect(page).toHaveURL(/\/profile$/);
+  });
+
+  test('Platform: Superadmin and Supporter, with the section tabs', async ({ page }) => {
+    await login(page, 'kasper');
+    await page.goto('/platform/finance');
+    await checkTabs(page, ['Kunder', 'Support', 'Finans', 'Admin', 'Profil'], 'Finans');
+    const sub = page.getByRole('navigation', { name: 'Finans', exact: true });
+    await expect(sub.getByRole('link', { name: 'Oversigt' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    await sub.getByRole('link', { name: 'Fakturering' }).click();
+    await expect(page).toHaveURL(/\/platform\/finance\/invoicing$/);
+    await expect(
+      page.getByRole('navigation', { name: 'Finans', exact: true }).getByRole('link', {
+        name: 'Fakturering',
+      }),
+    ).toHaveAttribute('aria-current', 'page');
+    await page.goto('/platform/admin/status');
+    await checkTabs(page, ['Kunder', 'Support', 'Finans', 'Admin', 'Profil'], 'Admin');
+    await page.context().clearCookies();
+    await login(page, 'anne');
+    await page.goto('/platform/support/access');
+    await checkTabs(page, ['Kunder', 'Support', 'Profil'], 'Support');
+    await expect(
+      page.getByRole('navigation', { name: 'Support', exact: true }).getByRole('link'),
+    ).toHaveText(['Sager', 'Adgange', 'Fejl', 'Tidsforbrug']);
+  });
+
+  test('hidden while a text field has focus', async ({ page }) => {
+    await login(page, 'kasper');
+    await page.goto('/platform/customers');
+    await expect(tabBar(page)).toBeVisible();
+    await page.getByRole('searchbox', { name: 'Søg kunde' }).focus();
+    await expect(tabBar(page)).toBeHidden();
+    await page.getByRole('searchbox', { name: 'Søg kunde' }).blur();
+    await expect(tabBar(page)).toBeVisible();
   });
 });
 

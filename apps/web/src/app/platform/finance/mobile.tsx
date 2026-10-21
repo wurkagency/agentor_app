@@ -10,18 +10,11 @@ import {
   StackedValue,
   TrendPill,
 } from '@agentor/ui/mobile';
-import {
-  BarChart3,
-  CircleCheck,
-  Clock,
-  CreditCard,
-  Headphones,
-  ReceiptText,
-  Repeat,
-} from 'lucide-react';
+import { CircleCheck, Clock, CreditCard } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { PlatformTopBar } from '@/components/mobile/chrome';
+import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
 
 export interface FinanceMobileData {
   month: string;
@@ -45,11 +38,12 @@ export interface FinanceMobileData {
 
 const OVERDUE = '/platform/finance/invoices?status=overdue';
 
-/** MP06 Finans (Superadmin): key figures, what needs action, and the finance areas. */
+/** MP06 Finans (Superadmin): key figures and what needs action; the areas are the sub-tabs above. */
 export async function FinanceMobile({ d }: { d: FinanceMobileData }) {
   const t = await getTranslations('mobile.platform.finance');
   return (
     <MobileShell topBar={<PlatformTopBar />}>
+      <PlatformSubTabs />
       <MobilePageTitle title={t('title')} aside={d.month} />
       <MobileCard>
         <RowLink
@@ -152,38 +146,6 @@ export async function FinanceMobile({ d }: { d: FinanceMobileData }) {
           ))}
         </MobileCard>
       )}
-
-      <SectionHeading>{t('section')}</SectionHeading>
-      <MobileCard>
-        <RowLink
-          href="/platform/finance/subscriptions"
-          linkAs={Link}
-          leading={<RowIcon icon={Repeat} />}
-          title={t('subscriptions')}
-          meta={t('subsMeta', { count: d.subscriptions, problems: d.paymentProblems })}
-        />
-        <RowLink
-          href="/platform/finance/support"
-          linkAs={Link}
-          leading={<RowIcon icon={Headphones} />}
-          title={t('settlement')}
-          meta={t('settlementMeta', { month: d.monthName, amount: d.supportGross })}
-        />
-        <RowLink
-          href="/platform/finance/invoicing"
-          linkAs={Link}
-          leading={<RowIcon icon={ReceiptText} />}
-          title={t('payments')}
-          meta={t('paymentsMeta', { amount: d.overdue })}
-        />
-        <RowLink
-          href="/platform/admin/reports/revenue"
-          linkAs={Link}
-          leading={<RowIcon icon={BarChart3} />}
-          title={t('reports')}
-          meta={t('reportsMeta', { month: d.lastMonthName, amount: d.lastMonthTotal })}
-        />
-      </MobileCard>
     </MobileShell>
   );
 }

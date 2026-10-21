@@ -14,6 +14,7 @@ import {
   Tr,
   cn,
 } from '@agentor/ui';
+import { Responsive } from '@agentor/ui/mobile';
 import {
   Activity,
   CircleCheck,
@@ -29,6 +30,7 @@ import { IncidentButton } from '@/components/platform/admin/incident-dialog';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { requireStaff } from '@/server/platform';
 import { statusData, type ComponentState } from '@/server/status-data';
+import { StatusMobile } from './mobile';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,7 +84,7 @@ export default async function StatusPage() {
       ? t('issueConnector', { name: brokenConnector.name, count: brokenConnector.broken })
       : t('allGood');
 
-  return (
+  const desktop = (
     <PageBody>
       <PageHeader
         title={t('title')}
@@ -337,5 +339,8 @@ export default async function StatusPage() {
         )}
       </Card>
     </PageBody>
+  );
+  return (
+    <Responsive desktop={desktop} mobile={<StatusMobile d={d} summary={summary} when={when} />} />
   );
 }

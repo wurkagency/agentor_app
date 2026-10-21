@@ -91,7 +91,7 @@ export function Toaster({ label }: { label: string }) {
       offset={24}
       // Phones: above the mobile tab bar (README decision 20); the shell sets the variable.
       mobileOffset={{
-        bottom: 'calc(var(--m-tabbar-height) + 8px + env(safe-area-inset-bottom))',
+        bottom: 'calc(var(--m-tabbar-height) + var(--m-tabbar-bottom) + 8px)',
         left: 16,
         right: 16,
       }}

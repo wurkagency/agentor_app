@@ -1,8 +1,7 @@
 import { Responsive } from '@agentor/ui/mobile';
 import { getTranslations } from 'next-intl/server';
-import { DesktopOnly } from '@/components/mobile/desktop-only';
 import { FilterStatus, UrlSegmented, withParam } from '@/components/platform/url-segmented';
-import { MyTimeMobile } from './mobile';
+import { MyTimeMobile, TimeScopeDeskMobile } from './mobile';
 import { TimePerCustomerView } from './per-customer';
 import { TimeView } from './view';
 
@@ -52,12 +51,15 @@ export default async function TimePage({
       />
     );
   return (
-    <DesktopOnly area="platformAdmin" title={t('title')} platform>
-      {scope === 'team' ? (
-        <TimeView team week={sp.week} scopeSwitch={scopeSwitch} />
-      ) : (
-        <TimePerCustomerView scopeSwitch={scopeSwitch} />
-      )}
-    </DesktopOnly>
+    <Responsive
+      desktop={
+        scope === 'team' ? (
+          <TimeView team week={sp.week} scopeSwitch={scopeSwitch} />
+        ) : (
+          <TimePerCustomerView scopeSwitch={scopeSwitch} />
+        )
+      }
+      mobile={<TimeScopeDeskMobile scope={scope} />}
+    />
   );
 }

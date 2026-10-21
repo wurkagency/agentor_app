@@ -19,19 +19,23 @@ type Scope = 'view' | 'help';
  * the same actions. Without an open case the reason becomes a new case, as on desktop.
  */
 export function RequestAccessSheet({
-  target,
+  target: initial,
   onClose,
   defaultCaseId,
+  choices,
 }: {
   target: AccessTarget;
   onClose: () => void;
   defaultCaseId?: string | undefined;
+  /** MP24 "Anmod": the customer is picked in the sheet. */
+  choices?: AccessTarget[];
 }) {
   const t = useTranslations('platform.access');
   const tm = useTranslations('mobile.access');
   const tc = useTranslations('common');
   const router = useRouter();
-  const [caseId, setCaseId] = useState(defaultCaseId ?? target.cases[0]?.id ?? NEW_CASE);
+  const [target, setTarget] = useState(initial);
+  const [caseId, setCaseId] = useState(defaultCaseId ?? initial.cases[0]?.id ?? NEW_CASE);
   const [reason, setReason] = useState('');
   const [hours, setHours] = useState<Hours>('8');
   const [scope, setScope] = useState<Scope>('help');
@@ -105,6 +109,20 @@ export function RequestAccessSheet({
         <p role="alert" className="m-0 text-table font-medium text-error-fg">
           {error}
         </p>
+      )}
+      {choices && choices.length > 1 && (
+        <MobileField label={t('customer')}>
+          <MobileSelect
+            value={target.tenantId}
+            onChange={(e) => {
+              const next = choices.find((c) => c.tenantId === e.target.value);
+              if (!next) return;
+              setTarget(next);
+              setCaseId(next.cases[0]?.id ?? NEW_CASE);
+            }}
+            options={choices.map((c) => ({ value: c.tenantId, label: c.name }))}
+          />
+        </MobileField>
       )}
       <MobileField label={t('case')}>
         <MobileSelect

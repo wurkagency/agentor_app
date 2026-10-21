@@ -25,7 +25,7 @@ export async function CustomersView({
   query: string;
   expired: boolean;
   /** Mobile chips (MP01). */
-  filter?: 'all' | 'attention' | 'mine';
+  filter?: 'all' | 'attention';
 }) {
   const { actor } = await requireStaff();
   const t = await getTranslations('platform.customers');

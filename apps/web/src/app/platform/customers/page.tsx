@@ -12,6 +12,7 @@ export default async function CustomersPage({
   searchParams: Promise<{ q?: string; expired?: string; filter?: string }>;
 }) {
   const sp = await searchParams;
-  const filter = sp.filter === 'attention' || sp.filter === 'mine' ? sp.filter : 'all';
+  // MP01 opens on "Kræver opmærksomhed"; ?filter=all shows every customer.
+  const filter = sp.filter === 'all' ? 'all' : 'attention';
   return <CustomersView query={sp.q ?? ''} expired={sp.expired === '1'} filter={filter} />;
 }

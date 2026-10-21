@@ -18,12 +18,16 @@ import {
   MobileShell,
   SectionHeading,
   TrendPill,
+  MobilePageTitle,
+  DeskNote,
+  Segmented,
 } from '@agentor/ui/mobile';
 import { Clock, Timer, TriangleAlert } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { PlatformTopBar } from '@/components/mobile/chrome';
+import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
 import { tenantNames } from '@/server/platform-data';
@@ -140,24 +144,12 @@ export async function MyTimeMobile({ week }: { week: string | undefined }) {
   }));
   const sessionCase = open?.caseId ? caseById.get(open.caseId) : undefined;
   const timerCase = timer?.caseId ? caseById.get(timer.caseId) : undefined;
-  const lastWorkDay = new Date(
-    end.getTime() - DAY * (days.some((d) => noon(d).getDay() % 6 === 0) ? 1 : 3),
-  );
 
   return (
-    <MobileShell
-      topBar={
-        <PlatformTopBar
-          back="/platform/support/cases"
-          title={t('title')}
-          subtitle={t('weekLabel', {
-            n: isoWeek(start),
-            from: formatDate(start, locale).replace(/ \d{4}$/, ''),
-            to: formatDate(lastWorkDay, locale),
-          })}
-        />
-      }
-    >
+    <MobileShell topBar={<PlatformTopBar />}>
+      <PlatformSubTabs />
+      <MobilePageTitle title={t('title')} aside={tm('weekShort', { n: isoWeek(start) })} />
+      <TimeScopeSwitch scope="me" />
       {open && (
         <MobileCallout
           tone="lime"
@@ -322,6 +314,41 @@ export async function MyTimeMobile({ week }: { week: string | undefined }) {
       {/* Room for the floating "Registrér tid" over the last row. */}
       <div aria-hidden className="h-16 flex-none" />
       <RegisterTimeFab cases={pickCases.map(({ id, label }) => ({ id, label }))} />
+    </MobileShell>
+  );
+}
+
+/** "Min tid · Team · Pr. kunde" (MP15), the same ?scope= as S6. */
+async function TimeScopeSwitch({ scope }: { scope: 'me' | 'team' | 'customer' }) {
+  const t = await getTranslations('platform.time');
+  return (
+    <Segmented
+      label={t('scope')}
+      linkAs={Link}
+      value={scope}
+      items={[
+        { key: 'me', label: t('scopeMe'), href: '/platform/support/time' },
+        { key: 'team', label: t('scopeTeam'), href: '/platform/support/time?scope=team' },
+        {
+          key: 'customer',
+          label: t('scopeCustomer'),
+          href: '/platform/support/time?scope=customer',
+        },
+      ]}
+    />
+  );
+}
+
+/** Team and Pr. kunde are tables for the computer; the phone keeps the switch and says so. */
+export async function TimeScopeDeskMobile({ scope }: { scope: 'team' | 'customer' }) {
+  const t = await getTranslations('platform.time');
+  const tm = await getTranslations('mobile.myTime');
+  return (
+    <MobileShell topBar={<PlatformTopBar />}>
+      <PlatformSubTabs />
+      <MobilePageTitle title={t('title')} />
+      <TimeScopeSwitch scope={scope} />
+      <DeskNote>{tm('deskScope')}</DeskNote>
     </MobileShell>
   );
 }

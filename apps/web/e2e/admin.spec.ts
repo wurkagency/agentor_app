@@ -42,55 +42,60 @@ test('Produkt: a new Business price for new subscriptions only leaves existing o
   await login(page, 'kasper');
   const before = await adminQuery<{ id: string; price_version_id: string; price: number }>(
     `select s.id, s.price_version_id, v.price_monthly_ore as price from subscriptions s
-       join plan_price_versions v on v.id = s.price_version_id where s.plan_id = 'business'`,
+       join plan_price_versions v on v.id = s.price_version_id where s.plan_id = 'business'
+      order by s.id`,
   );
   expect(before.length).toBeGreaterThan(0);
   const oldPrice = before[0]!.price;
 
-  await page.goto('/platform/admin/product');
-  await expect(page.getByRole('heading', { name: 'Produkt', exact: true })).toBeVisible();
-  const price = page.getByLabel('Pris pr. måned for Business');
-  await price.fill(String(oldPrice / 100 + 10));
-  await page.getByRole('radio', { name: /Kun nye abonnementer/ }).check();
-  await page.getByRole('button', { name: 'Gem ændringer' }).click();
-  await expect(page.getByText(/1 plan er gemt/).filter({ visible: true })).toBeVisible();
+  try {
+    await page.goto('/platform/admin/product');
+    await expect(page.getByRole('heading', { name: 'Produkt', exact: true })).toBeVisible();
+    const price = page.getByLabel('Pris pr. måned for Business');
+    await price.fill(String(oldPrice / 100 + 10));
+    await page.getByRole('radio', { name: /Kun nye abonnementer/ }).check();
+    await page.getByRole('button', { name: 'Gem ændringer' }).click();
+    await expect(page.getByText(/1 plan er gemt/).filter({ visible: true })).toBeVisible();
 
-  // The history has the new version with who and when.
-  await page.getByRole('button', { name: 'Historik' }).click();
-  const history = page.getByRole('dialog', { name: 'Historik' });
-  await expect(history.getByRole('row').nth(1)).toContainText('Business');
-  await expect(history.getByRole('row').nth(1)).toContainText('Kasper Nyborg');
-  await expect(history.getByRole('row').nth(1)).toContainText('Kun nye abonnementer');
-  await page.keyboard.press('Escape');
+    // The history has the new version with who and when.
+    await page.getByRole('button', { name: 'Historik' }).click();
+    const history = page.getByRole('dialog', { name: 'Historik' });
+    await expect(history.getByRole('row').nth(1)).toContainText('Business');
+    await expect(history.getByRole('row').nth(1)).toContainText('Kasper Nyborg');
+    await expect(history.getByRole('row').nth(1)).toContainText('Kun nye abonnementer');
+    await page.keyboard.press('Escape');
 
-  // Existing subscriptions keep their version and price; the plan's list price is the new one.
-  const after = await adminQuery<{ id: string; price_version_id: string; price: number }>(
-    `select s.id, s.price_version_id, v.price_monthly_ore as price from subscriptions s
-       join plan_price_versions v on v.id = s.price_version_id where s.plan_id = 'business'`,
-  );
-  expect(after).toEqual(before);
-  const [plan] = await adminQuery<{ price: number }>(
-    `select price_monthly_ore as price from plans where id = 'business'`,
-  );
-  expect(plan!.price).toBe(oldPrice + 1000);
-  // A subscription that changes to Business now gets the new version (trigger).
-  const [chosen] = await adminQuery<{ price: number }>(
-    `select v.price_monthly_ore as price from plan_price_versions v
-      where v.id = (select id from plan_price_versions where plan_id = 'business'
-                    order by created_at desc limit 1)`,
-  );
-  expect(chosen!.price).toBe(oldPrice + 1000);
-  const audit = await adminQuery(
-    `select 1 from platform.audit where action = 'price_version.created'
-        and detail->>'planId' = 'business' and created_at > now() - interval '1 minute'`,
-  );
-  expect(audit.length).toBe(1);
-
-  // Back to the seed's price, again as a version for new subscriptions only.
-  await page.reload();
-  await page.getByLabel('Pris pr. måned for Business').fill(String(oldPrice / 100));
-  await page.getByRole('button', { name: 'Gem ændringer' }).click();
-  await expect(page.getByText(/1 plan er gemt/).filter({ visible: true })).toBeVisible();
+    // Existing subscriptions keep their version and price; the plan's list price is the new one.
+    const after = await adminQuery<{ id: string; price_version_id: string; price: number }>(
+      `select s.id, s.price_version_id, v.price_monthly_ore as price from subscriptions s
+         join plan_price_versions v on v.id = s.price_version_id where s.plan_id = 'business'
+        order by s.id`,
+    );
+    expect(after).toEqual(before);
+    const [plan] = await adminQuery<{ price: number }>(
+      `select price_monthly_ore as price from plans where id = 'business'`,
+    );
+    expect(plan!.price).toBe(oldPrice + 1000);
+    // A subscription that changes to Business now gets the new version (trigger).
+    const [chosen] = await adminQuery<{ price: number }>(
+      `select v.price_monthly_ore as price from plan_price_versions v
+        where v.id = (select id from plan_price_versions where plan_id = 'business'
+                      order by created_at desc limit 1)`,
+    );
+    expect(chosen!.price).toBe(oldPrice + 1000);
+    const audit = await adminQuery(
+      `select 1 from platform.audit where action = 'price_version.created'
+          and detail->>'planId' = 'business' and created_at > now() - interval '1 minute'`,
+    );
+    expect(audit.length).toBe(1);
+  } finally {
+    // Back to the seed's price, again as a version for new subscriptions only, also when an
+    // assertion above failed: later specs (billing, onboarding) expect the seed's prices.
+    await page.goto('/platform/admin/product');
+    await page.getByLabel('Pris pr. måned for Business').fill(String(oldPrice / 100));
+    await page.getByRole('button', { name: 'Gem ændringer' }).click();
+    await expect(page.getByText(/1 plan er gemt/).filter({ visible: true })).toBeVisible();
+  }
 });
 
 async function tableRows(page: Page) {

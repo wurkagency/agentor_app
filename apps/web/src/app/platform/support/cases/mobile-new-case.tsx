@@ -1,6 +1,7 @@
 'use client';
 
 import { BigButton } from '@agentor/ui/mobile';
+import { Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { NewCaseDialog } from '@/components/platform/new-case-dialog';
@@ -11,7 +12,7 @@ export function MobileNewCase({ customers }: { customers: { id: string; name: st
   const [open, setOpen] = useState(false);
   return (
     <>
-      <BigButton className="mt-auto" onClick={() => setOpen(true)}>
+      <BigButton className="mt-auto" icon={Plus} onClick={() => setOpen(true)}>
         {t('newCase')}
       </BigButton>
       {open && <NewCaseDialog customers={customers} onClose={() => setOpen(false)} />}

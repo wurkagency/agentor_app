@@ -1,9 +1,10 @@
 import type { StaffMember } from '@agentor/db';
 import { formatDate, formatRelative, type Locale } from '@agentor/i18n';
 import { Avatar, StatusPill } from '@agentor/ui';
-import { ExpandCard, KV, MobileFootnote, MobileShell } from '@agentor/ui/mobile';
+import { ExpandCard, KV, MobileFootnote, MobileShell, MobilePageTitle } from '@agentor/ui/mobile';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { PlatformTopBar } from '@/components/mobile/chrome';
+import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
 import { InviteStaffAction, RulesEdit, StaffActions } from './mobile-controls';
 import { RIGHTS } from './rights';
 
@@ -46,16 +47,9 @@ export async function PlatformUsersMobile({
   const warnOn = warnConcurrent < WARN_OFF;
 
   return (
-    <MobileShell
-      topBar={
-        <PlatformTopBar
-          back="/platform/customers"
-          title={t('nav')}
-          subtitle={tm('count', { count: staff.length })}
-          actions={<InviteStaffAction />}
-        />
-      }
-    >
+    <MobileShell topBar={<PlatformTopBar actions={<InviteStaffAction />} />}>
+      <PlatformSubTabs />
+      <MobilePageTitle title={t('nav')} />
       <MobileFootnote>{tm('intro')}</MobileFootnote>
       {staff.map((s) => {
         const role = t(`roles.${s.role}`);

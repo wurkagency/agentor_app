@@ -1,6 +1,7 @@
 'use client';
 
-import { toast } from '@agentor/ui';
+import { Icon, toast } from '@agentor/ui';
+import { Send } from 'lucide-react';
 import { BigButton, Modal } from '@agentor/ui/mobile';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -49,8 +50,9 @@ export function NotifyInvoice({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="touch-target inline-flex h-8 flex-none cursor-pointer items-center rounded-full border-0 bg-white px-3.5 font-sans text-meta font-semibold text-fg-1 shadow-ring-chip"
+        className="touch-target inline-flex h-8 flex-none cursor-pointer items-center gap-1.5 rounded-full border-0 bg-white px-3.5 font-sans text-meta font-semibold text-fg-1 shadow-ring-chip"
       >
+        <Icon icon={Send} size={14} />
         {label}
       </button>
       <Modal

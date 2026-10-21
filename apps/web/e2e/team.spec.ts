@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test';
 import { TENANTS } from '../scripts/seed-data';
 import globalSetup from './global-setup';
 import { latestMailTo } from './mailpit';
-import { login, ownerSql } from './support';
+import { adminQuery, login, ownerSql } from './support';
 
 /** M3 acceptance: team, invitations, settings and audit log (D11, D12). */
 
@@ -181,7 +181,17 @@ test('requiring MFA for the whole team sends a reader to enrolment', async ({ pa
   await expect(bo).toHaveURL(/\/login\/mfa\/setup$/);
 
   await page.getByRole('switch', { name: 'Kræv totrin for hele teamet' }).click();
-  await expect(page.getByText('Sikkerhedsindstillingerne er gemt').first()).toBeVisible();
+  // The first save's toast may still be showing; wait for the setting itself, so the next test
+  // doesn't sign Bo in while the company still requires two-step login.
+  await expect
+    .poll(async () => {
+      const [t] = await adminQuery<{ on: boolean }>(
+        `select require_mfa_all as on from tenants where id = $1`,
+        [TENANTS.nordlys.id],
+      );
+      return t?.on;
+    })
+    .toBe(false);
 });
 
 test('audit log exports CSV with the active filters', async ({ page }) => {

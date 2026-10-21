@@ -1,5 +1,5 @@
 import { formatMinutes, type Locale } from '@agentor/i18n';
-import { cn } from '@agentor/ui';
+import { StatusPill } from '@agentor/ui';
 import { MobileCard, MobileEmpty, MobileShell, Responsive } from '@agentor/ui/mobile';
 import { CircleCheck } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
@@ -90,14 +90,7 @@ export default async function OverdueInvoicesPage() {
                   <strong className="whitespace-nowrap text-card tabular">{amount}</strong>
                 </div>
                 <div className="flex items-center justify-between gap-2">
-                  <span
-                    className={cn(
-                      'inline-flex h-6 items-center rounded-full px-2.5 text-micro font-semibold text-fg-1',
-                      pill.warn ? 'bg-warn-bg' : 'bg-error-bg',
-                    )}
-                  >
-                    {pill.text}
-                  </span>
+                  <StatusPill status={pill.warn ? 'warn' : 'error'}>{pill.text}</StatusPill>
                   <NotifyInvoice
                     tenantId={i.tenantId}
                     invoiceId={i.id}

@@ -3212,7 +3212,19 @@
       "colEffective": "Fra",
       "colBy": "Af",
       "noticeSubject": "Ny pris på Agentor {plan}",
-      "noticeBody": "Hej {company}\n\nPrisen på Agentor {plan} ændres fra {old} til {new} inkl. moms pr. måned.\n\nDen nye pris gælder fra jeres første fornyelse efter {date}. Indtil da betaler I den pris, I har i dag.\n\nI kan se jeres abonnement under Abonnement og forbrug i Agentor.\n\nVenlig hilsen\nAgentor"
+      "noticeBody": "Hej {company}\n\nPrisen på Agentor {plan} ændres fra {old} til {new} inkl. moms pr. måned.\n\nDen nye pris gælder fra jeres første fornyelse efter {date}. Indtil da betaler I den pris, I har i dag.\n\nI kan se jeres abonnement under Abonnement og forbrug i Agentor.\n\nVenlig hilsen\nAgentor",
+      "autoCalculated": "Beregnes automatisk",
+      "roundingUnitShort": "min.",
+      "externalUsersSub": "Adgang til udvalgte flows",
+      "mobileNote": "Nye priser gælder kun nye abonnementer, medmindre du vælger andet, når du gemmer.",
+      "featureShort": {
+        "externalUsers": "Eksterne brugere",
+        "moreDestinations": "Flere end 3 destinationer",
+        "sso": "SSO med Microsoft Entra",
+        "whiteLabel": "White-label",
+        "supportAudit": "Supportadgang og audit-log",
+        "eanInvoice": "Betaling på faktura (EAN)"
+      }
     },
     "adminStatus": {
       "title": "System Status",
@@ -3296,7 +3308,9 @@
       "noIncidentsBody": "Opret en hændelse, når noget påvirker kunderne, eller planlæg vedligehold.",
       "colTime": "Tid",
       "colIncident": "Hændelse",
-      "colImpact": "Påvirkning"
+      "colImpact": "Påvirkning",
+      "runsHourShort": "{count, plural, one {# kørsel} other {# kørsler}} sidste time",
+      "webhooksShort": "{count} i dag · {rejected} afvist"
     },
     "reports": {
       "title": "Rapporter",
@@ -3350,7 +3364,16 @@
         "colBilled": "Afregnet",
         "colAmount": "Beløb ekskl. moms",
         "empty": "Ingen supporttid i perioden",
-        "emptyBody": "Vælg en anden periode."
+        "emptyBody": "Vælg en anden periode.",
+        "perStaffMeta": "{count, plural, one {# supporter} other {# supportere}} · {pct} % automatisk",
+        "timeCases": "{time} · {count, plural, one {# sag} other {# sager}}",
+        "timeCasesShort": "{time} · {count}",
+        "topMeta": "{name} {pct} %",
+        "customerLine": "{time} · {amount}",
+        "billableShort": "Fakturerbar",
+        "roundingShort": "Oprunding {pct} %",
+        "medianShort": "Median {time}",
+        "nonBillableShort": "Fejl og goodwill"
       },
       "invoicing": {
         "intro": "Alle fakturaer i perioden med status og tid til betaling. Beløb inkl. moms. Gem som PDF eller eksportér til CSV.",
@@ -3384,7 +3407,15 @@
         "colDays": "Dage til betaling",
         "colAmount": "Beløb",
         "colStatus": "Status",
-        "footer": "Viser {shown} af {total} fakturaer. Eksporten indeholder alle fakturaer i perioden med betalingsmetode og betalingsdato."
+        "footer": "Viser {shown} af {total} fakturaer. Eksporten indeholder alle fakturaer i perioden med betalingsmetode og betalingsdato.",
+        "medianShort": "Median {median} dage",
+        "chip": {
+          "all": "Alle {count}",
+          "outstanding": "Udestående {count}",
+          "paid": "Betalt {count}"
+        },
+        "notPaid": "ikke betalt",
+        "due": "forfald {date}"
       },
       "revenue": {
         "total": "Omsætning i alt",
@@ -3393,7 +3424,9 @@
         "active": "{count} aktive ultimo",
         "outstanding": "Udestående",
         "outstandingSub": "Inkl. moms"
-      }
+      },
+      "pdfMobile": "Gem som PDF",
+      "csvMobile": "Eksportér CSV"
     }
   },
   "support": {
@@ -4022,7 +4055,7 @@
         "stable": "Stabil",
         "falling": "Faldende",
         "note": "Viser kun fejlkoder og antal, aldrig kundedata.",
-        "empty": "Ingen fejl det seneste døgn"
+        "empty": "Ingen fejl i perioden"
       },
       "finance": {
         "title": "Finans",
@@ -4064,6 +4097,16 @@
         "sentLink": "Betalingslinket er sendt til {email}",
         "failed": "Det kunne ikke sendes. Prøv igen.",
         "none": "Ingen forfaldne betalinger"
+      },
+      "access": {
+        "mine": "Mine {count}",
+        "all": "Alle {count}",
+        "pending": "Venter",
+        "actions": "{count} handl.",
+        "waitingCustomer": "venter på kunden",
+        "expiredOn": "udløb {date}",
+        "endedOn": "afsluttet {date}",
+        "request": "Anmod"
       }
     },
     "team": {
@@ -4291,7 +4334,8 @@
       "planCases": "Plan · sager",
       "line": "{registered} → {billed} · {amount}",
       "invoice": "Se faktura",
-      "footnote": "Tid uden sag og tid markeret som ikke fakturerbar kommer ikke med."
+      "footnote": "Tid uden sag og tid markeret som ikke fakturerbar kommer ikke med.",
+      "rateAside": "{rate} kr./t inkl. moms"
     },
     "supportInvoice": {
       "position": "{state} · {n} af {total} i kørslen {date}",
@@ -4329,7 +4373,8 @@
       "nextRunMeta": "{subs} abn. · {support} support",
       "needsAction": "{count, plural, one {# faktura kræver handling} other {# fakturaer kræver handling}}",
       "needsActionMeta": "Rykkere og betalingslinks · {amount}",
-      "noPayments": "Ingen betalinger endnu"
+      "noPayments": "Ingen betalinger endnu",
+      "inclVat": "Inkl. moms"
     },
     "reports": {
       "subtitle": "Pr. måned",
@@ -4377,7 +4422,11 @@
       "search": "Søg i titel, løsning og noter",
       "filterLabel": "Filter",
       "resolution": "Løsning",
-      "open": "Åbn sag"
+      "open": "Åbn sag",
+      "title": "Sager",
+      "list": "Liste",
+      "archiveCount": "Arkiv · {count}",
+      "viewLabel": "Visning"
     },
     "myTime": {
       "sessionAt": "Session i gang hos {name}",
@@ -4406,7 +4455,9 @@
       "newHelp": "På en sag eller uden sag",
       "edit": "Ret tid",
       "stopSave": "Stop og gem",
-      "noOpenCases": "Ingen åbne sager hos kunden"
+      "noOpenCases": "Ingen åbne sager hos kunden",
+      "weekShort": "Uge {n}",
+      "deskScope": "Team og Pr. kunde er tabeller, der vises på computer. Her ser du din egen tid under Min tid."
     },
     "resolve": {
       "title": "Løs sag",
@@ -4420,6 +4471,29 @@
       "notesSub": "Sendes aldrig til kunden · {count, plural, one {# note} other {# noter}}",
       "resolveSend": "Løs og send",
       "failed": "Sagen kunne ikke løses. Prøv igen."
+    },
+    "subTabs": {
+      "support": {
+        "label": "Support",
+        "cases": "Sager",
+        "access": "Adgange",
+        "errors": "Fejl",
+        "time": "Tidsforbrug"
+      },
+      "finance": {
+        "label": "Finans",
+        "overview": "Oversigt",
+        "subscriptions": "Abonnementer",
+        "support": "Support",
+        "invoicing": "Fakturering"
+      },
+      "admin": {
+        "label": "Admin",
+        "status": "Status",
+        "users": "Brugere",
+        "product": "Produkt",
+        "reports": "Rapporter"
+      }
     }
   },
   "signupFlow": {

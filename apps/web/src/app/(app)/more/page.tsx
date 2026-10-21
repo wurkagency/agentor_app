@@ -57,17 +57,18 @@ export default async function MorePage() {
   const mobile = (
     <MobileShell topBar={<AppTopBar />}>
       <MobileCard>
-        <div className="flex items-center gap-3 p-4">
+        {/* The whole card opens Min profil (MA10 → MA36). */}
+        <Link href="/profile" className="flex items-center gap-3 p-4 text-fg-1 no-underline">
           <span className="grid size-11 flex-none place-items-center rounded-full bg-fg-1 font-semibold text-white">
             {initials(ctx.user.name)}
           </span>
-          <div className="flex flex-1 flex-col leading-snug">
+          <span className="flex flex-1 flex-col leading-snug">
             <strong>{ctx.user.name}</strong>
             <span className="text-meta font-medium text-fg-2">
               {t('role', { role: tr(role), company: ctx.tenant.tenantName })}
             </span>
-          </div>
-        </div>
+          </span>
+        </Link>
       </MobileCard>
       <MobileCard>
         {billing && (

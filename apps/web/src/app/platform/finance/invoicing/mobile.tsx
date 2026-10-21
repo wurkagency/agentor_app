@@ -14,12 +14,14 @@ import {
   SectionHeading,
   StackedValue,
   TopBarAction,
+  MobilePageTitle,
 } from '@agentor/ui/mobile';
 import { CircleCheck, Download, ReceiptText, TriangleAlert } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { PlatformTopBar } from '@/components/mobile/chrome';
+import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
 import { dayMonth, kr, money } from '@/components/platform/finance/bits';
 import { KpiPair, KrValue, SmallKpi } from '@/components/platform/finance/mobile-bits';
 
@@ -80,16 +82,14 @@ export async function PaymentsMobile({ d }: { d: PaymentsMobileData }) {
     <MobileShell
       topBar={
         <PlatformTopBar
-          back="/platform/finance"
-          title={tf('tab.invoicing')}
-          subtitle={t('subtitle')}
-          bell={false}
           actions={
             <TopBarAction icon={Download} label={tf('pay.export')} href={d.exportHref} onNavy />
           }
         />
       }
     >
+      <PlatformSubTabs />
+      <MobilePageTitle title={tf('tab.invoicing')} aside={t('inclVat')} />
       <KpiPair>
         <MobileKpi
           featured

@@ -4,7 +4,7 @@ Status: **godkendt 19. okt. 2026. M1 bygget 20. okt. 2026 (ikke committet), se �
 
 Kilder: `docs/design/runde-1/README.md` beslutning 16, 18, 19 og 20, de 22 mobile tegneflader (`MA01`–`MA15`, `MP01`–`MP07`, alle 390 × 844), desktop-tegnefladerne for de samme funktioner, produktspecifikation §6, §7, §8, §9.5–9.7 og designspecifikation §2, §3.1, §5.4–5.6, §8, §9, §10.1.
 
-Regel ved konflikt: under 768 px vinder mobiltegnefladen på layout. På data og regler vinder spec og README-beslutningerne. Beslutning 20 vinder over spec §8 og designspec §8 (fx faner: **Mere** + klokke i stedet for en Notifikationer-fane, og topbar 60 px / tabbar 76 px som på tegnefladerne).
+Regel ved konflikt: under 768 px vinder mobiltegnefladen på layout. På data og regler vinder spec og README-beslutningerne. Beslutning 20 vinder over spec §8 og designspec §8 (fx faner: **Mere** + klokke i stedet for en Notifikationer-fane, og topbar 60 px som på tegnefladerne). Fra 21. okt. 2026 er tabbaren den svævende `MobileTabBar` v3 på 56 px (MX1/MX2, PLAN-2026-10-21 §7).
 
 ---
 
@@ -24,6 +24,8 @@ Hvorfor:
 2. **UA-gæt på serveren** giver forkert visning ved resize og hydrerings-mismatch, hvis man retter til på klienten.
 3. **CSS-skiftet er deterministisk ved 768 px**, virker ved resize, og `display: none` fjerner den skjulte gren fra tab-rækkefølgen og tilgængelighedstræet.
 4. **Samme server-loader og samme server actions** for begge grene. Permission-tjek ligger ét sted, og UI'et bestemmer kun, hvad der vises (princip 2).
+
+**Navigation under 768 px (PLAN-2026-10-21 M4):** `MobileTabBar` v3 svæver 14 px fra siderne og mindst 6 px over hjem-indikatoren. Kunden har Overblik · Integrationer · Aktivitet · Mere · Profil. Platform har Kunder · Support · Finans · Admin · Profil for Superadmin og Kunder · Support · Profil for Supporter. Support, Finans og Admin har `PlatformSubTabs` under topbjælken på sektionens listesider. Detaljesider har en tilbage-knap i stedet. Bjælken er skjult, mens et tekstfelt har fokus. FAB'er, `SelectionBar` og knapbjælker står over den (`bottom-tabbar-gap`, `bottom-over-tabbar`).
 
 Prisen er, at HTML'en indeholder begge grene. Det holdes nede ved at:
 
@@ -70,9 +72,9 @@ Bygges én gang og matches pixel for pixel ved 390 px. Kun design-tokens (lint).
 
 | Komponent | Indhold og krav |
 | --- | --- |
-| `MobileShell` | Topbar 60 px + indhold + tabbar 76 px + `env(safe-area-inset-*)`. Variant `platform` (navy). Offline-banner-slot. |
+| `MobileShell` | Topbar 60 px + indhold + plads til den svævende tabbar + `env(safe-area-inset-*)`. Variant `platform` (navy). Offline-banner-slot. |
 | `TopBar` | Logo-variant, eller tilbage-knap + titel + undertitel. Klokke med badge (rød ved fejl/afbrudt, ellers mørk, beslutning 4). Navy-variant med Platform-mærke og avatar. |
-| `TabBar` | 4 faner, aktiv = lime pill bag ikonet (navy pill på Platform). `<nav>` med `aria-current`. Finans-fanen renderes kun for Superadmin. |
+| `MobileTabBar` (v3, erstatter `TabBar`) | Svævende pille på 56 px. Den aktive fane viser ikon og label på en pille og har `aria-current`. De inaktive er kun et ikon med `aria-label` i et felt på 44 × 44. Hvid variant til kunden og navy til Platform. Finans og Admin renderes kun for Superadmin. |
 | `StatusHero` | Cirkelikon + overskrift + meta (MA02 "Alt kører", MA03 "2 ting kræver handling", MA05). |
 | `RowLink` | 56 px række: ikon eller logo, titel + meta, efterfølgende chevron, pill eller knap. Hele rækken er ét `<a>`; en knap i rækken er en søskende, ikke indlejret. |
 | `FlowCard` | Logoer kilde → destinationer, statuspill, navn, meta (MA04). |
@@ -305,7 +307,7 @@ Taget under natarbejdet efter planens anbefaling, så arbejdet ikke stod stille.
 28. **MP08:** chippen "Noter" tilføjet; "Gentag" og telefon/forbrug udeladt (ingen data/handling uden supportvisning). **MP10:** "Skift kunde" sidder i den lime bjælke; introlinjen er udeladt. **MP14:** "Fakturerbar tid" beholdt fra desktop; tiden kan ikke rettes; "Afslut også supportadgangen" er slået til som på tegnefladen. **MP17** åbnes fra MP08, ikke fra MP01-rækkerne (én handling pr. række).
 29. **MP12:** totrin vises som "Slået til/Mangler" (metoden kendes ikke); alle 9 rettigheder; fodnoten siger, at Superadmin kan åbne en kunde direkte, og at det logges (tegnefladens tekst modsagde rettighederne). **MP13:** fulde navne, knappen "Åbn sag". **MP15:** én række pr. registrering, så "Ret tid" retter præcis én (ny `updateTime`, kun egne, ikke-fakturerede). **MP16:** "Statusændringer" og "Spørg om kunden var tilfreds" som på desktop; "Tidsforbrug" er slået fra som på desktop; MP03 har fået et stille "Løs sag"-link under samtalen.
 30. **MP18–MP23:** MP21 ligger på desktop-ruten `/platform/finance/support/[tenantId]?month=` (før en kladde findes, er der intet faktura-id); `invoices/[tenantId]/[invoiceId]` viderestiller. MP21 beholder tabbaren, og knapperne står nederst på siden. MP20 "Send kontoudtog" kræver bekræftelse på mobil. MP22-ringen viser beløb uden "kr." for at passe på 360 px. MP23 har ingen median for løste sager (findes ikke i data).
-31. **Tabbar:** MP12 lyser "Kunder", MP15 lyser "Sager".
+31. **Tabbar:** MP12 lyste "Kunder" og MP15 "Sager". Med sitemap v2 (21. okt.) lyser MP12 "Admin", og MP15 lyser "Support".
 32. **Lighthouse-version (B6):** `lighthouse@13.5.0` kunne ikke installeres, fordi pnpm afviste en afhængighed (`chromium-bidi`) som mulig pakke-overtagelse ("trust downgrade"). Det er ikke tilsidesat; målingerne er lavet med `lighthouse@12.8.2`.
 
 ## 14. Status 21. okt. 2026 (M2–M4 og de nye tegneflader)

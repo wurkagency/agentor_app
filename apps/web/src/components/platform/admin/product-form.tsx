@@ -45,26 +45,14 @@ const SWITCHES: { key: ProductFeature; label: string }[] = [
 const parseKr = (v: string) => Number(v.replace(/\./g, '').replace(',', '.'));
 const parseLimit = (v: string): number | null => (v.trim() === '' ? null : Math.round(parseKr(v)));
 
-/**
- * Administration › Produkt (A2): the support price and the plans' prices and features. Values come
- * from the support price versions and plan_entitlements; "Gem ændringer" stores new versions.
- */
-export function ProductForm({
-  support,
-  plans,
-  history,
-}: {
-  support: { rateInclKr: number; roundingMinutes: number; nonBillable: string[] };
-  plans: ProductPlan[];
-  history: ProductHistoryRow[];
-}) {
+/** Form state and saving, shared by A2 (desktop) and MP26 (phone). */
+export function useProductForm(
+  support: { rateInclKr: number; roundingMinutes: number; nonBillable: string[] },
+  plans: ProductPlan[],
+) {
   const t = useTranslations('platform.product');
-  const locale = useLocale();
-  const nf = new Intl.NumberFormat(locale === 'da' ? 'da-DK' : 'en-GB');
-  const tf = useTranslations('plans.features');
   const tc = useTranslations('common');
   const router = useRouter();
-  const id = useId();
   const [rate, setRate] = useState(String(support.rateInclKr));
   const [rounding, setRounding] = useState(String(support.roundingMinutes));
   const [nonBillable, setNonBillable] = useState(new Set(support.nonBillable));
@@ -77,7 +65,6 @@ export function ProductForm({
     })),
   );
   const [appliesTo, setAppliesTo] = useState<ProductInput['appliesTo']>('new');
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const rateKr = parseKr(rate);
@@ -85,6 +72,13 @@ export function ProductForm({
 
   const update = (planId: string, patch: Partial<(typeof rows)[number]>) =>
     setRows((rs) => rs.map((r) => (r.id === planId ? { ...r, ...patch } : r)));
+  const toggleNonBillable = (r: string) =>
+    setNonBillable((s) => {
+      const n = new Set(s);
+      if (n.has(r)) n.delete(r);
+      else n.add(r);
+      return n;
+    });
 
   const save = () =>
     start(async () => {
@@ -117,6 +111,52 @@ export function ProductForm({
       });
       router.refresh();
     });
+
+  return {
+    rate,
+    setRate,
+    rounding,
+    setRounding,
+    nonBillable,
+    toggleNonBillable,
+    rows,
+    update,
+    appliesTo,
+    setAppliesTo,
+    error,
+    pending,
+    save,
+    exVat,
+  };
+}
+
+export const yearPrice = (price: string) => {
+  const kr = parseKr(price);
+  return Number.isFinite(kr) ? Math.round(kr * 10) : null;
+};
+
+/**
+ * Administration › Produkt (A2): the support price and the plans' prices and features. Values come
+ * from the support price versions and plan_entitlements; "Gem ændringer" stores new versions.
+ */
+export function ProductForm({
+  support,
+  plans,
+  history,
+}: {
+  support: { rateInclKr: number; roundingMinutes: number; nonBillable: string[] };
+  plans: ProductPlan[];
+  history: ProductHistoryRow[];
+}) {
+  const t = useTranslations('platform.product');
+  const locale = useLocale();
+  const nf = new Intl.NumberFormat(locale === 'da' ? 'da-DK' : 'en-GB');
+  const tf = useTranslations('plans.features');
+  const id = useId();
+  const f = useProductForm(support, plans);
+  const { rate, setRate, rounding, setRounding, nonBillable, rows, update, appliesTo } = f;
+  const { setAppliesTo, error, pending, save, exVat } = f;
+  const [historyOpen, setHistoryOpen] = useState(false);
 
   const input =
     'h-9 rounded-sm border border-border bg-surface px-3 text-right font-sans text-body tabular-nums text-fg-1';
@@ -219,14 +259,7 @@ export function ProductForm({
                       key={r}
                       type="button"
                       aria-pressed={on}
-                      onClick={() =>
-                        setNonBillable((s) => {
-                          const n = new Set(s);
-                          if (on) n.delete(r);
-                          else n.add(r);
-                          return n;
-                        })
-                      }
+                      onClick={() => f.toggleNonBillable(r)}
                       className={cn(
                         'inline-flex h-8 cursor-pointer items-center rounded-full border-0 px-3.5 font-sans text-table',
                         on ? 'bg-primary font-semibold' : 'bg-surface shadow-ring-chip',
@@ -283,10 +316,8 @@ export function ProductForm({
                 t('priceYear'),
                 t('priceYearSub'),
                 rows.map((r) => {
-                  const kr = parseKr(r.price);
-                  return Number.isFinite(kr)
-                    ? t('krAmount', { amount: nf.format(Math.round(kr * 10)) })
-                    : '–';
+                  const y = yearPrice(r.price);
+                  return y === null ? '–' : t('krAmount', { amount: nf.format(y) });
                 }),
               )}
               {cellRow(
@@ -380,41 +411,7 @@ export function ProductForm({
         </fieldset>
       </Card>
 
-      <Dialog
-        open={historyOpen}
-        onOpenChange={setHistoryOpen}
-        width={720}
-        title={t('history')}
-        description={t('historyIntro')}
-        closeLabel={tc('close')}
-      >
-        {history.length === 0 ? (
-          <p className="m-0 text-body text-fg-2">{t('historyEmpty')}</p>
-        ) : (
-          <Table aria-label={t('history')}>
-            <thead>
-              <tr>
-                <Th>{t('colWhat')}</Th>
-                <Th>{t('colChange')}</Th>
-                <Th>{t('colApplies')}</Th>
-                <Th>{t('colEffective')}</Th>
-                <Th>{t('colBy')}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((h) => (
-                <Tr key={h.id}>
-                  <Td className="font-semibold">{h.what}</Td>
-                  <Td className="whitespace-normal">{h.change}</Td>
-                  <Td>{h.appliesTo}</Td>
-                  <Td>{h.effective}</Td>
-                  <Td>{h.by}</Td>
-                </Tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
-      </Dialog>
+      <ProductHistoryDialog open={historyOpen} onOpenChange={setHistoryOpen} history={history} />
     </>
   );
 
@@ -433,4 +430,55 @@ export function ProductForm({
       s.key,
     );
   }
+}
+
+/** "Historik" (A2, MP26): every price version, newest first. */
+export function ProductHistoryDialog({
+  open,
+  onOpenChange,
+  history,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  history: ProductHistoryRow[];
+}) {
+  const t = useTranslations('platform.product');
+  const tc = useTranslations('common');
+  return (
+    <Dialog
+      open={open}
+      onOpenChange={onOpenChange}
+      width={720}
+      title={t('history')}
+      description={t('historyIntro')}
+      closeLabel={tc('close')}
+    >
+      {history.length === 0 ? (
+        <p className="m-0 text-body text-fg-2">{t('historyEmpty')}</p>
+      ) : (
+        <Table aria-label={t('history')}>
+          <thead>
+            <tr>
+              <Th>{t('colWhat')}</Th>
+              <Th>{t('colChange')}</Th>
+              <Th>{t('colApplies')}</Th>
+              <Th>{t('colEffective')}</Th>
+              <Th>{t('colBy')}</Th>
+            </tr>
+          </thead>
+          <tbody>
+            {history.map((h) => (
+              <Tr key={h.id}>
+                <Td className="font-semibold">{h.what}</Td>
+                <Td className="whitespace-normal">{h.change}</Td>
+                <Td>{h.appliesTo}</Td>
+                <Td>{h.effective}</Td>
+                <Td>{h.by}</Td>
+              </Tr>
+            ))}
+          </tbody>
+        </Table>
+      )}
+    </Dialog>
+  );
 }

@@ -5,7 +5,6 @@ import {
   CardButton,
   ExpandCard,
   KV,
-  MobileFootnote,
   MobileShell,
   RowIcon,
   TrendPill,
@@ -13,10 +12,11 @@ import {
 import { CalendarDays, Download } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { PlatformTopBar } from '@/components/mobile/chrome';
+import { ReportMobileHead } from '@/components/platform/admin/report-toolbar';
 import { growthOf, kr, monthLong, monthYear } from '@/components/platform/finance/bits';
 import { MobileSendReport } from '@/components/platform/finance/mobile-actions';
 import { NameValue } from '@/components/platform/finance/mobile-bits';
-import { growthPct, monthQuery, pct, type MonthReport } from '@/server/finance-data';
+import { growthPct, monthQuery, monthRange, pct, type MonthReport } from '@/server/finance-data';
 
 export interface ReportsMobileData {
   /** Newest first, each with the month before it for the trend. */
@@ -36,17 +36,8 @@ export async function ReportsMobile({ d }: { d: ReportsMobileData }) {
   const supportTotal = s.topCustomers.reduce((a, c) => a + c.netOre, 0);
   const selectedName = monthLong(s.month.start, locale);
   return (
-    <MobileShell
-      topBar={
-        <PlatformTopBar
-          back="/platform/finance"
-          title={tf('report.title')}
-          subtitle={t('subtitle')}
-          bell={false}
-        />
-      }
-    >
-      <MobileFootnote>{tf('report.intro')}</MobileFootnote>
+    <MobileShell topBar={<PlatformTopBar />}>
+      <ReportMobileHead type="revenue" query={monthQuery(s.month)} range={monthRange(s.month)} />
       {d.months.map(({ r, before }) => {
         const growth = growthOf(
           growthPct(r.revenueOre, before.revenueOre),

@@ -543,20 +543,19 @@
    home indicator's safe area on phones that have one. */
 :root {
   --m-topbar-height: 60px;
-  --m-tabbar-height: 76px;
+  /* MobileTabBar v3 (MX1/MX2): 56 px, 6 px above the home indicator, at least 14 px from the edge. */
+  --m-tabbar-height: 56px;
+  --m-tabbar-bottom: max(14px, calc(env(safe-area-inset-bottom) + 6px));
 }
 @utility pt-safe {
   padding-top: env(safe-area-inset-top);
 }
-@utility pb-tabbar-safe {
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
+@utility bottom-tabbar {
+  bottom: var(--m-tabbar-bottom);
 }
-@utility h-tabbar-safe {
-  height: calc(var(--m-tabbar-height) - 8px + max(8px, env(safe-area-inset-bottom)));
-}
-/* Room under the content for the fixed tab bar. */
+/* Room under the content for the floating tab bar, with 16 px to spare. */
 @utility pb-under-tabbar {
-  padding-bottom: calc(var(--m-tabbar-height) - 8px + max(8px, env(safe-area-inset-bottom)));
+  padding-bottom: calc(var(--m-tabbar-height) + var(--m-tabbar-bottom) + 16px);
 }
 /* Room under the content for a fixed 52 px action bar (MP03 timer). */
 @utility pb-under-bar {
@@ -640,9 +639,26 @@
 @utility grid-cols-done-hero {
   grid-template-columns: minmax(0, 1fr) auto;
 }
-/* Floating selection bar 12 px above the tab bar (MA19). */
+/* FAB, selection bar and timer 12 px above the floating tab bar (MA19, MX1). */
 @utility bottom-tabbar-gap {
-  bottom: calc(var(--m-tabbar-height) - 8px + max(8px, env(safe-area-inset-bottom)) + 12px);
+  bottom: calc(var(--m-tabbar-height) + var(--m-tabbar-bottom) + 12px);
+}
+/* A docked action bar right above the floating tab bar (MP26 "Gem ændringer"). */
+@utility bottom-over-tabbar {
+  bottom: calc(var(--m-tabbar-height) + var(--m-tabbar-bottom) + 6px);
+}
+/* MobileTabBar side padding (MX1: 20 / 18) and the active pill's (12 / 16), narrowed below about
+   400 px so four 44 px tabs and "Integrationer" still fit at 360. */
+@utility px-tabbar {
+  padding-left: clamp(6px, calc(100vw - 372px), 20px);
+  padding-right: clamp(6px, calc(100vw - 374px), 18px);
+}
+@utility px-tab-active {
+  padding-left: clamp(8px, calc(100vw - 352px), 12px);
+  padding-right: clamp(10px, calc(100vw - 348px), 16px);
+}
+@utility max-w-tabbar {
+  max-width: 480px;
 }
 
 /* Achievement progress (PR1/D15): a thin dark bar on the border colour. */

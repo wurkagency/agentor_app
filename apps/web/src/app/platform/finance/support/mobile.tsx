@@ -11,12 +11,14 @@ import {
   MobileLogo,
   MobileShell,
   Segmented,
+  MobilePageTitle,
 } from '@agentor/ui/mobile';
-import { Clock, FileText, Headphones } from 'lucide-react';
+import { CalendarDays, FileText, Headphones } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { PlatformTopBar } from '@/components/mobile/chrome';
-import { dayMonth, growthOf, kr, monthYear } from '@/components/platform/finance/bits';
+import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
+import { dayMonth, growthOf, kr } from '@/components/platform/finance/bits';
 import { KpiPair, KrValue, SmallKpi } from '@/components/platform/finance/mobile-bits';
 import { growthPct, pct, type CustomerSupport, type Month } from '@/server/finance-data';
 
@@ -43,23 +45,16 @@ export async function SettlementMobile({ d }: { d: SettlementMobileData }) {
   const krs = (ore: number) => `${kr(ore, locale)} kr.`;
   const rate = pct(totals.registered, totals.registered + totals.nonBillable);
   return (
-    <MobileShell
-      topBar={
-        <PlatformTopBar
-          back="/platform/finance"
-          title={tf('tab.support')}
-          subtitle={t('subtitle', {
-            month: monthYear(m.start, locale),
-            rate: kr(Math.round(d.rateOre * 1.25), locale),
-          })}
-          bell={false}
-        />
-      }
-    >
+    <MobileShell topBar={<PlatformTopBar />}>
+      <PlatformSubTabs />
+      <MobilePageTitle
+        title={tf('tab.support')}
+        aside={t('rateAside', { rate: kr(Math.round(d.rateOre * 1.25), locale) })}
+      />
       {d.isOpen && (
         <MobileCallout
           tone="info"
-          icon={Clock}
+          icon={CalendarDays}
           title={t('closes', { date: dayMonth(new Date(m.end.getTime() - 1), locale) })}
         >
           {t('sends', { date: dayMonth(m.end, locale) })}

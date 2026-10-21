@@ -297,9 +297,20 @@ export default async function ErrorsPage({
       </PageBody>
     </>
   );
-  // The phone always shows the last 24 hours (MP05).
-  const day = period === '24h' ? groups : await errorsFor(actor.userId, 1);
   return (
-    <Responsive desktop={desktop} mobile={<ErrorsMobile groups={day} describe={describe} />} />
+    <Responsive
+      desktop={desktop}
+      mobile={
+        <ErrorsMobile
+          groups={groups}
+          describe={describe}
+          period={range ? null : period}
+          from={shownFrom}
+          to={shownTo}
+          max={today}
+          aside={rangeText}
+        />
+      }
+    />
   );
 }
