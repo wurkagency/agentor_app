@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>Mobil Platform · afslut supportsession</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F1}
+.ds{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1A1A18;font-size:14px;line-height:1.55}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.i14{width:14px;height:14px}.i16{width:16px;height:16px}.i24{width:24px;height:24px}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px}
+.wrap{width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box}
+.pl{font-size:15px;font-weight:500;color:#6B6B67;text-decoration:none;padding:4px 0;white-space:nowrap}
+.pl.on{color:#1A1A18;font-weight:600;box-shadow:inset 0 -2px 0 #1A1A18}
+.sl{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:9999px;font-size:13px;font-weight:500;color:#6B6B67;text-decoration:none;white-space:nowrap}
+.sl.on{background:#FFFFFF;color:#1A1A18;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.icb{width:36px;height:36px;border-radius:9999px;display:grid;place-items:center;border:0;background:transparent;color:#1A1A18;cursor:pointer;position:relative;text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;box-sizing:border-box;padding:0 16px;border-radius:9999px;font-family:inherit;font-size:13px;font-weight:600;border:0;color:#1A1A18;background:transparent;white-space:nowrap;cursor:pointer;text-decoration:none}
+.btn-l{height:48px;padding:0 28px;font-size:12px;font-weight:700;letter-spacing:.10em;text-transform:uppercase}
+.btn-s{height:28px;padding:0 12px;font-size:12px}
+.btn-ic{width:28px;height:28px;padding:0}
+.p{background:#D0E84A}
+.s{background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #C8C5BF}
+.dk{background:#13293A;color:#FFFFFF}
+.x{background:#FFFFFF;color:#B42318;box-shadow:inset 0 0 0 1.5px #B42318}
+.dis{background:#F0EDE8;color:#6B6B67;cursor:not-allowed}
+.card{background:#FFFFFF;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.ct{font-size:16px;font-weight:600;line-height:1.4;margin:0}
+.sec{font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em;margin:0}
+.h1{margin:0;font-size:28px;font-weight:600;line-height:1.2;letter-spacing:-.01em}
+.meta{font-size:12px;font-weight:500;color:#6B6B67}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6B6B67;margin:0}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;box-sizing:border-box;padding:0 10px;border-radius:9999px;font-size:12px;font-weight:600;color:#1A1A18;white-space:nowrap}
+.pill .i{width:14px;height:14px}
+.badge{display:inline-flex;align-items:center;gap:5px;height:22px;box-sizing:border-box;padding:0 9px;border-radius:9999px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge .i{width:13px;height:13px}
+.live{background:#13293A;color:#FFFFFF}.test{background:#E5EDF5}
+.dot{width:8px;height:8px;border-radius:9999px;flex:none;display:inline-block}
+.cpt{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;white-space:nowrap}
+.logo{display:grid;place-items:center;box-sizing:border-box;background:#F0EDE8;border:1px solid #E4E1DB;border-radius:8px;font-weight:600;color:#1A1A18;flex:none}
+.logo:has(img){background:#FFFFFF}
+.logo img{width:72%;height:72%;object-fit:contain;display:block}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;line-height:1.4}
+.tbl th{height:40px;text-align:left;font-size:12px;font-weight:600;color:#1A1A18;border-bottom:1px solid #E4E1DB;padding:0 12px;white-space:nowrap}
+.tbl td{height:44px;border-bottom:1px solid #E4E1DB;padding:0 12px;vertical-align:middle;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:0}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;padding:3px;border-radius:9999px;background:#FFFFFF;gap:2px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.seg button{font-family:inherit;height:30px;padding:0 14px;border:0;border-radius:9999px;background:transparent;font-size:13px;font-weight:600;color:#6B6B67;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.seg button.on{background:#1A1A18;color:#FFFFFF}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;box-sizing:border-box;padding:0 14px;border-radius:9999px;font-family:inherit;font-size:13px;font-weight:500;color:#1A1A18;background:#FFFFFF;border:0;box-shadow:inset 0 0 0 1px #C8C5BF;cursor:pointer;white-space:nowrap}
+.chip.on{background:#D0E84A;box-shadow:none;font-weight:600}
+.tab{font-family:inherit;background:none;border:0;padding:0 0 10px;font-size:14px;font-weight:600;color:#6B6B67;cursor:pointer;text-decoration:none}
+.tab.on{color:#1A1A18;box-shadow:inset 0 -2px 0 #1A1A18}
+.inp{height:40px;box-sizing:border-box;border:1px solid #E4E1DB;border-radius:8px;padding:0 12px;display:flex;align-items:center;gap:8px;background:#FFFFFF;font-family:inherit;font-size:14px;color:#1A1A18;width:100%}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld>label{font-size:13px;font-weight:500}
+.frow{display:grid;grid-template-columns:200px minmax(0,1fr);align-items:center;column-gap:16px;min-height:40px}
+.frow>label,.frow>.lb{font-size:13px;font-weight:500}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:10px 16px;align-items:baseline;margin:0}
+.kv dt{font-size:12px;color:#6B6B67;margin:0}.kv dd{font-size:13px;margin:0}
+.sw{position:relative;width:36px;height:20px;border-radius:9999px;box-sizing:border-box;flex:none;display:inline-block;background:#1A1A18}
+.sw::after{content:"";position:absolute;right:3px;top:3px;width:14px;height:14px;border-radius:9999px;background:#FFFFFF}
+.sw::before{content:"";position:absolute;right:7px;top:7px;width:6px;height:6px;border-radius:9999px;background:#D0E84A;z-index:1}
+.sw.off{background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #6B6B67}
+.sw.off::after{left:4px;top:4px;right:auto;width:12px;height:12px;background:#6B6B67}
+.sw.off::before{display:none}
+.cb{width:18px;height:18px;border-radius:4px;box-sizing:border-box;display:inline-grid;place-items:center;flex:none;box-shadow:inset 0 0 0 1.5px #6B6B67;background:#FFFFFF}
+.cb.on{background:#1A1A18;box-shadow:none;color:#D0E84A}
+.ban{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;font-size:13px}
+.av{width:32px;height:32px;border-radius:9999px;display:inline-grid;place-items:center;font-size:12px;font-weight:600;flex:none;background:#F0EDE8}
+
+.ds .i{width:18px;height:18px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#6B6B67;font-size:11px;font-weight:600;padding-top:8px}
+.tab .tw{width:52px;height:30px;border-radius:9999px;display:grid;place-items:center}
+.tab.on{color:#1A1A18}.tab.on .tw{background:#D0E84A}
+.ptab.on .tw{background:#13293A;color:#FFFFFF}
+.row{display:flex;align-items:center;gap:12px;min-height:56px;padding:0 16px;box-shadow:inset 0 -1px 0 #EEEBE6;text-decoration:none;color:#1A1A18}
+.row:last-child{box-shadow:none}
+.lg{width:28px;height:28px;border-radius:8px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #E4E1DB;display:grid;place-items:center;flex:none}
+.lg img{width:18px;height:18px;object-fit:contain}
+.sw{width:44px;height:26px;border-radius:9999px;background:#C8C5BF;position:relative;flex:none;border:0;padding:0}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:9999px;background:#FFFFFF}
+.sw[aria-checked="true"]{background:#1A1A18}.sw[aria-checked="true"]::after{left:21px;background:#D0E84A}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:9999px;font-size:13px;font-weight:500;background:#FFFFFF;box-shadow:inset 0 0 0 1px #C8C5BF;color:#1A1A18;border:0;font-family:inherit;white-space:nowrap}
+.chip.on{background:#1A1A18;color:#FFFFFF;box-shadow:none;font-weight:600}
+.big{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;border-radius:9999px;border:0;font-family:inherit;font-size:15px;font-weight:600;text-decoration:none;color:#1A1A18;box-sizing:border-box}
+.sec2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#1A1A18;margin:14px 4px 0}
+
+details.xr{background:#FFFFFF;border-radius:14px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden}
+details.xr>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:60px;padding:10px 14px;cursor:pointer}
+details.xr>summary::-webkit-details-marker{display:none}
+details.xr>summary .cv{margin-left:auto;color:#6B6B67;display:flex;transition:transform .15s}
+details.xr[open]>summary .cv{transform:rotate(180deg)}
+.xb{padding:2px 14px 14px;display:flex;flex-direction:column;gap:8px;box-shadow:inset 0 1px 0 #EEEBE6}
+.kvr{display:flex;justify-content:space-between;gap:12px;font-size:13px;line-height:1.4;padding-top:8px}
+.kvr>span:first-child{color:#6B6B67;flex:none}
+.kvr>span:last-child{text-align:right;min-width:0}
+.mseg{display:flex;padding:3px;border-radius:9999px;background:#FFFFFF;gap:2px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.mseg button{flex:1;font-family:inherit;height:34px;border:0;border-radius:9999px;background:transparent;font-size:13px;font-weight:600;color:#6B6B67}
+.mseg button.on{background:#1A1A18;color:#FFFFFF}
+.minp{height:48px;box-sizing:border-box;border-radius:10px;border:1px solid #C8C5BF;padding:0 14px;font:inherit;font-size:16px;font-weight:400;background:#FFFFFF;width:100%;min-width:0;color:#1A1A18}
+.mlab{display:flex;flex-direction:column;gap:6px;font-size:13px;font-weight:600}
+.hs{display:flex;gap:8px;overflow:hidden}
+main>*{flex-shrink:0}
+</style>
+</helmet>
+<div class="ds" style="width: 390px; height: 844px; background: #F7F5F1; display: flex; flex-direction: column; position: relative; overflow: hidden">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><symbol id="bl" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></symbol><symbol id="cc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></symbol><symbol id="ch" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></symbol><symbol id="ck" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></symbol><symbol id="cp" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="10" x2="10" y1="15" y2="9"></line><line x1="14" x2="14" y1="15" y2="9"></line></symbol><symbol id="cx" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></symbol><symbol id="fc" viewBox="0 0 24 24"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"></path><path d="M8.5 2h7"></path><path d="M7 16h10"></path></symbol><symbol id="pl" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path><path d="m15 5 3 3"></path></symbol><symbol id="ta" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></symbol><symbol id="up" viewBox="0 0 24 24"><path d="m19 5 3-3"></path><path d="m2 22 3-3"></path><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"></path><path d="M7.5 13.5 10 11"></path><path d="M10.5 16.5 13 14"></path><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"></path></symbol><symbol id="xx" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></symbol></svg>
+<div style="flex: none; background: #D0E84A; padding: 8px 16px; display: flex; align-items: center; gap: 10px; font-size: 12.5px"><span class="logo" style="width: 26px; height: 26px; font-size: 11px; flex: none">NC</span><span style="flex: 1; display: flex; flex-direction: column; line-height: 1.25"><strong>Supportvisning · Nordlys Cykler ApS</strong><span>Se og hjælpe · sag #2291 · 23 t tilbage</span></span><a class="btn btn-s dk" href="MP14-Afslut-session.dc.html" style="height: 34px; color: #FFFFFF">Afslut</a></div><header style="flex: none; height: 60px; display: flex; align-items: center; gap: 8px; padding: 0 16px;  color: #1A1A18"><span style="flex: 1; display: flex; align-items: center; gap: 8px"><span style="color: #1A1A18; display: inline-flex; align-items: center; line-height: 0"><img src="/_blob/1081042ddccbfe88c57833ef05928055" alt="Agentor" style="height: 20px; width: auto; display: block;"></span></span><a class="icb" href="MA09-Notifikationer.dc.html" aria-label="Notifikationer, 2 nye" style="color: #1A1A18; width: 44px; height: 44px"><svg class="i" style="width: 20px; height: 20px"><use href="#bl"></use></svg><span style="position: absolute; top: 8px; right: 8px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 9999px; background: #B42318; color: #FFFFFF; font-size: 10px; font-weight: 700; display: grid; place-items: center">2</span></a></header>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+<div aria-hidden="true" style="display: flex; flex-direction: column; gap: 12px; opacity: .35; pointer-events: none"><section class="card" style="overflow: hidden; "><div style="padding: 16px"><strong>3 flows kræver handling</strong></div></section></div>
+</main>
+
+<div style="position: absolute; inset: 0; z-index: 5; background: rgba(26,26,24,.48); display: flex; align-items: flex-end"><section role="dialog" aria-modal="true" aria-label="Afslut supportsession" style="width: 100%; max-height: 88%; background: #F7F5F1; border-radius: 20px 20px 0 0; padding: 8px 16px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; overflow: hidden"><span style="align-self: center; width: 40px; height: 4px; border-radius: 9999px; background: #C8C5BF"></span><div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px"><div style="display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 18px; font-weight: 700">Afslut supportsession</strong><span class="meta">Nordlys Cykler ApS · i dag 11:15–11:57</span></div><a class="icb" href="MP10-Supportvisning.dc.html" aria-label="Luk" style="width: 40px; height: 40px; background: #FFFFFF; flex: none"><svg class="i" style="width: 18px; height: 18px"><use href="#xx"></use></svg></a></div><section class="card" style="overflow: hidden; "><div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 4px"><strong style="font-size: 26px; letter-spacing: -0.02em">42 min.</strong><span class="meta">Logget automatisk fra første til sidste handling. Pauser over 10 min. er trukket fra.</span></div></section><details class="xr"><summary><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35"><strong style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">7 handlinger i sessionen</strong><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Alle står i kundens audit-log</span></span><span class="cv"><svg class="i" style="width: 18px; height: 18px"><use href="#ch"></use></svg></span></summary><div class="xb"><div class="kvr"><span>11:15</span><span>Åbnede Overblik</span></div><div class="kvr"><span>11:18</span><span>Så fejlet record #10447</span></div><div class="kvr"><span>11:21</span><span>Så #10451 og #10453</span></div><div class="kvr"><span>11:24</span><span>Åbnede mapping for Ordrer → Fakturaer</span></div></div></details><label class="mlab">Knyt til sag<span class="minp" style="display: flex; align-items: center; justify-content: space-between"><span style="font-weight: 400">#2291 · Fakturaer til EU-kunder fejler</span><svg class="i" style="width: 16px; height: 16px"><use href="#ch"></use></svg></span></label><label class="mlab">Kort opsummering · intern note<textarea class="minp" style="height: 64px; padding: 10px 14px; resize: none; line-height: 1.4">Konto 1010 slettet i Dinero. Kunden skal vælge 1015.</textarea></label><label style="display: flex; gap: 10px; align-items: flex-start; font-size: 13px"><span class="cb on" style="width: 22px; height: 22px; border-radius: 6px"><svg class="i" style="width: 14px; height: 14px"><use href="#ck"></use></svg></span><span>Afslut også supportadgangen nu (ellers gælder den til i morgen 11:14)</span></label><button class="big p" type="button" style="">Gem 42 min. på #2291</button><div style="display: flex; justify-content: space-between"><a href="MP10-Supportvisning.dc.html" style="font-size: 13px; font-weight: 600; color: #1A1A18">Fortsæt session</a><a href="#" style="font-size: 13px; font-weight: 600; color: #1A1A18">Kassér tid</a></div></section></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,1005 +1,1536 @@
 {
-  "v": 3,
-  "attachments": {},
-  "boards": {
-    "App-skal-B-Indstillinger.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "1.5b App-skal · Indstillinger valgt",
-      "w": 1440,
-      "x": 10640,
-      "y": 1020
-    },
-    "App-skal-B.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "1.5b App-skal uden sidebar · 1440",
-      "w": 1440,
-      "x": 10640,
-      "y": 0
-    },
-    "App-skal.dc.html": {
-      "h": 900,
-      "title": "1.5 App-skal tom · 1440",
-      "w": 1440,
-      "x": 7600,
-      "y": 0
-    },
-    "D1-Ny-kunde.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D1 Overblik · ny kunde",
-      "w": 1440,
-      "x": 0,
-      "y": 10500
-    },
-    "D1-Overblik-Problemer-2560.dc.html": {
-      "expand": "fill",
-      "h": 1440,
-      "title": "D1 Overblik · 2560 px",
-      "w": 2560,
-      "x": 0,
-      "y": 11700
-    },
-    "D1-Overblik-Problemer.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "is_interactive": true,
-      "title": "D1 Overblik · problemer",
-      "w": 1440,
-      "x": 1520,
-      "y": 3000
-    },
-    "D1-Overblik.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "is_interactive": true,
-      "title": "D1 Overblik · alt kører",
-      "w": 1440,
-      "x": 0,
-      "y": 3000
-    },
-    "D1-Soeg.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "⌘K Søg eller hop til",
-      "w": 1440,
-      "x": 1520,
-      "y": 10500
-    },
-    "D10-Afstemning.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D10 Aktivitet · afstemning",
-      "w": 1440,
-      "x": 1520,
-      "y": 6560
-    },
-    "D10-Aktivitet-Log.dc.html": {
-      "expand": "fill",
-      "h": 960,
-      "title": "D10 Aktivitet · log",
-      "w": 1440,
-      "x": 0,
-      "y": 6560
-    },
-    "D11-Inviter.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D11 Invitér bruger",
-      "w": 1440,
-      "x": 4560,
-      "y": 6560
-    },
-    "D11-Team.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D11 Team og adgang",
-      "w": 1440,
-      "x": 3040,
-      "y": 6560
-    },
-    "D12-Auditlog.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D12 Audit-log",
-      "w": 1440,
-      "x": 0,
-      "y": 7580
-    },
-    "D12-Notifikationer.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D12 Notifikationer",
-      "w": 1440,
-      "x": 6080,
-      "y": 6560
-    },
-    "D12-Sikkerhed.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D12 Sikkerhed",
-      "w": 1440,
-      "x": 7600,
-      "y": 6560
-    },
-    "D13-Abonnement.dc.html": {
-      "expand": "fill",
-      "h": 1180,
-      "title": "D13 Abonnement og forbrug",
-      "w": 1440,
-      "x": 1520,
-      "y": 7580
-    },
-    "D14-Login.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D14 Log ind",
-      "w": 1440,
-      "x": 3040,
-      "y": 7580
-    },
-    "D14-MFA.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D14 Totrinsbekræftelse",
-      "w": 1440,
-      "x": 4560,
-      "y": 7580
-    },
-    "D14-Onboarding-1.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D14 Onboarding 1 · virksomhed",
-      "w": 1440,
-      "x": 6080,
-      "y": 7580
-    },
-    "D14-Onboarding-2.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D14 Onboarding 2 · plan og betaling",
-      "w": 1440,
-      "x": 7600,
-      "y": 7580
-    },
-    "D14-Onboarding-3.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D14 Onboarding 3 · skabelon",
-      "w": 1440,
-      "x": 0,
-      "y": 8880
-    },
-    "D2-Graense.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D2 Integrationer · planens grænse",
-      "w": 1440,
-      "x": 6080,
-      "y": 10500
-    },
-    "D2-Integrationer-2560.dc.html": {
-      "expand": "fill",
-      "h": 1440,
-      "title": "D2 Integrationer · 2560 px",
-      "w": 2560,
-      "x": 2640,
-      "y": 11700
-    },
-    "D2-Integrationer-Samlet.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "is_interactive": true,
-      "title": "Prototype · Integrationer samlet",
-      "w": 1440,
-      "x": 3920,
-      "y": 8880
-    },
-    "D2-Integrationer.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "is_interactive": true,
-      "title": "D2 Integrationer · flow udfoldet",
-      "w": 1440,
-      "x": 3040,
-      "y": 3000
-    },
-    "D2-Notifikationer.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "Notifikationer · popover",
-      "w": 1440,
-      "x": 7600,
-      "y": 10500
-    },
-    "D2-Tom.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D2 Integrationer · tom",
-      "w": 1440,
-      "x": 4560,
-      "y": 10500
-    },
-    "D2-Valg.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D2 Integrationer · masseredigering",
-      "w": 1440,
-      "x": 3040,
-      "y": 10500
-    },
-    "D3-Editor-2560.dc.html": {
-      "expand": "fill",
-      "h": 1440,
-      "title": "D3 Editor · 2560 px",
-      "w": 2560,
-      "x": 5280,
-      "y": 11700
-    },
-    "D3-Editor-Laest.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D3 Editor · skrivebeskyttet",
-      "w": 1440,
-      "x": 9120,
-      "y": 10500
-    },
-    "D3-Editor-Skjult.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D3 Editor · inspektør skjult",
-      "w": 1440,
-      "x": 7600,
-      "y": 4400
-    },
-    "D3-Editor-Start.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "is_interactive": true,
-      "title": "Prototype · editor, intet valgt",
-      "w": 1440,
-      "x": 5440,
-      "y": 8880
-    },
-    "D3-Editor-Traek.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D3 Editor · under træk",
-      "w": 1440,
-      "x": 6080,
-      "y": 3000
-    },
-    "D3-Editor-Validering.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "is_interactive": true,
-      "title": "D3 Editor · valideringsfejl",
-      "w": 1440,
-      "x": 7600,
-      "y": 3000
-    },
-    "D3-Editor.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "is_interactive": true,
-      "title": "D3 Editor · rute valgt, Mapping",
-      "w": 1440,
-      "x": 4560,
-      "y": 3000
-    },
-    "D4-Guide.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D4 Editor med guide · 2 af 4",
-      "w": 1440,
-      "x": 1520,
-      "y": 4400
-    },
-    "D4-Skabelonvaelger.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D4 Skabelonvælger",
-      "w": 1440,
-      "x": 0,
-      "y": 4400
-    },
-    "D5-GaaLive.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "is_interactive": true,
-      "title": "D5 Publicér · Gå Live",
-      "w": 1440,
-      "x": 4560,
-      "y": 4400
-    },
-    "D5-Testkoersel.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "is_interactive": true,
-      "title": "D5 Testkørsel",
-      "w": 1440,
-      "x": 3040,
-      "y": 4400
-    },
-    "D6-Listevisning.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D6 Editor · listevisning",
-      "w": 1440,
-      "x": 6080,
-      "y": 4400
-    },
-    "D7-Flow-Fejl.dc.html": {
-      "expand": "fill",
-      "h": 1060,
-      "title": "D7 Flowdetalje · med fejl",
-      "w": 1440,
-      "x": 1520,
-      "y": 5420
-    },
-    "D7-Flow-Oversigt.dc.html": {
-      "expand": "fill",
-      "h": 1000,
-      "title": "D7 Flowdetalje · oversigt",
-      "w": 1440,
-      "x": 0,
-      "y": 5420
-    },
-    "D8-Koersler-Forretning.dc.html": {
-      "expand": "fill",
-      "h": 960,
-      "title": "D8 Kørsler · fejlet record",
-      "w": 1440,
-      "x": 3040,
-      "y": 5420
-    },
-    "D8-Koersler-Udvikler.dc.html": {
-      "expand": "fill",
-      "h": 1000,
-      "title": "D8 Kørsler · udviklervisning",
-      "w": 1440,
-      "x": 4560,
-      "y": 5420
-    },
-    "D9-Dinero-Afbrudt.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D9 Forbindelse · afbrudt",
-      "w": 1440,
-      "x": 7600,
-      "y": 5420
-    },
-    "D9-Forbindelser.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "D9 Forbindelser",
-      "w": 1440,
-      "x": 6080,
-      "y": 5420
-    },
-    "D9-Katalog.dc.html": {
-      "expand": "fill",
-      "h": 1720,
-      "title": "D9 Tilføj forbindelse · katalog",
-      "w": 1440,
-      "x": 9120,
-      "y": 5420
-    },
-    "F1-Finans-Oversigt-Dage.dc.html": {
-      "expand": "fill",
-      "h": 1340,
-      "title": "Finans · oversigt pr. dag",
-      "w": 1440,
-      "x": 10640,
-      "y": 16700
-    },
-    "F1-Finans-Oversigt.dc.html": {
-      "expand": "fill",
-      "h": 1340,
-      "title": "Finans · oversigt",
-      "w": 1440,
-      "x": 0,
-      "y": 16700
-    },
-    "F2-Abonnementer.dc.html": {
-      "expand": "fill",
-      "h": 1180,
-      "title": "Finans · abonnementer",
-      "w": 1440,
-      "x": 1520,
-      "y": 16700
-    },
-    "F3-Support-Afregning.dc.html": {
-      "expand": "fill",
-      "h": 1360,
-      "title": "Finans · supportafregning, indeværende måned",
-      "w": 1440,
-      "x": 3040,
-      "y": 16700
-    },
-    "F4-Kunde-Oekonomi.dc.html": {
-      "expand": "fill",
-      "h": 1180,
-      "title": "Finans · kundens økonomi",
-      "w": 1440,
-      "x": 4560,
-      "y": 16700
-    },
-    "F5-Supportfaktura.dc.html": {
-      "expand": "fill",
-      "h": 1000,
-      "title": "Finans · supportfaktura (kladde)",
-      "w": 1440,
-      "x": 6080,
-      "y": 16700
-    },
-    "F6-Betalinger.dc.html": {
-      "expand": "fill",
-      "h": 1180,
-      "title": "Finans · fakturaer og betalinger",
-      "w": 1440,
-      "x": 7600,
-      "y": 16700
-    },
-    "F7-Rapporter.dc.html": {
-      "expand": "fill",
-      "h": 1340,
-      "title": "Finans · månedsrapport",
-      "w": 1440,
-      "x": 9120,
-      "y": 16700
-    },
-    "Komponenter-Data.dc.html": {
-      "h": 2240,
-      "title": "1.2 Data og formularer",
-      "w": 1440,
-      "x": 3040,
-      "y": 0
-    },
-    "Komponenter-Feedback.dc.html": {
-      "h": 1760,
-      "title": "1.3 Dialoger og feedback",
-      "w": 1440,
-      "x": 4560,
-      "y": 0
-    },
-    "Komponenter-Handlinger.dc.html": {
-      "h": 2040,
-      "title": "1.1 Handlinger og status",
-      "w": 1440,
-      "x": 1520,
-      "y": 0
-    },
-    "Komponenter-Tilstande.dc.html": {
-      "h": 1840,
-      "title": "1.4 Tom, indlæser og fejl",
-      "w": 1440,
-      "x": 6080,
-      "y": 0
-    },
-    "Layout.dc.html": {
-      "h": 760,
-      "title": "1.6 Layout · fluid",
-      "w": 1440,
-      "x": 12160,
-      "y": 0
-    },
-    "Main.dc.html": {
-      "h": 2590,
-      "title": "1.0 Tokens",
-      "w": 1440,
-      "x": 0,
-      "y": 0
-    },
-    "P1-Kunder-Menu.dc.html": {
-      "expand": "fill",
-      "h": 920,
-      "title": "Platform · tandhjulsmenu",
-      "w": 1440,
-      "x": 1520,
-      "y": 13670
-    },
-    "P1-Kunder.dc.html": {
-      "expand": "fill",
-      "h": 920,
-      "is_interactive": true,
-      "title": "Platform · Kunder (Supporter)",
-      "w": 1440,
-      "x": 0,
-      "y": 13670
-    },
-    "P2-Kunde.dc.html": {
-      "expand": "fill",
-      "h": 1080,
-      "title": "Platform · kunde med supportadgang",
-      "w": 1440,
-      "x": 3040,
-      "y": 13670
-    },
-    "P3-Adgang.dc.html": {
-      "expand": "fill",
-      "h": 920,
-      "title": "Platform · anmod om adgang",
-      "w": 1440,
-      "x": 4560,
-      "y": 13670
-    },
-    "P4-Supportvisning.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "Supportvisning i kundens app",
-      "w": 1440,
-      "x": 6080,
-      "y": 13670
-    },
-    "P5-Skift-Kunde.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "Supportvisning · skift kunde",
-      "w": 1440,
-      "x": 7600,
-      "y": 13670
-    },
-    "P6-Platformbrugere.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "Platform · brugere og roller (Superadmin)",
-      "w": 1440,
-      "x": 9120,
-      "y": 13670
-    },
-    "S1-Sager-Tavle.dc.html": {
-      "expand": "fill",
-      "h": 1110,
-      "title": "Supportsager · tavle",
-      "w": 1440,
-      "x": 0,
-      "y": 15150
-    },
-    "S2-Sager-Arkiv.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "Supportsager · arkiv",
-      "w": 1440,
-      "x": 1520,
-      "y": 15150
-    },
-    "S3-Sag.dc.html": {
-      "expand": "fill",
-      "h": 1240,
-      "title": "Supportsag · noter og tid",
-      "w": 1440,
-      "x": 3040,
-      "y": 15150
-    },
-    "S4-Tid-Tilfoej.dc.html": {
-      "expand": "fill",
-      "h": 1240,
-      "title": "Supportsag · tilføj tid",
-      "w": 1440,
-      "x": 4560,
-      "y": 15150
-    },
-    "S5-Session-Slut.dc.html": {
-      "expand": "fill",
-      "h": 900,
-      "title": "Supportsession · tid opsummeret",
-      "w": 1440,
-      "x": 6080,
-      "y": 15150
-    },
-    "S6-Min-Tid.dc.html": {
-      "expand": "fill",
-      "h": 920,
-      "title": "Tid · ugeoversigt",
-      "w": 1440,
-      "x": 7600,
-      "y": 15150
-    },
-    "S7-Fejl.dc.html": {
-      "expand": "fill",
-      "h": 920,
-      "title": "Fejl på tværs af kunder",
-      "w": 1440,
-      "x": 9120,
-      "y": 15150
-    },
-    "S8-Sag-Loes.dc.html": {
-      "expand": "fill",
-      "h": 1289,
-      "title": "Supportsag · løs og send forløb",
-      "w": 1440,
-      "x": 10640,
-      "y": 15150
-    },
-    "MA01-Log-ind.dc.html": {
-      "x": 0,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Log ind med Face ID",
-      "page": "mobile"
-    },
-    "MA02-Overblik.dc.html": {
-      "x": 470,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Overblik · alt kører",
-      "page": "mobile"
-    },
-    "MA03-Overblik-Problemer.dc.html": {
-      "x": 940,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Overblik · kræver handling",
-      "page": "mobile"
-    },
-    "MA04-Integrationer.dc.html": {
-      "x": 1410,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Integrationer · status",
-      "page": "mobile"
-    },
-    "MA05-Flow.dc.html": {
-      "x": 1880,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Flow · ruter og handlinger",
-      "page": "mobile"
-    },
-    "MA06-Fejl.dc.html": {
-      "x": 2350,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Fejl · forklaring og gentag",
-      "page": "mobile"
-    },
-    "MA07-Aktivitet.dc.html": {
-      "x": 2820,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Aktivitet",
-      "page": "mobile"
-    },
-    "MA08-Genforbind.dc.html": {
-      "x": 3290,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Genforbind e-conomic",
-      "page": "mobile"
-    },
-    "MA09-Notifikationer.dc.html": {
-      "x": 3760,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Notifikationer",
-      "page": "mobile"
-    },
-    "MA10-Mere.dc.html": {
-      "x": 4230,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Mere",
-      "page": "mobile"
-    },
-    "MA11-Notifikationsindstillinger.dc.html": {
-      "x": 4700,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Push-indstillinger",
-      "page": "mobile"
-    },
-    "MA12-Supportadgang.dc.html": {
-      "x": 5170,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Godkend supportadgang",
-      "page": "mobile"
-    },
-    "MA13-Installer.dc.html": {
-      "x": 5640,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Føj til hjemmeskærm (PWA)",
-      "page": "mobile"
-    },
-    "MA14-Push.dc.html": {
-      "x": 6110,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Push-beskeder",
-      "page": "mobile"
-    },
-    "MA15-Abonnement.dc.html": {
-      "x": 6580,
-      "y": 0,
-      "w": 390,
-      "h": 844,
-      "title": "Abonnement og forbrug",
-      "page": "mobile"
-    },
-    "MP01-Kunder.dc.html": {
-      "x": 0,
-      "y": 1264,
-      "w": 390,
-      "h": 844,
-      "title": "Platform · kunder",
-      "page": "mobile"
-    },
-    "MP02-Sager.dc.html": {
-      "x": 470,
-      "y": 1264,
-      "w": 390,
-      "h": 844,
-      "title": "Platform · mine sager",
-      "page": "mobile"
-    },
-    "MP03-Sag.dc.html": {
-      "x": 940,
-      "y": 1264,
-      "w": 390,
-      "h": 844,
-      "title": "Platform · sag med timer",
-      "page": "mobile"
-    },
-    "MP04-Tid.dc.html": {
-      "x": 1410,
-      "y": 1264,
-      "w": 390,
-      "h": 844,
-      "title": "Platform · registrér tid",
-      "page": "mobile"
-    },
-    "MP05-Fejl.dc.html": {
-      "x": 1880,
-      "y": 1264,
-      "w": 390,
-      "h": 844,
-      "title": "Platform · fejl på tværs",
-      "page": "mobile"
-    },
-    "MP06-Finans.dc.html": {
-      "x": 2350,
-      "y": 1264,
-      "w": 390,
-      "h": 844,
-      "title": "Platform · finans (Superadmin)",
-      "page": "mobile"
-    },
-    "MP07-Forfaldne.dc.html": {
-      "x": 2820,
-      "y": 1264,
-      "w": 390,
-      "h": 844,
-      "title": "Platform · forfaldne betalinger",
-      "page": "mobile"
-    }
+ "v": 3,
+ "attachments": {},
+ "boards": {
+  "App-skal-B-Indstillinger.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "1.5b App-skal · Indstillinger valgt",
+   "w": 1440,
+   "x": 10640,
+   "y": 1020
   },
-  "createdOnFiles": {
-    "at": "2026-10-18T12:00:00Z",
-    "v": 1
+  "App-skal-B.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "1.5b App-skal uden sidebar · 1440",
+   "w": 1440,
+   "x": 10640,
+   "y": 0
   },
-  "designSystems": [],
-  "launch": {
-    "view": "canvas"
+  "App-skal.dc.html": {
+   "h": 900,
+   "title": "1.5 App-skal tom · 1440",
+   "w": 1440,
+   "x": 7600,
+   "y": 0
   },
-  "notes": {
-    "etape1": {
-      "kind": "title1",
-      "maxW": 8000,
-      "text": "Etape 1 — Fundament",
-      "w": 240,
-      "x": 0,
-      "y": -300
-    },
-    "etape2": {
-      "kind": "title1",
-      "maxW": 8000,
-      "text": "Etape 2 — Kerneskærme",
-      "w": 240,
-      "x": 0,
-      "y": 2700
-    },
-    "etape3": {
-      "kind": "title1",
-      "maxW": 8000,
-      "text": "Etape 3 — Resten af runde 1",
-      "w": 240,
-      "x": 0,
-      "y": 4130
-    },
-    "etape3b": {
-      "kind": "title1",
-      "maxW": 8000,
-      "text": "Etape 3 — Supplerende tilstande",
-      "w": 240,
-      "x": 0,
-      "y": 10230
-    },
-    "finans": {
-      "kind": "title1",
-      "maxW": 8000,
-      "text": "Finans — abonnementer, supportafregning og rapporter (Superadmin)",
-      "w": 240,
-      "x": 0,
-      "y": 16430
-    },
-    "fluid": {
-      "kind": "title1",
-      "maxW": 7840,
-      "text": "Fluid layout · samme skærme ved 2560 px",
-      "w": 240,
-      "x": 0,
-      "y": 11430
-    },
-    "platform": {
-      "kind": "title1",
-      "maxW": 8000,
-      "text": "Agentor Platform — Superadmin og Supporter",
-      "w": 240,
-      "x": 0,
-      "y": 13400
-    },
-    "proto": {
-      "fill": "green",
-      "maxH": 260,
-      "size": 24,
-      "text": "Prototype-sti (tryk Play på D1 Overblik · problemer): Overblik → Integrationer → fold flowet ud (lime chevron) → Åbn editor → klik på ruten Ordrer → Fakturaer → klik på feltet EU B2B-salg (vælger 1015) → Testkør → Publicér → Publicér og gå Live → Overblik, alt kører.",
-      "w": 560,
-      "x": 3920,
-      "y": 9840
-    },
-    "sager": {
-      "kind": "title1",
-      "maxW": 8000,
-      "text": "Supportoverblik — sager, noter og tid",
-      "w": 240,
-      "x": 0,
-      "y": 14880
-    },
-    "mob_app": {
-      "kind": "title1",
-      "x": 0,
-      "y": -300,
-      "w": 240,
-      "maxW": 6970,
-      "text": "Kundens app på mobil · PWA",
-      "page": "mobile"
-    },
-    "mob_plat": {
-      "kind": "title1",
-      "x": 0,
-      "y": 964,
-      "w": 240,
-      "maxW": 3210,
-      "text": "Agentor Platform på mobil",
-      "page": "mobile"
-    }
+  "D1-Ny-kunde.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D1 Overblik · ny kunde",
+   "w": 1440,
+   "x": 0,
+   "y": 10500
   },
-  "order": [
-    "Main.dc.html",
-    "Komponenter-Handlinger.dc.html",
-    "Komponenter-Data.dc.html",
-    "Komponenter-Feedback.dc.html",
-    "Komponenter-Tilstande.dc.html",
-    "Layout.dc.html",
-    "App-skal.dc.html",
-    "App-skal-B.dc.html",
-    "App-skal-B-Indstillinger.dc.html",
-    "D1-Overblik.dc.html",
-    "D1-Overblik-Problemer.dc.html",
-    "D2-Integrationer.dc.html",
-    "D3-Editor.dc.html",
-    "D3-Editor-Traek.dc.html",
-    "D3-Editor-Validering.dc.html",
-    "D4-Skabelonvaelger.dc.html",
-    "D4-Guide.dc.html",
-    "D5-Testkoersel.dc.html",
-    "D5-GaaLive.dc.html",
-    "D6-Listevisning.dc.html",
-    "D3-Editor-Skjult.dc.html",
-    "D7-Flow-Oversigt.dc.html",
-    "D7-Flow-Fejl.dc.html",
-    "D8-Koersler-Forretning.dc.html",
-    "D8-Koersler-Udvikler.dc.html",
-    "D9-Forbindelser.dc.html",
-    "D9-Dinero-Afbrudt.dc.html",
-    "D10-Aktivitet-Log.dc.html",
-    "D10-Afstemning.dc.html",
-    "D11-Team.dc.html",
-    "D11-Inviter.dc.html",
-    "D12-Notifikationer.dc.html",
-    "D12-Sikkerhed.dc.html",
-    "D12-Auditlog.dc.html",
-    "D13-Abonnement.dc.html",
-    "D14-Login.dc.html",
-    "D14-MFA.dc.html",
-    "D14-Onboarding-1.dc.html",
-    "D14-Onboarding-2.dc.html",
-    "D14-Onboarding-3.dc.html",
-    "D2-Integrationer-Samlet.dc.html",
-    "D3-Editor-Start.dc.html",
-    "D9-Katalog.dc.html",
-    "D1-Ny-kunde.dc.html",
-    "D1-Soeg.dc.html",
-    "D2-Valg.dc.html",
-    "D2-Tom.dc.html",
-    "D2-Graense.dc.html",
-    "D2-Notifikationer.dc.html",
-    "D3-Editor-Laest.dc.html",
-    "D1-Overblik-Problemer-2560.dc.html",
-    "D2-Integrationer-2560.dc.html",
-    "D3-Editor-2560.dc.html",
-    "P1-Kunder.dc.html",
-    "P1-Kunder-Menu.dc.html",
-    "P2-Kunde.dc.html",
-    "P3-Adgang.dc.html",
-    "P4-Supportvisning.dc.html",
-    "P5-Skift-Kunde.dc.html",
-    "P6-Platformbrugere.dc.html",
-    "S1-Sager-Tavle.dc.html",
-    "S2-Sager-Arkiv.dc.html",
-    "S3-Sag.dc.html",
-    "S4-Tid-Tilfoej.dc.html",
-    "S5-Session-Slut.dc.html",
-    "S6-Min-Tid.dc.html",
-    "S7-Fejl.dc.html",
-    "S8-Sag-Loes.dc.html",
-    "F1-Finans-Oversigt.dc.html",
-    "F1-Finans-Oversigt-Dage.dc.html",
-    "F2-Abonnementer.dc.html",
-    "F3-Support-Afregning.dc.html",
-    "F4-Kunde-Oekonomi.dc.html",
-    "F5-Supportfaktura.dc.html",
-    "F6-Betalinger.dc.html",
-    "F7-Rapporter.dc.html",
-    "MA01-Log-ind.dc.html",
-    "MA02-Overblik.dc.html",
-    "MA03-Overblik-Problemer.dc.html",
-    "MA04-Integrationer.dc.html",
-    "MA05-Flow.dc.html",
-    "MA06-Fejl.dc.html",
-    "MA07-Aktivitet.dc.html",
-    "MA08-Genforbind.dc.html",
-    "MA09-Notifikationer.dc.html",
-    "MA10-Mere.dc.html",
-    "MA11-Notifikationsindstillinger.dc.html",
-    "MA12-Supportadgang.dc.html",
-    "MA13-Installer.dc.html",
-    "MA14-Push.dc.html",
-    "MA15-Abonnement.dc.html",
-    "MP01-Kunder.dc.html",
-    "MP02-Sager.dc.html",
-    "MP03-Sag.dc.html",
-    "MP04-Tid.dc.html",
-    "MP05-Fejl.dc.html",
-    "MP06-Finans.dc.html",
-    "MP07-Forfaldne.dc.html"
-  ],
-  "pages": [
-    {
-      "id": "page-1",
-      "name": "Desktop"
-    },
-    {
-      "id": "mobile",
-      "name": "Mobile"
-    }
-  ],
-  "title": "Agentor App — Runde 1"
+  "D1-Overblik-Problemer-2560.dc.html": {
+   "expand": "fill",
+   "h": 1440,
+   "title": "D1 Overblik · 2560 px",
+   "w": 2560,
+   "x": 0,
+   "y": 11700
+  },
+  "D1-Overblik-Problemer.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "is_interactive": true,
+   "title": "D1 Overblik · problemer",
+   "w": 1440,
+   "x": 1520,
+   "y": 3000
+  },
+  "D1-Overblik.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "is_interactive": true,
+   "title": "D1 Overblik · alt kører",
+   "w": 1440,
+   "x": 0,
+   "y": 3000
+  },
+  "D1-Soeg.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "⌘K Søg eller hop til",
+   "w": 1440,
+   "x": 1520,
+   "y": 10500
+  },
+  "D10-Afstemning.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D10 Aktivitet · afstemning",
+   "w": 1440,
+   "x": 1520,
+   "y": 6560
+  },
+  "D10-Aktivitet-Log.dc.html": {
+   "expand": "fill",
+   "h": 960,
+   "title": "D10 Aktivitet · log",
+   "w": 1440,
+   "x": 0,
+   "y": 6560
+  },
+  "D11-Inviter.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D11 Invitér bruger",
+   "w": 1440,
+   "x": 4560,
+   "y": 6560
+  },
+  "D11-Team.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D11 Team og adgang",
+   "w": 1440,
+   "x": 3040,
+   "y": 6560
+  },
+  "D12-Auditlog.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D12 Audit-log",
+   "w": 1440,
+   "x": 0,
+   "y": 7580
+  },
+  "D12-Notifikationer.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D12 Notifikationer",
+   "w": 1440,
+   "x": 6080,
+   "y": 6560
+  },
+  "D12-Sikkerhed.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D12 Sikkerhed",
+   "w": 1440,
+   "x": 7600,
+   "y": 6560
+  },
+  "D13-Abonnement.dc.html": {
+   "expand": "fill",
+   "h": 1180,
+   "title": "D13 Abonnement og forbrug",
+   "w": 1440,
+   "x": 1520,
+   "y": 7580
+  },
+  "D14-Login.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D14 Log ind",
+   "w": 1440,
+   "x": 3040,
+   "y": 7580
+  },
+  "D14-MFA.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D14 Totrinsbekræftelse",
+   "w": 1440,
+   "x": 4560,
+   "y": 7580
+  },
+  "D2-Graense.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D2 Integrationer · planens grænse",
+   "w": 1440,
+   "x": 6080,
+   "y": 10500
+  },
+  "D2-Integrationer-2560.dc.html": {
+   "expand": "fill",
+   "h": 1440,
+   "title": "D2 Integrationer · 2560 px",
+   "w": 2560,
+   "x": 2640,
+   "y": 11700
+  },
+  "D2-Integrationer-Samlet.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "is_interactive": true,
+   "title": "Prototype · Integrationer samlet",
+   "w": 1440,
+   "x": 3920,
+   "y": 8880
+  },
+  "D2-Integrationer.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "is_interactive": true,
+   "title": "D2 Integrationer · flow udfoldet",
+   "w": 1440,
+   "x": 3040,
+   "y": 3000
+  },
+  "D2-Notifikationer.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Notifikationer · popover",
+   "w": 1440,
+   "x": 7600,
+   "y": 10500
+  },
+  "D2-Tom.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D2 Integrationer · tom",
+   "w": 1440,
+   "x": 4560,
+   "y": 10500
+  },
+  "D2-Valg.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D2 Integrationer · masseredigering",
+   "w": 1440,
+   "x": 3040,
+   "y": 10500
+  },
+  "D3-Editor-2560.dc.html": {
+   "expand": "fill",
+   "h": 1440,
+   "title": "D3 Editor · 2560 px",
+   "w": 2560,
+   "x": 5280,
+   "y": 11700
+  },
+  "D3-Editor-Laest.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D3 Editor · skrivebeskyttet",
+   "w": 1440,
+   "x": 9120,
+   "y": 10500
+  },
+  "D3-Editor-Skjult.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D3 Editor · inspektør skjult",
+   "w": 1440,
+   "x": 7600,
+   "y": 4400
+  },
+  "D3-Editor-Start.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "is_interactive": true,
+   "title": "Prototype · editor, intet valgt",
+   "w": 1440,
+   "x": 5440,
+   "y": 8880
+  },
+  "D3-Editor-Traek.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D3 Editor · under træk",
+   "w": 1440,
+   "x": 6080,
+   "y": 3000
+  },
+  "D3-Editor-Validering.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "is_interactive": true,
+   "title": "D3 Editor · valideringsfejl",
+   "w": 1440,
+   "x": 7600,
+   "y": 3000
+  },
+  "D3-Editor.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "is_interactive": true,
+   "title": "D3 Editor · rute valgt, Mapping",
+   "w": 1440,
+   "x": 4560,
+   "y": 3000
+  },
+  "D4-Guide.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D4 Editor med guide · 2 af 4",
+   "w": 1440,
+   "x": 1520,
+   "y": 4400
+  },
+  "D4-Skabelonvaelger.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D4 Skabelonvælger",
+   "w": 1440,
+   "x": 0,
+   "y": 4400
+  },
+  "D5-GaaLive.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "is_interactive": true,
+   "title": "D5 Publicér · Gå Live",
+   "w": 1440,
+   "x": 4560,
+   "y": 4400
+  },
+  "D5-Testkoersel.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "is_interactive": true,
+   "title": "D5 Testkørsel",
+   "w": 1440,
+   "x": 3040,
+   "y": 4400
+  },
+  "D6-Listevisning.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D6 Editor · listevisning",
+   "w": 1440,
+   "x": 6080,
+   "y": 4400
+  },
+  "D7-Flow-Fejl.dc.html": {
+   "expand": "fill",
+   "h": 1060,
+   "title": "D7 Flowdetalje · med fejl",
+   "w": 1440,
+   "x": 1520,
+   "y": 5420
+  },
+  "D7-Flow-Oversigt.dc.html": {
+   "expand": "fill",
+   "h": 1000,
+   "title": "D7 Flowdetalje · oversigt",
+   "w": 1440,
+   "x": 0,
+   "y": 5420
+  },
+  "D8-Koersler-Forretning.dc.html": {
+   "expand": "fill",
+   "h": 960,
+   "title": "D8 Kørsler · fejlet record",
+   "w": 1440,
+   "x": 3040,
+   "y": 5420
+  },
+  "D8-Koersler-Udvikler.dc.html": {
+   "expand": "fill",
+   "h": 1000,
+   "title": "D8 Kørsler · udviklervisning",
+   "w": 1440,
+   "x": 4560,
+   "y": 5420
+  },
+  "D9-Dinero-Afbrudt.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D9 Forbindelse · afbrudt",
+   "w": 1440,
+   "x": 7600,
+   "y": 5420
+  },
+  "D9-Forbindelser.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "D9 Forbindelser",
+   "w": 1440,
+   "x": 6080,
+   "y": 5420
+  },
+  "D9-Katalog.dc.html": {
+   "expand": "fill",
+   "h": 1720,
+   "title": "D9 Tilføj forbindelse · katalog",
+   "w": 1440,
+   "x": 9120,
+   "y": 5420
+  },
+  "F1-Finans-Oversigt-Dage.dc.html": {
+   "expand": "fill",
+   "h": 1340,
+   "title": "Finans · oversigt pr. dag",
+   "w": 1440,
+   "x": 10640,
+   "y": 16700
+  },
+  "F1-Finans-Oversigt.dc.html": {
+   "expand": "fill",
+   "h": 1340,
+   "title": "Finans · oversigt",
+   "w": 1440,
+   "x": 0,
+   "y": 16700
+  },
+  "F2-Abonnementer.dc.html": {
+   "expand": "fill",
+   "h": 1180,
+   "title": "Finans · abonnementer",
+   "w": 1440,
+   "x": 1520,
+   "y": 16700
+  },
+  "F3-Support-Afregning.dc.html": {
+   "expand": "fill",
+   "h": 1360,
+   "title": "Finans · supportafregning, indeværende måned",
+   "w": 1440,
+   "x": 3040,
+   "y": 16700
+  },
+  "F4-Kunde-Oekonomi.dc.html": {
+   "expand": "fill",
+   "h": 1180,
+   "title": "Finans · kundens økonomi",
+   "w": 1440,
+   "x": 4560,
+   "y": 16700
+  },
+  "F5-Supportfaktura.dc.html": {
+   "expand": "fill",
+   "h": 1000,
+   "title": "Finans · supportfaktura (kladde)",
+   "w": 1440,
+   "x": 6080,
+   "y": 16700
+  },
+  "F6-Betalinger.dc.html": {
+   "expand": "fill",
+   "h": 1180,
+   "title": "Finans · fakturaer og betalinger",
+   "w": 1440,
+   "x": 7600,
+   "y": 16700
+  },
+  "F7-Rapporter.dc.html": {
+   "expand": "fill",
+   "h": 1340,
+   "title": "Finans · månedsrapport",
+   "w": 1440,
+   "x": 9120,
+   "y": 16700
+  },
+  "Komponenter-Data.dc.html": {
+   "h": 2240,
+   "title": "1.2 Data og formularer",
+   "w": 1440,
+   "x": 3040,
+   "y": 0
+  },
+  "Komponenter-Feedback.dc.html": {
+   "h": 1760,
+   "title": "1.3 Dialoger og feedback",
+   "w": 1440,
+   "x": 4560,
+   "y": 0
+  },
+  "Komponenter-Handlinger.dc.html": {
+   "h": 2040,
+   "title": "1.1 Handlinger og status",
+   "w": 1440,
+   "x": 1520,
+   "y": 0
+  },
+  "Komponenter-Tilstande.dc.html": {
+   "h": 1840,
+   "title": "1.4 Tom, indlæser og fejl",
+   "w": 1440,
+   "x": 6080,
+   "y": 0
+  },
+  "Layout.dc.html": {
+   "h": 760,
+   "title": "1.6 Layout · fluid",
+   "w": 1440,
+   "x": 12160,
+   "y": 0
+  },
+  "MA01-Log-ind.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Log ind med Face ID",
+   "w": 390,
+   "x": 0,
+   "y": 0
+  },
+  "MA02-Overblik.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Overblik · alt kører",
+   "w": 390,
+   "x": 470,
+   "y": 0
+  },
+  "MA03-Overblik-Problemer.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Overblik · kræver handling",
+   "w": 390,
+   "x": 940,
+   "y": 0
+  },
+  "MA04-Integrationer.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Integrationer · status",
+   "w": 390,
+   "x": 1410,
+   "y": 0
+  },
+  "MA05-Flow.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Flow · ruter og handlinger",
+   "w": 390,
+   "x": 1880,
+   "y": 0
+  },
+  "MA06-Fejl.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Fejl · forklaring og gentag",
+   "w": 390,
+   "x": 2350,
+   "y": 0
+  },
+  "MA07-Aktivitet.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Aktivitet",
+   "w": 390,
+   "x": 2820,
+   "y": 0
+  },
+  "MA08-Genforbind.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Genforbind e-conomic",
+   "w": 390,
+   "x": 3290,
+   "y": 0
+  },
+  "MA09-Notifikationer.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Notifikationer",
+   "w": 390,
+   "x": 3760,
+   "y": 0
+  },
+  "MA10-Mere.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Mere",
+   "w": 390,
+   "x": 4230,
+   "y": 0
+  },
+  "MA11-Notifikationsindstillinger.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Push-indstillinger",
+   "w": 390,
+   "x": 4700,
+   "y": 0
+  },
+  "MA12-Supportadgang.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Godkend supportadgang",
+   "w": 390,
+   "x": 5170,
+   "y": 0
+  },
+  "MA13-Installer.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Føj til hjemmeskærm (PWA)",
+   "w": 390,
+   "x": 5640,
+   "y": 0
+  },
+  "MA14-Push.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Push-beskeder",
+   "w": 390,
+   "x": 6110,
+   "y": 0
+  },
+  "MA15-Abonnement.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Abonnement og forbrug",
+   "w": 390,
+   "x": 6580,
+   "y": 0
+  },
+  "MP01-Kunder.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · kunder",
+   "w": 390,
+   "x": 0,
+   "y": 1264
+  },
+  "MP02-Sager.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · mine sager",
+   "w": 390,
+   "x": 470,
+   "y": 1264
+  },
+  "MP03-Sag.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · sag med timer",
+   "w": 390,
+   "x": 940,
+   "y": 1264
+  },
+  "MP04-Tid.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · registrér tid",
+   "w": 390,
+   "x": 1410,
+   "y": 1264
+  },
+  "MP05-Fejl.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · fejl på tværs",
+   "w": 390,
+   "x": 1880,
+   "y": 1264
+  },
+  "MP06-Finans.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · finans (Superadmin)",
+   "w": 390,
+   "x": 2350,
+   "y": 1264
+  },
+  "MP07-Forfaldne.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · forfaldne betalinger",
+   "w": 390,
+   "x": 2820,
+   "y": 1264
+  },
+  "Main.dc.html": {
+   "h": 2590,
+   "title": "1.0 Tokens",
+   "w": 1440,
+   "x": 0,
+   "y": 0
+  },
+  "OB1-Webshop.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Onboarding 1 · forbind webshop",
+   "w": 1440,
+   "x": 9120,
+   "y": 18480
+  },
+  "OB2-Regnskab.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Onboarding 2 · forbind regnskab",
+   "w": 1440,
+   "x": 10640,
+   "y": 18480
+  },
+  "OB3-Skabelon.dc.html": {
+   "expand": "fill",
+   "h": 1000,
+   "title": "Onboarding 3 · vælg skabelon",
+   "w": 1440,
+   "x": 12160,
+   "y": 18480
+  },
+  "OB4-Testkoersel.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Onboarding 4 · testkørsel",
+   "w": 1440,
+   "x": 13680,
+   "y": 18480
+  },
+  "OB5-Klar.dc.html": {
+   "expand": "fill",
+   "h": 760,
+   "title": "Onboarding 5 · klar",
+   "w": 1440,
+   "x": 15200,
+   "y": 18480
+  },
+  "P1-Kunder-Menu.dc.html": {
+   "expand": "fill",
+   "h": 920,
+   "title": "Platform · tandhjulsmenu",
+   "w": 1440,
+   "x": 1520,
+   "y": 13670
+  },
+  "P1-Kunder.dc.html": {
+   "expand": "fill",
+   "h": 920,
+   "is_interactive": true,
+   "title": "Platform · Kunder (Supporter)",
+   "w": 1440,
+   "x": 0,
+   "y": 13670
+  },
+  "P2-Kunde.dc.html": {
+   "expand": "fill",
+   "h": 1080,
+   "title": "Platform · kunde med supportadgang",
+   "w": 1440,
+   "x": 3040,
+   "y": 13670
+  },
+  "P3-Adgang.dc.html": {
+   "expand": "fill",
+   "h": 920,
+   "title": "Platform · anmod om adgang",
+   "w": 1440,
+   "x": 4560,
+   "y": 13670
+  },
+  "P4-Supportvisning.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Supportvisning i kundens app",
+   "w": 1440,
+   "x": 6080,
+   "y": 13670
+  },
+  "P5-Skift-Kunde.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Supportvisning · skift kunde",
+   "w": 1440,
+   "x": 7600,
+   "y": 13670
+  },
+  "P6-Platformbrugere.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Platform · brugere og roller (Superadmin)",
+   "w": 1440,
+   "x": 9120,
+   "y": 13670
+  },
+  "S1-Sager-Tavle.dc.html": {
+   "expand": "fill",
+   "h": 1110,
+   "title": "Supportsager · tavle",
+   "w": 1440,
+   "x": 0,
+   "y": 15150
+  },
+  "S2-Sager-Arkiv.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Supportsager · arkiv",
+   "w": 1440,
+   "x": 1520,
+   "y": 15150
+  },
+  "S3-Sag.dc.html": {
+   "expand": "fill",
+   "h": 1240,
+   "title": "Supportsag · noter og tid",
+   "w": 1440,
+   "x": 3040,
+   "y": 15150
+  },
+  "S4-Tid-Tilfoej.dc.html": {
+   "expand": "fill",
+   "h": 1240,
+   "title": "Supportsag · tilføj tid",
+   "w": 1440,
+   "x": 4560,
+   "y": 15150
+  },
+  "S5-Session-Slut.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Supportsession · tid opsummeret",
+   "w": 1440,
+   "x": 6080,
+   "y": 15150
+  },
+  "S6-Min-Tid.dc.html": {
+   "expand": "fill",
+   "h": 920,
+   "title": "Tid · ugeoversigt",
+   "w": 1440,
+   "x": 7600,
+   "y": 15150
+  },
+  "S7-Fejl.dc.html": {
+   "expand": "fill",
+   "h": 920,
+   "title": "Fejl på tværs af kunder",
+   "w": 1440,
+   "x": 9120,
+   "y": 15150
+  },
+  "S8-Sag-Loes.dc.html": {
+   "expand": "fill",
+   "h": 1289,
+   "title": "Supportsag · løs og send forløb",
+   "w": 1440,
+   "x": 10640,
+   "y": 15150
+  },
+  "SU1-Opret-konto.dc.html": {
+   "expand": "fill",
+   "h": 1000,
+   "is_interactive": true,
+   "title": "Signup 1 · opret konto",
+   "w": 1440,
+   "x": 0,
+   "y": 18480
+  },
+  "SU2-Bekraeft-mail.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Signup 2 · bekræft e-mail",
+   "w": 1440,
+   "x": 1520,
+   "y": 18480
+  },
+  "SU3-Virksomhed.dc.html": {
+   "expand": "fill",
+   "h": 980,
+   "title": "Signup 3 · virksomhed og systemer",
+   "w": 1440,
+   "x": 3040,
+   "y": 18480
+  },
+  "SU4-Abonnement.dc.html": {
+   "expand": "fill",
+   "h": 1040,
+   "title": "Signup 4 · vælg abonnement",
+   "w": 1440,
+   "x": 4560,
+   "y": 18480
+  },
+  "SU5-Betaling.dc.html": {
+   "expand": "fill",
+   "h": 900,
+   "title": "Signup 5 · betaling",
+   "w": 1440,
+   "x": 6080,
+   "y": 18480
+  },
+  "SU6-Velkommen.dc.html": {
+   "expand": "fill",
+   "h": 760,
+   "title": "Signup 6 · abonnement aktivt",
+   "w": 1440,
+   "x": 7600,
+   "y": 18480
+  },
+  "MS1-Opret-konto.dc.html": {
+   "x": 0,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Signup 1 · opret konto",
+   "page": "mobile"
+  },
+  "MS2-Bekraeft-mail.dc.html": {
+   "x": 470,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Signup 2 · bekræft e-mail",
+   "page": "mobile"
+  },
+  "MS3-Virksomhed.dc.html": {
+   "x": 940,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Signup 3 · virksomhed",
+   "page": "mobile"
+  },
+  "MS4-Abonnement.dc.html": {
+   "x": 1410,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Signup 4 · abonnement",
+   "page": "mobile"
+  },
+  "MS5-Betaling.dc.html": {
+   "x": 1880,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Signup 5 · betaling",
+   "page": "mobile"
+  },
+  "MS6-Velkommen.dc.html": {
+   "x": 2350,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Signup 6 · aktivt",
+   "page": "mobile"
+  },
+  "MO1-Webshop.dc.html": {
+   "x": 2820,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding 1 · webshop",
+   "page": "mobile"
+  },
+  "MO2-Regnskab.dc.html": {
+   "x": 3290,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding 2 · regnskab",
+   "page": "mobile"
+  },
+  "MO3-Skabelon.dc.html": {
+   "x": 3760,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding 3 · skabelon",
+   "page": "mobile"
+  },
+  "MO4-Testkoersel.dc.html": {
+   "x": 4230,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding 4 · testkørsel",
+   "page": "mobile"
+  },
+  "MO5-Klar.dc.html": {
+   "x": 4700,
+   "y": 2528,
+   "w": 390,
+   "h": 844,
+   "title": "Onboarding 5 · klar",
+   "page": "mobile"
+  },
+  "MA16-Kom-i-gang.dc.html": {
+   "x": 0,
+   "y": 3792,
+   "w": 390,
+   "h": 994,
+   "title": "Kom i gang",
+   "page": "mobile"
+  },
+  "MA17-Soeg.dc.html": {
+   "x": 470,
+   "y": 3792,
+   "w": 390,
+   "h": 844,
+   "title": "Søg",
+   "page": "mobile"
+  },
+  "MA18-Integrationer-Tom.dc.html": {
+   "x": 940,
+   "y": 3792,
+   "w": 390,
+   "h": 844,
+   "title": "Integrationer, tom",
+   "page": "mobile"
+  },
+  "MA19-Flows-Tabel.dc.html": {
+   "x": 1410,
+   "y": 3792,
+   "w": 390,
+   "h": 1154,
+   "title": "Flows, tabel med valg",
+   "page": "mobile"
+  },
+  "MA20-Flow-Ruter.dc.html": {
+   "x": 1880,
+   "y": 3792,
+   "w": 390,
+   "h": 1144,
+   "title": "Flow, ruter som tabel",
+   "page": "mobile"
+  },
+  "MA21-Graense.dc.html": {
+   "x": 2350,
+   "y": 3792,
+   "w": 390,
+   "h": 844,
+   "title": "Integrationer, grænse nået",
+   "page": "mobile"
+  },
+  "MA22-Testkoersel.dc.html": {
+   "x": 2820,
+   "y": 3792,
+   "w": 390,
+   "h": 1124,
+   "title": "Testkørsel",
+   "page": "mobile"
+  },
+  "MA23-Publicer.dc.html": {
+   "x": 3290,
+   "y": 3792,
+   "w": 390,
+   "h": 844,
+   "title": "Publicér",
+   "page": "mobile"
+  },
+  "MA24-Koersler.dc.html": {
+   "x": 3760,
+   "y": 3792,
+   "w": 390,
+   "h": 1044,
+   "title": "Kørsler",
+   "page": "mobile"
+  },
+  "MA25-Koersel-Udvikler.dc.html": {
+   "x": 4230,
+   "y": 3792,
+   "w": 390,
+   "h": 844,
+   "title": "Kørsel, developer",
+   "page": "mobile"
+  },
+  "MA26-Forbindelser.dc.html": {
+   "x": 4700,
+   "y": 3792,
+   "w": 390,
+   "h": 994,
+   "title": "Forbindelser",
+   "page": "mobile"
+  },
+  "MA27-Tilfoej-forbindelse.dc.html": {
+   "x": 5170,
+   "y": 3792,
+   "w": 390,
+   "h": 844,
+   "title": "Tilføj forbindelse",
+   "page": "mobile"
+  },
+  "MA28-Afstemning.dc.html": {
+   "x": 5640,
+   "y": 3792,
+   "w": 390,
+   "h": 1084,
+   "title": "Afstemning",
+   "page": "mobile"
+  },
+  "MA29-Team.dc.html": {
+   "x": 6110,
+   "y": 3792,
+   "w": 390,
+   "h": 994,
+   "title": "Team og adgang",
+   "page": "mobile"
+  },
+  "MA30-Inviter.dc.html": {
+   "x": 6580,
+   "y": 3792,
+   "w": 390,
+   "h": 844,
+   "title": "Invitér bruger",
+   "page": "mobile"
+  },
+  "MA31-Sikkerhed.dc.html": {
+   "x": 7050,
+   "y": 3792,
+   "w": 390,
+   "h": 994,
+   "title": "Sikkerhed",
+   "page": "mobile"
+  },
+  "MA32-Auditlog.dc.html": {
+   "x": 7520,
+   "y": 3792,
+   "w": 390,
+   "h": 964,
+   "title": "Audit-log",
+   "page": "mobile"
+  },
+  "MA33-Skift-plan.dc.html": {
+   "x": 7990,
+   "y": 3792,
+   "w": 390,
+   "h": 1154,
+   "title": "Skift plan",
+   "page": "mobile"
+  },
+  "MA34-MFA.dc.html": {
+   "x": 8460,
+   "y": 3792,
+   "w": 390,
+   "h": 844,
+   "title": "Totrinsbekræftelse",
+   "page": "mobile"
+  },
+  "MA35-Notifikationskanaler.dc.html": {
+   "x": 8930,
+   "y": 3792,
+   "w": 390,
+   "h": 904,
+   "title": "Notifikationer pr. hændelse",
+   "page": "mobile"
+  },
+  "MP08-Kunde.dc.html": {
+   "x": 0,
+   "y": 5366,
+   "w": 390,
+   "h": 944,
+   "title": "Platform · kunde",
+   "page": "mobile"
+  },
+  "MP09-Anmod-adgang.dc.html": {
+   "x": 470,
+   "y": 5366,
+   "w": 390,
+   "h": 844,
+   "title": "Platform · anmod om supportadgang",
+   "page": "mobile"
+  },
+  "MP10-Supportvisning.dc.html": {
+   "x": 940,
+   "y": 5366,
+   "w": 390,
+   "h": 844,
+   "title": "Platform · supportvisning",
+   "page": "mobile"
+  },
+  "MP11-Skift-kunde.dc.html": {
+   "x": 1410,
+   "y": 5366,
+   "w": 390,
+   "h": 844,
+   "title": "Platform · skift kunde",
+   "page": "mobile"
+  },
+  "MP12-Platformbrugere.dc.html": {
+   "x": 1880,
+   "y": 5366,
+   "w": 390,
+   "h": 1054,
+   "title": "Platform · platformbrugere",
+   "page": "mobile"
+  },
+  "MP13-Sager-Arkiv.dc.html": {
+   "x": 2350,
+   "y": 5366,
+   "w": 390,
+   "h": 1034,
+   "title": "Platform · sager, arkiv",
+   "page": "mobile"
+  },
+  "MP14-Afslut-session.dc.html": {
+   "x": 2820,
+   "y": 5366,
+   "w": 390,
+   "h": 844,
+   "title": "Platform · afslut supportsession",
+   "page": "mobile"
+  },
+  "MP15-Min-tid.dc.html": {
+   "x": 3290,
+   "y": 5366,
+   "w": 390,
+   "h": 1134,
+   "title": "Platform · min tid",
+   "page": "mobile"
+  },
+  "MP16-Loes-sag.dc.html": {
+   "x": 3760,
+   "y": 5366,
+   "w": 390,
+   "h": 964,
+   "title": "Platform · løs sag og send forløb",
+   "page": "mobile"
+  },
+  "MP17-Kunde-handlinger.dc.html": {
+   "x": 4230,
+   "y": 5366,
+   "w": 390,
+   "h": 844,
+   "title": "Platform · kunde, handlinger",
+   "page": "mobile"
+  },
+  "MP18-Abonnementer.dc.html": {
+   "x": 4700,
+   "y": 5366,
+   "w": 390,
+   "h": 1124,
+   "title": "Platform · finans, abonnementer",
+   "page": "mobile"
+  },
+  "MP19-Supportafregning.dc.html": {
+   "x": 5170,
+   "y": 5366,
+   "w": 390,
+   "h": 1194,
+   "title": "Platform · finans, supportafregning",
+   "page": "mobile"
+  },
+  "MP20-Kunde-oekonomi.dc.html": {
+   "x": 5640,
+   "y": 5366,
+   "w": 390,
+   "h": 844,
+   "title": "Platform · finans, kundens økonomi",
+   "page": "mobile"
+  },
+  "MP21-Supportfaktura.dc.html": {
+   "x": 6110,
+   "y": 5366,
+   "w": 390,
+   "h": 1034,
+   "title": "Platform · finans, supportfaktura",
+   "page": "mobile"
+  },
+  "MP22-Betalinger.dc.html": {
+   "x": 6580,
+   "y": 5366,
+   "w": 390,
+   "h": 844,
+   "title": "Platform · finans, fakturaer og betalinger",
+   "page": "mobile"
+  },
+  "MP23-Rapporter.dc.html": {
+   "x": 7050,
+   "y": 5366,
+   "w": 390,
+   "h": 1154,
+   "title": "Platform · finans, rapporter",
+   "page": "mobile"
+  }
+ },
+ "createdOnFiles": {
+  "at": "2026-10-18T12:00:00Z",
+  "v": 1
+ },
+ "designSystems": [],
+ "launch": {
+  "view": "canvas"
+ },
+ "notes": {
+  "etape1": {
+   "kind": "title1",
+   "maxW": 8000,
+   "text": "Etape 1 — Fundament",
+   "w": 240,
+   "x": 0,
+   "y": -300
+  },
+  "etape2": {
+   "kind": "title1",
+   "maxW": 8000,
+   "text": "Etape 2 — Kerneskærme",
+   "w": 240,
+   "x": 0,
+   "y": 2700
+  },
+  "etape3": {
+   "kind": "title1",
+   "maxW": 8000,
+   "text": "Etape 3 — Resten af runde 1",
+   "w": 240,
+   "x": 0,
+   "y": 4130
+  },
+  "etape3b": {
+   "kind": "title1",
+   "maxW": 8000,
+   "text": "Etape 3 — Supplerende tilstande",
+   "w": 240,
+   "x": 0,
+   "y": 10230
+  },
+  "finans": {
+   "kind": "title1",
+   "maxW": 8000,
+   "text": "Finans — abonnementer, supportafregning og rapporter (Superadmin)",
+   "w": 240,
+   "x": 0,
+   "y": 16430
+  },
+  "fluid": {
+   "kind": "title1",
+   "maxW": 7840,
+   "text": "Fluid layout · samme skærme ved 2560 px",
+   "w": 240,
+   "x": 0,
+   "y": 11430
+  },
+  "mob_app": {
+   "kind": "title1",
+   "maxW": 6970,
+   "page": "mobile",
+   "text": "Kundens app på mobil · PWA",
+   "w": 240,
+   "x": 0,
+   "y": -300
+  },
+  "mob_plat": {
+   "kind": "title1",
+   "maxW": 3210,
+   "page": "mobile",
+   "text": "Agentor Platform på mobil",
+   "w": 240,
+   "x": 0,
+   "y": 964
+  },
+  "platform": {
+   "kind": "title1",
+   "maxW": 8000,
+   "text": "Agentor Platform — Superadmin og Supporter",
+   "w": 240,
+   "x": 0,
+   "y": 13400
+  },
+  "proto": {
+   "fill": "green",
+   "maxH": 260,
+   "size": 24,
+   "text": "Prototype-sti (tryk Play på D1 Overblik · problemer): Overblik → Integrationer → fold flowet ud (lime chevron) → Åbn editor → klik på ruten Ordrer → Fakturaer → klik på feltet EU B2B-salg (vælger 1015) → Testkør → Publicér → Publicér og gå Live → Overblik, alt kører.",
+   "w": 560,
+   "x": 3920,
+   "y": 9840
+  },
+  "sager": {
+   "kind": "title1",
+   "maxW": 8000,
+   "text": "Supportoverblik — sager, noter og tid",
+   "w": 240,
+   "x": 0,
+   "y": 14880
+  },
+  "signup": {
+   "kind": "title1",
+   "maxW": 8000,
+   "text": "Ny kunde — signup med abonnement og onboarding",
+   "w": 240,
+   "x": 0,
+   "y": 18210
+  },
+  "mob_signup": {
+   "kind": "title1",
+   "x": 0,
+   "y": 2228,
+   "w": 240,
+   "maxW": 5090,
+   "text": "Ny kunde på mobil — signup og onboarding",
+   "page": "mobile"
+  },
+  "mob_app2": {
+   "kind": "title1",
+   "x": 0,
+   "y": 3492,
+   "w": 240,
+   "maxW": 9400,
+   "text": "Kundens app på mobil · alle sider fra Desktop",
+   "page": "mobile"
+  },
+  "mob_plat2": {
+   "kind": "title1",
+   "x": 0,
+   "y": 5066,
+   "w": 240,
+   "maxW": 7520,
+   "text": "Platform, sager og finans på mobil",
+   "page": "mobile"
+  }
+ },
+ "order": [
+  "Main.dc.html",
+  "Komponenter-Handlinger.dc.html",
+  "Komponenter-Data.dc.html",
+  "Komponenter-Feedback.dc.html",
+  "Komponenter-Tilstande.dc.html",
+  "Layout.dc.html",
+  "App-skal.dc.html",
+  "App-skal-B.dc.html",
+  "App-skal-B-Indstillinger.dc.html",
+  "D1-Overblik.dc.html",
+  "D1-Overblik-Problemer.dc.html",
+  "D2-Integrationer.dc.html",
+  "D3-Editor.dc.html",
+  "D3-Editor-Traek.dc.html",
+  "D3-Editor-Validering.dc.html",
+  "D4-Skabelonvaelger.dc.html",
+  "D4-Guide.dc.html",
+  "D5-Testkoersel.dc.html",
+  "D5-GaaLive.dc.html",
+  "D6-Listevisning.dc.html",
+  "D3-Editor-Skjult.dc.html",
+  "D7-Flow-Oversigt.dc.html",
+  "D7-Flow-Fejl.dc.html",
+  "D8-Koersler-Forretning.dc.html",
+  "D8-Koersler-Udvikler.dc.html",
+  "D9-Forbindelser.dc.html",
+  "D9-Dinero-Afbrudt.dc.html",
+  "D10-Aktivitet-Log.dc.html",
+  "D10-Afstemning.dc.html",
+  "D11-Team.dc.html",
+  "D11-Inviter.dc.html",
+  "D12-Notifikationer.dc.html",
+  "D12-Sikkerhed.dc.html",
+  "D12-Auditlog.dc.html",
+  "D13-Abonnement.dc.html",
+  "D14-Login.dc.html",
+  "D14-MFA.dc.html",
+  "D2-Integrationer-Samlet.dc.html",
+  "D3-Editor-Start.dc.html",
+  "D9-Katalog.dc.html",
+  "D1-Ny-kunde.dc.html",
+  "D1-Soeg.dc.html",
+  "D2-Valg.dc.html",
+  "D2-Tom.dc.html",
+  "D2-Graense.dc.html",
+  "D2-Notifikationer.dc.html",
+  "D3-Editor-Laest.dc.html",
+  "D1-Overblik-Problemer-2560.dc.html",
+  "D2-Integrationer-2560.dc.html",
+  "D3-Editor-2560.dc.html",
+  "P1-Kunder.dc.html",
+  "P1-Kunder-Menu.dc.html",
+  "P2-Kunde.dc.html",
+  "P3-Adgang.dc.html",
+  "P4-Supportvisning.dc.html",
+  "P5-Skift-Kunde.dc.html",
+  "P6-Platformbrugere.dc.html",
+  "S1-Sager-Tavle.dc.html",
+  "S2-Sager-Arkiv.dc.html",
+  "S3-Sag.dc.html",
+  "S4-Tid-Tilfoej.dc.html",
+  "S5-Session-Slut.dc.html",
+  "S6-Min-Tid.dc.html",
+  "S7-Fejl.dc.html",
+  "S8-Sag-Loes.dc.html",
+  "F1-Finans-Oversigt.dc.html",
+  "F1-Finans-Oversigt-Dage.dc.html",
+  "F2-Abonnementer.dc.html",
+  "F3-Support-Afregning.dc.html",
+  "F4-Kunde-Oekonomi.dc.html",
+  "F5-Supportfaktura.dc.html",
+  "F6-Betalinger.dc.html",
+  "F7-Rapporter.dc.html",
+  "MA01-Log-ind.dc.html",
+  "MA02-Overblik.dc.html",
+  "MA03-Overblik-Problemer.dc.html",
+  "MA04-Integrationer.dc.html",
+  "MA05-Flow.dc.html",
+  "MA06-Fejl.dc.html",
+  "MA07-Aktivitet.dc.html",
+  "MA08-Genforbind.dc.html",
+  "MA09-Notifikationer.dc.html",
+  "MA10-Mere.dc.html",
+  "MA11-Notifikationsindstillinger.dc.html",
+  "MA12-Supportadgang.dc.html",
+  "MA13-Installer.dc.html",
+  "MA14-Push.dc.html",
+  "MA15-Abonnement.dc.html",
+  "MP01-Kunder.dc.html",
+  "MP02-Sager.dc.html",
+  "MP03-Sag.dc.html",
+  "MP04-Tid.dc.html",
+  "MP05-Fejl.dc.html",
+  "MP06-Finans.dc.html",
+  "MP07-Forfaldne.dc.html",
+  "SU1-Opret-konto.dc.html",
+  "SU2-Bekraeft-mail.dc.html",
+  "SU3-Virksomhed.dc.html",
+  "SU4-Abonnement.dc.html",
+  "SU5-Betaling.dc.html",
+  "SU6-Velkommen.dc.html",
+  "OB1-Webshop.dc.html",
+  "OB2-Regnskab.dc.html",
+  "OB3-Skabelon.dc.html",
+  "OB4-Testkoersel.dc.html",
+  "OB5-Klar.dc.html",
+  "MS1-Opret-konto.dc.html",
+  "MS2-Bekraeft-mail.dc.html",
+  "MS3-Virksomhed.dc.html",
+  "MS4-Abonnement.dc.html",
+  "MS5-Betaling.dc.html",
+  "MS6-Velkommen.dc.html",
+  "MO1-Webshop.dc.html",
+  "MO2-Regnskab.dc.html",
+  "MO3-Skabelon.dc.html",
+  "MO4-Testkoersel.dc.html",
+  "MO5-Klar.dc.html",
+  "MA16-Kom-i-gang.dc.html",
+  "MA17-Soeg.dc.html",
+  "MA18-Integrationer-Tom.dc.html",
+  "MA19-Flows-Tabel.dc.html",
+  "MA20-Flow-Ruter.dc.html",
+  "MA21-Graense.dc.html",
+  "MA22-Testkoersel.dc.html",
+  "MA23-Publicer.dc.html",
+  "MA24-Koersler.dc.html",
+  "MA25-Koersel-Udvikler.dc.html",
+  "MA26-Forbindelser.dc.html",
+  "MA27-Tilfoej-forbindelse.dc.html",
+  "MA28-Afstemning.dc.html",
+  "MA29-Team.dc.html",
+  "MA30-Inviter.dc.html",
+  "MA31-Sikkerhed.dc.html",
+  "MA32-Auditlog.dc.html",
+  "MA33-Skift-plan.dc.html",
+  "MA34-MFA.dc.html",
+  "MA35-Notifikationskanaler.dc.html",
+  "MP08-Kunde.dc.html",
+  "MP09-Anmod-adgang.dc.html",
+  "MP10-Supportvisning.dc.html",
+  "MP11-Skift-kunde.dc.html",
+  "MP12-Platformbrugere.dc.html",
+  "MP13-Sager-Arkiv.dc.html",
+  "MP14-Afslut-session.dc.html",
+  "MP15-Min-tid.dc.html",
+  "MP16-Loes-sag.dc.html",
+  "MP17-Kunde-handlinger.dc.html",
+  "MP18-Abonnementer.dc.html",
+  "MP19-Supportafregning.dc.html",
+  "MP20-Kunde-oekonomi.dc.html",
+  "MP21-Supportfaktura.dc.html",
+  "MP22-Betalinger.dc.html",
+  "MP23-Rapporter.dc.html"
+ ],
+ "pages": [
+  {
+   "id": "page-1",
+   "name": "Desktop"
+  },
+  {
+   "id": "mobile",
+   "name": "Mobile"
+  }
+ ],
+ "title": "Agentor App — Runde 1"
 }

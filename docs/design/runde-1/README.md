@@ -1,6 +1,6 @@
 # Agentor App — Design, runde 1
 
-> **Status 19. okt. 2026: klar til Claude Code.** Denne mappe er en eksakt kopi af canvas (83 tegneflader, version 1792428068). Videre opdateringer sker i koden. Ændres designet igen på canvas, eksporteres det på ny hertil.
+> **Status 19. okt. 2026: klar til Claude Code.** Denne mappe er en eksakt kopi af canvas (83 tegneflader, version 1792479989). Videre opdateringer sker i koden. Ændres designet igen på canvas, eksporteres det på ny hertil.
 
 Eksport af designlærredet **"Agentor App — Runde 1"** (Claude Design), version 1792357173-1860, 18. okt. 2026.
 Live-lærred (privat, kræver adgang): https://claude.ai/artifact/PM26ZBLDG84UP6EMwvRw1a
@@ -60,7 +60,7 @@ Tegnefladerne henter logoer fra lærredets asset-lager (`/_blob/<id>`). Lokalt p
 | `D11-Team.dc.html` / `D11-Inviter.dc.html` | D11 Team og adgang / invitér |
 | `D12-Notifikationer.dc.html` / `D12-Sikkerhed.dc.html` / `D12-Auditlog.dc.html` | D12 Indstillinger |
 | `D13-Abonnement.dc.html` | D13 Abonnement og forbrug |
-| `D14-Login.dc.html`, `D14-MFA.dc.html`, `D14-Onboarding-1..3.dc.html` | D14 Login, MFA, onboarding i 3 trin |
+| `D14-Login.dc.html`, `D14-MFA.dc.html` | D14 Login og MFA (signup og onboarding: se "Ny kunde") |
 
 ### Agentor Platform (interne roller)
 | Fil | Indhold |
@@ -98,6 +98,22 @@ Tegnefladerne henter logoer fra lærredets asset-lager (`/_blob/<id>`). Lokalt p
 | `F6-Betalinger.dc.html` | Fakturaer og betalinger på tværs: forfaldne, rykkere, fejlede kortbetalinger, seneste betalinger |
 | `F7-Rapporter.dc.html` | Månedsrapport: økonomiske nøgletal og supportomfang, største kunder, tid pr. supporter, tidligere måneder |
 
+### Ny kunde: signup og onboarding
+
+| Fil | Indhold |
+|---|---|
+| `SU1-Opret-konto.dc.html` | Opret konto med e-mail eller Google/Microsoft, med logovæg og levende flow-eksempler |
+| `SU2-Bekraeft-mail.dc.html` | Bekræft e-mail med 6-cifret kode og en plan over de næste skridt |
+| `SU3-Virksomhed.dc.html` | CVR-opslag og valg af systemer og ordrevolumen, som bruges til at anbefale plan og skabelon |
+| `SU4-Abonnement.dc.html` | Vælg Startup, Business eller Enterprise, månedligt eller årligt (anbefaling ud fra SU3) |
+| `SU5-Betaling.dc.html` | Betaling med kort via QuickPay, ordreopsummering med moms og "Accept af betingelser" (to obligatoriske afkrydsninger: Abonnementsbetingelser og Privatlivspolitik) |
+| `SU6-Velkommen.dc.html` | Abonnementet er aktivt, kvittering og næste skridt |
+| `OB1-Webshop.dc.html` | Forbind webshop (forvalgt fra SU3) med diagram, der bliver grønt trin for trin |
+| `OB2-Regnskab.dc.html` | Forbind regnskab med tydelig liste over rettigheder |
+| `OB3-Skabelon.dc.html` | Vælg første flow ud fra en skabelon, og start som kladde |
+| `OB4-Testkoersel.dc.html` | Testkørsel med de 10 seneste ordrer, før noget skrives |
+| `OB5-Klar.dc.html` | Flowet er live, med invitation til team, tilføj HubSpot og QR-kode til mobil |
+
 ### Mobile (siden "Mobile" på tegnefladen · 390 × 844)
 
 | Fil | Indhold |
@@ -125,6 +141,54 @@ Tegnefladerne henter logoer fra lærredets asset-lager (`/_blob/<id>`). Lokalt p
 | `MP06-Finans.dc.html` | finans |
 | `MP07-Forfaldne.dc.html` | forfaldne |
 
+### Mobile: ny kunde (siden "Mobile")
+
+| Fil | Indhold |
+|---|---|
+| `MS1`–`MS6` | Signup på mobil: konto (Google/Microsoft eller e-mail), kode, virksomhed og systemer, abonnement (anbefalet plan foldet ud, andre som rækker), betaling med betingelser, aktivt |
+| `MO1`–`MO5` | Onboarding på mobil: webshop, regnskab, skabelon, testkørsel som liste, klar (med "Føj til hjemmeskærmen") |
+
+### Mobile: alle sider fra Desktop (siden "Mobile" · 390 bred, lange sider er højere)
+
+| Fil | Indhold |
+|---|---|
+| `MA16-Kom-i-gang.dc.html` | Kom i gang for ny kunde (D1-Ny-kunde): tjekliste 2 af 5, forbind regnskab |
+| `MA17-Soeg.dc.html` | Søg i ordrer, flows og forbindelser, hurtighandlinger (D1-Soeg) |
+| `MA18-Integrationer-Tom.dc.html` | Ingen flows endnu, skabelonforslag (D2-Tom) |
+| `MA19-Flows-Tabel.dc.html` | Flows som foldbar tabel med alle oplysninger, multivalg og massehandlinger (D2-Valg, D2-Integrationer) |
+| `MA20-Flow-Ruter.dc.html` | Flowets ruter som foldbar tabel pr. destination: tilstand, status, filter, kørsel; testkør og publicér (D6/D3, kun læse) |
+| `MA21-Graense.dc.html` | Alle integrationssæt i brug, opgradér (D2-Graense) |
+| `MA22-Testkoersel.dc.html` | Testkørsel: resultat pr. rute og ordre, foldbar ordredetalje (D5-Testkoersel) |
+| `MA23-Publicer.dc.html` | Publicér ny version som ark: ændringer, kladde eller bogfør, bekræftelse (D5-GaaLive) |
+| `MA24-Koersler.dc.html` | Kørsler i dag som foldbare rækker med records og gentag (D8-Koersler-Forretning) |
+| `MA25-Koersel-Udvikler.dc.html` | Developer-visning af fejlet record: request og response (D8-Koersler-Udvikler) |
+| `MA26-Forbindelser.dc.html` | Forbindelser med status, adgang og udløb, genautentificér (D9-Forbindelser) |
+| `MA27-Tilfoej-forbindelse.dc.html` | Katalog over systemer, forbind eller giv besked (D9-Katalog) |
+| `MA28-Afstemning.dc.html` | Afstemning dag for dag som foldbare rækker (D10-Afstemning) |
+| `MA29-Team.dc.html` | Team og adgang: brugere, roller, totrin, skift rolle og fjern (D11-Team) |
+| `MA30-Inviter.dc.html` | Invitér bruger som ark: rolle, adgang til udvalgte flows, udløb (D11-Inviter) |
+| `MA31-Sikkerhed.dc.html` | Totrin, passkeys, sessioner og supportgodkendelse (D12-Sikkerhed) |
+| `MA32-Auditlog.dc.html` | Audit-log som foldbare hændelser, filter for supportadgang (D12-Auditlog) |
+| `MA33-Skift-plan.dc.html` | Sammenlign og skift plan, månedligt eller årligt (D13-Abonnement) |
+| `MA34-MFA.dc.html` | Totrinsbekræftelse ved login (D14-MFA) |
+| `MA35-Notifikationskanaler.dc.html` | Kanaler pr. hændelse: app, e-mail, push, SMS (D12-Notifikationer) |
+| `MP08-Kunde.dc.html` | Kundeside med aktiv supportadgang, kræver handling, kontakt og adgangslog (P2-Kunde) |
+| `MP09-Anmod-adgang.dc.html` | Anmod om supportadgang som ark: sag, begrundelse, varighed, omfang (P3-Adgang) |
+| `MP10-Supportvisning.dc.html` | Supportvisning af kundens app med lime supportbjælke og Afslut (P4-Supportvisning) |
+| `MP11-Skift-kunde.dc.html` | Skift kunde under supportvisning (P5-Skift-Kunde) |
+| `MP12-Platformbrugere.dc.html` | Platformbrugere, rettigheder pr. rolle og regler for supportadgang (P6, kun Superadmin) |
+| `MP13-Sager-Arkiv.dc.html` | Arkiv over løste sager med søgning (S2-Sager-Arkiv) |
+| `MP14-Afslut-session.dc.html` | Afslut supportsession: tid, handlinger, knyt til sag, afslut adgang (S5-Session-Slut) |
+| `MP15-Min-tid.dc.html` | Min tid: igangværende session, dagens tid og registreringer (S6-Min-Tid) |
+| `MP16-Loes-sag.dc.html` | Løs sag og send forløb til kunden (S8-Sag-Loes) |
+| `MP17-Kunde-handlinger.dc.html` | Handlinger for en kunde som ark (P1-Kunder-Menu) |
+| `MP18-Abonnementer.dc.html` | Finans: abonnementer med nøgletal og foldbare kunderækker (F2) |
+| `MP19-Supportafregning.dc.html` | Finans: supportafregning pr. kunde med sager (F3) |
+| `MP20-Kunde-oekonomi.dc.html` | Finans: kundens økonomi og fakturaer (F4) |
+| `MP21-Supportfaktura.dc.html` | Finans: supportfaktura-kladde, godkend (F5) |
+| `MP22-Betalinger.dc.html` | Finans: fakturaer og betalinger (F6) |
+| `MP23-Rapporter.dc.html` | Finans: rapporter pr. måned som foldbare rækker (F7) |
+
 ## Beslutninger truffet under designet (afviger fra specifikationerne)
 
 Disse vinder over Designspecifikation v1 og Produktspecifikation v1.x, hvor de er i konflikt:
@@ -150,7 +214,10 @@ Disse vinder over Designspecifikation v1 og Produktspecifikation v1.x, hvor de e
 17. **Supportoverblik** (ny funktion, ikke i produktspecifikationen): Platform-navigationen har nu Kunder, Supportsager, Fejl, Tid, Systemstatus og Platformbrugere. Sager har statusserne Ny, I gang, Venter på kunde og Løst (arkiveres efter 14 dage) og prioriteterne Kritisk, Høj, Normal og Lav. Prioritet bruger ikke statusfarver. Tid logges automatisk pr. supportsession (fra første til sidste handling, pauser over 10 min. trækkes fra) og bekræftes, når sessionen afsluttes. Manuel tid og timer findes også. Interne noter er gule (#FBF0DC), markeret "Intern note" og aldrig synlige for kunden. Kundenoter kan fastgøres på kunden. "Fejl på tværs" viser kun antal og fejlkoder, aldrig kundedata. Fakturerbar tid kan markeres for alle kunder, og kundens abonnement vises ved feltet. Svarfrister er en pladsholder, til der er besluttet en supportaftale.
 18. **Finans** (ny funktion): Abonnementer og betalt support afregnes gennem Agentor Platform under fanen Finans, som kun Superadmin ser. Abonnementer opkræves forud, månedligt eller årligt, med kort eller MobilePay via QuickPay. Enterprise kan betale på faktura med EAN. Årlig pris er antaget at være 10 gange månedsprisen. Support faktureres bagud den 1. i næste måned til 800 kr. pr. time inkl. moms (640 kr. ekskl.). Tiden oprundes til nærmeste 15 min. pr. sag pr. måned. Tid uden sag og tid markeret som ikke fakturerbar kommer ikke med. Satsen kan ændres af Superadmin. Rapporter viser beløb ekskl. moms, mens fakturaer og supportafregning viser beløb inkl. moms. Mislykkede kortbetalinger forsøges igen efter 2, 5 og 9 dage.
 19. **Dashboard-blokke** (gælder alle Platform-oversigter: Kunder, Supportsager, Tid, Fejl og alle Finans-sider): Hver side starter med en række nøgletalskort. Det første kort er fremhævet (lime gradient, stort tal, vækstmærke og en kurve over tidligere perioder). De øvrige kort har ét visuelt element: en segmenteret søjle med streg-ticks i enden, en halvcirkel-måler med lime prik eller små søjler for de sidste 6 perioder, hvor den aktuelle periode er skraveret. Vækstmærker viser ↑/↓ mod forrige periode, grønt når ændringen er god, rødt når den er dårlig, gråt når den er neutral. Omsætningsgrafen kan skifte mellem Dage og Måneder: måneder som stablede, afrundede søjler (sort abonnement, skraveret lime support) med tooltip, dage som tynde søjler med en linje for samlet omsætning og en stiplet prognose. Eksempeltallene for tidligere perioder er pladsholdere. Kortene findes i to størrelser: stor (Finans) og kompakt, ca. 120 px høj (Kunder, Supportsager, Tid og Fejl), hvor grafikken står til højre for tallet og detaljerne er samlet på én linje.
-20. **Mobil og PWA** (siden "Mobile", erstatter de tidligere M1–M7, som er fjernet): Mobilen er til at følge med og handle hurtigt, ikke til at bygge. Ingen node-editor, ingen KPI-dæk og ingen tabeller. Kundens app har fire faner (Overblik, Integrationer, Aktivitet, Mere) og klokken øverst. Integrationer vises som statuskort med logoer, ruter som en liste. Det man kan på mobilen: se status og fejl med forklaring, gentage fejlede records, pause og genoptage flows, genforbinde en afbrudt forbindelse (OAuth), godkende eller afvise supportadgang, styre push og se abonnement og fakturaer. Mapping, regler, nye flows, plan og team ændres på computer, og skærmene siger det med en grå "computer"-linje og "Send link til min computer". Platform på mobil (navy header) har fanerne Kunder, Sager, Fejl og Finans (kun Superadmin): sager som liste i stedet for tavle, svar og interne noter, timer med "Stop og gem" og registrering af tid i en modal oven på sagen, fejlkoder på tværs og finans som én liste med nøgletal og forfaldne betalinger med rykker. Supportvisning af kundens app sker på computer. Login med passkey (WebAuthn), som telefonen låser op med Face ID, Touch ID eller fingeraftryk. E-mail og kode som alternativ. Push siger altid hvad der skete, åbner det rigtige sted og kan samles i stille timer (`MA14`). Under 768 px bruges disse skærme.
+20. **Mobil og PWA** (siden "Mobile", erstatter de tidligere M1–M7): *Erstattet af beslutning 23.* Mobilen var oprindeligt kun til at følge med og handle hurtigt. Det gælder ikke længere. Navigation, faner, passkey-login, push og stille timer (`MA14`) gælder fortsat. Under 768 px bruges mobilskærmene.
+21. **Signup og onboarding** (erstatter de tidligere D14-Onboarding-1..3, som er fjernet): En ny kunde er først aktiv, når abonnementet er betalt. Rækkefølgen er Konto → Virksomhed (CVR og systemer) → Abonnement → Betaling. Derefter følger onboarding: Webshop → Regnskab → Skabelon → Testkørsel → Live som kladde. Systemvalget i SU3 forvælger forbindelserne i onboarding og danner grundlag for den anbefalede plan og skabelon. Til højre er der et navy tillidspanel med logoer for de rigtige forbindelser, eksempler på flows, et diagram der bliver grønt for hver forbindelse, og tre tillidspunkter (data i EU, krypterede nøgler, test før noget skrives). Der er ingen opfundne tal eller citater. Årspris er 10 gange månedsprisen. Enterprises transaktionsgrænse og links til vilkår er pladsholdere ([ANTAL], [Handelsbetingelser], [Databehandleraftale]). Onboarding kan springes over, og så lander kunden på Overblik med en påmindelse.
+22. **Signup og onboarding på mobil** (`MS1`–`MS6`, `MO1`–`MO5`): Samme flow og tekster som på desktop. Det navy tillidspanel bliver til en logo-række, en kort tillidslinje og et lille navy kort med diagrammet, der bliver grønt. Planerne vises med den anbefalede plan foldet ud og de andre som rækker. Testkørslen vises som en liste i stedet for en tabel. Forbindelser oprettes med OAuth i systembrowseren og vender tilbage til appen.
+23. **Hele appen på mobil** (erstatter begrænsningerne i beslutning 20): Alle Desktop-sider har en mobilversion med fuld redigering, undtagen node-editoren, mapping, regler og skabelonguiden. Flows og ruter vises i stedet som foldbare tabeller med alle oplysninger synlige (`MA19`, `MA20`): man kan se alt, vælge flere flows og pause, genoptage eller køre dem, testkøre og publicere, men mapping, filtre, regler og nye flows ændres i editoren på computer. Alt andet kan gøres på mobilen: team og invitationer, roller, sikkerhed og sessioner, audit-log, forbindelser og katalog, afstemning, kørsler med developer-visning, plan og betaling, notifikationer pr. kanal. Platform på mobil kan nu også åbne supportvisning af kundens app (lime supportbjælke, skift kunde, afslut session med tid), anmode om adgang, se kundeside, arkiv, min tid, løse sager og sende forløb, administrere platformbrugere, og Finans har alle undersider (abonnementer, supportafregning, kundens økonomi, supportfaktura, betalinger, rapporter). Tabeller bliver til foldbare rækker (`details`), handlinger på en række ligger i den udfoldede række, og dialoger bliver til ark fra bunden. Lange sider er tegnet i fuld højde på tegnefladen.
 
 ## Kendte pladsholdere
 
@@ -183,3 +250,5 @@ Disse vinder over Designspecifikation v1 og Produktspecifikation v1.x, hvor de e
 | 01cc60e133d40d9a75d28da7bfabadf6 | salesforce.svg |
 | ef9468430ba0c36fa370f5a9a2d26772 | sendgrid.svg |
 | 857b441eb55c8cd7ad62689b8d6c60fd | twilio.svg |
+| ebd5bba2d6bc191039fc792ce7034984 | google.svg (login-knap) |
+| d70ebd4d599ea7295462c2db64489873 | microsoft.svg (login-knap) |
