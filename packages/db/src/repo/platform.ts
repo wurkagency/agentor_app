@@ -19,6 +19,7 @@ import {
   type CasePriority,
   type CaseStatus,
   type StaffRole,
+  type NonBillableReason,
   type TimeKind,
 } from '../schema/index.js';
 import { hashInviteToken } from './team.js';
@@ -1230,6 +1231,7 @@ type TimeInput = {
   kind: TimeKind;
   description: string;
   billable: boolean;
+  nonBillableReason?: NonBillableReason | null | undefined;
   source?: 'manual' | 'timer';
 };
 
@@ -1261,6 +1263,7 @@ async function insertTime(tx: Transaction, actor: StaffActor, input: TimeInput) 
     source: input.source ?? 'manual',
     description: input.description.trim().slice(0, 500),
     billable: input.billable && tenantId !== null,
+    nonBillableReason: input.billable ? null : (input.nonBillableReason ?? null),
   });
 }
 

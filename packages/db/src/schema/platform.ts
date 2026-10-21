@@ -178,6 +178,7 @@ export const supportSessions = platformSchema.table(
 );
 
 export type TimeKind = 'session' | 'phone' | 'email' | 'clarification' | 'meeting' | 'other';
+export type NonBillableReason = 'agentor_error' | 'goodwill';
 
 /** Support time (S3–S6). Billable entries go on the customer's next invoice. */
 export const timeEntries = platformSchema.table(
@@ -195,6 +196,8 @@ export const timeEntries = platformSchema.table(
     source: text('source').$type<'auto' | 'manual' | 'timer'>().notNull(),
     description: text('description').notNull().default(''),
     billable: boolean('billable').notNull().default(false),
+    /** Why non-billable time isn't billed (A2 "Ikke fakturerbar", A3). Null for billable time. */
+    nonBillableReason: text('non_billable_reason').$type<NonBillableReason>(),
     invoiceId: uuid('invoice_id'),
     createdAt: createdAt(),
   },
@@ -210,6 +213,10 @@ export const timeEntries = platformSchema.table(
       sql`${t.kind} in ('session', 'phone', 'email', 'clarification', 'meeting', 'other')`,
     ),
     check('time_entries_source_check', sql`${t.source} in ('auto', 'manual', 'timer')`),
+    check(
+      'time_entries_non_billable_reason_check',
+      sql`${t.nonBillableReason} is null or ${t.nonBillableReason} in ('agentor_error', 'goodwill')`,
+    ),
   ],
 );
 
@@ -232,4 +239,67 @@ export const platformAudit = platformSchema.table(
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.id] }), index('platform_audit_created_idx').on(t.createdAt)],
+);
+
+export type IncidentKind = 'incident' | 'maintenance';
+export type IncidentStatus = 'planned' | 'investigating' | 'monitoring' | 'resolved' | 'completed';
+
+/** Hændelser and planned maintenance on System Status (A1, MP25). Superadmin only. */
+export const incidents = platformSchema.table(
+  'incidents',
+  {
+    id: idColumn(),
+    kind: text('kind').$type<IncidentKind>().notNull(),
+    title: text('title').notNull(),
+    /** "Dinero-ruter · 412 kunder": what is affected, in words. */
+    impact: text('impact').notNull().default(''),
+    status: text('status').$type<IncidentStatus>().notNull(),
+    startsAt: ts('starts_at').notNull(),
+    endsAt: ts('ends_at'),
+    notes: text('notes').notNull().default(''),
+    createdBy: uuid('created_by').notNull(),
+    createdByName: text('created_by_name').notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.id] }),
+    index('incidents_starts_idx').on(t.startsAt),
+    check('incidents_kind_check', sql`${t.kind} in ('incident', 'maintenance')`),
+    check(
+      'incidents_status_check',
+      sql`${t.status} in ('planned', 'investigating', 'monitoring', 'resolved', 'completed')`,
+    ),
+    check('incidents_title_check', sql`length(trim(${t.title})) between 1 and 200`),
+    check('incidents_period_check', sql`${t.endsAt} is null or ${t.endsAt} >= ${t.startsAt}`),
+  ],
+);
+
+/**
+ * Support price versions (A2 Supportpris): the hourly rate ex. VAT, rounding and the billing rule.
+ * A new version applies from its effective date (the 1st of the next billing period); the month
+ * being billed uses the version in force at its start.
+ */
+export const supportPriceVersions = platformSchema.table(
+  'support_price_versions',
+  {
+    id: idColumn(),
+    rateOre: integer('rate_ore').notNull(),
+    roundingMinutes: integer('rounding_minutes').notNull(),
+    /** Which non-billable reasons may be chosen (A2 "Ikke fakturerbar"). */
+    nonBillable: jsonb('non_billable').$type<string[]>().notNull().default([]),
+    effectiveFrom: ts('effective_from').notNull(),
+    createdBy: uuid('created_by'),
+    createdByName: text('created_by_name').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.id] }),
+    index('support_price_versions_effective_idx').on(t.effectiveFrom),
+    check('support_price_versions_rate_check', sql`${t.rateOre} between 0 and 10000000`),
+    check(
+      'support_price_versions_rounding_check',
+      sql`${t.roundingMinutes} in (1, 5, 6, 10, 15, 30, 60)`,
+    ),
+  ],
 );

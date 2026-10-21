@@ -5,6 +5,8 @@
 export const GLOBAL_TABLES: Readonly<Record<string, string>> = {
   plans: 'Plan catalogue. Read-only for runtime roles.',
   plan_entitlements: 'Plan limits as data. Read-only for runtime roles.',
+  plan_price_versions:
+    'Plan price versions (A2). Read-only for runtime roles; written by app.platform_price_version_create.',
 };
 
 /** RLS tables that are not keyed by tenant_id and therefore get dedicated isolation tests. */

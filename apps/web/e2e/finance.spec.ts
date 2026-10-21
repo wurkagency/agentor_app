@@ -127,18 +127,17 @@ test('the monthly report exports and goes to the bookkeeper', async ({ page }) =
   expect(mail.subject).toMatch(/^Agentor · månedsrapport /);
 });
 
-test('Superadmin edits a plan in Administration › Produkt', async ({ page }) => {
+test('Superadmin changes a plan limit in Administration › Produkt', async ({ page }) => {
   await login(page, 'kasper');
   await page.goto('/platform/admin/product');
-  await page.getByRole('button', { name: 'Redigér Startup' }).click();
-  const dialog = page.getByRole('dialog', { name: 'Plan: Startup' });
-  await dialog.getByLabel('Brugere').fill('3');
-  await dialog.getByRole('button', { name: 'Gem plan' }).click();
-  await expect(page.getByText('Startup er gemt').filter({ visible: true })).toBeVisible();
-  await expect(page.getByRole('row', { name: /Startup/ })).toContainText('3');
+  const seats = page.getByLabel('Brugere for Startup');
+  await seats.fill('3');
+  await page.getByRole('button', { name: 'Gem ændringer' }).click();
+  await expect(page.getByText(/1 plan er gemt/).filter({ visible: true })).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel('Brugere for Startup')).toHaveValue('3');
   // Back to the seed's value.
-  await page.getByRole('button', { name: 'Redigér Startup' }).click();
-  await page.getByRole('dialog').getByLabel('Brugere').fill('2');
-  await page.getByRole('dialog').getByRole('button', { name: 'Gem plan' }).click();
-  await expect(page.getByText('Startup er gemt').filter({ visible: true })).toBeVisible();
+  await page.getByLabel('Brugere for Startup').fill('2');
+  await page.getByRole('button', { name: 'Gem ændringer' }).click();
+  await expect(page.getByText(/1 plan er gemt/).filter({ visible: true })).toBeVisible();
 });

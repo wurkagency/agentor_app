@@ -23,6 +23,7 @@ import {
   invoices,
   memberships,
   planEntitlements,
+  planPriceVersions,
   plans,
   subscriptions,
   tenants,
@@ -58,6 +59,55 @@ export interface PlanInfo {
   priceMonthlyOre: number;
   sortOrder: number;
   entitlements: Entitlements;
+}
+
+/**
+ * The monthly price (ex. VAT) a subscription is charged for a period starting `at`. Moves the
+ * subscription to a newer version when "Alle fra næste fornyelse" applies, and logs it.
+ */
+async function priceForRenewal(
+  tx: Transaction,
+  tenantId: string,
+  sub: { id: string; planId: string; priceVersionId: string | null },
+  planPriceOre: number,
+  at: Date,
+): Promise<number> {
+  const res = await tx.execute<{ id: string | null }>(
+    sql`select app.subscription_version_at(${sub.priceVersionId}::uuid, ${sub.planId}, ${at}) as id`,
+  );
+  const versionId = res.rows[0]?.id ?? sub.priceVersionId;
+  if (!versionId) return planPriceOre;
+  const [v] = await tx
+    .select({ price: planPriceVersions.priceMonthlyOre })
+    .from(planPriceVersions)
+    .where(eq(planPriceVersions.id, versionId));
+  if (!v) return planPriceOre;
+  if (versionId !== sub.priceVersionId) {
+    await tx
+      .update(subscriptions)
+      .set({ priceVersionId: versionId, updatedAt: new Date() })
+      .where(eq(subscriptions.id, sub.id));
+    await writeSystemAudit(tx, tenantId, {
+      action: 'subscription.price_changed',
+      objectType: 'subscription',
+      objectId: sub.id,
+      after: { priceVersionId: versionId, priceMonthlyOre: v.price },
+    });
+  }
+  return v.price;
+}
+
+async function versionPrice(
+  tx: Transaction,
+  versionId: string | null,
+  fallbackOre: number,
+): Promise<number> {
+  if (!versionId) return fallbackOre;
+  const [v] = await tx
+    .select({ price: planPriceVersions.priceMonthlyOre })
+    .from(planPriceVersions)
+    .where(eq(planPriceVersions.id, versionId));
+  return v?.price ?? fallbackOre;
 }
 
 async function loadPlans(tx: Transaction): Promise<PlanInfo[]> {
@@ -166,7 +216,11 @@ export async function getBillingOverview(
         pastDueSince: sub.pastDueSince,
         interval: sub.interval,
       },
-      plan,
+      // The customer's own price: the version their subscription is on (A2), not the list price.
+      plan: {
+        ...plan,
+        priceMonthlyOre: await versionPrice(tx, sub.priceVersionId, plan.priceMonthlyOre),
+      },
       plans: all,
       period,
       usage,
@@ -546,6 +600,9 @@ export async function prepareCharge(
     }
     const plan = (await loadPlans(tx)).find((p) => p.id === sub.planId);
     if (!plan) throw new BillingError('UNKNOWN_PLAN');
+    // A2 price versions: the subscription's own version, or the plan's newest "all from next
+    // renewal" version once the customer has had 30 days' notice (app.subscription_version_at).
+    const monthlyOre = await priceForRenewal(tx, tenantId, sub, plan.priceMonthlyOre, periodStart);
     const [tenant] = await tx.select({ timeZone: tenants.timeZone }).from(tenants).limit(1);
     const prevPeriod = billingPeriod(new Date(periodStart.getTime() - 1), tenant?.timeZone);
     const [addonRow] = await tx
@@ -553,11 +610,11 @@ export async function prepareCharge(
       .from(addons)
       .where(eq(addons.period, prevPeriod));
     const fullPrice = subscriptionPriceOre({
-      monthlyOre: plan.priceMonthlyOre,
+      monthlyOre,
       interval: sub.interval,
     });
     const price = subscriptionPriceOre({
-      monthlyOre: plan.priceMonthlyOre,
+      monthlyOre,
       interval: sub.interval,
       discountPct: sub.discountPct,
       discountUntil: sub.discountUntil,

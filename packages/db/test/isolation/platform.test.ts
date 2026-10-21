@@ -223,6 +223,111 @@ describe('sitemap v2: Support › Adgange and Fejl (0046)', () => {
   });
 });
 
+describe('Administration (0048, 0049): Superadmin only, versions read-only for runtime roles', () => {
+  it('a Supporter can neither change prices, write incidents nor read the status counts', async () => {
+    const sup = { as: 'web' as const, user: STAFF };
+    const r = await steps([
+      makeStaff('supporter'),
+      {
+        ...sup,
+        sql: `select app.platform_price_version_create('business', 1, '{}'::jsonb, 'new', 'X')`,
+      },
+      {
+        ...sup,
+        sql: `insert into platform.incidents (kind, title, status, starts_at, created_by, created_by_name)
+              values ('incident', 'X', 'investigating', now(), $1, 'X')`,
+        values: [STAFF],
+      },
+      { ...sup, sql: 'select count(*)::int as n from platform.incidents' },
+      { ...sup, sql: 'select * from app.platform_status_counts(now(), now())' },
+      { ...sup, sql: 'select * from app.platform_connector_status()' },
+      {
+        ...sup,
+        sql: `insert into platform.support_price_versions (rate_ore, rounding_minutes, effective_from, created_by_name)
+              values (1, 15, now(), 'X')`,
+      },
+      { ...sup, sql: 'select count(*)::int as n from platform.support_price_versions' },
+    ]);
+    expect(r[1]!.error?.message).toContain('NOT_SUPERADMIN');
+    expect(r[2]!.error).toBeDefined();
+    expect(r[3]!.rows![0]!.n).toBe(0);
+    expect(r[4]!.error?.message).toContain('NOT_SUPERADMIN');
+    expect(r[5]!.error?.message).toContain('NOT_SUPERADMIN');
+    expect(r[6]!.error).toBeDefined();
+    // Staff read the support price (Tid pr. kunde shows the rate).
+    expect(r[7]!.rows![0]!.n).toBeGreaterThan(0);
+  });
+
+  it('nobody writes plan_price_versions directly; Superadmin goes through the function', async () => {
+    const r = await steps([
+      makeStaff('superadmin'),
+      {
+        as: 'web',
+        user: STAFF,
+        sql: `insert into plan_price_versions (plan_id, price_monthly_ore, applies_to, effective_from, created_by_name)
+              values ('business', 1, 'new', now(), 'X')`,
+      },
+      {
+        as: 'web',
+        user: STAFF,
+        sql: `update plan_price_versions set price_monthly_ore = 1`,
+      },
+      {
+        as: 'web',
+        user: STAFF,
+        sql: `select app.platform_price_version_create('business', 16900, '{}'::jsonb, 'new', 'Kasper') as id`,
+      },
+      {
+        as: 'admin',
+        sql: `select price_monthly_ore as p from plan_price_versions where plan_id = 'business'
+               order by created_at desc limit 1`,
+      },
+      {
+        as: 'worker',
+        tenant: ID.tenantA,
+        sql: 'select count(*)::int as n from plan_price_versions',
+      },
+    ]);
+    expect(r[1]!.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
+    expect(r[2]!.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
+    expect(r[3]!.error).toBeUndefined();
+    expect(r[4]!.rows![0]!.p).toBe(16900);
+    expect(r[5]!.rows![0]!.n).toBeGreaterThan(0);
+  });
+
+  it('a new subscription gets the newest version; an existing one keeps its own', async () => {
+    const r = await steps([
+      {
+        as: 'admin',
+        sql: `select s.price_version_id as v from subscriptions s where s.tenant_id = $1`,
+        values: [ID.tenantA],
+      },
+      makeStaff('superadmin'),
+      {
+        as: 'web',
+        user: STAFF,
+        sql: `select app.platform_price_version_create(
+                (select plan_id from subscriptions where tenant_id = '${ID.tenantA}'), 12345, '{}'::jsonb, 'new', 'Kasper') as id`,
+      },
+      {
+        as: 'admin',
+        sql: `select s.price_version_id as v from subscriptions s where s.tenant_id = $1`,
+        values: [ID.tenantA],
+      },
+      {
+        as: 'admin',
+        sql: `select app.subscription_version_at(s.price_version_id, s.plan_id, now() + interval '1 year') as v
+                from subscriptions s where s.tenant_id = $1`,
+        values: [ID.tenantA],
+      },
+    ]);
+    expect(r[0]!.rows![0]!.v).toBeTruthy();
+    expect(r[3]!.rows![0]!.v).toBe(r[0]!.rows![0]!.v);
+    // "new" never moves an existing subscription, even at a later renewal.
+    expect(r[4]!.rows![0]!.v).toBe(r[0]!.rows![0]!.v);
+  });
+});
+
 describe('a support grant', () => {
   it('opens nothing until the customer approves', async () => {
     const r = await steps([

@@ -172,13 +172,9 @@ export function StaffRowMenu({
 /** Regler for supportadgang (P6) and the hourly rate for billable time (Platformindstillinger). */
 export function RulesForm({
   warnConcurrent,
-  hourlyRateKr,
-  showRate,
   bookkeeperEmail = null,
 }: {
   warnConcurrent: number;
-  hourlyRateKr: number | null;
-  showRate: boolean;
   bookkeeperEmail?: string | null;
 }) {
   const t = useTranslations('platform.users');
@@ -186,7 +182,6 @@ export function RulesForm({
   const router = useRouter();
   const [warn, setWarn] = useState(warnConcurrent > 0);
   const [count, setCount] = useState(String(warnConcurrent || 3));
-  const [rate, setRate] = useState(hourlyRateKr === null ? '' : String(hourlyRateKr));
   const [bookkeeper, setBookkeeper] = useState(bookkeeperEmail ?? '');
   const [pending, start] = useTransition();
   const save = () =>
@@ -194,12 +189,7 @@ export function RulesForm({
       const res = await saveSettingsAction({
         warnConcurrentGrants: warn ? Math.max(1, Number(count) || 3) : 50,
         requireCaseAndReason: true,
-        ...(showRate
-          ? {
-              hourlyRateKr: rate.trim() === '' ? null : Number(rate.replace(',', '.')),
-              bookkeeperEmail: bookkeeper.trim() || null,
-            }
-          : {}),
+        bookkeeperEmail: bookkeeper.trim() || null,
       });
       toast[res.ok ? 'ok' : 'error']({
         title: res.ok ? t('saved') : t('errors.generic'),
@@ -232,22 +222,7 @@ export function RulesForm({
         </span>
         <Switch checked={warn} onCheckedChange={setWarn} aria-label={t('warnConcurrent')} />
       </label>
-      {showRate && (
-        <Field label={t('hourlyRate')} help={t('hourlyRateHelp')} inline>
-          {({ id, describedBy }) => (
-            <Input
-              id={id}
-              aria-describedby={describedBy}
-              className="w-32 tabular"
-              inputMode="decimal"
-              placeholder={t('notSet')}
-              value={rate}
-              onChange={(e) => setRate(e.target.value.replace(/[^\d,.]/g, ''))}
-            />
-          )}
-        </Field>
-      )}
-      {showRate && (
+      {
         <Field label={t('bookkeeper')} help={t('bookkeeperHelp')} inline>
           {({ id, describedBy }) => (
             <Input
@@ -260,7 +235,7 @@ export function RulesForm({
             />
           )}
         </Field>
-      )}
+      }
       <p className="m-0 text-meta text-fg-2">{t('approvalAlways')}</p>
       <div>
         <Button variant="primary" size="m" loading={pending} onClick={save}>

@@ -25,6 +25,10 @@ describe('support billing', () => {
   it('rounds each registration up to 15 minutes', () => {
     expect(roundUpQuarter(0)).toBe(0);
     expect(roundUpQuarter(1)).toBe(15);
+    // A2 "Oprunding": the step comes from the support price version.
+    expect(roundUpQuarter(1, 30)).toBe(30);
+    expect(roundUpQuarter(31, 30)).toBe(60);
+    expect(roundUpQuarter(7, 1)).toBe(7);
     expect(roundUpQuarter(15)).toBe(15);
     expect(roundUpQuarter(16)).toBe(30);
     expect(roundUpQuarter(42)).toBe(45);

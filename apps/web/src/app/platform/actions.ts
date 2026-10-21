@@ -350,6 +350,8 @@ const timeSchema = z.object({
   kind: z.enum(['phone', 'email', 'clarification', 'meeting', 'other']),
   description: z.string().max(500),
   billable: z.boolean(),
+  /** A2/A3: why non-billable time isn't billed. */
+  nonBillableReason: z.enum(['agentor_error', 'goodwill']).nullable().optional(),
 });
 
 export async function addTimeAction(input: z.input<typeof timeSchema>): Promise<ActionResult> {
@@ -589,7 +591,6 @@ export async function disableStaffAction(userId: string): Promise<ActionResult> 
 }
 
 export async function saveSettingsAction(input: {
-  hourlyRateKr?: number | null;
   requireCaseAndReason?: boolean;
   warnConcurrentGrants?: number;
   bookkeeperEmail?: string | null;
@@ -597,7 +598,6 @@ export async function saveSettingsAction(input: {
   const { actor } = await requireStaff(true);
   const parsed = z
     .object({
-      hourlyRateKr: z.number().min(0).max(100000).nullable().optional(),
       requireCaseAndReason: z.boolean().optional(),
       warnConcurrentGrants: z.number().int().min(1).max(50).optional(),
       bookkeeperEmail: z.email().max(200).nullable().optional(),
@@ -605,12 +605,6 @@ export async function saveSettingsAction(input: {
     .safeParse(input);
   if (!parsed.success) return { ok: false, error: 'invalid' };
   await setPlatformSettings(db(), actor, {
-    ...(parsed.data.hourlyRateKr !== undefined
-      ? {
-          hourlyRateOre:
-            parsed.data.hourlyRateKr === null ? null : Math.round(parsed.data.hourlyRateKr * 100),
-        }
-      : {}),
     // Case and reason stay required by the database whatever this says (§9.7).
     ...(parsed.data.requireCaseAndReason !== undefined ? { requireCaseAndReason: true } : {}),
     ...(parsed.data.warnConcurrentGrants !== undefined

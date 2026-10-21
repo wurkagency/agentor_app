@@ -3,7 +3,6 @@ import {
   Card,
   Gauge,
   HeroCurve,
-  Icon,
   KpiCard,
   MiniBars,
   SegmentBar,
@@ -13,11 +12,10 @@ import {
   Tr,
   cn,
 } from '@agentor/ui';
-import { CircleCheck, Clock, Download, FileText, Headphones, TriangleAlert } from 'lucide-react';
+import { CircleCheck, Clock, FileText, Headphones, TriangleAlert } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import { Responsive } from '@agentor/ui/mobile';
-import { ButtonLink } from '@/components/button-link';
 import { SendReportButton } from '@/components/platform/finance/action-buttons';
 import {
   PanelHeader,
@@ -28,6 +26,7 @@ import {
   monthShort,
   monthYear,
 } from '@/components/platform/finance/bits';
+import { ReportToolbar } from '@/components/platform/admin/report-toolbar';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import {
   currentMonth,
@@ -156,23 +155,11 @@ export default async function ReportsPage({
         title={t('report.title')}
         subtitle={t('report.intro')}
         actions={
-          <>
-            <ButtonLink
-              href={`/platform/admin/reports/revenue/export.csv?${monthQuery(m)}`}
-              prefetch={false}
-            >
-              <Icon icon={Download} size={16} />
-              CSV
-            </ButtonLink>
-            <ButtonLink
-              href={`/platform/admin/reports/revenue/export.pdf?${monthQuery(m)}`}
-              prefetch={false}
-            >
-              <Icon icon={Download} size={16} />
-              PDF
-            </ButtonLink>
-            <SendReportButton month={m.key} label={t('report.sendBookkeeper')} />
-          </>
+          <ReportToolbar
+            type="revenue"
+            query={monthQuery(m)}
+            extra={<SendReportButton month={m.key} label={t('report.sendBookkeeper')} />}
+          />
         }
       />
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">

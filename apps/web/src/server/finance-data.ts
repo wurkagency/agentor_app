@@ -13,7 +13,8 @@ import {
   financeSubscriptions,
   financeTime,
   listPlans,
-  supportRateOre,
+  supportPrice,
+  listPlanVersions,
   type FinanceInvoice,
   type FinanceSubscription,
   type FinanceTimeEntry,
@@ -109,7 +110,15 @@ export const financeTimeFor = cache((actor: StaffActor, firstDay: string, lastDa
   financeTime(db(), actor, firstDay, lastDay),
 );
 
-export const financeRate = cache((actor: StaffActor) => supportRateOre(db(), actor));
+/** The support price (rate ex. VAT, rounding) in force at the start of a month (A2 versions). */
+export const financePrice = cache((actor: StaffActor, monthStart: Date) =>
+  supportPrice(db(), actor, monthStart),
+);
+
+/** Plan price versions by id: what each subscription is charged (A2). */
+export const versionPrices = cache(
+  async () => new Map((await listPlanVersions(db())).map((v) => [v.id, v.priceMonthlyOre])),
+);
 
 export const planPrices = cache(async () => {
   const plans = await listPlans(db());
@@ -140,10 +149,11 @@ function cardExpiresWithin(expiry: string | null, now: Date, days: number): bool
 }
 
 export async function subscriptionRows(actor: StaffActor, now = new Date()): Promise<SubRow[]> {
-  const [subs, prices, invoices] = await Promise.all([
+  const [subs, prices, invoices, versions] = await Promise.all([
     financeSubs(actor),
     planPrices(),
     financeInvoicesAll(actor),
+    versionPrices(),
   ]);
   const failed = new Map(
     invoices
@@ -153,7 +163,8 @@ export async function subscriptionRows(actor: StaffActor, now = new Date()): Pro
   return subs.map((s) => {
     const plan = prices.get(s.planId);
     const priceOre = subscriptionPriceOre({
-      monthlyOre: plan?.monthlyOre ?? 0,
+      monthlyOre:
+        (s.priceVersionId ? versions.get(s.priceVersionId) : undefined) ?? plan?.monthlyOre ?? 0,
       interval: s.interval,
       discountPct: s.discountPct,
       discountUntil: s.discountUntil,
@@ -296,7 +307,7 @@ export async function supportForMonth(
 ): Promise<{ customers: CustomerSupport[]; rateOre: number; entries: FinanceTimeEntry[] }> {
   const [entries, rateOre, subs, invoices] = await Promise.all([
     financeTimeFor(actor, m.firstDay, m.lastDay),
-    financeRate(actor),
+    financePrice(actor, m.start),
     subscriptionRows(actor),
     financeInvoicesAll(actor),
   ]);
@@ -308,7 +319,7 @@ export async function supportForMonth(
   const subBy = new Map(subs.map((s) => [s.tenantId, s]));
   const customers: CustomerSupport[] = [];
   for (const [tenantId, es] of byTenant) {
-    const lines = supportLines(es, rateOre);
+    const lines = supportLines(es, rateOre.rateOre, rateOre.roundingMinutes);
     const totals = supportTotals(lines);
     const sub = subBy.get(tenantId);
     const latest = [...es]
@@ -339,7 +350,7 @@ export async function supportForMonth(
     });
   }
   customers.sort((a, b) => b.grossOre - a.grossOre);
-  return { customers, rateOre, entries: list };
+  return { customers, rateOre: rateOre.rateOre, entries: list };
 }
 
 /** Projected billable minutes at month end from the pace so far. */

@@ -1,4 +1,4 @@
-import { getPlatformSettings, timeBetween } from '@agentor/db';
+import { supportPrice, timeBetween } from '@agentor/db';
 import { formatMinutes, formatMoney, type Locale } from '@agentor/i18n';
 import { Banner, Card, EmptyState, Table, Td, Th, Tr } from '@agentor/ui';
 import { Clock } from 'lucide-react';
@@ -28,7 +28,7 @@ export async function TimePerCustomerView({ scopeSwitch }: { scopeSwitch: ReactN
     timeBetween(db(), actor.userId, from, to, false),
     customersFor(actor.userId),
     planNames(),
-    getPlatformSettings(db(), actor.userId),
+    supportPrice(db(), actor, new Date(`${from}T12:00:00Z`)),
   ]);
   const rows = customers
     .map((c) => {
@@ -43,7 +43,8 @@ export async function TimePerCustomerView({ scopeSwitch }: { scopeSwitch: ReactN
     })
     .filter((r) => r.minutes > 0)
     .sort((a, b) => b.minutes - a.minutes);
-  const rate = settings.hourlyRateOre;
+  // The support price in force this month (A2 versions).
+  const rate: number | null = settings.rateOre;
   return (
     <PageBody>
       <PageHeader title={t('title')} subtitle={t('perCustomerIntro')} actions={scopeSwitch} />

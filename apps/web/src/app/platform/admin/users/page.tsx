@@ -118,8 +118,7 @@ export default async function StaffPage() {
             <h2 className="m-0 text-card">{t('rulesTitle')}</h2>
             <RulesForm
               warnConcurrent={settings.warnConcurrentGrants}
-              hourlyRateKr={settings.hourlyRateOre === null ? null : settings.hourlyRateOre / 100}
-              showRate={false}
+              bookkeeperEmail={settings.bookkeeperEmail}
             />
           </Card>
           <Card className="flex items-start gap-3">

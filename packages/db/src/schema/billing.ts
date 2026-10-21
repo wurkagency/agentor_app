@@ -11,6 +11,7 @@ import {
   text,
   timestamp,
   unique,
+  uuid,
 } from 'drizzle-orm/pg-core';
 import { createdAt, idColumn, tenantIdColumn, updatedAt } from './columns.js';
 import { plans } from './plans.js';
@@ -57,6 +58,8 @@ export const subscriptions = pgTable(
     /** Discount on the plan price, set by Superadmin (F2). */
     discountPct: integer('discount_pct'),
     discountUntil: ts('discount_until'),
+    /** The plan price version charged (A2). Set by trigger from the plan's newest version. */
+    priceVersionId: uuid('price_version_id'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },

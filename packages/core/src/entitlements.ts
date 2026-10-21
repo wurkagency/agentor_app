@@ -25,6 +25,8 @@ export interface Entitlements {
   recommendedForOrders: string[];
   /** Most systems (SU3) the plan is recommended for; null = no upper bound. */
   recommendedForSystems: Limit;
+  /** Prøveperiode in days (A2); null = by agreement, absent = not set yet. */
+  trialDays?: Limit;
 }
 
 const KEYS: Record<string, keyof Entitlements> = {
@@ -41,6 +43,7 @@ const KEYS: Record<string, keyof Entitlements> = {
   features: 'features',
   recommended_for_orders: 'recommendedForOrders',
   recommended_for_systems: 'recommendedForSystems',
+  trial_days: 'trialDays',
 };
 
 const LIMIT_KEYS = new Set<keyof Entitlements>([
@@ -67,7 +70,10 @@ export function parseEntitlements(rows: readonly { key: string; value: unknown }
   }
   for (const k of Object.values(KEYS)) {
     const v = out[k];
-    if (k === 'features') {
+    if (k === 'trialDays') {
+      // Optional: shown on A2 when set, never assumed.
+      if (k in out && !isLimit(v)) throw new Error(`entitlement ${k} malformed`);
+    } else if (k === 'features') {
       const f = v as PlanFeatures | undefined;
       if (!f || !Array.isArray(f.included) || !Array.isArray(f.excluded))
         throw new Error(`entitlement ${k} missing`);

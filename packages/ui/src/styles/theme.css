@@ -469,6 +469,15 @@
   grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(0, 1fr));
 }
 
+/* Administration › Produkt (A2): support price beside the plans matrix, 1 : 2. */
+@utility grid-cols-product {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+}
+/* Label column 200 px beside the field (frow on the boards). */
+@utility grid-cols-form-row {
+  grid-template-columns: 200px minmax(0, 1fr);
+}
+
 /* ---- Mobile shell (README decision 20, MA/MP boards) ------------------------------------------
    Top bar 60 px and tab bar 76 px as drawn. The tab bar's own 8 px bottom padding grows to the
    home indicator's safe area on phones that have one. */

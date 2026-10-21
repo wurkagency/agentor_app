@@ -182,6 +182,7 @@ export function AddTimeDialog({
   const [kind, setKind] = useState('phone');
   const [description, setDescription] = useState('');
   const [billable, setBillable] = useState(true);
+  const [reason, setReason] = useState<'none' | 'agentor_error' | 'goodwill'>('none');
   const [pending, start] = useTransition();
   const m = /^(\d{1,2}):(\d{2})$/.exec(duration.trim());
   const minutes = m ? Number(m[1]) * 60 + Number(m[2]) : Number(duration) || 0;
@@ -218,6 +219,7 @@ export function AddTimeDialog({
                     kind: kind as 'phone',
                     description,
                     billable,
+                    nonBillableReason: billable || reason === 'none' ? null : reason,
                   });
                   if (!res.ok)
                     return void toast.error({ title: t('error'), closeLabel: tc('close') });
@@ -304,6 +306,22 @@ export function AddTimeDialog({
         </span>
         <Switch checked={billable} onCheckedChange={setBillable} aria-label={t('billable')} />
       </label>
+      {!billable && (
+        <Field label={t('reason')} inline>
+          {() => (
+            <Segmented
+              aria-label={t('reason')}
+              value={reason}
+              onValueChange={setReason}
+              options={[
+                { value: 'none', label: t('reasonNone') },
+                { value: 'agentor_error', label: t('reasonAgentorError') },
+                { value: 'goodwill', label: t('reasonGoodwill') },
+              ]}
+            />
+          )}
+        </Field>
+      )}
     </Dialog>
   );
 }

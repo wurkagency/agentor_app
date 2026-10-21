@@ -91,3 +91,17 @@ test('M1 Finans and Administration (Superadmin)', async ({ page }) => {
   await page.goto('/platform/admin/reports/revenue');
   await shot(page, 'F7-Rapporter');
 });
+
+test('M2 Administration (Superadmin)', async ({ page }) => {
+  await login(page, 'kasper');
+  await page.goto('/platform/admin/status');
+  await shot(page, 'A1-Systemstatus');
+  await page.goto('/platform/admin/product');
+  await shot(page, 'A2-Produkt');
+  await page.goto('/platform/admin/reports/support');
+  await shot(page, 'A3-Rapport-Support');
+  await page.goto('/platform/admin/reports/invoicing');
+  await shot(page, 'A4-Rapport-Fakturering');
+  await page.goto('/platform/admin/reports/revenue');
+  await shot(page, 'F7-Rapporter');
+});

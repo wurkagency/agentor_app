@@ -1,4 +1,5 @@
 import {
+  BILLING_STEP_MINUTES,
   DEFAULT_SUPPORT_RATE_ORE,
   roundUpQuarter,
   supportLines,
@@ -12,12 +13,12 @@ import { withoutTenant, type Database, type Transaction } from '../client.js';
 import {
   cases,
   platformAudit,
-  platformSettings,
   timeEntries,
   type BillingInterval,
   type InvoiceKind,
   type InvoiceLine,
   type InvoiceStatus,
+  type NonBillableReason,
   type PaymentMethod,
   type SubscriptionStatus,
 } from '../schema/index.js';
@@ -61,6 +62,8 @@ export interface FinanceSubscription {
   cancelAt: Date | null;
   discountPct: number | null;
   discountUntil: Date | null;
+  /** The plan price version charged (A2). */
+  priceVersionId: string | null;
   createdAt: Date;
 }
 
@@ -97,6 +100,7 @@ export async function financeSubscriptions(
     cancelAt: date(s.cancel_at),
     discountPct: (s.discount_pct as number | null) ?? null,
     discountUntil: date(s.discount_until),
+    priceVersionId: (s.price_version_id as string | null) ?? null,
     createdAt: date(s.created_at)!,
   }));
 }
@@ -183,6 +187,9 @@ export async function financeInvoices(
 
 export interface FinanceTimeEntry extends SupportEntry {
   tenantId: string;
+  caseCategory: string | null;
+  nonBillableReason: NonBillableReason | null;
+  kind: string;
   staffUserId: string;
   staffName: string;
   invoiceId: string | null;
@@ -210,8 +217,11 @@ export async function financeTime(
         caseTitle: cases.title,
         caseStatus: cases.status,
         caseResolvedAt: cases.resolvedAt,
+        caseCategory: cases.category,
         minutes: timeEntries.minutes,
         billable: timeEntries.billable,
+        nonBillableReason: timeEntries.nonBillableReason,
+        kind: timeEntries.kind,
         workDate: timeEntries.workDate,
         source: timeEntries.source,
         invoiceId: timeEntries.invoiceId,
@@ -228,17 +238,36 @@ export async function financeTime(
       caseTitle: r.caseTitle ?? null,
       caseStatus: r.caseStatus ?? null,
       caseResolvedAt: r.caseResolvedAt ?? null,
+      caseCategory: r.caseCategory ?? null,
     }));
 }
 
-export async function supportRateOre(db: Database, actor: StaffActor): Promise<number> {
-  const [row] = await asStaff(db, actor.userId, (tx) =>
-    tx
-      .select({ value: platformSettings.value })
-      .from(platformSettings)
-      .where(eq(platformSettings.key, 'hourlyRateOre')),
+/**
+ * The support price in force at `at` (the start of the month being billed): rate ex. VAT and the
+ * rounding step, from the support price versions (A2). 640 kr. and 15 min. if none exists.
+ */
+export async function supportPrice(
+  db: Database,
+  actor: StaffActor,
+  at: Date = new Date(),
+): Promise<{ rateOre: number; roundingMinutes: number }> {
+  const res = await asStaff(db, actor.userId, (tx) =>
+    tx.execute<{ rate_ore: number; rounding_minutes: number }>(
+      sql`select * from app.support_price_at(${at})`,
+    ),
   );
-  return typeof row?.value === 'number' && row.value > 0 ? row.value : DEFAULT_SUPPORT_RATE_ORE;
+  const r = res.rows[0];
+  return r
+    ? { rateOre: Number(r.rate_ore), roundingMinutes: Number(r.rounding_minutes) }
+    : { rateOre: DEFAULT_SUPPORT_RATE_ORE, roundingMinutes: BILLING_STEP_MINUTES };
+}
+
+export async function supportRateOre(
+  db: Database,
+  actor: StaffActor,
+  at: Date = new Date(),
+): Promise<number> {
+  return (await supportPrice(db, actor, at)).rateOre;
 }
 
 const MONTHS_DA = [
@@ -285,7 +314,7 @@ export async function saveSupportDrafts(
   const m = supportMonth(year, month);
   const [entries, rate, existing] = await Promise.all([
     financeTime(db, actor, m.firstDay, m.lastDay),
-    supportRateOre(db, actor),
+    supportPrice(db, actor, m.start),
     financeInvoices(db, actor, m.start, new Date(Date.now() + 86_400_000)),
   ]);
   const drafts = new Map(
@@ -307,7 +336,7 @@ export async function saveSupportDrafts(
   await asStaff(db, actor.userId, async (tx) => {
     for (const [tenantId, list] of byTenant) {
       if (opts.tenantId && tenantId !== opts.tenantId) continue;
-      const lines = supportLines(list, rate);
+      const lines = supportLines(list, rate.rateOre, rate.roundingMinutes);
       let manual = (drafts.get(tenantId)?.lines ?? []).filter((l) => l.manual);
       if (opts.removeLine !== undefined)
         manual = manual.filter((_, idx) => idx !== opts.removeLine);
@@ -489,39 +518,4 @@ export async function logFinanceAction(
       .insert(platformAudit)
       .values({ actorUserId: actor.userId, actorName: actor.name, action, detail }),
   );
-}
-
-export const EDITABLE_PLAN_KEYS = [
-  'seats',
-  'transactions_per_month',
-  'integration_sets',
-  'destinations_per_flow',
-  'polling_interval_minutes',
-] as const;
-
-/**
- * Superadmin changes a plan's monthly price and limits (P6 "Ændre planer, priser"). Null in a
- * limit means unlimited. Customers see the change at once; prices apply from the next renewal.
- */
-export async function updatePlan(
-  db: Database,
-  actor: StaffActor,
-  planId: string,
-  input: {
-    priceMonthlyOre: number;
-    values: Partial<Record<(typeof EDITABLE_PLAN_KEYS)[number], number | null>>;
-  },
-): Promise<void> {
-  requireSuperadmin(actor);
-  await asStaff(db, actor.userId, async (tx) => {
-    await tx.execute(
-      sql`select app.platform_plan_update(${planId}, ${input.priceMonthlyOre}::int, ${JSON.stringify(input.values)}::jsonb)`,
-    );
-    await tx.insert(platformAudit).values({
-      actorUserId: actor.userId,
-      actorName: actor.name,
-      action: 'plan.updated',
-      detail: { planId, ...input },
-    });
-  });
 }

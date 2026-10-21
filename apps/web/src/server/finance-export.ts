@@ -1,4 +1,5 @@
 import type { StaffActor } from '@agentor/db';
+import { copenhagenToday } from './date-range';
 import {
   financeInvoicesAll,
   monthReport,
@@ -19,7 +20,8 @@ const cell = (v: unknown) => {
   return `"${s.replace(/"/g, '""')}"`;
 };
 const kr = (ore: number) => (ore / 100).toFixed(2).replace('.', ',');
-const day = (d: Date | null) => (d ? d.toISOString().slice(0, 10) : '');
+/** The Copenhagen calendar date (UTC would put midnight here on the day before). */
+const day = (d: Date | null) => (d ? copenhagenToday(d) : '');
 
 export function csv(rows: unknown[][]): string {
   return `\uFEFF${rows.map((r) => r.map(cell).join(';')).join('\r\n')}\r\n`;
@@ -145,7 +147,12 @@ export async function timelogCsv(actor: StaffActor, m: Month): Promise<string> {
 }
 
 /** The monthly report (F7) as CSV; amounts ex. VAT. */
+/**
+ * F7 Omsætning as CSV (Administration › Rapporter): ISO month, a dot as decimal point and minutes
+ * as whole numbers, so a spreadsheet reads it in any locale (PLAN-2026-10-21 §6).
+ */
 export async function reportCsv(actor: StaffActor, m: Month): Promise<string> {
+  const kr = (ore: number) => (ore / 100).toFixed(2);
   const r = await monthReport(actor, m);
   return csv([
     ['Måned', m.key],

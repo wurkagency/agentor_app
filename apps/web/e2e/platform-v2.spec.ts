@@ -34,6 +34,12 @@ const SUPERADMIN_ONLY = [
   '/platform/admin/reports/revenue/export.csv',
   '/platform/admin/reports/revenue/export.pdf',
   '/platform/admin/reports/legacy',
+  '/platform/admin/reports/support',
+  '/platform/admin/reports/support/export.csv',
+  '/platform/admin/reports/support/export.pdf',
+  '/platform/admin/reports/invoicing',
+  '/platform/admin/reports/invoicing/export.csv',
+  '/platform/admin/reports/invoicing/export.pdf',
 ];
 
 async function topMenu(page: Page) {

@@ -16,10 +16,13 @@ export const INVOICE_DUE_DAYS = 8;
 /** Support time is billed in quarters of an hour. */
 export const BILLING_STEP_MINUTES = 15;
 
-/** Each registration (session or manual entry) is rounded up to the next 15 minutes. */
-export function roundUpQuarter(minutes: number): number {
+/**
+ * Each registration (session or manual entry) is rounded up to the next step: 15 minutes unless
+ * the support price version says otherwise (A2 "Oprunding").
+ */
+export function roundUpQuarter(minutes: number, step = BILLING_STEP_MINUTES): number {
   if (minutes <= 0) return 0;
-  return Math.ceil(minutes / BILLING_STEP_MINUTES) * BILLING_STEP_MINUTES;
+  return Math.ceil(minutes / step) * step;
 }
 
 export function addYear(date: Date): Date {
@@ -87,9 +90,13 @@ export interface SupportLine {
 
 /**
  * Support lines for one customer and month: one line per case, each registration rounded up to
- * 15 min. Time without a case and time marked not billable never count.
+ * the version's step (15 min.). Time without a case and time marked not billable never count.
  */
-export function supportLines(entries: readonly SupportEntry[], rateOre: number): SupportLine[] {
+export function supportLines(
+  entries: readonly SupportEntry[],
+  rateOre: number,
+  roundingMinutes = BILLING_STEP_MINUTES,
+): SupportLine[] {
   const byCase = new Map<string, SupportLine>();
   for (const e of entries) {
     if (!e.billable || !e.caseId || e.caseNumber === null || e.minutes <= 0) continue;
@@ -112,7 +119,7 @@ export function supportLines(entries: readonly SupportEntry[], rateOre: number):
       byCase.set(e.caseId, line);
     }
     line.registeredMinutes += e.minutes;
-    line.billedMinutes += roundUpQuarter(e.minutes);
+    line.billedMinutes += roundUpQuarter(e.minutes, roundingMinutes);
     line.entryIds.push(e.id);
     if (e.source === 'auto') line.sessions += 1;
     else line.entries += 1;

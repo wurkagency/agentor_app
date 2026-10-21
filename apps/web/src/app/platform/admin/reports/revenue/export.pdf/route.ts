@@ -1,57 +1,80 @@
+import { logExport } from '@agentor/db';
 import { formatMinutes, formatMoney } from '@agentor/i18n';
+import { getTranslations } from 'next-intl/server';
 import type { NextRequest } from 'next/server';
-import { monthFromQuery, monthReport, parseMonth } from '@/server/finance-data';
-import { renderPdf, type PdfLine } from '@/server/invoice-pdf';
+import { monthYear } from '@/components/platform/finance/bits';
+import { currentMonth, monthFromQuery, monthReport, shiftMonth } from '@/server/finance-data';
+import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
+import { reportPdf } from '@/server/report-pdf';
 
-/** "PDF" (F7): the monthly report on one page, amounts ex. VAT. */
+/** "PDF" (F7, Administration › Rapporter › Omsætning): the monthly report, amounts ex. VAT. */
 export async function GET(req: NextRequest) {
   const { actor } = await requireStaff(true);
   const sp = req.nextUrl.searchParams;
   const m =
-    monthFromQuery({ from: sp.get('from'), month: sp.get('month') }) ?? parseMonth(undefined);
+    monthFromQuery({ from: sp.get('from'), month: sp.get('month') }) ??
+    shiftMonth(currentMonth(), -1);
   const r = await monthReport(actor, m);
+  const t = await getTranslations({ locale: 'da', namespace: 'platform.reports' });
   const kr = (ore: number) => formatMoney(ore / 100, 'da');
-  const lines: PdfLine[] = [
-    { text: 'Agentor', x: 50, y: 790, size: 18, bold: true },
-    { text: `Månedsrapport ${m.key}`, x: 50, y: 765, size: 13, bold: true },
-    { text: 'Beløb er ekskl. moms.', x: 50, y: 748, size: 9 },
-  ];
-  const rules: { y: number; x1: number; x2: number }[] = [];
-  let y = 715;
-  const row = (label: string, value: string, bold = false) => {
-    lines.push({ text: label, x: 50, y, size: 10, bold });
-    lines.push({ text: value, x: 545, y, size: 10, bold, align: 'right' });
-    y -= 18;
-  };
-  row('Omsætning', kr(r.revenueOre), true);
-  row('Abonnementer', kr(r.subscriptionOre));
-  row('Support', kr(r.supportOre));
-  row('Aktive abonnementer ultimo', String(r.activeAtEnd));
-  row('Fakturerbar tid', formatMinutes(r.billableMinutes));
-  row('Afregnet tid', formatMinutes(r.billedMinutes));
-  row('Ikke fakturerbar', formatMinutes(r.nonBillableMinutes));
-  row('Udestående inkl. moms', kr(r.outstandingGross));
-  row('Sager løst', String(r.casesResolved));
-  y -= 10;
-  rules.push({ y: y + 14, x1: 50, x2: 545 });
-  lines.push({ text: 'Største kunder i support', x: 50, y, size: 11, bold: true });
-  y -= 18;
-  for (const c of r.topCustomers.slice(0, 8))
-    row(c.name, `${formatMinutes(c.billedMinutes)} · ${kr(c.netOre)}`);
-  y -= 10;
-  rules.push({ y: y + 14, x1: 50, x2: 545 });
-  lines.push({ text: 'Tid pr. supporter', x: 50, y, size: 11, bold: true });
-  y -= 18;
-  for (const s of r.perStaff)
-    row(
-      s.name,
-      `${formatMinutes(s.billable)} fakturerbar · ${formatMinutes(s.nonBillable)} ikke · ${s.cases} sager`,
-    );
-  return new Response(new Uint8Array(renderPdf(lines, rules)), {
+  const min = (n: number) => formatMinutes(n, 'da');
+  const pdf = reportPdf({
+    title: t('pdfRevenueTitle', { month: monthYear(m.start, 'da') }),
+    subtitle: t('pdfFooterExVat'),
+    kpis: [
+      { label: t('revenue.total'), value: kr(r.revenueOre) },
+      {
+        label: t('revenue.subscriptions'),
+        value: kr(r.subscriptionOre),
+        sub: t('revenue.active', { count: r.activeAtEnd }),
+      },
+      { label: t('revenue.support'), value: kr(r.supportOre) },
+      {
+        label: t('revenue.outstanding'),
+        value: kr(r.outstandingGross),
+        sub: t('revenue.outstandingSub'),
+      },
+      { label: t('support.registered'), value: min(r.billableMinutes) },
+      { label: t('support.billed'), value: min(r.billedMinutes) },
+      { label: t('support.nonBillable'), value: min(r.nonBillableMinutes) },
+      { label: t('support.resolved'), value: String(r.casesResolved) },
+    ],
+    tables: [
+      {
+        heading: t('support.topCustomers'),
+        columns: [
+          { label: t('support.colCustomer'), weight: 3 },
+          { label: t('support.colBilled'), weight: 1.5, align: 'right' },
+          { label: t('support.colAmount'), weight: 2, align: 'right' },
+        ],
+        rows: r.topCustomers.map((c) => [c.name, min(c.billedMinutes), kr(c.netOre)]),
+      },
+      {
+        heading: t('support.perStaff'),
+        columns: [
+          { label: t('support.colStaff'), weight: 3 },
+          { label: t('support.colBillable'), weight: 2, align: 'right' },
+          { label: t('support.colNonBillable'), weight: 2, align: 'right' },
+          { label: t('support.colCases'), weight: 1, align: 'right' },
+        ],
+        rows: r.perStaff.map((s) => [s.name, min(s.billable), min(s.nonBillable), String(s.cases)]),
+      },
+    ],
+    pageLabel: (p, n) => t('pdfPage', { page: p, pages: n }),
+    footer: t('pdfFooterExVat'),
+  });
+  await logExport(db(), actor, {
+    report: 'revenue',
+    format: 'pdf',
+    from: m.firstDay,
+    to: m.lastDay,
+    rows: r.topCustomers.length + r.perStaff.length,
+  });
+  return new Response(new Uint8Array(pdf), {
     headers: {
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="finans-${m.key}.pdf"`,
+      'Content-Disposition': `attachment; filename="agentor-omsaetning-${m.key}.pdf"`,
       'Cache-Control': 'private, no-store',
     },
   });
