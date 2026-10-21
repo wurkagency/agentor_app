@@ -14,10 +14,10 @@ import { z } from 'zod';
 import type { ActionResult } from '@/server/actor';
 import { quickpay } from '@/server/billing';
 import { optionalCvr } from '@/server/cvr';
-import { env } from '@/server/env';
 import { db } from '@/server/infra';
-import { sendMail } from '@/server/mail';
+import { appLink, sendEmail } from '@/server/mail';
 import { requireStaff } from '@/server/platform';
+import { tenantNames } from '@/server/platform-data';
 
 /**
  * Customer administration on P2 (Superadmin): edit the details, send the owner a new invitation,
@@ -121,24 +121,20 @@ export async function resendOwnerInvitationAction(
   } catch (e) {
     return { ok: false, error: codeOf(e) };
   }
-  const link = new URL(`/invite/${sent.token}`, env().APP_URL).toString();
+  // E11: 14 days; resendOwnerInvitation replaced the token, so earlier links are dead.
+  const company = (await tenantNames(actor.userId)).get(tenantId) ?? '';
   let mailed = true;
   try {
-    await sendMail({
-      to: sent.email,
-      subject: 'Din invitation til Agentor',
-      text: `Hej
-
-${actor.name} fra Agentor har sendt dig en ny invitation som ejer af jeres virksomhed hos Agentor.
-
-Opret dit login, eller log ind, og betal med kort her:
-${link}
-
-Linket virker i 14 dage. Tidligere links virker ikke længere. Har du ikke bedt om det, kan du se bort fra denne mail.
-
-Venlig hilsen
-Agentor`,
-    });
+    await sendEmail(
+      'owner-reinvite',
+      {
+        staff: actor.name,
+        company,
+        url: appLink(`/invite/${sent.token}`),
+        email: sent.email,
+      },
+      { to: sent.email, entityRef: `tenant-${tenantId}` },
+    );
   } catch (err) {
     mailed = false;
     console.error('owner invitation mail failed', err instanceof Error ? err.message : err);

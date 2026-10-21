@@ -32,9 +32,11 @@ import {
   notify,
   openFailureIds,
   resolveNotifications,
+  routeDestination,
   saveLink,
   saveLookup,
   storePayloads,
+  systematicFailures,
   type RecordInsert,
   type RouteRecordInsert,
 } from '@agentor/db';
@@ -453,7 +455,11 @@ async function processFinishJob(deps: FlowDeps, job: { tenantId: string; runId: 
       needsAction: true,
       flowId: run.flowId,
     });
-  } else if (totals.failed === 0) {
+  }
+  if (totals.failed > 0) {
+    // E20: the same error over and over on one route, even while it is still being retried.
+    await notifySystematic(deps, job.tenantId, run);
+  } else {
     const open = await openFailureIds(deps.db, job.tenantId, run.flowId);
     if (open.length === 0)
       await resolveNotifications(deps.db, job.tenantId, { flowId: run.flowId });
@@ -527,5 +533,43 @@ async function testRun(
   await completeRun(deps.db, tenantId, run, results, {
     pollMinutes: def.pollMinutes,
     startedAt: started,
+  });
+}
+
+/**
+ * E20 "Systematisk fejl": the same error on at least the company's threshold of records (default
+ * 3) on one route within 15 minutes. One notification per flow until it is resolved; the e-mail
+ * goes out from the queue with the same why/fix texts as the app (explain() in @agentor/core).
+ */
+async function notifySystematic(
+  deps: FlowDeps,
+  tenantId: string,
+  run: { id: string; flowId: string; flowName: string },
+) {
+  const [top] = await systematicFailures(deps.db, tenantId, run.flowId);
+  if (!top) return;
+  const dest = await routeDestination(deps.db, tenantId, run.flowId, top.routeId);
+  const system = dest?.connectorId ? (manifestFor(dest.connectorId)?.name ?? dest.connectorId) : '';
+  // Flat parameters (notifications.params holds strings and numbers): the e-mail rebuilds the
+  // explanation in the recipient's language.
+  const p: Record<string, string | number> = {
+    count: top.count,
+    flow: run.flowName,
+    entity: top.entity,
+    code: top.errorCode,
+    label: top.label,
+    system,
+    routeId: top.routeId,
+    at: top.lastAt.toISOString(),
+  };
+  for (const [k, v] of Object.entries(top.errorParams ?? {}))
+    if (typeof v === 'string' && v.length <= 200) p[`p_${k}`] = v;
+  await notify(deps.db, tenantId, {
+    event: 'systematic_error',
+    messageKey: 'systematicError',
+    params: p,
+    href: `/integrations/${run.flowId}?tab=runs&run=${run.id}`,
+    needsAction: true,
+    flowId: run.flowId,
   });
 }

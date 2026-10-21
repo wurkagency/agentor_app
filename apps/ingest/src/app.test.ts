@@ -163,3 +163,54 @@ describe('connection webhooks', () => {
     expect(queued).toHaveLength(1);
   });
 });
+
+describe('inbound mail (E12 replies)', () => {
+  const calls: [string, string, string][] = [];
+  const mail = buildApp({
+    inboundSecret: 'test-inbound-secret',
+    caseReply: async (token, from, body) => {
+      calls.push([token, from, body]);
+      return 'reopened';
+    },
+  });
+  afterAll(() => mail.close());
+  const item = {
+    From: { Address: 'mette@nordlys-cykler.dk' },
+    To: [{ Address: 'sag+0123456789abcdef0123456789abcdef@svar.agentor.dk' }],
+    RawTextBody: 'Det virker ikke igen.\n\nDen 21. okt. 2026 skrev Agentor:\n> Din sag er løst',
+  };
+
+  it('refuses a wrong or missing secret', async () => {
+    for (const url of ['/mail/inbound', '/mail/inbound?secret=nope']) {
+      const res = await mail.inject({
+        method: 'POST',
+        url,
+        headers: { 'content-type': 'application/json' },
+        payload: JSON.stringify({ items: [item] }),
+      });
+      expect(res.statusCode).toBe(401);
+    }
+    expect(calls).toHaveLength(0);
+  });
+
+  it('adds the reply without the quoted original', async () => {
+    const res = await mail.inject({
+      method: 'POST',
+      url: '/mail/inbound',
+      headers: {
+        'content-type': 'application/json',
+        'x-agentor-inbound-secret': 'test-inbound-secret',
+      },
+      payload: JSON.stringify({ items: [item, { ...item, To: [{ Address: 'x@agentor.dk' }] }] }),
+    });
+    expect(res.statusCode).toBe(200);
+    expect(calls).toEqual([
+      ['0123456789abcdef0123456789abcdef', 'mette@nordlys-cykler.dk', 'Det virker ikke igen.'],
+    ]);
+  });
+
+  it('is off without a secret', async () => {
+    const res = await app.inject({ method: 'POST', url: '/mail/inbound', payload: {} });
+    expect(res.statusCode).toBe(404);
+  });
+});

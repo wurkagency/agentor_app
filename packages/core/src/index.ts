@@ -6,3 +6,5 @@ export * from './engine.js';
 export * from './signup.js';
 export * from './cvr.js';
 export * from './push.js';
+export * from './record-error.js';
+export * from './week.js';

@@ -1,6 +1,6 @@
 'use server';
 
-import { copenhagenMonth, supportMonth, withVat } from '@agentor/core';
+import { copenhagenMonth, subscriptionPriceOre, supportMonth, withVat } from '@agentor/core';
 import {
   PlatformError,
   createPlanVersion,
@@ -12,13 +12,11 @@ import {
   NON_BILLABLE_REASONS,
   type PlanValueKey,
 } from '@agentor/db';
-import { formatDate, formatMoney } from '@agentor/i18n';
-import { getTranslations } from 'next-intl/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import type { ActionResult } from '@/server/actor';
 import { db } from '@/server/infra';
-import { sendMail } from '@/server/mail';
+import { appLink, sendEmail } from '@/server/mail';
 import { requireStaff } from '@/server/platform';
 
 /** The features Superadmin switches per plan on A2 (data in plan_entitlements.features). */
@@ -79,7 +77,6 @@ export async function saveProductAction(
   const parsed = schema.safeParse(input);
   if (!parsed.success) return { ok: false, error: 'invalid' };
   const d = parsed.data;
-  const t = await getTranslations('platform.product');
   try {
     const [plans, supportVersions] = await Promise.all([
       listPlans(db()),
@@ -155,7 +152,6 @@ export async function saveProductAction(
           p.planId,
           plan.priceMonthlyOre,
           priceOre,
-          t,
         );
         await markPriceNoticeSent(db(), actor, versionId, notices);
       }
@@ -175,7 +171,6 @@ async function sendPriceNotices(
   planId: string,
   oldOre: number,
   newOre: number,
-  t: Awaited<ReturnType<typeof getTranslations<'platform.product'>>>,
 ): Promise<number> {
   const subs = (await financeSubscriptions(db(), actor)).filter(
     (s) =>
@@ -186,18 +181,23 @@ async function sendPriceNotices(
   );
   const from = new Date(Date.now() + 30 * 86_400_000);
   for (const s of subs) {
-    const price = (ore: number) => formatMoney(withVat(ore).gross / 100, 'da');
-    await sendMail({
-      to: s.billingEmail!,
-      subject: t('noticeSubject', { plan: planName }),
-      text: t('noticeBody', {
+    // E14: old and new price incl. VAT for the customer's own interval.
+    const gross = (monthlyOre: number) =>
+      withVat(subscriptionPriceOre({ monthlyOre, interval: s.interval })).gross;
+    await sendEmail(
+      'plan-price-change',
+      {
         company: s.tenantName,
         plan: planName,
-        old: price(oldOre),
-        new: price(newOre),
-        date: formatDate(from, 'da'),
-      }),
-    });
+        interval: s.interval,
+        oldGrossOre: gross(oldOre),
+        newGrossOre: gross(newOre),
+        effectiveFrom: from,
+        url: appLink('/billing'),
+        billingEmail: s.billingEmail!,
+      },
+      { to: s.billingEmail!, entityRef: `price-${planId}-${s.tenantId}` },
+    );
   }
   return subs.length;
 }

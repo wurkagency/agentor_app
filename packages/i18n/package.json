@@ -4,10 +4,14 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
     "./messages/*": "./messages/*"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run"
   },
@@ -15,5 +19,9 @@
     "@agentor/config": "workspace:*",
     "@types/node": "^22.20.5",
     "vitest": "^4.1.11"
-  }
+  },
+  "files": [
+    "dist",
+    "messages"
+  ]
 }

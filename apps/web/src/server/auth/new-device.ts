@@ -1,7 +1,6 @@
 import { getUserById, hasEarlierSessionFromAgent } from '@agentor/db';
-import { formatDateTime } from '@agentor/i18n';
 import { db } from '../infra';
-import { sendMail } from '../mail';
+import { sendEmail } from '../mail';
 
 /** Short, human description of a user agent: "Chrome på Windows". No full UA string in mail. */
 export function describeAgent(ua: string): string {
@@ -48,9 +47,10 @@ export async function notifyNewDevice(session: {
   if (seenAgent || !anyEarlier) return;
   const user = await getUserById(db(), session.userId);
   if (!user) return;
-  await sendMail({
-    to: user.email,
-    subject: 'Nyt login på din Agentor-konto',
-    text: `Hej ${user.name}\n\nDin konto blev brugt til at logge ind fra ${describeAgent(ua)} ${formatDateTime(new Date())}.\n\nVar det dig, skal du ikke gøre noget. Var det ikke dig, så skift din adgangskode og log ud overalt under Indstillinger → Sikkerhed.\n\nVenlig hilsen\nAgentor`,
-  });
+  // E03: deliberately no button and no link. The app has no IP geolocation, so no place.
+  await sendEmail(
+    'new-device-login',
+    { name: user.name, email: user.email, device: describeAgent(ua), place: null, at: new Date() },
+    { to: user.email, entityRef: `session-${session.id}` },
+  );
 }

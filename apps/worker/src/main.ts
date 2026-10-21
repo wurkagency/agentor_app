@@ -2,13 +2,16 @@ import { createQuickPay, quickPayMode } from '@agentor/billing';
 import { createHash } from 'node:crypto';
 import { loadKekFile, publicOf, publicKeyFromBase64 } from '@agentor/keybox';
 import { createDatabase } from '@agentor/db';
+import { createMailer } from '@agentor/email';
 import { flowsQueue, QUEUES, redisConnection } from '@agentor/jobs';
 import { FlowProducer, Worker } from 'bullmq';
+import nodemailer from 'nodemailer';
 import pino from 'pino';
 import { processBillingJob } from './billing.js';
 import { processConnectionJob } from './connections.js';
 import { processFlowJobByName } from './flows.js';
 import { metrics, serveMetrics } from './metrics.js';
+import { drainEmailQueue } from './email.js';
 import { drainPushQueue } from './push.js';
 
 /**
@@ -86,6 +89,29 @@ const pushTimer = vapid
     }, 5_000)
   : null;
 
+// Notification e-mails E19–E22 (PLAN-EMAILS-PDF §5): Mailpit locally, Brevo SMTP in production.
+const smtpUrl = process.env.SMTP_URL;
+if (!smtpUrl && process.env.NODE_ENV === 'production')
+  throw new Error('SMTP_URL is required: notification e-mails cannot be sent');
+const emailLog = log.child({ part: 'email' });
+const emailDeps = {
+  db: database.db,
+  redis: connection,
+  log: emailLog,
+  appUrl,
+  send: createMailer({
+    transport: nodemailer.createTransport(smtpUrl ?? 'smtp://127.0.0.1:51025'),
+    from: process.env.MAIL_FROM ?? 'Agentor <no-reply@agentor.dk>',
+    appUrl,
+    log: emailLog,
+  }),
+};
+const emailTimer = setInterval(() => {
+  drainEmailQueue(emailDeps).catch((e: unknown) =>
+    log.error({ err: e instanceof Error ? e.message : String(e) }, 'email drain failed'),
+  );
+}, 5_000);
+
 const workers = [
   new Worker(
     QUEUES.system,
@@ -122,6 +148,7 @@ const shutdown = async (signal: string) => {
   log.info({ signal }, 'shutting down');
   const timeout = setTimeout(() => process.exit(1), 60_000);
   if (pushTimer) clearInterval(pushTimer);
+  clearInterval(emailTimer);
   await Promise.all(workers.map((w) => w.close()));
   await producer.close();
   metricsServer?.close();

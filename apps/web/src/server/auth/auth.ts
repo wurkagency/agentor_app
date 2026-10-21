@@ -12,7 +12,7 @@ import { db } from '../infra';
 import { notifyNewDevice } from './new-device';
 import { redisRateLimitStorage } from './rate-limit';
 import { clearFailures, isLocked, recordFailure } from './lockout';
-import { sendMail } from '../mail';
+import { sendEmail } from '../mail';
 import { markSessionMfaVerified, markSignupStarted, signInMethods } from '@agentor/db';
 import { isRecentSignIn, STEP_UP_PATHS } from './reauth';
 import { mockSsoConfig, SSO_PROVIDERS } from '../mock-sso';
@@ -127,11 +127,12 @@ function createAuth() {
         verify: ({ hash: h, password }) => verify(h, password, ARGON2),
       },
       sendResetPassword: async ({ user, url }) => {
-        await sendMail({
-          to: user.email,
-          subject: 'Nulstil din adgangskode til Agentor',
-          text: `Hej ${user.name}\n\nBrug linket herunder til at vælge en ny adgangskode. Linket virker i 1 time.\n\n${url}\n\nHar du ikke bedt om det, kan du se bort fra denne mail.\n\nVenlig hilsen\nAgentor`,
-        });
+        // E02. The current password keeps working until the new one is set.
+        await sendEmail(
+          'reset-password',
+          { name: user.name, email: user.email, url },
+          { to: user.email },
+        );
       },
     },
     ...(e.SSO_MODE === 'live'
@@ -170,20 +171,12 @@ function createAuth() {
       autoSignInAfterVerification: true,
       expiresIn: 24 * 3600,
       sendVerificationEmail: async ({ user, url }) => {
-        await sendMail({
-          to: user.email,
-          subject: 'Bekræft din e-mail til Agentor',
-          text: `Hej ${user.name}
-
-Bekræft din e-mail for at komme i gang med Agentor. Linket virker i 24 timer.
-
-${url}
-
-Har du ikke oprettet en konto, kan du se bort fra denne mail.
-
-Venlig hilsen
-Agentor`,
-        });
+        // E01 (24 hours).
+        await sendEmail(
+          'verify-email',
+          { name: user.name, email: user.email, url },
+          { to: user.email },
+        );
       },
     },
     rateLimit: {

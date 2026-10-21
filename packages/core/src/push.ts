@@ -10,6 +10,7 @@ export type PushCategory = 'errors' | 'connection' | 'support' | 'quota' | 'week
 export function pushCategory(messageKey: string): PushCategory | null {
   switch (messageKey) {
     case 'recordsFailed':
+    case 'systematicError':
     case 'creditNotesFailed':
     case 'paymentFailed':
       return 'errors';
@@ -111,7 +112,16 @@ export function formatMessage(template: string, params: Record<string, string | 
       );
       const form = forms[`=${n}`] ?? (n === 1 ? forms.one : undefined) ?? forms.other ?? '';
       out += form.replaceAll('#', String(n));
-    } else out += String(params[inner.trim()] ?? '');
+    } else {
+      // {interval, select, year {…} other {…}}: the form named by the value, else "other".
+      const select = /^(\w+),\s*select,\s*([\s\S]*)$/.exec(inner);
+      if (select) {
+        const forms = Object.fromEntries(
+          [...select[2]!.matchAll(/(\w+)\s*\{([^{}]*)\}/g)].map((m) => [m[1], m[2]]),
+        );
+        out += forms[String(params[select[1]!] ?? '')] ?? forms.other ?? '';
+      } else out += String(params[inner.trim()] ?? '');
+    }
     i = j + 1;
   }
   return out;

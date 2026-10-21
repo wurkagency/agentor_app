@@ -225,12 +225,39 @@ export async function addUsageTx(tx: Transaction, tenantId: string, n: number, n
       target: [usageCounters.tenantId, usageCounters.period],
       set: { transactions: sql`${usageCounters.transactions} + ${n}`, updatedAt: now },
     })
-    .returning({ transactions: usageCounters.transactions, exceededAt: usageCounters.exceededAt });
-  if (!row || row.exceededAt) return;
+    .returning({
+      transactions: usageCounters.transactions,
+      exceededAt: usageCounters.exceededAt,
+      quotaNotifiedAt: usageCounters.quotaNotifiedAt,
+    });
+  if (!row || (row.exceededAt && row.quotaNotifiedAt)) return;
   const [sub] = await tx.select({ planId: subscriptions.planId }).from(subscriptions).limit(1);
   const plan = sub ? (await loadPlansTx(tx)).find((p) => p.id === sub.planId) : undefined;
   const limit = plan?.entitlements.transactionsPerMonth;
-  if (limit !== undefined && limit !== null && row.transactions >= limit)
+  if (limit === undefined || limit === null || limit <= 0) return;
+  // E21 "Kvote over 80 %": at most once a month per tenant, claimed on the counter row.
+  if (!row.quotaNotifiedAt && row.transactions * 10 >= limit * 8) {
+    const claimed = await tx
+      .update(usageCounters)
+      .set({ quotaNotifiedAt: now })
+      .where(and(eq(usageCounters.period, period), isNull(usageCounters.quotaNotifiedAt)))
+      .returning({ id: usageCounters.id });
+    if (claimed.length)
+      await notifyTx(tx, tenantId, {
+        event: 'quota',
+        messageKey: 'quota',
+        params: {
+          pct: Math.floor((row.transactions * 100) / limit),
+          used: row.transactions,
+          limit,
+          period,
+        },
+        href: '/billing',
+        needsAction: false,
+        emailKey: `quota:${period}`,
+      });
+  }
+  if (!row.exceededAt && row.transactions >= limit)
     await tx
       .update(usageCounters)
       .set({ exceededAt: now })
@@ -344,64 +371,97 @@ export async function failRun(db: Database, tenantId: string, runId: string) {
   );
 }
 
+export interface NotifyInput {
+  event: NotificationEvent;
+  messageKey: string;
+  params: Record<string, string | number>;
+  href: string;
+  needsAction: boolean;
+  flowId?: string | undefined;
+  connectionId?: string | undefined;
+  /**
+   * The e-mail's idempotency key when it is not the notification itself (E21: "quota:2026-10",
+   * once a month). Defaults to the new notification's id.
+   */
+  emailKey?: string | undefined;
+}
+
+/** Events that also go out by e-mail from the worker (E19–E21); E22 is the weekly job. */
+export const EMAIL_EVENTS: readonly NotificationEvent[] = [
+  'connection_broken',
+  'systematic_error',
+  'quota',
+];
+
 /**
  * In-app notification for every member who wants it (preferences per user, critical events are
- * always shown). Repeats of an unresolved notification for the same flow/connection are skipped.
+ * always shown), and an e-mail in the queue for every member with e-mail on for the event
+ * (PLAN-EMAILS-PDF §5). Repeats of an unresolved notification for the same flow/connection are
+ * skipped, so each problem is mailed once.
  */
-export async function notify(
-  db: Database,
-  tenantId: string,
-  n: {
-    event: NotificationEvent;
-    messageKey: string;
-    params: Record<string, string | number>;
-    href: string;
-    needsAction: boolean;
-    flowId?: string | undefined;
-    connectionId?: string | undefined;
-  },
-): Promise<number> {
-  return withTenant(db, { tenantId }, async (tx) => {
-    const members = await tx.select({ userId: memberships.userId }).from(memberships);
-    const prefs = await tx
-      .select({ userId: notificationPrefs.userId, inApp: notificationPrefs.inApp })
-      .from(notificationPrefs)
-      .where(eq(notificationPrefs.event, n.event));
-    const critical = CRITICAL_EVENTS.includes(n.event);
-    let created = 0;
-    for (const m of members) {
-      const pref = prefs.find((p) => p.userId === m.userId);
-      const wants = critical || (pref ? pref.inApp : DEFAULT_PREFS[n.event].inApp);
-      if (!wants) continue;
-      const [dup] = await tx
-        .select({ id: notifications.id })
-        .from(notifications)
-        .where(
-          and(
-            eq(notifications.userId, m.userId),
-            eq(notifications.messageKey, n.messageKey),
-            isNull(notifications.resolvedAt),
-            n.flowId ? eq(notifications.flowId, n.flowId) : undefined,
-            n.connectionId ? eq(notifications.connectionId, n.connectionId) : undefined,
-          ),
-        )
-        .limit(1);
-      if (dup) continue;
-      await tx.insert(notifications).values({
-        tenantId,
-        userId: m.userId,
-        event: n.event,
-        needsAction: n.needsAction,
-        messageKey: n.messageKey,
-        params: n.params,
-        href: n.href,
-        flowId: n.flowId ?? null,
-        connectionId: n.connectionId ?? null,
-      });
+export async function notify(db: Database, tenantId: string, n: NotifyInput): Promise<number> {
+  return withTenant(db, { tenantId }, (tx) => notifyTx(tx, tenantId, n));
+}
+
+/** notify() inside a transaction that is already in the tenant's context. */
+export async function notifyTx(tx: Transaction, tenantId: string, n: NotifyInput): Promise<number> {
+  const members = await tx.select({ userId: memberships.userId }).from(memberships);
+  const prefs = await tx
+    .select({
+      userId: notificationPrefs.userId,
+      inApp: notificationPrefs.inApp,
+      email: notificationPrefs.email,
+    })
+    .from(notificationPrefs)
+    .where(eq(notificationPrefs.event, n.event));
+  const critical = CRITICAL_EVENTS.includes(n.event);
+  const mails = EMAIL_EVENTS.includes(n.event);
+  let created = 0;
+  for (const m of members) {
+    const pref = prefs.find((p) => p.userId === m.userId);
+    const inApp = critical || (pref ? pref.inApp : DEFAULT_PREFS[n.event].inApp);
+    const email = mails && (pref ? pref.email : DEFAULT_PREFS[n.event].email);
+    if (!inApp && !email) continue;
+    const [dup] = await tx
+      .select({ id: notifications.id })
+      .from(notifications)
+      .where(
+        and(
+          eq(notifications.userId, m.userId),
+          eq(notifications.messageKey, n.messageKey),
+          isNull(notifications.resolvedAt),
+          n.flowId ? eq(notifications.flowId, n.flowId) : undefined,
+          n.connectionId ? eq(notifications.connectionId, n.connectionId) : undefined,
+        ),
+      )
+      .limit(1);
+    if (dup) continue;
+    let notificationId: string | null = null;
+    if (inApp) {
+      const [row] = await tx
+        .insert(notifications)
+        .values({
+          tenantId,
+          userId: m.userId,
+          event: n.event,
+          needsAction: n.needsAction,
+          messageKey: n.messageKey,
+          params: n.params,
+          href: n.href,
+          flowId: n.flowId ?? null,
+          connectionId: n.connectionId ?? null,
+        })
+        .returning({ id: notifications.id });
+      notificationId = row?.id ?? null;
       created++;
     }
-    return created;
-  });
+    const key = n.emailKey ?? notificationId;
+    if (email && key)
+      await tx.execute(
+        sql`select app.queue_email(${tenantId}::uuid, ${m.userId}::uuid, ${n.event}, ${key}, ${notificationId}::uuid, null)`,
+      );
+  }
+  return created;
 }
 
 /** Marks notifications resolved when the cause is gone (flow errors retried, connection fixed). */

@@ -11,16 +11,16 @@ import {
   setDraftTimelog,
   setSubscriptionDiscount,
 } from '@agentor/db';
-import { formatDate, formatMoney, type Locale } from '@agentor/i18n';
-import { getLocale, getTranslations } from 'next-intl/server';
+import type { Locale } from '@agentor/i18n';
+import { getLocale } from 'next-intl/server';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import type { ActionResult } from '@/server/actor';
-import { env } from '@/server/env';
 import { reportCsv } from '@/server/finance-export';
-import { financeInvoicesAll, financeSubs, parseMonth } from '@/server/finance-data';
+import { financeInvoicesAll, financeSubs, monthReport, parseMonth } from '@/server/finance-data';
 import { db } from '@/server/infra';
-import { sendMail } from '@/server/mail';
+import { brandName } from '@/components/billing/card';
+import { appLink, sendEmail } from '@/server/mail';
 import { requireStaff } from '@/server/platform';
 
 /**
@@ -125,35 +125,42 @@ export async function notifyInvoiceAction(input: {
   }
   if (!contact) return { ok: false, error: 'NOT_FOUND' };
   if (!contact.email) return { ok: false, error: 'NO_EMAIL' };
-  const t = await getTranslations('platform.finance.mail');
   const locale = (await getLocale()) as Locale;
-  const amount = formatMoney(contact.grossOre / 100, locale);
-  const link = new URL('/billing', env().APP_URL).toString();
-  await sendMail(
-    parsed.data.kind === 'reminder'
-      ? {
-          to: contact.email,
-          subject: t('reminderSubject', { number: contact.number ?? '' }),
-          text: t('reminderBody', {
-            company: contact.tenantName,
-            number: contact.number ?? '',
-            amount,
-            due: contact.dueAt ? formatDate(contact.dueAt, locale) : '',
-            count: contact.reminders,
-            link,
-          }),
-        }
-      : {
-          to: contact.email,
-          subject: t('linkSubject', { number: contact.number ?? '' }),
-          text: t('linkBody', {
-            company: contact.tenantName,
-            number: contact.number ?? '',
-            amount,
-            link,
-          }),
-        },
-  );
+  const ref = `invoice-${parsed.data.invoiceId}`;
+  if (parsed.data.kind === 'reminder') {
+    // E15; the second and later reminders say so in the subject.
+    await sendEmail(
+      'invoice-reminder',
+      {
+        company: contact.tenantName,
+        number: contact.number ?? '',
+        grossOre: contact.grossOre,
+        dueAt: contact.dueAt ?? new Date(),
+        reminder: Math.max(1, contact.reminders),
+        url: appLink(`/billing/invoices/${parsed.data.invoiceId}/pdf`),
+        billingEmail: contact.email,
+      },
+      { to: contact.email, locale, entityRef: `${ref}-reminder-${contact.reminders}` },
+    );
+  } else {
+    // E16: the button opens the owner's card page, which starts QuickPay's hosted form.
+    const [subs, invoices] = await Promise.all([financeSubs(actor), financeInvoicesAll(actor)]);
+    const sub = subs.find((x) => x.tenantId === parsed.data.tenantId);
+    const inv = invoices.find((x) => x.id === parsed.data.invoiceId);
+    await sendEmail(
+      'update-card',
+      {
+        company: contact.tenantName,
+        number: contact.number ?? '',
+        grossOre: contact.grossOre,
+        card: sub?.cardLast4 ? `${brandName(sub.cardBrand)} •••• ${sub.cardLast4}` : null,
+        detail: inv?.description ?? null,
+        url: appLink('/billing/payment'),
+        billingEmail: contact.email,
+      },
+      { to: contact.email, locale, entityRef: `${ref}-card` },
+    );
+  }
   revalidatePath('/platform/finance', 'layout');
   return { ok: true, data: { email: contact.email } };
 }
@@ -164,16 +171,25 @@ export async function sendReportAction(month: string): Promise<ActionResult<{ em
   const settings = await getPlatformSettings(db(), actor.userId);
   if (!settings.bookkeeperEmail) return { ok: false, error: 'NO_BOOKKEEPER' };
   const m = parseMonth(month);
-  const t = await getTranslations('platform.finance.mail');
-  const csv = await reportCsv(actor, m);
-  await sendMail({
-    to: settings.bookkeeperEmail,
-    subject: t('reportSubject', { month: m.key }),
-    text: t('reportBody', { month: m.key }),
-    attachments: [
-      { filename: `agentor-finans-${m.key}.csv`, content: csv, contentType: 'text/csv' },
-    ],
-  });
+  const [csv, r] = await Promise.all([reportCsv(actor, m), monthReport(actor, m)]);
+  const filename = `agentor-finans-${m.key}.csv`;
+  // E18: internal, to the bookkeeper, with the CSV attached.
+  await sendEmail(
+    'monthly-report',
+    {
+      month: m.key,
+      revenueOre: r.revenueOre,
+      subscriptionsOre: r.subscriptionOre,
+      supportOre: r.supportOre,
+      filename,
+      bytes: Buffer.byteLength(csv, 'utf8'),
+    },
+    {
+      to: settings.bookkeeperEmail,
+      attachments: [{ filename, content: csv, contentType: 'text/csv' }],
+      entityRef: `report-${m.key}`,
+    },
+  );
   return { ok: true, data: { email: settings.bookkeeperEmail } };
 }
 
@@ -187,25 +203,26 @@ export async function sendStatementAction(
   const sub = subs.find((s) => s.tenantId === tenantId);
   if (!sub) return { ok: false, error: 'NOT_FOUND' };
   if (!sub.billingEmail) return { ok: false, error: 'NO_EMAIL' };
-  const t = await getTranslations('platform.finance.mail');
   const locale = (await getLocale()) as Locale;
   const open = invoices.filter(
     (i) => i.tenantId === tenantId && (i.status === 'open' || i.status === 'failed'),
   );
-  const lines = open.map(
-    (i) =>
-      `${i.number ?? ''}  ${i.description}  ${formatMoney(i.grossOre / 100, locale)}${i.dueAt ? `  (${formatDate(i.dueAt, locale)})` : ''}`,
-  );
-  await sendMail({
-    to: sub.billingEmail,
-    subject: t('statementSubject'),
-    text: t('statementBody', {
+  // E17: one ledger line per open invoice, or "Ingen åbne poster".
+  await sendEmail(
+    'account-statement',
+    {
       company: sub.tenantName,
-      lines: lines.length ? lines.join('\n') : t('statementEmpty'),
-      total: formatMoney(open.reduce((a, i) => a + i.grossOre, 0) / 100, locale),
-      link: new URL('/billing', env().APP_URL).toString(),
-    }),
-  });
+      lines: open.map((i) => ({
+        number: i.number ?? '',
+        description: i.description,
+        grossOre: i.grossOre,
+        dueAt: i.dueAt,
+      })),
+      url: appLink('/billing/invoices'),
+      billingEmail: sub.billingEmail,
+    },
+    { to: sub.billingEmail, locale, entityRef: `statement-${tenantId}-${Date.now()}` },
+  );
   await logFinanceAction(db(), actor, 'finance.statement_sent', {
     tenantId,
     invoices: open.length,

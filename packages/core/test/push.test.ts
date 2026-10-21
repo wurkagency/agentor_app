@@ -54,4 +54,10 @@ describe('formatMessage', () => {
     expect(formatMessage(t, { count: 1, flow: 'Webshop' })).toBe('1 record fejlede i Webshop');
     expect(formatMessage(t, { count: 3, flow: 'Webshop' })).toBe('3 records fejlede i Webshop');
   });
+
+  it('picks a select form, or "other"', () => {
+    const t = 'Betales {interval, select, year {årligt} other {månedligt}} forud';
+    expect(formatMessage(t, { interval: 'year' })).toBe('Betales årligt forud');
+    expect(formatMessage(t, { interval: 'month' })).toBe('Betales månedligt forud');
+  });
 });

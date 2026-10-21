@@ -4,11 +4,10 @@ import { createCustomer, listPlans, PlatformError } from '@agentor/db';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import type { ActionResult } from '@/server/actor';
-import { parseCvr } from '@agentor/core';
+import { parseCvr, subscriptionPriceOre, withVat } from '@agentor/core';
 import { CVR_ERROR, cvrProvider, optionalCvr, type CvrCompany } from '@/server/cvr';
-import { env } from '@/server/env';
 import { db } from '@/server/infra';
-import { sendMail } from '@/server/mail';
+import { appLink, sendEmail } from '@/server/mail';
 import { requireStaff } from '@/server/platform';
 
 const optional = (max: number) =>
@@ -63,25 +62,27 @@ export async function createCustomerAction(
     throw e;
   }
   const plan = (await listPlans(db())).find((p) => p.id === c.planId);
-  const link = new URL(`/invite/${created.token}`, env().APP_URL).toString();
-  const period = c.interval === 'year' ? 'årligt' : 'månedligt';
+  // E10: 14 days; the company is active only after the first payment.
+  const priceNetOre = subscriptionPriceOre({
+    monthlyOre: plan?.priceMonthlyOre ?? 0,
+    interval: c.interval,
+  });
   let mailed = true;
   try {
-    await sendMail({
-      to: c.ownerEmail,
-      subject: `${c.name} er oprettet hos Agentor`,
-      text: `Hej
-
-${actor.name} fra Agentor har oprettet ${c.name} til dig med ${plan?.name ?? c.planId}, betalt ${period}.
-
-Opret dit login, og betal med kort her:
-${link}
-
-Linket virker i 14 dage. Har du ikke bedt om det, kan du se bort fra denne mail.
-
-Venlig hilsen
-Agentor`,
-    });
+    await sendEmail(
+      'customer-created',
+      {
+        staff: actor.name,
+        company: c.name,
+        plan: plan?.name ?? c.planId,
+        interval: c.interval,
+        priceNetOre,
+        firstPaymentGrossOre: withVat(priceNetOre).gross,
+        url: appLink(`/invite/${created.token}`),
+        email: c.ownerEmail,
+      },
+      { to: c.ownerEmail, entityRef: `tenant-${created.tenantId}` },
+    );
   } catch (err) {
     mailed = false;
     console.error('customer invitation mail failed', err instanceof Error ? err.message : err);

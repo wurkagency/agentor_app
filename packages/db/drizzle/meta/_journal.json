@@ -379,6 +379,27 @@
       "when": 1792613895466,
       "tag": "0053_customer_admin",
       "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1792620828595,
+      "tag": "0054_email_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1792621182008,
+      "tag": "0055_weekly_optins",
+      "breakpoints": true
+    },
+    {
+      "idx": 56,
+      "version": "7",
+      "when": 1792622219615,
+      "tag": "0056_email_recipient",
+      "breakpoints": true
     }
   ]
 }

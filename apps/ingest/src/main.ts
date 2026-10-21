@@ -1,4 +1,4 @@
-import { createDatabase, ingestWebhook } from '@agentor/db';
+import { caseReplyByEmail, createDatabase, ingestWebhook } from '@agentor/db';
 import {
   billingQueue,
   connectionsQueue,
@@ -37,10 +37,21 @@ const app = buildApp({
           { jobId: eventId },
         )
     : undefined,
+  inboundSecret: process.env.INBOUND_MAIL_SECRET || undefined,
+  caseReply: database
+    ? (token, from, body) => caseReplyByEmail(database.db, token, from, body)
+    : undefined,
   logger: {
     level: process.env.LOG_LEVEL ?? 'info',
     base: { service: 'agentor-ingest' },
     // Never log credentials or payloads (produktspecifikation §9.6).
+    // Query strings can carry the inbound mail secret: only method and path are logged.
+    serializers: {
+      req: (req: { method: string; url: string }) => ({
+        method: req.method,
+        url: req.url.split('?')[0],
+      }),
+    },
     redact: {
       paths: [
         'req.headers.authorization',

@@ -1,5 +1,4 @@
 import { claimSignupReceipt, releaseSignupReceipt } from '@agentor/db';
-import { env } from './env';
 import { db } from './infra';
 import { sendSignupReceipt } from './signup-mail';
 
@@ -15,13 +14,10 @@ export async function ensureSignupReceipt(
   try {
     const r = await claimSignupReceipt(db(), ctx);
     if (!r) return;
-    const billingUrl = new URL('/billing', env().APP_URL).toString();
-    void sendSignupReceipt(r.billingEmail ?? fallbackEmail, r, billingUrl).catch(
-      async (err: unknown) => {
-        console.error('signup receipt mail failed', err instanceof Error ? err.message : err);
-        await releaseSignupReceipt(db(), ctx).catch(() => undefined);
-      },
-    );
+    void sendSignupReceipt(r.billingEmail ?? fallbackEmail, r).catch(async (err: unknown) => {
+      console.error('signup receipt mail failed', err instanceof Error ? err.message : err);
+      await releaseSignupReceipt(db(), ctx).catch(() => undefined);
+    });
   } catch (err) {
     console.error('signup receipt claim failed', err instanceof Error ? err.message : err);
   }

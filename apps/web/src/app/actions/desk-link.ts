@@ -6,7 +6,7 @@ import type { ActionResult } from '@/server/actor';
 import { requireUser } from '@/server/auth/session';
 import { redisRateLimitStorage } from '@/server/auth/rate-limit';
 import { env } from '@/server/env';
-import { sendMail } from '@/server/mail';
+import { sendEmail } from '@/server/mail';
 
 /**
  * "Send link til min computer" (README decision 20): e-mails the signed-in user a link to the same
@@ -30,10 +30,7 @@ export async function sendDeskLink(
   const clean = typeof title === 'string' ? title.replace(/[\r\n]+/g, ' ').trim() : '';
   const page = clean ? clean.slice(0, 120) : t('page');
   const url = new URL(target, env().APP_URL).toString();
-  await sendMail({
-    to: user.email,
-    subject: t('subject', { page }),
-    text: t('body', { page, url }),
-  });
+  // E13: the link needs a login and grants nothing on its own.
+  await sendEmail('desk-link', { page, url }, { to: user.email });
   return { ok: true, data: { email: user.email } };
 }

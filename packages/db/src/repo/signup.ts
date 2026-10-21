@@ -522,6 +522,7 @@ export async function getOnboardingState(db: Database, ctx: Ctx): Promise<Onboar
 /* ---- Receipt for the first payment (Q20) ------------------------------------------------------------ */
 
 export interface SignupReceipt {
+  invoiceId: string;
   invoiceNumber: string | null;
   amountOre: number;
   vatOre: number;
@@ -532,6 +533,9 @@ export interface SignupReceipt {
   billingEmail: string | null;
   planName: string;
   interval: 'month' | 'year';
+  /** The card the first payment was taken from (brand and last four digits only). */
+  cardBrand: string | null;
+  cardLast4: string | null;
 }
 
 /**
@@ -547,6 +551,7 @@ export async function claimSignupReceipt(db: Database, ctx: Ctx): Promise<Signup
     if (!invoiceId) return null;
     const [row] = await tx
       .select({
+        invoiceId: invoices.id,
         invoiceNumber: invoices.number,
         amountOre: invoices.amountOre,
         vatOre: invoices.vatOre,
@@ -557,6 +562,8 @@ export async function claimSignupReceipt(db: Database, ctx: Ctx): Promise<Signup
         billingEmail: tenants.billingEmail,
         planId: subscriptions.planId,
         interval: subscriptions.interval,
+        cardBrand: subscriptions.cardBrand,
+        cardLast4: subscriptions.cardLast4,
       })
       .from(invoices)
       .innerJoin(tenants, eq(tenants.id, invoices.tenantId))

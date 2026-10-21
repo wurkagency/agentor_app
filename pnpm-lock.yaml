@@ -224,6 +224,9 @@ importers:
 
   apps/scheduler:
     dependencies:
+      '@agentor/core':
+        specifier: workspace:*
+        version: link:../../packages/core
       '@agentor/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -261,6 +264,9 @@ importers:
       '@agentor/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@agentor/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@agentor/flows':
         specifier: workspace:*
         version: link:../../packages/flows
@@ -403,6 +409,9 @@ importers:
       '@agentor/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@agentor/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@agentor/flows':
         specifier: workspace:*
         version: link:../../packages/flows
@@ -421,6 +430,9 @@ importers:
       ioredis:
         specifier: ^5.0.0
         version: 5.11.1
+      nodemailer:
+        specifier: ^10.0.0
+        version: 10.1.0
       pino:
         specifier: ^10.0.0
         version: 10.4.0
@@ -431,6 +443,9 @@ importers:
       '@agentor/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@types/nodemailer':
+        specifier: ^8.0.0
+        version: 8.0.2
       '@types/web-push':
         specifier: 3.6.4
         version: 3.6.4
@@ -514,6 +529,31 @@ importers:
         specifier: ^4.0.0
         version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
+  packages/email:
+    dependencies:
+      '@agentor/core':
+        specifier: workspace:*
+        version: link:../core
+      '@agentor/i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      nodemailer:
+        specifier: ^10.0.0
+        version: 10.1.0
+    devDependencies:
+      '@agentor/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
+      '@types/nodemailer':
+        specifier: ^8.0.0
+        version: 8.0.2
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
   packages/flows:
     dependencies:
       '@agentor/connectors':
@@ -586,6 +626,25 @@ importers:
         version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
 
   packages/keybox:
+    devDependencies:
+      '@agentor/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: ^22.20.5
+        version: 22.20.5
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.11(@types/node@22.20.5)(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  packages/pdf:
+    dependencies:
+      '@agentor/core':
+        specifier: workspace:*
+        version: link:../core
+      '@agentor/i18n':
+        specifier: workspace:*
+        version: link:../i18n
     devDependencies:
       '@agentor/config':
         specifier: workspace:*

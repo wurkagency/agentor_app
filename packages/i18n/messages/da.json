@@ -496,7 +496,9 @@
       "supportRequested": "{name} fra Agentor support beder om adgang i {hours, plural, one {# time} other {# timer}}",
       "supportOpened": "{name} fra Agentor support har adgang i {hours, plural, one {# time} other {# timer}}",
       "supportExtension": "{name} fra Agentor support beder om at forlænge adgangen",
-      "paymentFailed": "Betalingen af faktura {number} blev afvist. {retry, select, none {Opdatér kortet under Abonnement.} other {Vi prøver automatisk igen.}}"
+      "paymentFailed": "Betalingen af faktura {number} blev afvist. {retry, select, none {Opdatér kortet under Abonnement.} other {Vi prøver automatisk igen.}}",
+      "systematicError": "{count} records fejlede på samme måde i {flow}",
+      "quota": "I har brugt {pct} % af månedens transaktioner"
     },
     "actions": {
       "connection_broken": "Genautentificér",
@@ -2906,17 +2908,6 @@
         "removed": "Rabatten er fjernet",
         "error": "Rabatten blev ikke gemt. Prøv igen."
       },
-      "mail": {
-        "reminderSubject": "Påmindelse: faktura {number} fra Agentor",
-        "reminderBody": "Hej {company}\n\nVi kan ikke se, at faktura {number} på {amount} er betalt. Den forfaldt {due}.\n\nSe fakturaen og betal under Abonnement og forbrug:\n{link}\n\nHar I allerede betalt, kan I se bort fra denne mail.\n\nVenlig hilsen\nAgentor",
-        "linkSubject": "Opdatér betalingskort for faktura {number}",
-        "linkBody": "Hej {company}\n\nBetalingen af faktura {number} på {amount} blev afvist af kortudstederen.\n\nOpdatér kortet under Abonnement og forbrug, så trækker vi beløbet igen:\n{link}\n\nVenlig hilsen\nAgentor",
-        "reportSubject": "Agentor · månedsrapport {month}",
-        "reportBody": "Hej\n\nVedhæftet er månedsrapporten for {month} fra Agentor Platform. Beløb er ekskl. moms.\n\nVenlig hilsen\nAgentor",
-        "statementSubject": "Kontoudtog fra Agentor",
-        "statementBody": "Hej {company}\n\nHer er jeres åbne poster hos Agentor:\n\n{lines}\n\nI alt: {total}\n\nSe fakturaerne under Abonnement og forbrug:\n{link}\n\nVenlig hilsen\nAgentor",
-        "statementEmpty": "Ingen åbne poster."
-      },
       "billing": {
         "intro": "Tid fra supportsager lægges løbende på kunden. Perioden lukkes {close}, og fakturaerne sendes {send} kl. 08.00.",
         "exportLog": "Eksportér tidslog",
@@ -3234,8 +3225,6 @@
       "colApplies": "Gælder for",
       "colEffective": "Fra",
       "colBy": "Af",
-      "noticeSubject": "Ny pris på Agentor {plan}",
-      "noticeBody": "Hej {company}\n\nPrisen på Agentor {plan} ændres fra {old} til {new} inkl. moms pr. måned.\n\nDen nye pris gælder fra jeres første fornyelse efter {date}. Indtil da betaler I den pris, I har i dag.\n\nI kan se jeres abonnement under Abonnement og forbrug i Agentor.\n\nVenlig hilsen\nAgentor",
       "autoCalculated": "Beregnes automatisk",
       "roundingUnitShort": "min.",
       "externalUsersSub": "Adgang til udvalgte flows",
@@ -3581,9 +3570,7 @@
         "generic": "Den her side bruges på computer."
       },
       "mail": {
-        "page": "en side i Agentor",
-        "subject": "Link til {page}",
-        "body": "Du bad om at åbne {page} på din computer.\n\nÅbn linket her:\n{url}\n\nDu skal være logget ind. Har du ikke bedt om linket, kan du se bort fra denne e-mail."
+        "page": "en side i Agentor"
       }
     },
     "dev": {
@@ -3829,7 +3816,9 @@
         "supportRequested": "Agentor support beder om adgang",
         "supportOpened": "Agentor support har adgang",
         "supportExtension": "Agentor support beder om mere tid",
-        "paymentFailed": "Betalingen blev afvist"
+        "paymentFailed": "Betalingen blev afvist",
+        "systematicError": "{count} records fejlede på samme måde i {flow}",
+        "quota": "I har brugt {pct} % af månedens transaktioner"
       },
       "meta": {
         "support": "{name} · tryk for at svare",
@@ -3951,6 +3940,10 @@
       "generic": {
         "title": "Agentor",
         "body": "Tryk for at se, hvad der skete."
+      },
+      "systematicError": {
+        "title": "Samme fejl på {count} records",
+        "body": "{flow}. Tryk for at se, hvorfor og hvordan du løser det."
       }
     },
     "offline": {
@@ -5065,5 +5058,404 @@
   "suspended": {
     "title": "Kontoen er suspenderet",
     "body": "Agentor har suspenderet virksomhedens konto, så appen kan ikke åbnes lige nu. Kontakt support@agentor.dk for at få den åbnet igen."
+  },
+  "email": {
+    "common": {
+      "hello": "Hej",
+      "helloName": "Hej {name}",
+      "regards": "Venlig hilsen",
+      "signature": "Agentor",
+      "fallback": "Virker knappen ikke, så kopiér linket ind i din browser:",
+      "footer": "Agentor ApS · app.agentor.dk · support@agentor.dk",
+      "todayAt": "i dag kl. {time}",
+      "yesterdayAt": "i går kl. {time}",
+      "todayShort": "i dag {time}",
+      "codeLabel": "Kode {code}",
+      "codeExpiry": "Koden virker i **10 minutter**",
+      "securityNoLinks": "Vi sender aldrig links til at logge ind i sikkerhedsmails. Åbn selv Agentor i din browser eller app.",
+      "net": "Beløb uden moms",
+      "vat": "Moms 25 %",
+      "inclVat": "{amount} inkl. moms",
+      "amountInclVat": "Beløb inkl. moms",
+      "interval": {
+        "month": "månedligt",
+        "year": "årligt"
+      },
+      "reasonBilling": "Du får denne mail, fordi {email} er faktura-e-mail for {company}.",
+      "reasonNotify": "Du får denne mail, fordi du har slået e-mail til for \"{event}\" hos {company}.",
+      "editNotifications": "Ret notifikationer",
+      "event": {
+        "connection_broken": "Forbindelse afbrudt",
+        "systematic_error": "Systematisk fejl",
+        "quota": "Kvote over 80 %"
+      }
+    },
+    "verifyEmail": {
+      "subject": "Bekræft din e-mail til Agentor",
+      "preheader": "Ét klik, så er du i gang. Linket virker i 24 timer.",
+      "heading": "Bekræft din e-mail",
+      "body": "Bekræft din e-mail for at komme i gang med Agentor. Så kan du forbinde webshop og regnskab og se dit første flow køre.",
+      "button": "Bekræft e-mail",
+      "expiry": "Linket virker i **24 timer**",
+      "safety": "Har du ikke oprettet en konto, kan du se bort fra denne mail. Der sker ikke noget, før du klikker på linket.",
+      "reason": "Du får denne mail, fordi nogen oprettede en konto med {email}."
+    },
+    "resetPassword": {
+      "subject": "Nulstil din adgangskode til Agentor",
+      "preheader": "Vælg en ny adgangskode. Linket virker i 1 time.",
+      "heading": "Nulstil din adgangskode",
+      "body": "Du har bedt om at nulstille din adgangskode. Brug knappen for at vælge en ny.",
+      "button": "Vælg ny adgangskode",
+      "expiry": "Linket virker i **1 time**",
+      "safety": "Har du ikke bedt om det, kan du se bort fra denne mail. Din nuværende adgangskode virker stadig.",
+      "reason": "Du får denne mail, fordi nogen bad om at nulstille adgangskoden for {email}."
+    },
+    "newDeviceLogin": {
+      "subject": "Nyt login på din Agentor-konto",
+      "heading": "Nyt login på din konto",
+      "body": "Din konto blev lige brugt til at logge ind fra en enhed, vi ikke har set før.",
+      "device": "Enhed",
+      "place": "Sted",
+      "approx": "{place} (cirka)",
+      "time": "Tidspunkt",
+      "noticeTitle": "Var det dig?",
+      "noticeBody": "Så skal du ikke gøre noget. Var det ikke dig, så skift din adgangskode og log ud overalt under **Indstillinger › Sikkerhed** i Agentor. Skriv til support@agentor.dk, hvis du er i tvivl.",
+      "reason": "Du får denne mail, fordi der blev logget ind på kontoen {email}."
+    },
+    "emailChangeCode": {
+      "subject": "{code} er din kode til at skifte login-e-mail",
+      "preheader": "Koden virker i 10 minutter.",
+      "heading": "Bekræft din nye login-e-mail",
+      "body": "Skriv koden herunder i Agentor for at bekræfte, at denne adresse er din.",
+      "safety": "Har du ikke bedt om at skifte e-mail, kan du se bort fra denne mail. Din login-e-mail ændres ikke uden koden.",
+      "reason": "Du får denne mail, fordi {email} er angivet som ny login-e-mail."
+    },
+    "emailChanged": {
+      "subject": "Din login-e-mail hos Agentor er ændret",
+      "preheader": "Var det ikke dig, så kontakt os med det samme.",
+      "heading": "Din login-e-mail er ændret",
+      "body": "Login-e-mailen på din Agentor-konto er lige blevet ændret til {email}, og den nye adresse er bekræftet med en kode.",
+      "time": "Tidspunkt",
+      "device": "Fra enhed",
+      "noticeTitle": "Var det ikke dig?",
+      "noticeBody": "Kontakt os med det samme på support@agentor.dk, så låser vi kontoen og hjælper dig ind igen.",
+      "safety": "Denne adresse modtager ikke flere mails fra Agentor om kontoen.",
+      "reason": "Du får denne mail, fordi {email} var login-e-mail på kontoen indtil nu."
+    },
+    "signupCode": {
+      "subject": "{code} er din kode til Agentor",
+      "preheader": "Skriv koden for at bekræfte din e-mail. Den virker i 10 minutter.",
+      "heading": "Din kode til Agentor",
+      "body": "Skriv koden i Agentor for at bekræfte din e-mail og fortsætte oprettelsen.",
+      "safety": "Har du ikke oprettet en konto, kan du se bort fra denne mail.",
+      "reason": "Du får denne mail, fordi {email} blev brugt til at oprette en konto."
+    },
+    "signupExisting": {
+      "subject": "Du har allerede en konto hos Agentor",
+      "preheader": "Log ind med din e-mail i stedet for at oprette en ny konto.",
+      "heading": "Du har allerede en konto",
+      "body": "Nogen, forhåbentlig dig, forsøgte at oprette en konto med denne e-mail. Du har allerede en konto, så du kan bare logge ind.",
+      "button": "Log ind på Agentor",
+      "safety": "Har du glemt adgangskoden, kan du nulstille den på login-siden. Var det ikke dig, skal du ikke gøre noget.",
+      "reason": "Du får denne mail, fordi {email} blev brugt til at oprette en konto."
+    },
+    "receipt": {
+      "subject": "Kvittering for dit abonnement hos Agentor (faktura {number})",
+      "preheader": "{company} har nu {plan}, betalt {interval}.",
+      "heading": "Tak for din betaling",
+      "body": "{company} har nu {plan}, betalt {interval}. Abonnementet er aktivt, og du kan gå i gang med opsætningen.",
+      "invoice": "Faktura",
+      "period": "Periode",
+      "paid": "Betalt",
+      "total": "Betalt i alt",
+      "button": "Se fakturaen",
+      "hint": "Fakturaen som PDF og alle betalinger finder du under **Abonnement og forbrug**."
+    },
+    "teamInvite": {
+      "subject": "{inviter} har inviteret dig til {company} på Agentor",
+      "preheader": "Du er inviteret som {role}. Linket virker i 7 dage.",
+      "heading": "Du er inviteret til {company}",
+      "body": "{inviter} har inviteret dig til {company} på Agentor som {role}.",
+      "role": "Rolle",
+      "access": "Adgang",
+      "accessExpires": "Adgangen udløber",
+      "button": "Acceptér invitationen",
+      "expiry": "Linket virker i **7 dage**",
+      "safety": "Kender du ikke afsenderen, kan du se bort fra denne mail.",
+      "reason": "Du får denne mail, fordi {inviter} inviterede {email}."
+    },
+    "customerCreated": {
+      "subject": "{company} er oprettet hos Agentor",
+      "preheader": "Opret dit login, og betal med kort. Linket virker i 14 dage.",
+      "heading": "Jeres konto er klar",
+      "body": "{staff} fra Agentor har oprettet {company} til dig med {plan}, betalt {interval}.",
+      "plan": "Plan",
+      "price": {
+        "month": "{plan} · {price}/md. ekskl. moms",
+        "year": "{plan} · {price}/år ekskl. moms"
+      },
+      "firstPayment": "Første betaling",
+      "button": "Opret login og betal",
+      "expiry": "Linket virker i **14 dage**",
+      "safety": "Har du ikke bedt om det, kan du se bort fra denne mail.",
+      "reason": "Du får denne mail, fordi Agentor oprettede en konto til {email}."
+    },
+    "ownerReinvite": {
+      "subject": "Din invitation til Agentor",
+      "preheader": "En ny invitation. Tidligere links virker ikke længere.",
+      "heading": "Her er din nye invitation",
+      "body": "{staff} fra Agentor har sendt dig en ny invitation som ejer af {company} hos Agentor.",
+      "button": "Opret login og betal",
+      "expiry": "Linket virker i **14 dage**. Tidligere links virker ikke længere.",
+      "safety": "Har du ikke bedt om det, kan du se bort fra denne mail.",
+      "reason": "Du får denne mail, fordi Agentor sendte en ny invitation til {email}."
+    },
+    "caseResolved": {
+      "subject": "Løst: {title} (sag #{number})",
+      "preheaderFallback": "Sagen er markeret som løst.",
+      "heading": "Din sag er løst",
+      "defaultClosing": "Hej {name}. Din sag \"{title}\" er løst.",
+      "history": "Forløb",
+      "time": "Tidsforbrug i alt",
+      "satisfactionTitle": "Var du tilfreds med hjælpen?",
+      "satisfactionBody": "Svar **Ja** eller **Nej** på denne e-mail.",
+      "reopen": "Svar på denne e-mail for at genåbne sagen (#{number}). Efter 14 dage arkiveres den.",
+      "signature": "{name}, Agentor support",
+      "reason": "Du får denne mail, fordi du er kontaktperson på sag #{number} hos {company}."
+    },
+    "deskLink": {
+      "subject": "Link til {page}",
+      "preheader": "Åbn siden på din computer.",
+      "heading": "Fortsæt på din computer",
+      "body": "Du bad om at åbne {page} på din computer. Siden findes kun på computer, fordi den kræver mere plads.",
+      "button": "Åbn siden",
+      "safety": "Du skal være logget ind. Har du ikke bedt om linket, kan du se bort fra denne mail.",
+      "reason": "Du får denne mail, fordi du trykkede \"Send link til min computer\" i Agentor-appen."
+    },
+    "planPrice": {
+      "subject": "Ny pris på Agentor {plan}",
+      "preheader": "Den nye pris gælder fra jeres første fornyelse efter {date}.",
+      "heading": "Ny pris på {plan}",
+      "body": "Prisen på Agentor {plan} ændres. Den nye pris gælder fra jeres første fornyelse efter {date}. Indtil da betaler I den pris, I har i dag.",
+      "old": "Pris i dag",
+      "new": "Ny pris",
+      "from": "Gælder fra",
+      "fromValue": "Første fornyelse efter {date}",
+      "per": {
+        "month": "{amount}/md. inkl. moms",
+        "year": "{amount}/år inkl. moms"
+      },
+      "button": "Se jeres abonnement",
+      "hint": "I kan skifte plan eller interval under **Abonnement og forbrug** i Agentor."
+    },
+    "reminder": {
+      "subject": "Påmindelse: faktura {number} fra Agentor",
+      "subjectSecond": "{n}. påmindelse: faktura {number} fra Agentor",
+      "preheader": "Faktura {number} på {amount} forfaldt {due}",
+      "heading": "Påmindelse om faktura",
+      "body": "Vi kan ikke se, at faktura {number} er betalt.",
+      "due": "Forfaldt",
+      "button": "Se og betal fakturaen",
+      "hint": "Har I allerede betalt, kan I se bort fra denne mail. Spørgsmål til fakturaen kan sendes som svar på denne mail."
+    },
+    "updateCard": {
+      "subject": "Opdatér betalingskort for faktura {number}",
+      "preheader": "Betalingen på {amount} blev afvist af kortudstederen.",
+      "heading": "Betalingen blev afvist",
+      "body": "Betalingen af faktura {number} på {amount} blev afvist af kortudstederen.",
+      "card": "Kort",
+      "invoice": "Faktura",
+      "button": "Opdatér betalingskort",
+      "hint": "Når kortet er opdateret, trækker vi beløbet igen. Vi gemmer aldrig dit kortnummer; det håndteres af QuickPay."
+    },
+    "statement": {
+      "subject": "Kontoudtog fra Agentor",
+      "preheader": "{count, plural, one {# åben post} other {# åbne poster}} · i alt {total} inkl. moms.",
+      "preheaderEmpty": "Ingen åbne poster.",
+      "heading": "Jeres kontoudtog",
+      "body": "Her er jeres åbne poster hos Agentor. Beløb er inkl. moms.",
+      "bodyEmpty": "I har ingen åbne poster hos Agentor.",
+      "detail": "{description} · forfald {due}",
+      "total": "I alt",
+      "empty": "Ingen åbne poster",
+      "button": "Se fakturaerne"
+    },
+    "monthlyReport": {
+      "subject": "Agentor · månedsrapport {month}",
+      "preheader": "Månedsrapporten er vedhæftet som CSV. Beløb er ekskl. moms.",
+      "heading": "Månedsrapport for {month}",
+      "body": "Vedhæftet er månedsrapporten for {month} fra Agentor Platform. Beløb er ekskl. moms.",
+      "revenue": "Omsætning",
+      "subscriptions": "Abonnementer",
+      "support": "Support",
+      "fileMeta": "CSV · {kb} kB",
+      "hint": "Rapporten er også tilgængelig som PDF under Administration › Rapporter.",
+      "reason": "Intern mail til Agentors bogholder."
+    },
+    "connectionBroken": {
+      "subject": "{system} er afbrudt · {flow} står stille",
+      "subjectNoFlow": "{system} er afbrudt",
+      "preheader": {
+        "expired": "Adgangen udløb {when}. Log ind igen for at fortsætte.",
+        "other": "Forbindelsen holdt op med at virke {when}. Log ind igen for at fortsætte."
+      },
+      "heading": "{system} er afbrudt",
+      "body": {
+        "expired": "Forbindelsen til {system} · {account} virker ikke længere, fordi adgangen udløb {when}.",
+        "other": "Forbindelsen til {system} · {account} holdt op med at virke {when}."
+      },
+      "stalledOne": "Flowet {flows} står stille, indtil du logger ind igen.",
+      "stalledMany": "Flowene {flows} står stille, indtil du logger ind igen.",
+      "affected": "Påvirket",
+      "affectedOne": "{flow} · {routes, plural, one {# rute} other {# ruter}}",
+      "affectedMany": "{count} flows · {routes, plural, one {# rute} other {# ruter}}",
+      "queued": "Venter i kø",
+      "queuedValue": "{count, plural, one {# ordre} other {# ordrer}} · sendes, når forbindelsen virker",
+      "button": "Genforbind {system}",
+      "hint": "Du logger ind hos {system}. Agentor ser aldrig din adgangskode."
+    },
+    "systematicError": {
+      "subject": "{count} {entity} fejlede på samme måde i {flow}",
+      "heading": "Samme fejl på flere {entity}",
+      "body": "{count} {entity} i {flow} fejlede {when} med samme fejl.",
+      "why": "Hvorfor",
+      "fix": "Sådan løser du det",
+      "button": "Se fejlen",
+      "subjectMany": "{count} fejl gik igen i jeres flows i nat",
+      "preheaderMany": "{count} records fejlede på samme måde. Se hvorfor, og hvordan du løser det.",
+      "headingMany": "Samme fejl gik igen",
+      "bodyMany": "Mens der var stilletid, fejlede flere records på samme måde. Her er {count, plural, one {fejlen} other {de # fejl}}.",
+      "incident": "{flow}: {count} {entity} · {when}",
+      "buttonMany": "Åbn Overblik"
+    },
+    "quota": {
+      "subject": "I har brugt {pct} % af månedens transaktioner",
+      "preheader": "{used} af {limit} transaktioner. Tælleren nulstilles {reset}",
+      "heading": "{pct} % af månedens transaktioner er brugt",
+      "body": "{company} har brugt {used} af {limit} transaktioner i {month}. Kun Live-skrivninger tæller.",
+      "bar": "Transaktioner i {month}",
+      "resets": "Nulstilles",
+      "plan": "Plan",
+      "button": "Se forbrug og planer",
+      "hint": "Får I brug for flere, kan I opgradere under Abonnement og forbrug. Ændringen gælder med det samme."
+    },
+    "weekly": {
+      "subject": "Ugen hos {company}: {records} records, {errors} fejl",
+      "preheader": "Uge {week} · {period}. {pct} af kørslerne gik uden fejl.",
+      "heading": "Ugen der gik",
+      "body": "Her er uge {week} ({period}) for {company}.",
+      "records": "Records",
+      "orders": "Ordrer",
+      "errors": "Fejl",
+      "ok": "Uden fejl",
+      "flows": "Flows",
+      "flowOk": "OK",
+      "flowErrors": "{count} fejl",
+      "brokenSince": "Afbrudt fra {day}",
+      "button": "Åbn Overblik",
+      "reason": "Du får denne mail mandag kl. 8, fordi du har slået ugentlig opsummering til.",
+      "unsubscribe": "Slå den fra"
+    },
+    "entity": {
+      "order": "{count, plural, one {ordre} other {ordrer}}",
+      "creditNote": "{count, plural, one {kreditnota} other {kreditnotaer}}",
+      "customer": "{count, plural, one {kunde} other {kunder}}",
+      "product": "{count, plural, one {produkt} other {produkter}}",
+      "stock": "{count, plural, one {lagerpost} other {lagerposter}}",
+      "record": "records"
+    }
+  },
+  "unsubscribe": {
+    "title": "Afmeld ugentlig opsummering",
+    "intro": "Du får den ugentlige opsummering fra {company} hver mandag kl. 8.",
+    "button": "Afmeld",
+    "done": "Du er afmeldt. Du får ikke flere ugentlige opsummeringer fra {company}.",
+    "already": "Den ugentlige opsummering er allerede slået fra.",
+    "invalid": "Linket virker ikke længere. Du kan slå e-mails fra under Indstillinger › Notifikationer.",
+    "settings": "Gå til notifikationer"
+  },
+  "pdf": {
+    "invoice": "Faktura",
+    "creditNote": "Kreditnota",
+    "invoiceDate": "Fakturadato",
+    "date": "Dato",
+    "due": "Forfald",
+    "period": "Periode",
+    "customerNo": "Kundenr.",
+    "credits": "Krediterer",
+    "creditsValue": "Faktura {number}",
+    "billedTo": "Faktureres til",
+    "creditedTo": "Krediteres til",
+    "about": "Vedrørende",
+    "reason": "Årsag",
+    "creditedBy": "Krediteret af {name}",
+    "description": "Beskrivelse",
+    "quantity": "Antal",
+    "price": "Pris",
+    "amount": "Beløb",
+    "subtotal": "Subtotal ekskl. moms",
+    "vat": "Moms 25 %",
+    "total": "I alt inkl. moms",
+    "creditTotal": "Krediteret i alt inkl. moms",
+    "page": "Side {page} af {pages}",
+    "continued": "{title} {number} (fortsat)",
+    "cvr": "CVR {cvr}",
+    "hours": "{hours} t",
+    "pieces": "{count}",
+    "placeholder": {
+      "address": "[Adresse]",
+      "postalCity": "[Postnr. og by]",
+      "cvr": "[CVR]",
+      "reg": "[Reg.nr.]",
+      "account": "[Kontonr.]",
+      "iban": "[IBAN]"
+    },
+    "footerCompany": "{name} · CVR {cvr} · {address}",
+    "footerBank": "Bank {reg} {account} · IBAN {iban}",
+    "subscription": {
+      "about": "Abonnement · {plan}",
+      "aboutInterval": "{interval, select, year {Betales årligt forud} other {Betales månedligt forud}}",
+      "line": "Agentor {plan}, {interval, select, year {årligt} other {månedligt}}",
+      "lineDetail": "{from} – {to}"
+    },
+    "support": {
+      "about": "Support · {period}",
+      "aboutRule": "Afregnet efter tid pr. sag, oprundet til 15 min.",
+      "aboutRate": "Timepris {rate} ekskl. moms",
+      "lineDetail": "{dates} · registreret {registered} · oprundet"
+    },
+    "status": {
+      "paidTitle": "Betalt",
+      "paid": "med {card} den {date} via QuickPay.",
+      "transaction": "Transaktion {id}",
+      "cardTitle": "Trækkes",
+      "card": "på {card} den {date} via QuickPay.",
+      "cardFailedTitle": "Afvist",
+      "cardFailed": "Betalingen med {card} blev afvist. Vi prøver igen automatisk.",
+      "eanTitle": "Forfald",
+      "ean": "{date}. Fakturaen sendes elektronisk til EAN {ean}.",
+      "bankTitle": "Forfald",
+      "bank": "{date}. Betal til bank {reg} {account} (IBAN {iban}), og angiv fakturanummer {number}.",
+      "refundTitle": "Tilbageført",
+      "refund": "til {card} den {date}. Det kan tage 3–5 bankdage, før beløbet står på kontoen.",
+      "refundPendingTitle": "Tilbageføres",
+      "refundPending": "til {card}. Det kan tage 3–5 bankdage, før beløbet står på kontoen.",
+      "offsetTitle": "Modregnes",
+      "offset": "i næste faktura fra Agentor.",
+      "after": "Faktura {number} er herefter på {amount} inkl. moms."
+    },
+    "notes": {
+      "invoice": "Spørgsmål til fakturaen: {email}.",
+      "timelog": "Tidslog med dato, sag og varighed pr. registrering er vedhæftet som bilag. Tid markeret som ikke fakturerbar er ikke med. Spørgsmål til fakturaen: {email}.",
+      "creditNote": "En kreditnota annullerer helt eller delvist en tidligere faktura og har sit eget nummer. Den oprindelige faktura ændres ikke. Spørgsmål: {email}."
+    },
+    "timelog": {
+      "title": "Bilag: tidslog",
+      "intro": "Hver registrering med dato og varighed. Tiden oprundes til 15 min. pr. sag pr. måned.",
+      "date": "Dato",
+      "case": "Sag",
+      "registered": "Registreret",
+      "billed": "Faktureret"
+    }
   }
 }

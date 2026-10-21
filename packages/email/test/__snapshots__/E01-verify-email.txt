@@ -1,0 +1,18 @@
+Bekræft din e-mail
+
+Hej Mette
+
+Bekræft din e-mail for at komme i gang med Agentor. Så kan du forbinde webshop og regnskab og se dit første flow køre.
+
+Bekræft e-mail: https://app.agentor.dk/verify?token=8f3a…c21e
+
+Linket virker i 24 timer
+
+Har du ikke oprettet en konto, kan du se bort fra denne mail. Der sker ikke noget, før du klikker på linket.
+
+Venlig hilsen
+Agentor
+
+-- 
+Agentor ApS · app.agentor.dk · support@agentor.dk
+Du får denne mail, fordi nogen oprettede en konto med mette@nordlys-cykler.dk.

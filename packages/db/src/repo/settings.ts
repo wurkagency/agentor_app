@@ -77,13 +77,8 @@ export const DEFAULT_PREFS: PrefMatrix = Object.fromEntries(
     e,
     {
       inApp: e !== 'weekly_summary',
-      email: [
-        'connection_broken',
-        'systematic_error',
-        'quota',
-        'payment_failed',
-        'weekly_summary',
-      ].includes(e),
+      // The weekly summary (E22) is opt-in: off until the member switches it on.
+      email: ['connection_broken', 'systematic_error', 'quota', 'payment_failed'].includes(e),
       push: ['connection_broken', 'systematic_error'].includes(e),
       sms: false,
     },

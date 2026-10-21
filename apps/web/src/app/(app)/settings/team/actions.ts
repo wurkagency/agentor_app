@@ -2,6 +2,7 @@
 
 import {
   createInvitation,
+  listFlowOptions,
   removeMember,
   revokeInvitation,
   TeamError,
@@ -12,9 +13,8 @@ import { getTranslations } from 'next-intl/server';
 import { z } from 'zod';
 import { actorFor, type ActionResult } from '@/server/actor';
 import { requireRole } from '@/server/auth/session';
-import { env } from '@/server/env';
 import { db } from '@/server/infra';
-import { sendMail } from '@/server/mail';
+import { appLink, sendEmail } from '@/server/mail';
 
 const ADMIN = ['owner', 'admin'] as const;
 
@@ -68,13 +68,39 @@ export async function inviteMember(input: unknown): Promise<ActionResult> {
       accessExpiresAt: endOfDay(v.accessExpiresAt),
       isExternal: v.isExternal,
     });
-    const t = await getTranslations({ locale: 'da', namespace: 'profile.roles' });
-    const link = `${env().APP_URL}/invite/${token}`;
-    await sendMail({
-      to: v.email.toLowerCase(),
-      subject: `${ctx.user.name} har inviteret dig til ${ctx.tenant.tenantName} på Agentor`,
-      text: `Hej\n\n${ctx.user.name} har inviteret dig til ${ctx.tenant.tenantName} på Agentor som ${t(v.role).toLowerCase()}.\n\nAcceptér invitationen her. Linket virker i 7 dage:\n${link}\n\nVenlig hilsen\nAgentor`,
-    });
+    // E09. Access and expiry rows only when they are set.
+    const [roles, team] = await Promise.all([
+      getTranslations({ locale: 'da', namespace: 'profile.roles' }),
+      getTranslations({ locale: 'da', namespace: 'team' }),
+    ]);
+    const hint = {
+      admin: 'roleAdminShort',
+      developer: 'roleDeveloperShort',
+      reader: 'roleReaderShort',
+    } as const;
+    let access: string | null = null;
+    if (v.flowScope === 'selected') {
+      const names = (
+        await listFlowOptions(db(), { tenantId: ctx.tenant.tenantId, userId: ctx.user.id })
+      )
+        .filter((f) => v.flowIds.includes(f.id))
+        .map((f) => f.name);
+      access = team('someFlows', { count: names.length, names: names.join(', ') });
+    }
+    await sendEmail(
+      'team-invite',
+      {
+        inviter: ctx.user.name,
+        company: ctx.tenant.tenantName,
+        role: roles(v.role),
+        roleDetail: team(hint[v.role]).toLowerCase(),
+        access,
+        accessExpiresAt: endOfDay(v.accessExpiresAt),
+        url: appLink(`/invite/${token}`),
+        email: v.email.toLowerCase(),
+      },
+      { to: v.email.toLowerCase() },
+    );
     revalidatePath('/settings/team');
     return { ok: true };
   } catch (e) {

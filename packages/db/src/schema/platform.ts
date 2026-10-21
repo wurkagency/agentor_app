@@ -8,6 +8,7 @@ import {
   integer,
   jsonb,
   pgSchema,
+  unique,
   primaryKey,
   text,
   timestamp,
@@ -76,6 +77,11 @@ export const cases = platformSchema.table(
     createdVia: text('created_via').notNull().default('customer'),
     resolution: text('resolution'),
     satisfied: boolean('satisfied'),
+    /**
+     * The case's own reply address (sag+<token>@…, PLAN-EMAILS-PDF Q4): set when E12 is first sent.
+     * Random, unguessable; a reply to it is added as a customer message and reopens the case.
+     */
+    replyToken: text('reply_token'),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
     resolvedAt: ts('resolved_at'),
@@ -85,6 +91,7 @@ export const cases = platformSchema.table(
     foreignKey({ columns: [t.tenantId], foreignColumns: [tenants.id] }).onDelete('cascade'),
     index('cases_tenant_idx').on(t.tenantId, t.createdAt),
     index('cases_status_idx').on(t.status, t.updatedAt),
+    unique('cases_reply_token_key').on(t.replyToken),
     check(
       'cases_status_check',
       sql`${t.status} in ('new', 'in_progress', 'waiting', 'resolved', 'closed')`,

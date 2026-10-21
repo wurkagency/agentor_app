@@ -53,6 +53,7 @@ const config: NextConfig = {
   // Database driver and repositories run as plain Node modules on the server.
   serverExternalPackages: [
     '@agentor/db',
+    '@agentor/email',
     '@agentor/jobs',
     '@agentor/storage',
     'bullmq',

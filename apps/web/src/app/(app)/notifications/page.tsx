@@ -39,6 +39,8 @@ export async function generateMetadata() {
 const LOOK: Record<string, { icon: typeof Info; tone: RowTone }> = {
   connectionBroken: { icon: Unplug, tone: 'error' },
   recordsFailed: { icon: CircleX, tone: 'error' },
+  systematicError: { icon: CircleX, tone: 'error' },
+  quota: { icon: Info, tone: 'warn' },
   creditNotesFailed: { icon: CircleX, tone: 'error' },
   supportRequested: { icon: Headset, tone: 'lime' },
   supportOpened: { icon: Headset, tone: 'neutral' },

@@ -19,6 +19,8 @@
     "CVR_PROVIDER",
     "DATAFORDELER_*",
     "MAILPIT_API",
+    "CASE_REPLY_DOMAIN",
+    "INBOUND_MAIL_SECRET",
     "LOG_LEVEL",
     "KEK_*",
     "CONNECTOR_MODE"

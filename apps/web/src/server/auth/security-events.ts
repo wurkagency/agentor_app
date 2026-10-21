@@ -1,6 +1,8 @@
 import { mustKeepTwoFactor } from '@agentor/db';
 import { db } from '../infra';
-import { sendMail } from '../mail';
+import { maskAddress } from '@agentor/email';
+import { sendEmail } from '../mail';
+import { describeAgent } from './new-device';
 import { auditOwnChange } from '../profile/owner';
 
 /**
@@ -11,7 +13,7 @@ import { auditOwnChange } from '../profile/owner';
 
 type SessionLike = {
   user: { id: string; name: string; email: string; twoFactorEnabled?: boolean | null };
-  session: { activeTenantId?: string | null };
+  session: { activeTenantId?: string | null; userAgent?: string | null };
 };
 
 /** Better Auth path → audit action, for successful calls on an existing session. */
@@ -53,7 +55,12 @@ export async function auditSecurityEvent(
     action,
     detail,
   );
-  if (path === '/email-otp/change-email') await notifyOldAddress(session.user.email);
+  if (path === '/email-otp/change-email')
+    await notifyOldAddress(
+      session.user.email,
+      String(b.newEmail ?? ''),
+      session.session.userAgent ?? null,
+    );
 }
 
 /** "a•••@nordlys-cykler.dk": enough to recognise, not the whole address. */
@@ -63,38 +70,25 @@ export function maskEmail(email: string): string {
   return `${local[0]}•••@${domain}`;
 }
 
-async function notifyOldAddress(oldEmail: string) {
-  await sendMail({
-    to: oldEmail,
-    subject: 'Din login-e-mail hos Agentor er ændret',
-    text: `Hej
-
-Login-e-mailen på din Agentor-konto er lige blevet ændret, og den nye adresse er bekræftet med en kode.
-
-Var det ikke dig, så kontakt os med det samme på support@agentor.dk.
-
-Venlig hilsen
-Agentor`,
-  }).catch((err: unknown) =>
+/** E05: to the old address. No button and no link; the new address is masked. */
+async function notifyOldAddress(oldEmail: string, newEmail: string, userAgent: string | null) {
+  await sendEmail(
+    'email-changed',
+    {
+      email: oldEmail,
+      newEmailMasked: maskAddress(newEmail),
+      at: new Date(),
+      device: userAgent ? describeAgent(userAgent) : null,
+    },
+    { to: oldEmail },
+  ).catch((err: unknown) =>
     console.error('e-mail change notice failed', err instanceof Error ? err.message : err),
   );
 }
 
+/** E04: the code to the new address (10 minutes), code first in the subject. */
 export async function sendEmailChangeCode(email: string, code: string): Promise<void> {
-  await sendMail({
-    to: email,
-    subject: `${code} er din kode til at skifte login-e-mail`,
-    text: `Hej
-
-Din kode til at bekræfte din nye login-e-mail hos Agentor er:
-
-${code}
-
-Koden virker i 10 minutter. Har du ikke bedt om at skifte e-mail, kan du se bort fra denne mail.
-
-Venlig hilsen
-Agentor`,
-  });
+  await sendEmail('email-change-code', { code, email }, { to: email });
 }
 
 /** Staff, and members of a company that requires it, can't turn TOTP off (D12, PLAN Q9). */

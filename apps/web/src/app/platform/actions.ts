@@ -29,7 +29,8 @@ import {
   upsertStaff,
   type CaseEvent,
 } from '@agentor/db';
-import { formatDateTime, formatMinutes, type Locale } from '@agentor/i18n';
+import type { CaseHistoryItem } from '@agentor/email';
+import type { Locale } from '@agentor/i18n';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -37,7 +38,8 @@ import { getLocale } from 'next-intl/server';
 import { z } from 'zod';
 import type { ActionResult } from '@/server/actor';
 import { db } from '@/server/infra';
-import { sendMail } from '@/server/mail';
+import { caseReplyAddress } from '@/server/case-reply';
+import { sendEmail } from '@/server/mail';
 import { requireStaff, SUPPORT_COOKIE } from '@/server/platform';
 import { tenantNames } from '@/server/platform-data';
 
@@ -486,63 +488,77 @@ export async function resolveCaseAction(
     const people = (await caseRecipients(db(), actor.userId, caseId)).filter((r) =>
       p.recipients.includes(r.userId),
     );
-    const text = caseEmail(
-      res.case.number,
-      res.case.title,
-      p.closingMessage,
-      res.events,
-      res.minutes,
-      p,
-      locale,
-    );
+    // E12: one mail per chosen contact; replies go to the case's own address.
+    const history = caseHistory(res.events, p, locale);
+    const company = (await tenantNames(actor.userId)).get(res.case.tenantId) ?? '';
+    const replyTo = await caseReplyAddress(actor.userId, caseId);
     for (const person of people)
-      await sendMail({
-        to: person.email,
-        subject: `Løst: ${res.case.title} (sag #${res.case.number})`,
-        text: text.replace('{name}', person.name.split(' ')[0] ?? person.name),
-      }).catch(() => undefined);
+      await sendEmail(
+        'case-resolved',
+        {
+          firstName: person.name.split(' ')[0] ?? person.name,
+          number: res.case.number,
+          title: res.case.title,
+          closing: p.closingMessage,
+          history: history.length ? history : null,
+          minutes: p.include.time ? res.minutes : null,
+          askSatisfaction: p.askSatisfaction,
+          staffFirstName: actor.name.split(' ')[0] ?? actor.name,
+          company,
+        },
+        { to: person.email, replyTo, entityRef: `case-${res.case.id}`, locale },
+      ).catch(() => undefined);
   }
   revalidatePath('/platform/support/cases', 'layout');
   redirect(`/platform/support/cases/${caseId}`);
 }
 
-function caseEmail(
-  number: number,
-  title: string,
-  closing: string,
+/**
+ * The history the supporter chose to send (S8): customer messages and replies, status changes
+ * and a plain line per support session. Internal notes are never loaded (resolveCase), and the
+ * closing message is the mail's body, not a history entry.
+ */
+function caseHistory(
   events: CaseEvent[],
-  minutes: number,
   p: z.infer<typeof resolveSchema>,
   locale: Locale,
-): string {
-  const lines = [closing.trim() || `Hej {name}. Din sag "${title}" er løst.`, '', 'FORLØB', ''];
+): CaseHistoryItem[] {
+  const out: CaseHistoryItem[] = [];
+  const da = locale === 'da';
   for (const e of events) {
-    if (e.kind === 'customer_message' || e.kind === 'reply') {
-      if (!p.include.messages) continue;
-      lines.push(
-        `${e.kind === 'reply' ? e.authorName : e.authorName} · ${formatDateTime(e.createdAt, locale)}`,
-        e.body,
-        '',
-      );
+    if ((e.kind === 'customer_message' || e.kind === 'reply') && p.include.messages) {
+      if (e.meta?.closing) continue;
+      out.push({
+        who: e.authorName,
+        at: e.createdAt,
+        body: e.body,
+        kind: e.kind === 'reply' ? 'staff' : 'customer',
+      });
     } else if (e.kind === 'status' && p.include.status) {
-      lines.push(`Status · ${formatDateTime(e.createdAt, locale)}`, e.body, '');
+      const resolved = e.meta?.to === 'resolved' || e.meta?.to === 'closed';
+      out.push({
+        who: 'Status',
+        at: e.createdAt,
+        body: resolved
+          ? da
+            ? 'Sagen er markeret som løst.'
+            : 'The case has been marked as resolved.'
+          : e.body,
+        kind: 'status',
+      });
     } else if (e.kind === 'session' && p.include.sessions) {
       // Only what we looked at, no technical detail.
-      lines.push(
-        `Agentor support · ${formatDateTime(e.createdAt, locale)}`,
-        e.body || 'Vi kiggede på sagen i jeres app.',
-        '',
-      );
+      out.push({
+        who: 'Agentor support',
+        at: e.createdAt,
+        body:
+          e.body ||
+          (da ? 'Vi kiggede på sagen i jeres app.' : 'We looked at the case in your app.'),
+        kind: 'agentor',
+      });
     }
   }
-  if (p.include.time) lines.push(`Tidsforbrug i alt: ${formatMinutes(minutes, locale)}`, '');
-  if (p.askSatisfaction)
-    lines.push('Var du tilfreds med hjælpen? Svar Ja eller Nej på denne e-mail.', '');
-  lines.push(
-    `Svar på denne e-mail for at genåbne sagen (#${number}).`,
-    'Agentor ApS · app.agentor.dk',
-  );
-  return lines.join('\n');
+  return out;
 }
 
 /* ---- Staff and settings (P6) ------------------------------------------------------------------ */

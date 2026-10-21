@@ -59,7 +59,7 @@ export const config = {
   // Pages only: never static assets or the image optimiser (a lesson from agentor.dk).
   matcher: [
     {
-      source: '/((?!_next/static|_next/image|favicon.ico|logos/|fonts/|icons/|api/auth).*)',
+      source: '/((?!_next/static|_next/image|favicon.ico|logos/|fonts/|icons/|email/|api/auth).*)',
       missing: [
         { type: 'header', key: 'next-router-prefetch' },
         { type: 'header', key: 'purpose', value: 'prefetch' },

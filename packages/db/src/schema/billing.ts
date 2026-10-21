@@ -100,6 +100,8 @@ export const usageCounters = pgTable(
     transactions: integer('transactions').notNull().default(0),
     /** When the period's quota was first reached; starts the 7-day grace (D2). */
     exceededAt: ts('exceeded_at'),
+    /** E21 "Kvote over 80 %" was sent for this period (at most once a month per tenant). */
+    quotaNotifiedAt: ts('quota_notified_at'),
     updatedAt: updatedAt(),
   },
   (t) => [

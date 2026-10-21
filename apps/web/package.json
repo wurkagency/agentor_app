@@ -18,6 +18,7 @@
     "@agentor/connectors": "workspace:*",
     "@agentor/core": "workspace:*",
     "@agentor/db": "workspace:*",
+    "@agentor/email": "workspace:*",
     "@agentor/flows": "workspace:*",
     "@agentor/http": "workspace:*",
     "@agentor/i18n": "workspace:*",

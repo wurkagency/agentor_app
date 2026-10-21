@@ -13,6 +13,14 @@ const schema = z.object({
   /** Mailpit locally when unset; required in production (no silent default there). */
   SMTP_URL: z.string().min(1).optional(),
   MAIL_FROM: z.string().default('Agentor <no-reply@agentor.dk>'),
+  /**
+   * Inbound domain for case replies (E12, PLAN-EMAILS-PDF Q4): Reply-To is sag+<token>@<domain>.
+   * Unset: replies go to support@agentor.dk and don't reopen the case automatically.
+   */
+  CASE_REPLY_DOMAIN: z
+    .string()
+    .regex(/^[a-z0-9.-]+\.[a-z]{2,}$/)
+    .optional(),
   QUICKPAY_MODE: z.enum(['mock', 'test', 'live']).default('mock'),
   QUICKPAY_API_KEY: z.string().optional(),
   /** Only the mock checkout signs callbacks in the web process; real ones come from QuickPay. */

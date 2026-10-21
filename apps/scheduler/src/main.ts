@@ -6,7 +6,9 @@ import {
   dueInvoiceJobs,
   dueSubscriptions,
   failStaleRuns,
+  queueEmail,
   retentionSweep,
+  weeklyRecipients,
 } from '@agentor/db';
 import { billingQueue, enqueueBilling, enqueueFlowRun, flowsQueue } from '@agentor/jobs';
 import { Redis } from 'ioredis';
@@ -20,6 +22,7 @@ import {
   STALE_RUN_MS,
 } from './flows.js';
 import { LeaderLock } from './leader-lock.js';
+import { WEEKLY_INTERVAL_MS, weeklyTick } from './weekly.js';
 
 const log = pino({
   level: process.env.LOG_LEVEL ?? 'info',
@@ -117,12 +120,27 @@ const staleTimer = setInterval(runStale, HOUSEKEEPING_INTERVAL_MS);
 const retentionTimer = setInterval(runRetention, RETENTION_INTERVAL_MS);
 setTimeout(runRetention, 60_000);
 
+// E22: the weekly summary, queued on Monday morning for everyone who switched it on.
+const runWeekly = () =>
+  weeklyTick({
+    isLeader: () => lock.isLeader,
+    recipients: () => weeklyRecipients(database.db),
+    queue: (tenantId, userId, key) =>
+      queueEmail(database.db, tenantId, { userId, event: 'weekly_summary', key }),
+  })
+    .then((n) => n && log.info({ queued: n }, 'weekly summaries queued'))
+    .catch((err: unknown) =>
+      log.error({ err: err instanceof Error ? err.message : err }, 'weekly tick failed'),
+    );
+const weeklyTimer = setInterval(runWeekly, WEEKLY_INTERVAL_MS);
+
 const shutdown = async (signal: string) => {
   log.info({ signal }, 'shutting down');
   clearInterval(billingTimer);
   clearInterval(flowTimer);
   clearInterval(staleTimer);
   clearInterval(retentionTimer);
+  clearInterval(weeklyTimer);
   await runQueue.close();
   await lock.stop();
   await queue.close();

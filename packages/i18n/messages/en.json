@@ -496,7 +496,9 @@
       "supportRequested": "{name} from Agentor support asks for access for {hours, plural, one {# hour} other {# hours}}",
       "supportOpened": "{name} from Agentor support has access for {hours, plural, one {# hour} other {# hours}}",
       "supportExtension": "{name} from Agentor support asks to extend the access",
-      "paymentFailed": "The payment of invoice {number} was declined. {retry, select, none {Update the card under Subscription.} other {We will try again automatically.}}"
+      "paymentFailed": "The payment of invoice {number} was declined. {retry, select, none {Update the card under Subscription.} other {We will try again automatically.}}",
+      "systematicError": "{count} records failed the same way in {flow}",
+      "quota": "You've used {pct}% of this month's transactions"
     },
     "actions": {
       "connection_broken": "Reconnect",
@@ -2906,17 +2908,6 @@
         "removed": "Discount removed",
         "error": "The discount was not saved. Try again."
       },
-      "mail": {
-        "reminderSubject": "Reminder: invoice {number} from Agentor",
-        "reminderBody": "Hello {company}\n\nWe cannot see that invoice {number} for {amount} has been paid. It was due {due}.\n\nSee the invoice and pay under Subscription and usage:\n{link}\n\nIf you have already paid, please ignore this e-mail.\n\nKind regards\nAgentor",
-        "linkSubject": "Update the payment card for invoice {number}",
-        "linkBody": "Hello {company}\n\nThe payment of invoice {number} for {amount} was declined by the card issuer.\n\nUpdate the card under Subscription and usage and we will charge it again:\n{link}\n\nKind regards\nAgentor",
-        "reportSubject": "Agentor · monthly report {month}",
-        "reportBody": "Hello\n\nAttached is the monthly report for {month} from Agentor Platform. Amounts are ex. VAT.\n\nKind regards\nAgentor",
-        "statementSubject": "Account statement from Agentor",
-        "statementBody": "Hello {company}\n\nHere are your open items with Agentor:\n\n{lines}\n\nTotal: {total}\n\nSee the invoices under Subscription and usage:\n{link}\n\nKind regards\nAgentor",
-        "statementEmpty": "No open items."
-      },
       "billing": {
         "intro": "Time from support cases is added to the customer as it is logged. The period closes {close} and invoices are sent {send} at 08:00.",
         "exportLog": "Export time log",
@@ -3234,8 +3225,6 @@
       "colApplies": "Applies to",
       "colEffective": "From",
       "colBy": "By",
-      "noticeSubject": "New price for Agentor {plan}",
-      "noticeBody": "Hello {company}\n\nThe price of Agentor {plan} changes from {old} to {new} incl. VAT per month.\n\nThe new price applies from your first renewal after {date}. Until then you pay the price you have today.\n\nYou can see your subscription under Subscription and usage in Agentor.\n\nKind regards\nAgentor",
       "autoCalculated": "Calculated automatically",
       "roundingUnitShort": "min.",
       "externalUsersSub": "Access to selected flows",
@@ -3581,9 +3570,7 @@
         "generic": "This page is used on a computer."
       },
       "mail": {
-        "page": "a page in Agentor",
-        "subject": "Link to {page}",
-        "body": "You asked to open {page} on your computer.\n\nOpen the link here:\n{url}\n\nYou need to be signed in. If you didn't ask for this link, you can ignore this e-mail."
+        "page": "a page in Agentor"
       }
     },
     "dev": {
@@ -3829,7 +3816,9 @@
         "supportRequested": "Agentor support asks for access",
         "supportOpened": "Agentor support has access",
         "supportExtension": "Agentor support asks for more time",
-        "paymentFailed": "The payment was declined"
+        "paymentFailed": "The payment was declined",
+        "systematicError": "{count} records failed the same way in {flow}",
+        "quota": "You've used {pct}% of this month's transactions"
       },
       "meta": {
         "support": "{name} · tap to answer",
@@ -3951,6 +3940,10 @@
       "generic": {
         "title": "Agentor",
         "body": "Tap to see what happened."
+      },
+      "systematicError": {
+        "title": "The same error on {count} records",
+        "body": "{flow}. Tap to see why and how to fix it."
       }
     },
     "offline": {
@@ -5065,5 +5058,404 @@
   "suspended": {
     "title": "The account is suspended",
     "body": "Agentor has suspended the company's account, so the app can't be opened right now. Contact support@agentor.dk to have it reopened."
+  },
+  "email": {
+    "common": {
+      "hello": "Hi",
+      "helloName": "Hi {name}",
+      "regards": "Kind regards",
+      "signature": "Agentor",
+      "fallback": "If the button doesn't work, copy the link into your browser:",
+      "footer": "Agentor ApS · app.agentor.dk · support@agentor.dk",
+      "todayAt": "today at {time}",
+      "yesterdayAt": "yesterday at {time}",
+      "todayShort": "today {time}",
+      "codeLabel": "Code {code}",
+      "codeExpiry": "The code works for **10 minutes**",
+      "securityNoLinks": "We never send sign-in links in security e-mails. Open Agentor yourself in your browser or app.",
+      "net": "Amount excl. VAT",
+      "vat": "VAT 25%",
+      "inclVat": "{amount} incl. VAT",
+      "amountInclVat": "Amount incl. VAT",
+      "interval": {
+        "month": "monthly",
+        "year": "yearly"
+      },
+      "reasonBilling": "You are receiving this e-mail because {email} is the invoice e-mail for {company}.",
+      "reasonNotify": "You are receiving this e-mail because you turned on e-mail for \"{event}\" at {company}.",
+      "editNotifications": "Edit notifications",
+      "event": {
+        "connection_broken": "Connection lost",
+        "systematic_error": "Systematic error",
+        "quota": "Quota above 80%"
+      }
+    },
+    "verifyEmail": {
+      "subject": "Confirm your e-mail for Agentor",
+      "preheader": "One click and you're ready. The link works for 24 hours.",
+      "heading": "Confirm your e-mail",
+      "body": "Confirm your e-mail to get started with Agentor. Then you can connect your webshop and accounting and watch your first flow work.",
+      "button": "Confirm e-mail",
+      "expiry": "The link works for **24 hours**",
+      "safety": "If you didn't create an account, you can ignore this e-mail. Nothing happens until you click the link.",
+      "reason": "You are receiving this e-mail because someone created an account with {email}."
+    },
+    "resetPassword": {
+      "subject": "Reset your Agentor password",
+      "preheader": "Choose a new password. The link works for 1 hour.",
+      "heading": "Reset your password",
+      "body": "You asked to reset your password. Use the button to choose a new one.",
+      "button": "Choose a new password",
+      "expiry": "The link works for **1 hour**",
+      "safety": "If you didn't ask for this, you can ignore this e-mail. Your current password still works.",
+      "reason": "You are receiving this e-mail because someone asked to reset the password for {email}."
+    },
+    "newDeviceLogin": {
+      "subject": "New sign-in to your Agentor account",
+      "heading": "New sign-in to your account",
+      "body": "Your account was just used to sign in from a device we haven't seen before.",
+      "device": "Device",
+      "place": "Location",
+      "approx": "{place} (approximate)",
+      "time": "Time",
+      "noticeTitle": "Was it you?",
+      "noticeBody": "Then you don't need to do anything. If it wasn't you, change your password and sign out everywhere under **Settings › Security** in Agentor. Write to support@agentor.dk if you're unsure.",
+      "reason": "You are receiving this e-mail because someone signed in to the account {email}."
+    },
+    "emailChangeCode": {
+      "subject": "{code} is your code to change your login e-mail",
+      "preheader": "The code works for 10 minutes.",
+      "heading": "Confirm your new login e-mail",
+      "body": "Enter the code below in Agentor to confirm that this address is yours.",
+      "safety": "If you didn't ask to change your e-mail, you can ignore this e-mail. Your login e-mail doesn't change without the code.",
+      "reason": "You are receiving this e-mail because {email} was entered as a new login e-mail."
+    },
+    "emailChanged": {
+      "subject": "Your Agentor login e-mail has changed",
+      "preheader": "If it wasn't you, contact us right away.",
+      "heading": "Your login e-mail has changed",
+      "body": "The login e-mail on your Agentor account was just changed to {email}, and the new address was confirmed with a code.",
+      "time": "Time",
+      "device": "From device",
+      "noticeTitle": "Wasn't it you?",
+      "noticeBody": "Contact us right away at support@agentor.dk, and we'll lock the account and help you back in.",
+      "safety": "This address will not receive more e-mails from Agentor about the account.",
+      "reason": "You are receiving this e-mail because {email} was the login e-mail on the account until now."
+    },
+    "signupCode": {
+      "subject": "{code} is your Agentor code",
+      "preheader": "Enter the code to confirm your e-mail. It works for 10 minutes.",
+      "heading": "Your Agentor code",
+      "body": "Enter the code in Agentor to confirm your e-mail and continue signing up.",
+      "safety": "If you didn't create an account, you can ignore this e-mail.",
+      "reason": "You are receiving this e-mail because {email} was used to create an account."
+    },
+    "signupExisting": {
+      "subject": "You already have an Agentor account",
+      "preheader": "Sign in with your e-mail instead of creating a new account.",
+      "heading": "You already have an account",
+      "body": "Someone, hopefully you, tried to create an account with this e-mail. You already have an account, so you can just sign in.",
+      "button": "Sign in to Agentor",
+      "safety": "If you forgot your password, you can reset it on the sign-in page. If it wasn't you, you don't need to do anything.",
+      "reason": "You are receiving this e-mail because {email} was used to create an account."
+    },
+    "receipt": {
+      "subject": "Receipt for your Agentor subscription (invoice {number})",
+      "preheader": "{company} now has {plan}, paid {interval}.",
+      "heading": "Thank you for your payment",
+      "body": "{company} now has {plan}, paid {interval}. The subscription is active, and you can start setting up.",
+      "invoice": "Invoice",
+      "period": "Period",
+      "paid": "Paid",
+      "total": "Paid in total",
+      "button": "View the invoice",
+      "hint": "The invoice as PDF and all payments are under **Subscription and usage**."
+    },
+    "teamInvite": {
+      "subject": "{inviter} invited you to {company} on Agentor",
+      "preheader": "You're invited as {role}. The link works for 7 days.",
+      "heading": "You're invited to {company}",
+      "body": "{inviter} invited you to {company} on Agentor as {role}.",
+      "role": "Role",
+      "access": "Access",
+      "accessExpires": "Access expires",
+      "button": "Accept the invitation",
+      "expiry": "The link works for **7 days**",
+      "safety": "If you don't know the sender, you can ignore this e-mail.",
+      "reason": "You are receiving this e-mail because {inviter} invited {email}."
+    },
+    "customerCreated": {
+      "subject": "{company} has been set up at Agentor",
+      "preheader": "Create your login and pay by card. The link works for 14 days.",
+      "heading": "Your account is ready",
+      "body": "{staff} from Agentor set up {company} for you with {plan}, paid {interval}.",
+      "plan": "Plan",
+      "price": {
+        "month": "{plan} · {price}/mo. excl. VAT",
+        "year": "{plan} · {price}/yr. excl. VAT"
+      },
+      "firstPayment": "First payment",
+      "button": "Create login and pay",
+      "expiry": "The link works for **14 days**",
+      "safety": "If you didn't ask for this, you can ignore this e-mail.",
+      "reason": "You are receiving this e-mail because Agentor created an account for {email}."
+    },
+    "ownerReinvite": {
+      "subject": "Your invitation to Agentor",
+      "preheader": "A new invitation. Earlier links no longer work.",
+      "heading": "Here is your new invitation",
+      "body": "{staff} from Agentor sent you a new invitation as owner of {company} at Agentor.",
+      "button": "Create login and pay",
+      "expiry": "The link works for **14 days**. Earlier links no longer work.",
+      "safety": "If you didn't ask for this, you can ignore this e-mail.",
+      "reason": "You are receiving this e-mail because Agentor sent a new invitation to {email}."
+    },
+    "caseResolved": {
+      "subject": "Resolved: {title} (case #{number})",
+      "preheaderFallback": "The case has been marked as resolved.",
+      "heading": "Your case is resolved",
+      "defaultClosing": "Hi {name}. Your case \"{title}\" is resolved.",
+      "history": "History",
+      "time": "Total time spent",
+      "satisfactionTitle": "Were you happy with the help?",
+      "satisfactionBody": "Reply **Yes** or **No** to this e-mail.",
+      "reopen": "Reply to this e-mail to reopen the case (#{number}). After 14 days it is archived.",
+      "signature": "{name}, Agentor support",
+      "reason": "You are receiving this e-mail because you are a contact on case #{number} at {company}."
+    },
+    "deskLink": {
+      "subject": "Link to {page}",
+      "preheader": "Open the page on your computer.",
+      "heading": "Continue on your computer",
+      "body": "You asked to open {page} on your computer. The page is only on computer because it needs more room.",
+      "button": "Open the page",
+      "safety": "You need to be signed in. If you didn't ask for the link, you can ignore this e-mail.",
+      "reason": "You are receiving this e-mail because you tapped \"Send link to my computer\" in the Agentor app."
+    },
+    "planPrice": {
+      "subject": "New price for Agentor {plan}",
+      "preheader": "The new price applies from your first renewal after {date}.",
+      "heading": "New price for {plan}",
+      "body": "The price of Agentor {plan} is changing. The new price applies from your first renewal after {date}. Until then you pay the price you have today.",
+      "old": "Price today",
+      "new": "New price",
+      "from": "Applies from",
+      "fromValue": "First renewal after {date}",
+      "per": {
+        "month": "{amount}/mo. incl. VAT",
+        "year": "{amount}/yr. incl. VAT"
+      },
+      "button": "View your subscription",
+      "hint": "You can change plan or interval under **Subscription and usage** in Agentor."
+    },
+    "reminder": {
+      "subject": "Reminder: invoice {number} from Agentor",
+      "subjectSecond": "Reminder {n}: invoice {number} from Agentor",
+      "preheader": "Invoice {number} for {amount} was due {due}.",
+      "heading": "Invoice reminder",
+      "body": "We can't see that invoice {number} has been paid.",
+      "due": "Was due",
+      "button": "View and pay the invoice",
+      "hint": "If you have already paid, you can ignore this e-mail. Questions about the invoice can be sent as a reply to this e-mail."
+    },
+    "updateCard": {
+      "subject": "Update the payment card for invoice {number}",
+      "preheader": "The payment of {amount} was declined by the card issuer.",
+      "heading": "The payment was declined",
+      "body": "The payment of invoice {number} for {amount} was declined by the card issuer.",
+      "card": "Card",
+      "invoice": "Invoice",
+      "button": "Update payment card",
+      "hint": "When the card is updated, we charge the amount again. We never store your card number; QuickPay handles it."
+    },
+    "statement": {
+      "subject": "Statement from Agentor",
+      "preheader": "{count, plural, one {# open item} other {# open items}} · {total} in total incl. VAT.",
+      "preheaderEmpty": "No open items.",
+      "heading": "Your statement",
+      "body": "Here are your open items at Agentor. Amounts incl. VAT.",
+      "bodyEmpty": "You have no open items at Agentor.",
+      "detail": "{description} · due {due}",
+      "total": "Total",
+      "empty": "No open items",
+      "button": "View the invoices"
+    },
+    "monthlyReport": {
+      "subject": "Agentor · monthly report {month}",
+      "preheader": "The monthly report is attached as CSV. Amounts excl. VAT.",
+      "heading": "Monthly report for {month}",
+      "body": "Attached is the monthly report for {month} from Agentor Platform. Amounts excl. VAT.",
+      "revenue": "Revenue",
+      "subscriptions": "Subscriptions",
+      "support": "Support",
+      "fileMeta": "CSV · {kb} kB",
+      "hint": "The report is also available as PDF under Administration › Reports.",
+      "reason": "Internal e-mail to Agentor's bookkeeper."
+    },
+    "connectionBroken": {
+      "subject": "{system} is disconnected · {flow} has stopped",
+      "subjectNoFlow": "{system} is disconnected",
+      "preheader": {
+        "expired": "Access expired {when}. Sign in again to continue.",
+        "other": "The connection stopped working {when}. Sign in again to continue."
+      },
+      "heading": "{system} is disconnected",
+      "body": {
+        "expired": "The connection to {system} · {account} no longer works because access expired {when}.",
+        "other": "The connection to {system} · {account} stopped working {when}."
+      },
+      "stalledOne": "The flow {flows} has stopped until you sign in again.",
+      "stalledMany": "The flows {flows} have stopped until you sign in again.",
+      "affected": "Affected",
+      "affectedOne": "{flow} · {routes, plural, one {# route} other {# routes}}",
+      "affectedMany": "{count} flows · {routes, plural, one {# route} other {# routes}}",
+      "queued": "Waiting in queue",
+      "queuedValue": "{count, plural, one {# order} other {# orders}} · sent when the connection works",
+      "button": "Reconnect {system}",
+      "hint": "You sign in at {system}. Agentor never sees your password."
+    },
+    "systematicError": {
+      "subject": "{count} {entity} failed the same way in {flow}",
+      "heading": "The same error on several {entity}",
+      "body": "{count} {entity} in {flow} failed {when} with the same error.",
+      "why": "Why",
+      "fix": "How to fix it",
+      "button": "View the error",
+      "subjectMany": "{count} errors repeated in your flows overnight",
+      "preheaderMany": "{count} records failed the same way. See why and how to fix it.",
+      "headingMany": "The same errors repeated",
+      "bodyMany": "During quiet hours, several records failed the same way. Here {count, plural, one {is the error} other {are the # errors}}.",
+      "incident": "{flow}: {count} {entity} · {when}",
+      "buttonMany": "Open Overview"
+    },
+    "quota": {
+      "subject": "You've used {pct}% of this month's transactions",
+      "preheader": "{used} of {limit} transactions. The counter resets {reset}.",
+      "heading": "{pct}% of this month's transactions used",
+      "body": "{company} has used {used} of {limit} transactions in {month}. Only Live writes count.",
+      "bar": "Transactions in {month}",
+      "resets": "Resets",
+      "plan": "Plan",
+      "button": "View usage and plans",
+      "hint": "If you need more, you can upgrade under Subscription and usage. The change applies at once."
+    },
+    "weekly": {
+      "subject": "The week at {company}: {records} records, {errors} errors",
+      "preheader": "Week {week} · {period}. {pct} of runs had no errors.",
+      "heading": "The week that was",
+      "body": "Here is week {week} ({period}) for {company}.",
+      "records": "Records",
+      "orders": "Orders",
+      "errors": "Errors",
+      "ok": "Without errors",
+      "flows": "Flows",
+      "flowOk": "OK",
+      "flowErrors": "{count} errors",
+      "brokenSince": "Disconnected since {day}",
+      "button": "Open Overview",
+      "reason": "You are receiving this e-mail on Mondays at 8 because you turned on the weekly summary.",
+      "unsubscribe": "Turn it off"
+    },
+    "entity": {
+      "order": "{count, plural, one {order} other {orders}}",
+      "creditNote": "{count, plural, one {credit note} other {credit notes}}",
+      "customer": "{count, plural, one {customer} other {customers}}",
+      "product": "{count, plural, one {product} other {products}}",
+      "stock": "{count, plural, one {stock item} other {stock items}}",
+      "record": "records"
+    }
+  },
+  "unsubscribe": {
+    "title": "Unsubscribe from the weekly summary",
+    "intro": "You get the weekly summary from {company} every Monday at 8.",
+    "button": "Unsubscribe",
+    "done": "You're unsubscribed. You won't get more weekly summaries from {company}.",
+    "already": "The weekly summary is already turned off.",
+    "invalid": "The link no longer works. You can turn e-mails off under Settings › Notifications.",
+    "settings": "Go to notifications"
+  },
+  "pdf": {
+    "invoice": "Invoice",
+    "creditNote": "Credit note",
+    "invoiceDate": "Invoice date",
+    "date": "Date",
+    "due": "Due",
+    "period": "Period",
+    "customerNo": "Customer no.",
+    "credits": "Credits",
+    "creditsValue": "Invoice {number}",
+    "billedTo": "Billed to",
+    "creditedTo": "Credited to",
+    "about": "Regarding",
+    "reason": "Reason",
+    "creditedBy": "Credited by {name}",
+    "description": "Description",
+    "quantity": "Qty",
+    "price": "Price",
+    "amount": "Amount",
+    "subtotal": "Subtotal excl. VAT",
+    "vat": "VAT 25%",
+    "total": "Total incl. VAT",
+    "creditTotal": "Credited in total incl. VAT",
+    "page": "Page {page} of {pages}",
+    "continued": "{title} {number} (continued)",
+    "cvr": "CVR {cvr}",
+    "hours": "{hours} h",
+    "pieces": "{count}",
+    "placeholder": {
+      "address": "[Address]",
+      "postalCity": "[Postcode and city]",
+      "cvr": "[CVR]",
+      "reg": "[Reg. no.]",
+      "account": "[Account no.]",
+      "iban": "[IBAN]"
+    },
+    "footerCompany": "{name} · CVR {cvr} · {address}",
+    "footerBank": "Bank {reg} {account} · IBAN {iban}",
+    "subscription": {
+      "about": "Subscription · {plan}",
+      "aboutInterval": "{interval, select, year {Paid yearly in advance} other {Paid monthly in advance}}",
+      "line": "Agentor {plan}, {interval, select, year {yearly} other {monthly}}",
+      "lineDetail": "{from} – {to}"
+    },
+    "support": {
+      "about": "Support · {period}",
+      "aboutRule": "Billed by time per case, rounded up to 15 min.",
+      "aboutRate": "Hourly rate {rate} excl. VAT",
+      "lineDetail": "{dates} · registered {registered} · rounded up"
+    },
+    "status": {
+      "paidTitle": "Paid",
+      "paid": "with {card} on {date} via QuickPay.",
+      "transaction": "Transaction {id}",
+      "cardTitle": "Charged",
+      "card": "to {card} on {date} via QuickPay.",
+      "cardFailedTitle": "Declined",
+      "cardFailed": "The payment with {card} was declined. We will try again automatically.",
+      "eanTitle": "Due",
+      "ean": "{date}. The invoice is sent electronically to EAN {ean}.",
+      "bankTitle": "Due",
+      "bank": "{date}. Pay to bank {reg} {account} (IBAN {iban}) quoting invoice number {number}.",
+      "refundTitle": "Refunded",
+      "refund": "to {card} on {date}. It can take 3–5 banking days before the amount is in the account.",
+      "refundPendingTitle": "Being refunded",
+      "refundPending": "to {card}. It can take 3–5 banking days before the amount is in the account.",
+      "offsetTitle": "Offset",
+      "offset": "against the next invoice from Agentor.",
+      "after": "Invoice {number} is then {amount} incl. VAT."
+    },
+    "notes": {
+      "invoice": "Questions about the invoice: {email}.",
+      "timelog": "A time log with the date, case and duration of each registration is attached. Time marked as not billable is not included. Questions about the invoice: {email}.",
+      "creditNote": "A credit note cancels a previous invoice in full or in part and has its own number. The original invoice is not changed. Questions: {email}."
+    },
+    "timelog": {
+      "title": "Appendix: time log",
+      "intro": "Each registration with its date and duration. Time is rounded up to 15 min. per case per month.",
+      "date": "Date",
+      "case": "Case",
+      "registered": "Registered",
+      "billed": "Billed"
+    }
   }
 }
