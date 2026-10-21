@@ -306,3 +306,16 @@ Taget under natarbejdet efter planens anbefaling, så arbejdet ikke stod stille.
 29. **MP12:** totrin vises som "Slået til/Mangler" (metoden kendes ikke); alle 9 rettigheder; fodnoten siger, at Superadmin kan åbne en kunde direkte, og at det logges (tegnefladens tekst modsagde rettighederne). **MP13:** fulde navne, knappen "Åbn sag". **MP15:** én række pr. registrering, så "Ret tid" retter præcis én (ny `updateTime`, kun egne, ikke-fakturerede). **MP16:** "Statusændringer" og "Spørg om kunden var tilfreds" som på desktop; "Tidsforbrug" er slået fra som på desktop; MP03 har fået et stille "Løs sag"-link under samtalen.
 30. **MP18–MP23:** MP21 ligger på desktop-ruten `/platform/finance/support/[tenantId]?month=` (før en kladde findes, er der intet faktura-id); `invoices/[tenantId]/[invoiceId]` viderestiller. MP21 beholder tabbaren, og knapperne står nederst på siden. MP20 "Send kontoudtog" kræver bekræftelse på mobil. MP22-ringen viser beløb uden "kr." for at passe på 360 px. MP23 har ingen median for løste sager (findes ikke i data).
 31. **Tabbar:** MP12 lyser "Kunder", MP15 lyser "Sager".
+32. **Lighthouse-version (B6):** `lighthouse@13.5.0` kunne ikke installeres, fordi pnpm afviste en afhængighed (`chromium-bidi`) som mulig pakke-overtagelse ("trust downgrade"). Det er ikke tilsidesat; målingerne er lavet med `lighthouse@12.8.2`.
+
+## 14. Status 21. okt. 2026 (M2–M4 og de nye tegneflader)
+
+Bygget: MA01–MA15 og MA17–MA35 (MA16 droppet, se 20), MP01–MP23. Samme ruter og API som desktop, `Responsive` under 768 px; desktop-only-segmenter fjernet, hvor der nu er en tegneflade. Tilbage som desktop-only: editor, nyt flow, skabeloner, Indstillinger › Virksomhed og Profil, platformbrugernes roller/audit, tid for team/kunder, platformindstillinger og systemstatus.
+
+Tests (gate-stak med production-build, frisk seed):
+
+- Playwright: 205 bestået, 5 sprunget over (desktop + mobile-390 + mobile-360), uden for signup/onboarding. Alle 55 mobilskærme ved 390 og 360 med axe (WCAG 2.2 AA), ingen vandret scroll og screenshots i `docs/screenshots/mobile/`. De krævede forløb består: push → MA12 → godkend → audit-log; MA03 → MA06 → gentag; MP03 → stop timer → MP04 → gem 15 min. (tjekket i databasen); offline-banneret.
+- **Ikke verificeret lokalt:** `signup.spec`, `onboarding.spec` og `platform.spec` › "Superadmin creates a customer … active". De kræver `SSO_MODE=mock`, som production-buildet afviser, og den anden sessions dev-server optager mappen. Betalingsforløbet (mock-QuickPay-callback) nåede ikke ingest på gate-stakken. Ingen af de sider er ændret her ud over én locator-linje i `onboarding.spec.ts` (MFA-feltet findes nu også i mobilgrenen). CI kører dem.
+- Unit 22/22 pakker, isolation 547 bestået / 9 sprunget over, typecheck, lint og prettier rene.
+- Semgrep (p/default, p/typescript, p/nodejs) på commit-træet og gitleaks (hele historikken, 65 commits): ingen fund.
+- Lighthouse 12.8.2, mobil, logget ind: /login 99/100/100, / 87/100/100, /integrations 86/100/100, /activity 88/100/100, /platform/cases 88/100/100, /platform/finance 89/100/100 (performance/accessibility/best practices).
