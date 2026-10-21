@@ -10,6 +10,24 @@ R=$D/releases/$(date +%Y%m%d%H%M%S)
 export PATH="/usr/local/bin:$PATH"
 cd /
 
+# Node and PM2 may only live in Plesk's Node.js folder; find them before anything is built or
+# migrated, so a missing PM2 can't leave a migrated database behind an unreloaded app.
+if ! command -v pm2 >/dev/null; then
+  for dir in $(ls -d /opt/plesk/node/*/bin 2>/dev/null | sort -rV); do
+    if [ -x "$dir/pm2" ]; then
+      export PATH="$dir:$PATH"
+      break
+    fi
+  done
+fi
+if ! command -v pm2 >/dev/null || ! command -v node >/dev/null; then
+  echo "pm2 or node not found. Run server-setup.sh again (it links them into /usr/local/bin),"
+  echo "or: npm install -g pm2 && ln -sf \"\$(readlink -f \"\$(command -v pm2)\")\" /usr/local/bin/pm2"
+  exit 1
+fi
+NODE_DIR=$(dirname "$(readlink -f "$(command -v node)")")
+export PATH="$NODE_DIR:$PATH"
+
 echo "== Release $R"
 cp -a "$D/repo" "$R"
 cd "$R"
