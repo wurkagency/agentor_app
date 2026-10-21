@@ -81,6 +81,7 @@ done
 
 echo "== Admin commands"
 install -m 700 "$R/infra/scripts/superadmin.sh" /usr/local/bin/agentor-superadmin
+install -m 700 "$R/infra/scripts/reset-customers.sh" /usr/local/bin/agentor-reset-customers
 
 echo "== Switch and reload"
 chown -R root:root "$R" && chmod -R a+rX "$R"
