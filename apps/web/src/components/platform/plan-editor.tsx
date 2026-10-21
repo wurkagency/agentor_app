@@ -5,7 +5,7 @@ import { Pencil } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { savePlanAction } from '@/app/platform/settings/actions';
+import { savePlanAction } from '@/app/platform/admin/product/actions';
 
 export interface PlanValues {
   id: string;

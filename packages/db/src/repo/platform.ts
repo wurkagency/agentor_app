@@ -321,6 +321,63 @@ export async function myGrants(db: Database, userId: string): Promise<MyGrant[]>
     .sort((a, b) => b.requestedAt.getTime() - a.requestedAt.getTime());
 }
 
+/** A grant on Support › Adgange (S9, MP24): any staff member's, with the case and the action count. */
+export interface PlatformGrant {
+  grantId: string;
+  tenantId: string;
+  tenantName: string;
+  tenantCvr: string | null;
+  staffUserId: string;
+  staffName: string;
+  caseId: string | null;
+  caseRef: string;
+  caseNumber: number | null;
+  caseTitle: string | null;
+  scope: 'view' | 'help';
+  state: GrantState;
+  approvedByName: string | null;
+  requestedAt: Date;
+  approvedAt: Date | null;
+  expiresAt: Date;
+  /** When it stopped: ended, revoked, denied or expired. */
+  closedAt: Date | null;
+  extensionRequestedAt: Date | null;
+  /** Support actions in the customer's audit log during the grant. */
+  actions: number;
+}
+
+/** Every staff member's grants from the last 60 days (app.platform_grants, 0046). */
+export async function allGrants(db: Database, userId: string): Promise<PlatformGrant[]> {
+  const res = await asStaff(db, userId, (tx) =>
+    tx.execute<Record<string, unknown>>(sql`select * from app.platform_grants()`),
+  );
+  const date = (v: unknown) => (v ? new Date(v as string) : null);
+  return res.rows
+    .map((r) => ({
+      grantId: String(r.grant_id),
+      tenantId: String(r.tenant_id),
+      tenantName: String(r.tenant_name),
+      tenantCvr: (r.tenant_cvr as string | null) ?? null,
+      staffUserId: String(r.staff_user_id),
+      staffName: String(r.staff_name ?? ''),
+      caseId: (r.case_id as string | null) ?? null,
+      caseRef: String(r.case_ref),
+      caseNumber:
+        r.case_number === null || r.case_number === undefined ? null : Number(r.case_number),
+      caseTitle: (r.case_title as string | null) ?? null,
+      scope: r.scope as 'view' | 'help',
+      state: r.state as GrantState,
+      approvedByName: (r.approved_by_name as string | null) ?? null,
+      requestedAt: new Date(r.requested_at as string),
+      approvedAt: date(r.approved_at),
+      expiresAt: new Date(r.expires_at as string),
+      closedAt: date(r.closed_at),
+      extensionRequestedAt: date(r.extension_requested_at),
+      actions: Number(r.actions ?? 0),
+    }))
+    .sort((a, b) => b.requestedAt.getTime() - a.requestedAt.getTime());
+}
+
 /** Superadmin opens a customer's app directly: no request, no approval, audit log only. */
 export async function superadminAccess(
   db: Database,
@@ -1372,18 +1429,31 @@ export async function errorGroups(
   userId: string,
   days: number,
 ): Promise<ErrorGroup[]> {
-  const now = Date.now();
-  const since = new Date(now - days * 86_400_000);
-  const before = new Date(now - 2 * days * 86_400_000);
+  const to = new Date();
+  return errorGroupsBetween(db, userId, new Date(to.getTime() - days * 86_400_000), to);
+}
+
+/**
+ * Fejl (S7) for a period [from, to): counts per error code in the period, compared with the same
+ * length of time before it for the trend and "new" codes.
+ */
+export async function errorGroupsBetween(
+  db: Database,
+  userId: string,
+  from: Date,
+  to: Date,
+): Promise<ErrorGroup[]> {
+  const before = new Date(from.getTime() - (to.getTime() - from.getTime()));
   return asStaff(db, userId, async (tx) => {
     const res = await tx.execute<{
       error_code: string;
       connector_id: string;
       tenant_id: string;
-      records: number;
+      records_now: number;
+      records_prev: number;
       first_seen: Date;
       last_seen: Date;
-    }>(sql`select * from app.platform_error_codes(${before})`);
+    }>(sql`select * from app.platform_error_codes_range(${before}, ${from}, ${to})`);
     const groups = new Map<
       string,
       {
@@ -1407,8 +1477,9 @@ export async function errorGroups(
       };
       const last = new Date(r.last_seen);
       const first = new Date(r.first_seen);
-      if (last >= since) g.now.set(r.tenant_id, (g.now.get(r.tenant_id) ?? 0) + Number(r.records));
-      if (first < since) g.prev.add(r.tenant_id);
+      const now = Number(r.records_now);
+      if (now > 0) g.now.set(r.tenant_id, (g.now.get(r.tenant_id) ?? 0) + now);
+      if (Number(r.records_prev) > 0) g.prev.add(r.tenant_id);
       if (first < g.first) g.first = first;
       if (last > g.last) g.last = last;
       groups.set(key, g);

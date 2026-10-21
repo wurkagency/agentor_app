@@ -3,7 +3,7 @@
  * MA08 Genforbind, MA09 Notifikationer) keep Overblik lit, settings reached from Mere keep Mere.
  */
 export type AppTab = 'overview' | 'integrations' | 'activity' | 'more';
-export type PlatformTab = 'customers' | 'cases' | 'errors' | 'finance';
+export type PlatformTab = 'customers' | 'support' | 'finance' | 'admin' | 'profile';
 
 const under = (path: string, prefix: string) => path === prefix || path.startsWith(`${prefix}/`);
 
@@ -26,16 +26,16 @@ export function activeAppTab(path: string): AppTab | null {
 }
 
 export function activePlatformTab(path: string): PlatformTab | null {
-  // MP12 Platformbrugere is reached from Kunder, MP15 Min tid from Sager.
-  if (under(path, '/platform/customers') || under(path, '/platform/users') || path === '/platform')
-    return 'customers';
-  if (under(path, '/platform/cases') || under(path, '/platform/time')) return 'cases';
-  if (under(path, '/platform/errors')) return 'errors';
+  // Sitemap v2 (README decision 24): Kunder · Support · Finans · Admin · Profil.
+  if (under(path, '/platform/customers') || path === '/platform') return 'customers';
+  if (under(path, '/platform/support')) return 'support';
   if (under(path, '/platform/finance')) return 'finance';
+  if (under(path, '/platform/admin')) return 'admin';
+  if (under(path, '/platform/profile')) return 'profile';
   return null;
 }
 
 /** A case (MP03) shows its timer bar instead of the tab bar. */
 export function platformHidesTabBar(path: string): boolean {
-  return /^\/platform\/cases\/(?!archive(\/|$)|list(\/|$))[^/]+/.test(path);
+  return /^\/platform\/support\/cases\/(?!export(\/|$))[^/?]+/.test(path);
 }

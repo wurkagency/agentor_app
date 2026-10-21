@@ -21,16 +21,20 @@ describe('activeAppTab', () => {
 });
 
 describe('platform tabs', () => {
-  it('maps areas and hides the bar on a case', () => {
-    expect(activePlatformTab('/platform/customers')).toBe('customers');
-    expect(activePlatformTab('/platform/cases/123')).toBe('cases');
+  it('maps the sitemap v2 areas and hides the bar on a case', () => {
+    expect(activePlatformTab('/platform')).toBe('customers');
+    expect(activePlatformTab('/platform/customers/abc')).toBe('customers');
+    expect(activePlatformTab('/platform/support/cases/123')).toBe('support');
+    expect(activePlatformTab('/platform/support/access')).toBe('support');
+    expect(activePlatformTab('/platform/support/time')).toBe('support');
     expect(activePlatformTab('/platform/finance/invoices')).toBe('finance');
-    expect(activePlatformTab('/platform/time')).toBe('cases');
-    expect(activePlatformTab('/platform/users')).toBe('customers');
-    expect(activePlatformTab('/platform/settings')).toBeNull();
-    expect(platformHidesTabBar('/platform/cases/123')).toBe(true);
-    expect(platformHidesTabBar('/platform/cases')).toBe(false);
-    expect(platformHidesTabBar('/platform/cases/archive')).toBe(false);
-    expect(platformHidesTabBar('/platform/cases/list')).toBe(false);
+    expect(activePlatformTab('/platform/admin/users')).toBe('admin');
+    expect(activePlatformTab('/platform/admin/product')).toBe('admin');
+    expect(activePlatformTab('/platform/profile')).toBe('profile');
+    expect(activePlatformTab('/platform/supportx')).toBeNull();
+    expect(platformHidesTabBar('/platform/support/cases/123')).toBe(true);
+    expect(platformHidesTabBar('/platform/support/cases/123/resolve')).toBe(true);
+    expect(platformHidesTabBar('/platform/support/cases')).toBe(false);
+    expect(platformHidesTabBar('/platform/support/cases/export')).toBe(false);
   });
 });

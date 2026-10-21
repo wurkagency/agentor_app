@@ -1690,17 +1690,8 @@
     "badge": "Platform",
     "nav": "Platform",
     "search": "Søg kunde eller CVR",
-    "account": "Konto: {name}",
+    "account": "Profil og indstillinger",
     "logout": "Log ud",
-    "section": {
-      "customers": "Kunder",
-      "cases": "Supportsager",
-      "errors": "Fejl",
-      "time": "Tid",
-      "finance": "Finans",
-      "status": "Systemstatus",
-      "users": "Platformbrugere"
-    },
     "role": {
       "superadmin": "Superadmin",
       "supporter": "Supporter"
@@ -1728,9 +1719,6 @@
     },
     "customers": {
       "nav": "Kunder",
-      "all": "Alle kunder",
-      "mine": "Mine adgange",
-      "recent": "Seneste",
       "title": "Kunder",
       "intro": "Du ser kun navn, plan og samlet status. Kundens data kræver supportadgang, der gælder i højst 24 timer og logges i kundens audit-log.",
       "export": "Eksportér liste",
@@ -1931,7 +1919,8 @@
       "errors": {
         "generic": "Anmodningen blev ikke sendt. Prøv igen.",
         "reason": "Skriv en begrundelse til kunden."
-      }
+      },
+      "customer": "Kunde"
     },
     "case": {
       "status": {
@@ -2029,12 +2018,12 @@
       "waitingDays": "Venter i {count, plural, one {# dag} other {# dage}}"
     },
     "cases": {
-      "nav": "Supportsager",
+      "nav": "Sager",
       "board": "Tavle",
       "list": "Liste",
       "archive": "Arkiv",
       "myTimeToday": "Din tid i dag",
-      "title": "Supportsager",
+      "title": "Sager",
       "intro": "Træk et kort til en ny kolonne for at skifte status. Kunden får besked, når en sag løses.",
       "new": "Ny sag",
       "createShort": "Opret sag",
@@ -2064,7 +2053,12 @@
       "notesTitle": "Interne noter",
       "archivedAfter": "Arkiveres efter 14 dage",
       "moreArchive": "Se {count} mere og arkivet",
-      "moved": "#{n} er flyttet til {status}"
+      "moved": "#{n} er flyttet til {status}",
+      "viewLabel": "Visning af sager",
+      "viewBoard": "Tavle",
+      "viewList": "Liste",
+      "viewArchive": "Arkiv · {count}",
+      "showing": "Viser {view}"
     },
     "archive": {
       "title": "Arkiv",
@@ -2094,10 +2088,10 @@
       "footer": "Viser {shown} af {total} sager · i alt {time}"
     },
     "errors": {
-      "title": "Fejl på tværs af kunder",
+      "title": "Fejl",
       "intro": "Fejl grupperet efter fejlkode. Rammer samme fejl flere kunder, skyldes det ofte en ændring hos systemet, ikke hos kunden. Viser kun antal, aldrig kundedata.",
       "period": "Periode",
-      "p24h": "Sidste 24 timer",
+      "p24h": "24 timer",
       "p7d": "7 dage",
       "p30d": "30 dage",
       "statTypes": "Fejltyper",
@@ -2135,11 +2129,17 @@
         "DESTINATION_ERROR": "Destinationen afviste posten",
         "CONNECTION_BROKEN": "Forbindelsen er afbrudt"
       },
-      "statNew": "{count, plural, one {# ny} other {# nye}}"
+      "statNew": "{count, plural, one {# ny} other {# nye}}",
+      "from": "Fra",
+      "to": "til",
+      "apply": "Vis",
+      "showing": "Viser {period}",
+      "rangeLabel": "{from} – {to}",
+      "rangeInvalid": "Fra skal være før til, og perioden må højst være 90 dage."
     },
     "time": {
-      "nav": "Tid",
-      "title": "Min tid",
+      "nav": "Tidsforbrug",
+      "title": "Tidsforbrug",
       "team": "Teamet",
       "teamTitle": "Teamets tid",
       "perCustomer": "Pr. kunde",
@@ -2218,14 +2218,18 @@
       "colPlan": "Plan",
       "colBillable": "Fakturerbar",
       "colAmount": "Beløb",
-      "colInvoiced": "Faktureret"
+      "colInvoiced": "Faktureret",
+      "scopeMe": "Min tid",
+      "scopeTeam": "Team",
+      "scopeCustomer": "Pr. kunde",
+      "showing": "Viser {scope}"
     },
     "users": {
-      "nav": "Platformbrugere",
+      "nav": "Brugere",
       "staff": "Medarbejdere",
       "rolesTab": "Roller",
       "audit": "Platform-audit-log",
-      "title": "Platformbrugere og roller",
+      "title": "Brugere",
       "intro": "Agentors egne medarbejdere. Kun Superadmin kan se og ændre denne side. Totrin er påkrævet.",
       "invite": "Invitér medarbejder",
       "inviteHelp": "Medarbejderen skal have et Agentor-login i forvejen.",
@@ -2305,7 +2309,8 @@
         "settings_updated": "Ændrede indstillinger"
       },
       "bookkeeper": "Bogholderens e-mail",
-      "bookkeeperHelp": "Månedsrapporten fra Finans sendes hertil."
+      "bookkeeperHelp": "Månedsrapporten fra Finans sendes hertil.",
+      "auditLink": "Platformens audit-log"
     },
     "settings": {
       "title": "Platformindstillinger",
@@ -2460,13 +2465,6 @@
       "title": "Finans",
       "intro": "Abonnementer, support og betalinger for alle kunder. Beløb er ekskl. moms, medmindre andet står.",
       "openPeriod": "{month} · åben periode til",
-      "tab": {
-        "overview": "Oversigt",
-        "subscriptions": "Abonnementer",
-        "support": "Supportafregning",
-        "payments": "Fakturaer og betalinger",
-        "reports": "Rapporter"
-      },
       "export": "Eksportér",
       "monthlyReport": "Månedsrapport",
       "perMonth": "/ md.",
@@ -2805,7 +2803,8 @@
         "share": "Andel",
         "perStaff": "Tid pr. supporter",
         "autoShare": "{pct} % logget automatisk",
-        "total": "I alt"
+        "total": "I alt",
+        "title": "Rapporter"
       },
       "actions": {
         "sent": "Sendt til {email}",
@@ -2815,7 +2814,84 @@
           "NO_BOOKKEEPER": "Angiv bogholderens e-mail under Platformindstillinger.",
           "NOT_FOUND": "Fakturaen er ikke længere åben."
         }
+      },
+      "tab": {
+        "overview": "Oversigt",
+        "subscriptions": "Abonnementer",
+        "support": "Support",
+        "invoicing": "Fakturering"
       }
+    },
+    "section": {
+      "customers": "Kunder",
+      "support": "Support",
+      "finance": "Finans",
+      "admin": "Administration"
+    },
+    "subnav": {
+      "label": "Sekundær navigation · {section}",
+      "customers": "Kunder",
+      "support": {
+        "cases": "Sager",
+        "access": "Adgange",
+        "errors": "Fejl",
+        "time": "Tidsforbrug"
+      },
+      "admin": {
+        "status": "System Status",
+        "users": "Brugere",
+        "product": "Produkt",
+        "reports": "Rapporter"
+      }
+    },
+    "grants": {
+      "title": "Adgange",
+      "intro": "Supportadgang til kunders data. Højst 24 timer, kræver sag og begrundelse og logges i kundens audit-log.",
+      "filterLabel": "Vis adgange",
+      "mine": "Mine · {count}",
+      "all": "Alle · {count}",
+      "request": "Anmod om adgang",
+      "kpiActive": "Aktive adgange",
+      "kpiActiveMax": "Højst 24 t",
+      "kpiActiveMine": "Din udløber {when}",
+      "kpiActiveNone": "Ingen af dine er aktive",
+      "kpiPending": "Venter på godkendelse",
+      "kpiPendingSub": "{name} · sendt {time}",
+      "kpiNone": "Ingen",
+      "kpiExpiring": "Udløber inden 2 timer",
+      "kpiExpiringSub": "{name} · {time}",
+      "kpiRequests": "Anmodninger på 30 dage",
+      "kpiRequestsSub": "{approved} godkendt · {denied} afvist",
+      "activeTitle": "Aktive og ventende",
+      "expiredTitle": "Seneste udløbne",
+      "colCustomer": "Kunde",
+      "colCase": "Sag",
+      "colScope": "Omfang",
+      "colApprovedBy": "Godkendt af",
+      "colExpires": "Udløber",
+      "colStaff": "Medarbejder",
+      "colPeriod": "Periode",
+      "colActions": "Handlinger",
+      "scopeView": "Kun se",
+      "scopeHelp": "Se og hjælpe",
+      "waiting": "Venter",
+      "left": "{time} tilbage",
+      "cvr": "CVR {cvr}",
+      "noCase": "Uden sag",
+      "ended": "afsluttet",
+      "seeLog": "Se log",
+      "openAsSupport": "Åbn som support",
+      "extend": "Forlæng",
+      "end": "Afslut",
+      "withdraw": "Træk tilbage",
+      "extensionRequested": "Forlængelse anmodet",
+      "emptyActive": "Ingen aktive eller ventende adgange",
+      "emptyActiveBody": "Anmod om adgang fra en kunde eller en sag.",
+      "emptyExpired": "Ingen udløbne adgange de sidste 30 dage.",
+      "footer": "Kunder, der kræver godkendelse, skal altid godkende. Ingen har stående adgang, heller ikke Superadmin.",
+      "today": "i dag {time}",
+      "tomorrow": "i morgen {time}",
+      "youShort": "(dig)"
     }
   },
   "support": {
@@ -2862,9 +2938,10 @@
       "activity": "Aktivitet",
       "more": "Mere",
       "customers": "Kunder",
-      "cases": "Sager",
-      "errors": "Fejl",
-      "finance": "Finans"
+      "finance": "Finans",
+      "support": "Support",
+      "admin": "Admin",
+      "profile": "Profil"
     },
     "bell": "Notifikationer, {count, plural, =0 {ingen nye} one {# ny} other {# nye}}",
     "back": "Tilbage",

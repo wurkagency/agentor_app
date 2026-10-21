@@ -1,19 +1,16 @@
 import { KeyRound, MapPin, ShieldCheck, type LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { cn } from '../../lib/cn';
+import { Logotype } from '../logotype';
 import { Icon } from '../icon';
 
 // Server-safe: no hooks. Signup and onboarding (README decisions 21–22, SU/OB and MS/MO boards).
 
 /* ---- Wordmark ------------------------------------------------------------------------------------- */
 
-/** "Agent" + "or" with the 2 px underline (decision 5): 22/700 on SU/OB, 20/700 on MS/MO. */
+/** The Agentor logotype (21 Oct 2026, replaces the text wordmark): 22 px on SU/OB, 20 px on MS/MO. */
 export function SignupLogo({ mobile = false }: { mobile?: boolean }) {
-  return (
-    <span className={cn('text-fg-1', mobile ? 'text-m-logo' : 'text-su-logo')}>
-      Agent<span className="border-b-2 border-fg-1 pb-px">or</span>
-    </span>
-  );
+  return <Logotype label="Agentor" className={cn('text-fg-1', mobile ? 'h-5' : 'h-5.5')} />;
 }
 
 /* ---- SignupShell (desktop, from 768 px) --------------------------------------------------------- */

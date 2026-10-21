@@ -326,7 +326,7 @@ export async function CustomerMobile(p: CustomerMobileProps) {
               {p.cases.map((x) => (
                 <RowLink
                   key={x.id}
-                  href={`/platform/cases/${x.id}`}
+                  href={`/platform/support/cases/${x.id}`}
                   linkAs={Link}
                   title={`#${x.number} · ${x.title}`}
                   meta={[

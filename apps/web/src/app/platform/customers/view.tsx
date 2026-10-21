@@ -18,12 +18,10 @@ import { CustomersMobile } from './mobile';
  * lasts at most 24 hours and is logged in the customer's audit log.
  */
 export async function CustomersView({
-  view,
   query,
   expired,
   filter = 'all',
 }: {
-  view: 'all' | 'mine' | 'recent';
   query: string;
   expired: boolean;
   /** Mobile chips (MP01). */
@@ -46,17 +44,9 @@ export async function CustomersView({
   const now = new Date();
   const myActive = mine.filter((g) => g.state === 'active');
   const nextExpiry = myActive.map((g) => g.expiresAt).sort((a, b) => a.getTime() - b.getTime())[0];
-  const recent = new Set(mine.map((g) => g.tenantId));
   const mineCase = (tenantId: string) =>
     open.some((o) => o.tenantId === tenantId && o.assigneeId === actor.userId);
-  const visible = customers.filter((c) =>
-    view === 'mine'
-      ? c.myGrant && (c.myGrant.state === 'active' || c.myGrant.state === 'pending')
-      : view === 'recent'
-        ? recent.has(c.tenantId) || mineCase(c.tenantId)
-        : true,
-  );
-  const items: CustomerItem[] = visible.map((c) => ({
+  const items: CustomerItem[] = customers.map((c) => ({
     tenantId: c.tenantId,
     name: c.name,
     initials: initials(c.name),
@@ -204,9 +194,7 @@ export async function CustomersView({
   return (
     <Responsive
       desktop={desktop}
-      mobile={
-        <CustomersMobile items={items} query={query} filter={view === 'mine' ? 'mine' : filter} />
-      }
+      mobile={<CustomersMobile items={items} query={query} filter={filter} />}
     />
   );
 }

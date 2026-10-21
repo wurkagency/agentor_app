@@ -33,7 +33,8 @@ export interface GearCounts {
 
 /**
  * The gear in the top bar for Agentor staff (P1-Kunder-Menu): the Platform sections with a
- * short status each. Platformbrugere and Platformindstillinger are locked to Superadmin.
+ * short status each. Finans, Systemstatus, Platformbrugere and Platformindstillinger are locked to
+ * Superadmin (README decision 24).
  */
 export function GearMenu({
   role,
@@ -56,19 +57,19 @@ export function GearMenu({
         sub: t('gear.customersSub'),
       },
       {
-        href: '/platform/cases',
+        href: '/platform/support/cases',
         icon: MessageCircle,
         title: t('gear.cases'),
         sub: t('gear.casesSub', { open: counts.openCases, mine: counts.mineCases }),
       },
       {
-        href: '/platform/errors',
+        href: '/platform/support/errors',
         icon: CircleX,
         title: t('gear.errors'),
         sub: t('gear.errorsSub', { count: counts.errorTypes }),
       },
       {
-        href: '/platform/time',
+        href: '/platform/support/time',
         icon: Clock,
         title: t('gear.time'),
         sub: t('gear.timeSub', { time: counts.minutesToday }),
@@ -81,20 +82,21 @@ export function GearMenu({
         locked: !superadmin,
       },
       {
-        href: '/platform/status',
+        href: '/platform/admin/status',
         icon: Activity,
         title: t('gear.status'),
         sub: t('gear.statusSub'),
+        locked: !superadmin,
       },
       {
-        href: '/platform/users',
+        href: '/platform/admin/users',
         icon: UserRound,
         title: t('gear.users'),
         sub: t('gear.usersSub'),
         locked: !superadmin,
       },
       {
-        href: '/platform/settings',
+        href: '/platform/admin/product',
         icon: Settings,
         title: t('gear.settings'),
         sub: t('gear.settingsSub'),

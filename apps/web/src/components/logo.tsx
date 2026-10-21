@@ -1,25 +1,25 @@
-import { cn } from '@agentor/ui';
+import { Logotype, cn } from '@agentor/ui';
 
 /**
- * Wordmark "Agent" + "or" with a 2 px underline under "or", 24/700, −0.02em. No triangle
- * (README decision 5). Focus flows use the larger 28 px variant.
+ * The Agentor logotype (docs/design/runde-1/logos/agentor-logotype.svg) as inline SVG in the text
+ * colour, so it is dark on light and white on navy like the boards. 24 px high in the app shell,
+ * 22 px in the Platform header, 28 px on the focus flows.
  */
 export function Logo({
   size = 'default',
   className,
 }: {
-  size?: 'default' | 'focus';
+  size?: 'default' | 'platform' | 'focus';
   className?: string;
 }) {
   return (
-    <span
+    <Logotype
+      label="Agentor"
       className={cn(
-        'inline-block font-bold tracking-tight text-fg-1',
-        size === 'focus' ? 'text-counter' : 'text-logo',
+        'text-fg-1',
+        size === 'focus' ? 'h-7' : size === 'platform' ? 'h-5.5' : 'h-6',
         className,
       )}
-    >
-      Agent<span className="border-b-2 border-current pb-px">or</span>
-    </span>
+    />
   );
 }

@@ -53,7 +53,7 @@ interface Screen {
 
 /** The seeded EU-invoice case (MP03), from the case list (MP02). */
 async function euCaseHref(page: Page) {
-  await page.goto('/platform/cases');
+  await page.goto('/platform/support/cases');
   const link = page
     .getByRole('link', { name: /Fakturaer til EU-kunder fejler/ })
     .filter({ visible: true });
@@ -239,7 +239,7 @@ const SCREENS: Screen[] = [
   {
     board: 'MP02-Sager',
     user: 'anne',
-    path: '/platform/cases',
+    path: '/platform/support/cases',
     texts: [
       'Sager',
       /^Din tid i dag /,
@@ -285,7 +285,7 @@ const SCREENS: Screen[] = [
   {
     board: 'MP05-Fejl',
     user: 'anne',
-    path: '/platform/errors',
+    path: '/platform/support/errors',
     texts: [
       'Fejl',
       'Sidste 24 timer',
@@ -583,9 +583,9 @@ const SCREENS: Screen[] = [
   {
     board: 'MP12-Platformbrugere',
     user: 'kasper',
-    path: '/platform/users',
+    path: '/platform/admin/users',
     texts: [
-      'Platformbrugere',
+      'Brugere',
       /^\d+ medarbejdere$/,
       'Kun Superadmin kan se og ændre denne side',
       'Kasper Nyborg',
@@ -603,7 +603,7 @@ const SCREENS: Screen[] = [
   {
     board: 'MP13-Sager-Arkiv',
     user: 'anne',
-    path: '/platform/cases/archive',
+    path: '/platform/support/cases?view=archive',
     texts: [
       'Arkiv',
       /^\d+ (løst sag|løste og lukkede sager)$/,
@@ -617,9 +617,9 @@ const SCREENS: Screen[] = [
   {
     board: 'MP15-Min-tid',
     user: 'anne',
-    path: '/platform/time',
+    path: '/platform/support/time',
     texts: [
-      'Min tid',
+      'Tidsforbrug',
       /^Uge \d+ · /,
       'Din tid i dag',
       'Denne uge',
@@ -672,7 +672,7 @@ const SCREENS: Screen[] = [
     user: 'kasper',
     path: '/platform/finance/support',
     texts: [
-      'Supportafregning',
+      'Support',
       /kr\.\/t inkl\. moms$/,
       /^Perioden lukkes /,
       'Til afregning',
@@ -712,9 +712,9 @@ const SCREENS: Screen[] = [
   {
     board: 'MP22-Betalinger',
     user: 'kasper',
-    path: '/platform/finance/payments',
+    path: '/platform/finance/invoicing',
     texts: [
-      'Fakturaer og betalinger',
+      'Fakturering',
       'Beløb inkl. moms',
       /^Faktureret i /,
       'Forfaldent',
@@ -726,7 +726,7 @@ const SCREENS: Screen[] = [
   {
     board: 'MP23-Rapporter',
     user: 'kasper',
-    path: '/platform/finance/reports',
+    path: '/platform/admin/reports/revenue',
     texts: [
       'Rapporter',
       'Pr. måned',

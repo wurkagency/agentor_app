@@ -122,7 +122,7 @@ export default async function OverdueInvoicesPage() {
   return (
     <Responsive
       mobile={mobile}
-      desktop={<DesktopRedirect href="/platform/finance/payments" label={tf('tab.payments')} />}
+      desktop={<DesktopRedirect href="/platform/finance/invoicing" label={tf('tab.invoicing')} />}
     />
   );
 }

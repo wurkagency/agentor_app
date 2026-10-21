@@ -134,7 +134,7 @@ test('@mobile offline shows the last overview with the grey banner', async ({ pa
 
 test('@mobile MP03 → stop timer → MP04 → save 15 min.', async ({ page }) => {
   await login(page, 'anne');
-  await page.goto('/platform/cases');
+  await page.goto('/platform/support/cases');
   await page
     .getByRole('link', { name: /Fakturaer til EU-kunder fejler/ })
     .filter({ visible: true })

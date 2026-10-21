@@ -10,6 +10,33 @@ if (process.env.NODE_ENV !== 'production' && existsSync(rootEnv)) process.loadEn
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
+/** Old Platform URLs → sitemap v2. Kept for one release (PLAN-2026-10-21 §3.2). */
+export const PLATFORM_REDIRECTS: [string, string][] = [
+  ['/platform/cases', '/platform/support/cases?view=board'],
+  ['/platform/cases/list', '/platform/support/cases?view=list'],
+  ['/platform/cases/archive', '/platform/support/cases?view=archive'],
+  ['/platform/cases/archive/export', '/platform/support/cases/export'],
+  ['/platform/cases/:id', '/platform/support/cases/:id'],
+  ['/platform/cases/:id/resolve', '/platform/support/cases/:id/resolve'],
+  ['/platform/customers/mine', '/platform/support/access?filter=mine'],
+  ['/platform/customers/recent', '/platform/customers'],
+  ['/platform/errors', '/platform/support/errors'],
+  ['/platform/time', '/platform/support/time'],
+  ['/platform/time/team', '/platform/support/time?scope=team'],
+  ['/platform/time/customers', '/platform/support/time?scope=customer'],
+  ['/platform/time/export', '/platform/support/time/export'],
+  ['/platform/status', '/platform/admin/status'],
+  ['/platform/users', '/platform/admin/users'],
+  ['/platform/users/roles', '/platform/admin/users'],
+  ['/platform/users/audit', '/platform/admin/users/audit'],
+  ['/platform/settings', '/platform/admin/product'],
+  ['/platform/finance/payments', '/platform/finance/invoicing'],
+  ['/platform/finance/payments/export', '/platform/finance/invoicing/export'],
+  ['/platform/finance/reports', '/platform/admin/reports/legacy'],
+  ['/platform/finance/reports/export', '/platform/admin/reports/legacy?format=csv'],
+  ['/platform/finance/reports/pdf', '/platform/admin/reports/legacy?format=pdf'],
+];
+
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
@@ -23,6 +50,15 @@ const config: NextConfig = {
   devIndicators: false,
   // Database driver and repositories run as plain Node modules on the server.
   serverExternalPackages: ['@agentor/db', '@agentor/jobs', 'bullmq', 'pg', '@node-rs/argon2'],
+  // Platform sitemap v2 (README decision 24): the old URLs answer 308 for one release. The query
+  // string is passed on. Finans/Administration still answer 404 for a Supporter at the new URL.
+  redirects: async () => [
+    ...PLATFORM_REDIRECTS.map(([source, destination]) => ({
+      source,
+      destination,
+      permanent: true,
+    })),
+  ],
 };
 
 export default withNextIntl(config);

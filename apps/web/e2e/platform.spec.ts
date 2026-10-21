@@ -14,27 +14,25 @@ async function as(browser: Browser, user: Parameters<typeof login>[1]): Promise<
   return page;
 }
 
-test('Supporter sees customers but not Platformbrugere', async ({ page }) => {
+test('Supporter sees customers but not Administration › Brugere', async ({ page }) => {
   await login(page, 'anne');
   await page.goto('/platform/customers');
   await expect(page.getByRole('link', { name: 'Nordlys Cykler ApS' }).first()).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Platformbrugere' })).toHaveCount(0);
-  await page.goto('/platform/users');
-  await expect(
-    page.getByText('Du har ikke adgang til denne side').filter({ visible: true }),
-  ).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Administration' })).toHaveCount(0);
+  const res = await page.goto('/platform/admin/users');
+  expect(res?.status()).toBe(404);
 });
 
 test('Superadmin manages platform users', async ({ page }) => {
   await login(page, 'kasper');
-  await page.goto('/platform/users');
-  await expect(page.getByRole('heading', { name: 'Platformbrugere og roller' })).toBeVisible();
+  await page.goto('/platform/admin/users');
+  await expect(page.getByRole('heading', { name: 'Brugere', exact: true })).toBeVisible();
   await expect(page.getByText('anne@agentor.test').filter({ visible: true })).toBeVisible();
 });
 
 test('a customer never sees internal notes', async ({ browser, page }) => {
   await login(page, 'anne');
-  await page.goto('/platform/cases/list');
+  await page.goto('/platform/support/cases?view=list');
   await page.getByRole('link', { name: EU_CASE }).click();
   await expect(page.getByRole('heading', { name: EU_CASE })).toBeVisible();
 
@@ -79,7 +77,7 @@ test('a customer opens a case and support sees it', async ({ browser, page }) =>
   await customer.context().close();
 
   await login(page, 'anne');
-  await page.goto('/platform/cases/list');
+  await page.goto('/platform/support/cases?view=list');
   await expect(page.getByRole('link', { name: 'E2E: lagertal opdateres ikke' })).toBeVisible();
 });
 

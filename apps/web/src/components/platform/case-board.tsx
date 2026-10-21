@@ -5,8 +5,8 @@ import { FilterChip, Icon, SearchInput, cn, toast } from '@agentor/ui';
 import { Archive, CircleX, MessageCircle, Plus, Timer, X } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useMemo, useState, useTransition, type DragEvent } from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState, useTransition, type DragEvent } from 'react';
 import { updateCaseAction } from '@/app/platform/actions';
 import { FilterMenu } from '../filter-menu';
 import {
@@ -65,12 +65,35 @@ export function CaseBoard({
   const tco = useTranslations('common');
   const locale = useLocale() as Locale;
   const router = useRouter();
-  const [q, setQ] = useState('');
-  const [mine, setMine] = useState(false);
-  const [unassigned, setUnassigned] = useState(false);
-  const [priority, setPriority] = useState<Priority | null>(null);
-  const [customer, setCustomer] = useState<string | null>(null);
-  const [category, setCategory] = useState<string | null>(null);
+  // The filters live in the URL, so a filtered board can be shared and survives a reload.
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const setParam = (key: string, value: string | null) => {
+    const next = new URLSearchParams(params.toString());
+    if (value) next.set(key, value);
+    else next.delete(key);
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+  };
+  const [q, setQ] = useState(params.get('q') ?? '');
+  useEffect(() => {
+    const id = setTimeout(() => {
+      if ((params.get('q') ?? '') !== q.trim()) setParam('q', q.trim() || null);
+    }, 300);
+    return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q]);
+  const mine = params.get('mine') === '1';
+  const unassigned = params.get('unassigned') === '1';
+  const priorityParam = params.get('priority');
+  const priority =
+    (['critical', 'high', 'normal', 'low'] as const).find((p) => p === priorityParam) ?? null;
+  const customer = params.get('customer');
+  const category = params.get('category');
+  const setMine = (on: boolean) => setParam('mine', on ? '1' : null);
+  const setUnassigned = (on: boolean) => setParam('unassigned', on ? '1' : null);
+  const setPriority = (v: Priority | null) => setParam('priority', v);
+  const setCustomer = (v: string | null) => setParam('customer', v);
+  const setCategory = (v: string | null) => setParam('category', v);
   const [dragging, setDragging] = useState<string | null>(null);
   const [over, setOver] = useState<CaseStatusKey | null>(null);
   const [local, setLocal] = useState<Record<string, CaseStatusKey>>({});
@@ -146,7 +169,7 @@ export function CaseBoard({
           <PriorityBadge priority={c.priority} />
         </div>
         <Link
-          href={`/platform/cases/${c.id}`}
+          href={`/platform/support/cases/${c.id}`}
           className="text-body font-semibold text-fg-1 no-underline hover:underline"
         >
           {c.title}
@@ -284,7 +307,7 @@ export function CaseBoard({
                 <ul className="m-0 flex list-none flex-col gap-3 p-0">{shown.map(card)}</ul>
                 {col === 'resolved' && (
                   <Link
-                    href="/platform/cases/archive"
+                    href="/platform/support/cases?view=archive"
                     className="flex h-10 items-center justify-center gap-2 rounded-full text-table font-semibold text-fg-1 no-underline shadow-ring-chip"
                   >
                     <Icon icon={Archive} size={16} />

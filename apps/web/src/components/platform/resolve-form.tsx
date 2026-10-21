@@ -90,7 +90,7 @@ export function ResolveForm({
         </div>
         <span className="flex flex-wrap items-center gap-3">
           <Button variant="secondary" size="m" asChild>
-            <a href={`/platform/cases/${caseId}`}>{t('cancel')}</a>
+            <a href={`/platform/support/cases/${caseId}`}>{t('cancel')}</a>
           </Button>
           <Button variant="secondary" size="m" disabled={pending} onClick={() => submit(false)}>
             {t('resolveOnly')}

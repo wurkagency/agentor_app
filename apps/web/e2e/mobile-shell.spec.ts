@@ -174,11 +174,13 @@ test.describe('@mobile responsive switch', () => {
     });
   });
 
-  test('Platform tab bar: Finans only for Superadmin', async ({ page }) => {
+  test('Platform tabs per role, Profil last (README decisions 24 and 25)', async ({ page }) => {
     await login(page, 'kasper');
     await page.goto('/platform/customers');
     const tabs = page.getByRole('navigation', { name: 'Hovedmenu' });
-    await expect(tabs.getByRole('link', { name: 'Finans' })).toBeVisible();
+    await expect(tabs.getByRole('link')).toHaveCount(5);
+    for (const [i, name] of ['Kunder', 'Support', 'Finans', 'Admin', 'Profil'].entries())
+      await expect(tabs.getByRole('link').nth(i)).toHaveAccessibleName(name);
     await expect(tabs.getByRole('link', { name: 'Kunder' })).toHaveAttribute(
       'aria-current',
       'page',
@@ -186,11 +188,12 @@ test.describe('@mobile responsive switch', () => {
     await page.context().clearCookies();
     await login(page, 'anne');
     await page.goto('/platform/customers');
-    await expect(tabs.getByRole('link', { name: 'Kunder' })).toBeVisible();
-    await expect(tabs.getByRole('link', { name: 'Finans' })).toHaveCount(0);
-    // And the route itself stays closed (same server check as desktop).
-    const res = await page.goto('/platform/finance/reports');
-    expect(res?.status()).toBe(403);
+    await expect(tabs.getByRole('link')).toHaveCount(3);
+    for (const [i, name] of ['Kunder', 'Support', 'Profil'].entries())
+      await expect(tabs.getByRole('link').nth(i)).toHaveAccessibleName(name);
+    // And the routes themselves don't exist for a Supporter (same server check as desktop).
+    const res = await page.goto('/platform/admin/reports/revenue');
+    expect(res?.status()).toBe(404);
   });
 });
 
@@ -230,10 +233,10 @@ test.describe('@mobile top bar on every screen', () => {
     await login(page, 'kasper');
     for (const path of [
       '/platform/customers',
-      '/platform/cases',
-      '/platform/errors',
+      '/platform/support/cases',
+      '/platform/support/errors',
       '/platform/finance',
-      '/platform/time',
+      '/platform/support/time',
     ]) {
       await page.goto(path);
       const bars = visibleBars(page);

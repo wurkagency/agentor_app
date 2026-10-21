@@ -13,7 +13,5 @@ export default async function CustomersPage({
 }) {
   const sp = await searchParams;
   const filter = sp.filter === 'attention' || sp.filter === 'mine' ? sp.filter : 'all';
-  return (
-    <CustomersView view="all" query={sp.q ?? ''} expired={sp.expired === '1'} filter={filter} />
-  );
+  return <CustomersView query={sp.q ?? ''} expired={sp.expired === '1'} filter={filter} />;
 }

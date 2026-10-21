@@ -239,14 +239,14 @@ export default async function FinanceOverview({
         actions={
           <>
             <ButtonLink
-              href="/platform/finance/payments/export"
+              href="/platform/finance/invoicing/export"
               variant="secondary"
               prefetch={false}
             >
               <Icon icon={Download} size={16} />
               {t('export')}
             </ButtonLink>
-            <ButtonLink href="/platform/finance/reports" variant="primary" size="l">
+            <ButtonLink href="/platform/admin/reports/revenue" variant="primary" size="l">
               <Icon icon={FileText} size={16} />
               {t('monthlyReport')}
             </ButtonLink>

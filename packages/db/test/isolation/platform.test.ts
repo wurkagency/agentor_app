@@ -139,6 +139,90 @@ describe('staff without a grant', () => {
   });
 });
 
+describe('sitemap v2: Support › Adgange and Fejl (0046)', () => {
+  it('non-staff can call neither function', async () => {
+    const owner = { as: 'web' as const, user: ID.userAOwner, tenant: ID.tenantA };
+    const r = await steps([
+      { ...owner, sql: 'select * from app.platform_grants()' },
+      {
+        ...owner,
+        sql: `select * from app.platform_error_codes_range(now() - interval '2 days', now() - interval '1 day', now())`,
+      },
+    ]);
+    expect(r[0]!.error?.message).toContain('NOT_STAFF');
+    expect(r[1]!.error?.message).toContain('NOT_STAFF');
+  });
+
+  it('lists every staff grant with its state, but only counts and names, never customer data', async () => {
+    const r = await steps([
+      makeStaff(),
+      request(),
+      { as: 'web', user: STAFF, sql: 'select * from app.platform_grants()' },
+      approve,
+      {
+        as: 'web',
+        user: STAFF,
+        sql: 'select state, actions from app.platform_grants() where staff_user_id = $1',
+        values: [STAFF],
+      },
+      {
+        as: 'web',
+        user: STAFF,
+        sql: `select * from app.platform_error_codes_range(now() - interval '2 days', now() - interval '1 day', now())`,
+      },
+    ]);
+    const rows = r[2]!.rows!.filter((x) => x.staff_user_id === STAFF);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]!.state).toBe('pending');
+    expect(rows[0]!.staff_user_id).toBe(STAFF);
+    expect(Object.keys(rows[0]!).sort()).toEqual(
+      [
+        'grant_id',
+        'tenant_id',
+        'tenant_name',
+        'tenant_cvr',
+        'staff_user_id',
+        'staff_name',
+        'case_id',
+        'case_ref',
+        'case_number',
+        'case_title',
+        'scope',
+        'state',
+        'approved_by_name',
+        'requested_at',
+        'approved_at',
+        'expires_at',
+        'closed_at',
+        'extension_requested_at',
+        'actions',
+      ].sort(),
+    );
+    expect(r[4]!.rows![0]!.state).toBe('active');
+    expect(r[5]!.error).toBeUndefined();
+    expect(Object.keys(r[5]!.rows![0] ?? { error_code: 1 })).not.toContain('payload');
+  });
+
+  it("hides another staff member's direct Superadmin opening", async () => {
+    const r = await steps([
+      makeStaff(),
+      {
+        as: 'admin',
+        sql: `insert into support_access_grants (tenant_id, case_ref, reason, support_name, staff_user_id, scope, hours, superadmin, approved_at, expires_at)
+              values ($1, 'Superadmin', 'Direkte', 'Kasper', $2, 'help', 24, true, now(), now() + interval '1 hour')`,
+        values: [ID.tenantA, ID.userAOwner],
+      },
+      {
+        as: 'web',
+        user: STAFF,
+        sql: `select count(*)::int as n from app.platform_grants() where case_ref = 'Superadmin'`,
+      },
+    ]);
+    expect(r[1]!.error).toBeUndefined();
+    expect(r[2]!.rows![0]!.n).toBe(0);
+  });
+});
+
 describe('a support grant', () => {
   it('opens nothing until the customer approves', async () => {
     const r = await steps([

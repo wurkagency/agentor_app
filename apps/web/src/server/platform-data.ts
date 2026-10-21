@@ -1,4 +1,11 @@
-import { caseStats, errorGroups, listCustomers, listPlans, type CustomerRow } from '@agentor/db';
+import {
+  caseStats,
+  errorGroups,
+  errorGroupsBetween,
+  listCustomers,
+  listPlans,
+  type CustomerRow,
+} from '@agentor/db';
 import { formatMinutes, type Locale } from '@agentor/i18n';
 import { cache } from 'react';
 import { db } from './infra';
@@ -22,6 +29,11 @@ export const statsFor = cache(async (userId: string) => caseStats(db(), userId))
 
 export const errorsFor = cache(async (userId: string, days: number) =>
   errorGroups(db(), userId, days),
+);
+
+/** Fejl for a chosen Fra/til period [from, to) (S7). */
+export const errorsBetween = cache(async (userId: string, from: Date, to: Date) =>
+  errorGroupsBetween(db(), userId, from, to),
 );
 
 /** The short status lines in the gear menu (P1-Kunder-Menu). */

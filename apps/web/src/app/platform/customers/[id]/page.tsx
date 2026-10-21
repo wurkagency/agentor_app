@@ -262,7 +262,7 @@ export default async function CustomerPage({
               <>
                 <CardHeader
                   title={
-                    <Link href={`/platform/cases/${latest.id}`} className="text-fg-1">
+                    <Link href={`/platform/support/cases/${latest.id}`} className="text-fg-1">
                       {t('caseTitle', { n: latest.number })}
                     </Link>
                   }
@@ -306,7 +306,10 @@ export default async function CustomerPage({
                   <Tr key={c.id}>
                     <Td className="pl-5 font-mono text-mono">#{c.number}</Td>
                     <Td>
-                      <Link href={`/platform/cases/${c.id}`} className="font-semibold text-fg-1">
+                      <Link
+                        href={`/platform/support/cases/${c.id}`}
+                        className="font-semibold text-fg-1"
+                      >
                         {c.title}
                       </Link>
                     </Td>

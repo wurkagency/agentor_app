@@ -3,12 +3,13 @@
 import { cn } from '@agentor/ui';
 import {
   Activity,
-  CircleX,
+  CircleUserRound,
   CreditCard,
+  Headphones,
   House,
-  Kanban,
   Menu,
   Search,
+  Settings,
   Users,
   Workflow,
 } from 'lucide-react';
@@ -108,7 +109,7 @@ export function PlatformTopBar({ back, bell = true, fallback = false, ...rest }:
       {...(bell
         ? {
             bell: {
-              href: '/platform/cases?filter=mine',
+              href: '/platform/support/cases?filter=mine',
               count: attention.count,
               severe: attention.severe,
               label: t('platformBell', { count: attention.count }),
@@ -153,7 +154,10 @@ export function AppTabBar({ className }: { className?: string }) {
   );
 }
 
-/** Kunder, Sager, Fejl, and Finans for Superadmin only (README decision 18). */
+/**
+ * Platform tabs (README decisions 24 and 25): Superadmin Kunder · Support · Finans · Admin ·
+ * Profil, Supporter Kunder · Support · Profil. Profil is always last.
+ */
 export function PlatformTabBar({ className }: { className?: string }) {
   const t = useTranslations('mobile.tabs');
   const path = usePathname();
@@ -168,11 +172,14 @@ export function PlatformTabBar({ className }: { className?: string }) {
       className={cn('md:hidden', className)}
       items={[
         { key: 'customers', href: '/platform/customers', label: t('customers'), icon: Users },
-        { key: 'cases', href: '/platform/cases', label: t('cases'), icon: Kanban },
-        { key: 'errors', href: '/platform/errors', label: t('errors'), icon: CircleX },
+        { key: 'support', href: '/platform/support/cases', label: t('support'), icon: Headphones },
         ...(superadmin
-          ? [{ key: 'finance', href: '/platform/finance', label: t('finance'), icon: CreditCard }]
+          ? [
+              { key: 'finance', href: '/platform/finance', label: t('finance'), icon: CreditCard },
+              { key: 'admin', href: '/platform/admin/status', label: t('admin'), icon: Settings },
+            ]
           : []),
+        { key: 'profile', href: '/platform/profile', label: t('profile'), icon: CircleUserRound },
       ]}
     />
   );

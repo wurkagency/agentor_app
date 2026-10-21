@@ -11,10 +11,8 @@ test('Supporters and customers never see Finans', async ({ browser, page }) => {
   await login(page, 'anne');
   await page.goto('/platform/customers');
   await expect(page.getByRole('link', { name: 'Finans' })).toHaveCount(0);
-  await page.goto('/platform/finance');
-  await expect(
-    page.getByText('Du har ikke adgang til denne side').filter({ visible: true }),
-  ).toBeVisible();
+  // README decision 24: Finans doesn't exist for a Supporter (404, not 403).
+  expect((await page.goto('/platform/finance'))?.status()).toBe(404);
 
   const customer = await (await browser.newContext()).newPage();
   await login(customer, 'jonas');
@@ -58,7 +56,7 @@ test('subscriptions filter and a discount', async ({ page }) => {
 test('support is drafted per case, rounded per registration, and approved', async ({ page }) => {
   await login(page, 'kasper');
   await page.goto('/platform/finance/support');
-  await expect(page.getByRole('heading', { name: /^Supportafregning · / })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /^Support · / })).toBeVisible();
   await page.getByRole('button', { name: 'Forhåndsvis fakturaer' }).click();
   await expect(page.getByRole('heading', { name: /^Supportfaktura · / })).toBeVisible();
 
@@ -93,7 +91,7 @@ test('support is drafted per case, rounded per registration, and approved', asyn
 
 test('a reminder and a payment link go to the customer by e-mail', async ({ page }) => {
   await login(page, 'kasper');
-  await page.goto('/platform/finance/payments');
+  await page.goto('/platform/finance/invoicing');
   const hav = page.getByRole('row', { name: new RegExp(PLATFORM_TENANTS.hav.name) }).first();
   await hav.getByRole('button', { name: 'Send rykker' }).click();
   await expect(
@@ -114,12 +112,12 @@ test('a reminder and a payment link go to the customer by e-mail', async ({ page
 
 test('the monthly report exports and goes to the bookkeeper', async ({ page }) => {
   await login(page, 'kasper');
-  await page.goto('/platform/finance/reports');
+  await page.goto('/platform/admin/reports/revenue');
   await expect(page.getByRole('region', { name: 'Omsætning i alt' })).toBeVisible();
-  const csv = await page.request.get('/platform/finance/reports/export');
+  const csv = await page.request.get('/platform/admin/reports/revenue/export.csv');
   expect(csv.status()).toBe(200);
   expect(await csv.text()).toContain('Omsætning ekskl. moms');
-  const pdf = await page.request.get('/platform/finance/reports/pdf');
+  const pdf = await page.request.get('/platform/admin/reports/revenue/export.pdf');
   expect(pdf.headers()['content-type']).toBe('application/pdf');
   await page.getByRole('button', { name: 'Send til bogholder' }).click();
   await expect(
@@ -129,9 +127,9 @@ test('the monthly report exports and goes to the bookkeeper', async ({ page }) =
   expect(mail.subject).toMatch(/^Agentor · månedsrapport /);
 });
 
-test('Superadmin edits a plan in Platformindstillinger', async ({ page }) => {
+test('Superadmin edits a plan in Administration › Produkt', async ({ page }) => {
   await login(page, 'kasper');
-  await page.goto('/platform/settings');
+  await page.goto('/platform/admin/product');
   await page.getByRole('button', { name: 'Redigér Startup' }).click();
   const dialog = page.getByRole('dialog', { name: 'Plan: Startup' });
   await dialog.getByLabel('Brugere').fill('3');

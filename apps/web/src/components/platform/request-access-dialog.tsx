@@ -34,12 +34,15 @@ const NEW_CASE = 'new';
  * scope. Without an open case the reason becomes a new case, so access is always tied to one.
  */
 export function RequestAccessDialog({
-  target,
+  target: initial,
+  choices,
   open,
   onOpenChange,
   defaultCaseId,
 }: {
   target: AccessTarget;
+  /** Support › Adgange (S9): the customer is picked in the dialog from these. */
+  choices?: AccessTarget[] | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultCaseId?: string | undefined;
@@ -47,7 +50,8 @@ export function RequestAccessDialog({
   const t = useTranslations('platform.access');
   const tc = useTranslations('common');
   const router = useRouter();
-  const [caseId, setCaseId] = useState(defaultCaseId ?? target.cases[0]?.id ?? NEW_CASE);
+  const [target, setTarget] = useState(initial);
+  const [caseId, setCaseId] = useState(defaultCaseId ?? initial.cases[0]?.id ?? NEW_CASE);
   const [reason, setReason] = useState('');
   const [hours, setHours] = useState<'1' | '8' | '24'>('8');
   const [scope, setScope] = useState<'view' | 'help'>('help');
@@ -127,6 +131,23 @@ export function RequestAccessDialog({
         <Banner tone="info">{t('noApproval')}</Banner>
       )}
       {error && <Banner tone="error">{error}</Banner>}
+      {choices && choices.length > 1 && (
+        <Field label={t('customer')} inline>
+          {({ id }) => (
+            <Select
+              id={id}
+              value={target.tenantId}
+              onValueChange={(v) => {
+                const next = choices.find((c) => c.tenantId === v);
+                if (!next) return;
+                setTarget(next);
+                setCaseId(next.cases[0]?.id ?? NEW_CASE);
+              }}
+              options={choices.map((c) => ({ value: c.tenantId, label: c.name }))}
+            />
+          )}
+        </Field>
+      )}
       <Field label={t('case')} inline>
         {({ id }) => (
           <Select

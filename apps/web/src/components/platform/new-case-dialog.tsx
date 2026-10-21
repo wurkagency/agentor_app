@@ -52,7 +52,7 @@ export function NewCaseDialog({
                 const res = await createCaseAction({ tenantId, title, body, priority, category });
                 if (!res.ok) return setError(true);
                 onClose();
-                router.push(`/platform/cases/${res.data!.id}`);
+                router.push(`/platform/support/cases/${res.data!.id}`);
               })
             }
           >

@@ -73,6 +73,25 @@ export function parseMonth(value: string | undefined, now = new Date()): Month {
   return diff >= 0 && diff <= 24 ? monthOf(y, mo) : cur;
 }
 
+/**
+ * The month a report shows, from ?from=YYYY-MM-DD (Administration › Rapporter, README decision
+ * 24) or the older ?month=YYYY-MM.
+ */
+export function monthFromQuery(
+  q: { from?: string | null | undefined; month?: string | null | undefined },
+  now = new Date(),
+): Month | null {
+  const key = q.from ? q.from.slice(0, 7) : q.month;
+  return key ? parseMonth(key, now) : null;
+}
+
+/** ?from=&to= for a whole month, as the report links and exports use. */
+export function monthQuery(m: Month): string {
+  const last = new Date(Date.UTC(m.year, m.month, 0)).getUTCDate();
+  const mm = String(m.month).padStart(2, '0');
+  return `from=${m.year}-${mm}-01&to=${m.year}-${mm}-${String(last).padStart(2, '0')}`;
+}
+
 export const monthsBack = (to: Month, n: number) =>
   Array.from({ length: n }, (_, i) => shiftMonth(to, i - n + 1));
 

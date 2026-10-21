@@ -226,7 +226,7 @@ export async function endSupportViewAction(
   revalidatePath('/platform', 'layout');
   redirect(
     parsed.data.caseId
-      ? `/platform/cases/${parsed.data.caseId}`
+      ? `/platform/support/cases/${parsed.data.caseId}`
       : `/platform/customers/${session.tenantId}`,
   );
 }
@@ -264,7 +264,7 @@ export async function createCaseAction(input: {
     .safeParse(input);
   if (!parsed.success) return { ok: false, error: 'invalid' };
   const id = await createCase(db(), actor, { ...parsed.data, assignToMe: true });
-  revalidatePath('/platform/cases');
+  revalidatePath('/platform/support/cases');
   return { ok: true, data: { id } };
 }
 
@@ -302,7 +302,7 @@ export async function updateCaseAction(
   } catch (e) {
     return fail(e);
   }
-  revalidatePath('/platform/cases', 'layout');
+  revalidatePath('/platform/support/cases', 'layout');
   return { ok: true };
 }
 
@@ -330,7 +330,7 @@ export async function addCaseEventAction(
   } catch (e) {
     return fail(e);
   }
-  revalidatePath(`/platform/cases/${caseId}`);
+  revalidatePath(`/platform/support/cases/${caseId}`);
   return { ok: true };
 }
 
@@ -338,7 +338,7 @@ export async function followCaseAction(caseId: string, follow: boolean): Promise
   const { actor } = await requireStaff();
   if (!isUuid(caseId)) return { ok: false, error: 'invalid' };
   await followCase(db(), actor, caseId, follow);
-  revalidatePath(`/platform/cases/${caseId}`);
+  revalidatePath(`/platform/support/cases/${caseId}`);
   return { ok: true };
 }
 
@@ -433,7 +433,7 @@ export async function linkSessionAction(sessionId: string, caseId: string): Prom
   } catch (e) {
     return fail(e);
   }
-  revalidatePath('/platform/time');
+  revalidatePath('/platform/support/time');
   return { ok: true };
 }
 
@@ -500,8 +500,8 @@ export async function resolveCaseAction(
         text: text.replace('{name}', person.name.split(' ')[0] ?? person.name),
       }).catch(() => undefined);
   }
-  revalidatePath('/platform/cases', 'layout');
-  redirect(`/platform/cases/${caseId}`);
+  revalidatePath('/platform/support/cases', 'layout');
+  redirect(`/platform/support/cases/${caseId}`);
 }
 
 function caseEmail(
@@ -572,7 +572,7 @@ export async function upsertStaffAction(input: {
   } catch (e) {
     return fail(e);
   }
-  revalidatePath('/platform/users', 'layout');
+  revalidatePath('/platform/admin/users', 'layout');
   return { ok: true };
 }
 
@@ -584,7 +584,7 @@ export async function disableStaffAction(userId: string): Promise<ActionResult> 
   } catch (e) {
     return fail(e);
   }
-  revalidatePath('/platform/users', 'layout');
+  revalidatePath('/platform/admin/users', 'layout');
   return { ok: true };
 }
 

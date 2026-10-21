@@ -7,7 +7,7 @@ import {
 } from '@agentor/db';
 
 import { cookies, headers } from 'next/headers';
-import { forbidden, redirect } from 'next/navigation';
+import { forbidden, notFound, redirect } from 'next/navigation';
 import { cache } from 'react';
 import { requireUser, type UserSession } from './auth/session';
 import { db } from './infra';
@@ -32,13 +32,16 @@ export interface StaffContext {
   actor: StaffActor;
 }
 
-/** Staff gate for /platform. Superadmin-only pages pass superadmin: true. */
+/**
+ * Staff gate for /platform. Superadmin-only areas (Finans, Administration: README decision 24)
+ * pass superadmin: true, and a Supporter gets 404 there, so the routes don't reveal they exist.
+ */
 export const requireStaff = cache(async (superadmin = false): Promise<StaffContext> => {
   const session = await requireUser();
   const role = await staffRole(session.user.id);
   if (!role) forbidden();
   if (!session.user.twoFactorEnabled) redirect('/login/mfa/setup');
-  if (superadmin && role !== 'superadmin') forbidden();
+  if (superadmin && role !== 'superadmin') notFound();
   return { session, actor: { userId: session.user.id, name: session.user.name, role } };
 });
 

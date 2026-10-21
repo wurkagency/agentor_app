@@ -123,7 +123,7 @@ export async function FinanceMobile({ d }: { d: FinanceMobileData }) {
           }
         />
         <RowLink
-          href="/platform/finance/reports"
+          href="/platform/admin/reports/revenue"
           linkAs={Link}
           title={t('ytd')}
           trailing={
@@ -170,14 +170,14 @@ export async function FinanceMobile({ d }: { d: FinanceMobileData }) {
           meta={t('settlementMeta', { month: d.monthName, amount: d.supportGross })}
         />
         <RowLink
-          href="/platform/finance/payments"
+          href="/platform/finance/invoicing"
           linkAs={Link}
           leading={<RowIcon icon={ReceiptText} />}
           title={t('payments')}
           meta={t('paymentsMeta', { amount: d.overdue })}
         />
         <RowLink
-          href="/platform/finance/reports"
+          href="/platform/admin/reports/revenue"
           linkAs={Link}
           leading={<RowIcon icon={BarChart3} />}
           title={t('reports')}

@@ -1690,17 +1690,8 @@
     "badge": "Platform",
     "nav": "Platform",
     "search": "Search customer or CVR",
-    "account": "Account: {name}",
+    "account": "Profile and settings",
     "logout": "Log out",
-    "section": {
-      "customers": "Customers",
-      "cases": "Support cases",
-      "errors": "Errors",
-      "time": "Time",
-      "finance": "Finance",
-      "status": "System status",
-      "users": "Platform users"
-    },
     "role": {
       "superadmin": "Superadmin",
       "supporter": "Supporter"
@@ -1728,9 +1719,6 @@
     },
     "customers": {
       "nav": "Customers",
-      "all": "All customers",
-      "mine": "My access",
-      "recent": "Recent",
       "title": "Customers",
       "intro": "You only see name, plan and overall status. Customer data needs support access, which lasts at most 24 hours and is logged in the customer's audit log.",
       "export": "Export list",
@@ -1931,7 +1919,8 @@
       "errors": {
         "generic": "The request wasn't sent. Try again.",
         "reason": "Write a reason for the customer."
-      }
+      },
+      "customer": "Customer"
     },
     "case": {
       "status": {
@@ -2029,12 +2018,12 @@
       "waitingDays": "Waiting {count, plural, one {# day} other {# days}}"
     },
     "cases": {
-      "nav": "Support cases",
+      "nav": "Cases",
       "board": "Board",
       "list": "List",
       "archive": "Archive",
       "myTimeToday": "Your time today",
-      "title": "Support cases",
+      "title": "Cases",
       "intro": "Drag a card to another column to change its status. The customer is told when a case is resolved.",
       "new": "New case",
       "createShort": "Create case",
@@ -2064,7 +2053,12 @@
       "notesTitle": "Internal notes",
       "archivedAfter": "Archived after 14 days",
       "moreArchive": "See {count} more and the archive",
-      "moved": "#{n} moved to {status}"
+      "moved": "#{n} moved to {status}",
+      "viewLabel": "Case view",
+      "viewBoard": "Board",
+      "viewList": "List",
+      "viewArchive": "Archive · {count}",
+      "showing": "Showing {view}"
     },
     "archive": {
       "title": "Archive",
@@ -2094,10 +2088,10 @@
       "footer": "Showing {shown} of {total} cases · {time} in total"
     },
     "errors": {
-      "title": "Errors across customers",
+      "title": "Errors",
       "intro": "Errors grouped by error code. When the same error hits several customers, it is usually a change at the system, not at the customer. Counts only, never customer data.",
       "period": "Period",
-      "p24h": "Last 24 hours",
+      "p24h": "24 hours",
       "p7d": "7 days",
       "p30d": "30 days",
       "statTypes": "Error types",
@@ -2135,11 +2129,17 @@
         "DESTINATION_ERROR": "The destination rejected the record",
         "CONNECTION_BROKEN": "The connection is disconnected"
       },
-      "statNew": "{count} new"
+      "statNew": "{count} new",
+      "from": "From",
+      "to": "to",
+      "apply": "Show",
+      "showing": "Showing {period}",
+      "rangeLabel": "{from} – {to}",
+      "rangeInvalid": "From must be before to, and the period can be at most 90 days."
     },
     "time": {
-      "nav": "Time",
-      "title": "My time",
+      "nav": "Time spent",
+      "title": "Time spent",
       "team": "Team",
       "teamTitle": "Team time",
       "perCustomer": "Per customer",
@@ -2218,14 +2218,18 @@
       "colPlan": "Plan",
       "colBillable": "Billable",
       "colAmount": "Amount",
-      "colInvoiced": "Invoiced"
+      "colInvoiced": "Invoiced",
+      "scopeMe": "My time",
+      "scopeTeam": "Team",
+      "scopeCustomer": "Per customer",
+      "showing": "Showing {scope}"
     },
     "users": {
-      "nav": "Platform users",
+      "nav": "Users",
       "staff": "Staff",
       "rolesTab": "Roles",
       "audit": "Platform audit log",
-      "title": "Platform users and roles",
+      "title": "Users",
       "intro": "Agentor's own staff. Only Superadmin can see and change this page. Two-step login is required.",
       "invite": "Invite staff member",
       "inviteHelp": "The staff member needs an Agentor login already.",
@@ -2305,7 +2309,8 @@
         "settings_updated": "Changed settings"
       },
       "bookkeeper": "Bookkeeper e-mail",
-      "bookkeeperHelp": "The monthly report from Finance is sent here."
+      "bookkeeperHelp": "The monthly report from Finance is sent here.",
+      "auditLink": "Platform audit log"
     },
     "settings": {
       "title": "Platform settings",
@@ -2460,13 +2465,6 @@
       "title": "Finance",
       "intro": "Subscriptions, support and payments for all customers. Amounts are ex. VAT unless stated.",
       "openPeriod": "{month} · open period until",
-      "tab": {
-        "overview": "Overview",
-        "subscriptions": "Subscriptions",
-        "support": "Support billing",
-        "payments": "Invoices and payments",
-        "reports": "Reports"
-      },
       "export": "Export",
       "monthlyReport": "Monthly report",
       "perMonth": "/ mo.",
@@ -2805,7 +2803,8 @@
         "share": "Share",
         "perStaff": "Time per supporter",
         "autoShare": "{pct} % logged automatically",
-        "total": "Total"
+        "total": "Total",
+        "title": "Reports"
       },
       "actions": {
         "sent": "Sent to {email}",
@@ -2815,7 +2814,84 @@
           "NO_BOOKKEEPER": "Set the bookkeeper's e-mail in Platform settings.",
           "NOT_FOUND": "The invoice is no longer open."
         }
+      },
+      "tab": {
+        "overview": "Overview",
+        "subscriptions": "Subscriptions",
+        "support": "Support",
+        "invoicing": "Invoicing"
       }
+    },
+    "section": {
+      "customers": "Customers",
+      "support": "Support",
+      "finance": "Finance",
+      "admin": "Administration"
+    },
+    "subnav": {
+      "label": "Secondary navigation · {section}",
+      "customers": "Customers",
+      "support": {
+        "cases": "Cases",
+        "access": "Access",
+        "errors": "Errors",
+        "time": "Time spent"
+      },
+      "admin": {
+        "status": "System Status",
+        "users": "Users",
+        "product": "Product",
+        "reports": "Reports"
+      }
+    },
+    "grants": {
+      "title": "Access",
+      "intro": "Support access to customers' data. At most 24 hours, requires a case and a reason, and is logged in the customer's audit log.",
+      "filterLabel": "Show access",
+      "mine": "Mine · {count}",
+      "all": "All · {count}",
+      "request": "Request access",
+      "kpiActive": "Active access",
+      "kpiActiveMax": "At most 24 h",
+      "kpiActiveMine": "Yours expires {when}",
+      "kpiActiveNone": "None of yours are active",
+      "kpiPending": "Awaiting approval",
+      "kpiPendingSub": "{name} · sent {time}",
+      "kpiNone": "None",
+      "kpiExpiring": "Expires within 2 hours",
+      "kpiExpiringSub": "{name} · {time}",
+      "kpiRequests": "Requests in 30 days",
+      "kpiRequestsSub": "{approved} approved · {denied} denied",
+      "activeTitle": "Active and pending",
+      "expiredTitle": "Recently expired",
+      "colCustomer": "Customer",
+      "colCase": "Case",
+      "colScope": "Scope",
+      "colApprovedBy": "Approved by",
+      "colExpires": "Expires",
+      "colStaff": "Staff member",
+      "colPeriod": "Period",
+      "colActions": "Actions",
+      "scopeView": "View only",
+      "scopeHelp": "View and help",
+      "waiting": "Waiting",
+      "left": "{time} left",
+      "cvr": "CVR {cvr}",
+      "noCase": "No case",
+      "ended": "ended",
+      "seeLog": "See log",
+      "openAsSupport": "Open as support",
+      "extend": "Extend",
+      "end": "End",
+      "withdraw": "Withdraw",
+      "extensionRequested": "Extension requested",
+      "emptyActive": "No active or pending access",
+      "emptyActiveBody": "Request access from a customer or a case.",
+      "emptyExpired": "No expired access in the last 30 days.",
+      "footer": "Customers who require approval always have to approve. Nobody has standing access, not even Superadmin.",
+      "today": "today {time}",
+      "tomorrow": "tomorrow {time}",
+      "youShort": "(you)"
     }
   },
   "support": {
@@ -2862,9 +2938,10 @@
       "activity": "Activity",
       "more": "More",
       "customers": "Customers",
-      "cases": "Cases",
-      "errors": "Errors",
-      "finance": "Finance"
+      "finance": "Finance",
+      "support": "Support",
+      "admin": "Admin",
+      "profile": "Profile"
     },
     "bell": "Notifications, {count, plural, =0 {none new} one {# new} other {# new}}",
     "back": "Back",
