@@ -82,16 +82,15 @@ describe('private billing indexes', () => {
     expect(webResolve.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
   });
 
-  it('invoices are INV/YYYY/XXXXX and credit notes CRED/YYYY/XXXXX, from two series', async () => {
-    const { result } = await run(
-      'worker',
-      null,
-      'select app.next_invoice_number() as i, app.next_credit_note_number() as c',
-    );
+  it('invoices are INV/YYYY/XXXXX; credit note numbers come only with a credit note', async () => {
+    const { result } = await run('worker', null, 'select app.next_invoice_number() as i');
     expect(result!.rows[0].i).toMatch(/^INV\/\d{4}\/\d{5,}$/);
-    expect(result!.rows[0].c).toMatch(/^CRED\/\d{4}\/\d{5,}$/);
-    const web = await run('web', null, 'select app.next_credit_note_number()');
-    expect(web.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
+    // K-YYYY-nnnn is taken inside app.create_credit_note; a number taken outside it would leave
+    // a gap in the series.
+    for (const role of ['web', 'worker'] as const) {
+      const r = await run(role, null, 'select app.next_credit_note_number()');
+      expect(r.error?.code).toBe(INSUFFICIENT_PRIVILEGE);
+    }
   });
 });
 

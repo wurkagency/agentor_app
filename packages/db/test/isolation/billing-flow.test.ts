@@ -213,6 +213,43 @@ describe('billing lifecycle', () => {
     });
   });
 
+  it('a credit note set off against the next invoice lowers it once (I02)', async () => {
+    const [prev] = (
+      await admin(
+        `select id, number from invoices where tenant_id = $1 order by created_at desc limit 1`,
+        [tenantId],
+      )
+    ).rows as { id: string; number: string }[];
+    await admin(
+      `insert into credit_notes (tenant_id, number, invoice_id, invoice_number, invoice_issued_at, reason,
+                                 refund_method, net_ore, vat_ore, created_by_name)
+       values ($1, 'K-2026-9001', $2, $3, now(), 'Fejl hos Agentor', 'offset', -4000, -1000, 'Kasper Nyborg')`,
+      [tenantId, prev!.id, prev!.number],
+    );
+    await admin(
+      `update subscriptions set interval = 'month', discount_pct = null, discount_until = null,
+         current_period_end = now() + interval '1 year' where tenant_id = $1`,
+      [tenantId],
+    );
+    const charge = await prepareCharge(worker.db, tenantId, () => 'AGOFFSET0001');
+    // Business 159 kr. − 40 kr. set off = 119 kr. + 25 % VAT.
+    expect(charge?.amountOre).toBe(14875);
+    const inv = (await admin(`select lines from invoices where id = $1`, [charge!.invoiceId]))
+      .rows[0] as { lines: { text: string; amountOre: number }[] };
+    expect(inv.lines).toContainEqual(
+      expect.objectContaining({ text: 'Modregning kreditnota K-2026-9001', amountOre: -4000 }),
+    );
+    const c = await admin(
+      `select offset_invoice_id from credit_notes where number = 'K-2026-9001'`,
+    );
+    expect(c.rows[0]).toEqual({ offset_invoice_id: charge!.invoiceId });
+    await applyChargeResult(worker.db, tenantId, charge!.invoiceId, {
+      accepted: true,
+      providerPaymentId: 'poff',
+    });
+    await admin(`delete from credit_notes where number = 'K-2026-9001'`);
+  });
+
   it('an approved support invoice is numbered and charged; a failure is retried after 2 days', async () => {
     const inv = (
       await admin(

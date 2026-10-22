@@ -14,12 +14,13 @@ import {
   type Entitlements,
   type QuotaState,
 } from '@agentor/core';
-import { and, asc, count, desc, eq, gt, isNull, ne, sql, sum } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, inArray, isNull, ne, sql, sum } from 'drizzle-orm';
 import { withoutTenant, withTenant, type Database, type Transaction } from '../client.js';
 import {
   addons,
   flows,
   invitations,
+  creditNotes,
   invoices,
   memberships,
   planEntitlements,
@@ -624,7 +625,21 @@ export async function prepareCharge(
       price < fullPrice
         ? [{ text: `Rabat ${sub.discountPct} %`, amountOre: price - fullPrice }]
         : [];
-    const net = price + (addonRow?.n ?? 0);
+    let net = price + (addonRow?.n ?? 0);
+    // Credit notes set off against the next invoice (I02 "Modregnes i næste faktura"): whole
+    // credit notes, oldest first, as long as the invoice stays above zero; the rest wait.
+    const offsets = await tx
+      .select({ id: creditNotes.id, number: creditNotes.number, netOre: creditNotes.netOre })
+      .from(creditNotes)
+      .where(and(eq(creditNotes.refundMethod, 'offset'), isNull(creditNotes.offsetInvoiceId)))
+      .orderBy(asc(creditNotes.createdAt));
+    const applied: string[] = [];
+    for (const c of offsets) {
+      if (net + c.netOre <= 0) continue;
+      lines.push({ text: `Modregning kreditnota ${c.number}`, amountOre: c.netOre, manual: true });
+      net += c.netOre;
+      applied.push(c.id);
+    }
     const { vat } = withVat(net);
     const numRes = await tx.execute<{ n: string }>(sql`select app.next_invoice_number() as n`);
     const number = numRes.rows[0]!.n;
@@ -646,6 +661,11 @@ export async function prepareCharge(
         dueAt: byInvoice ? new Date(now.getTime() + INVOICE_DUE_DAYS * DAY) : now,
       })
       .returning({ id: invoices.id });
+    if (applied.length)
+      await tx
+        .update(creditNotes)
+        .set({ offsetInvoiceId: inv!.id })
+        .where(inArray(creditNotes.id, applied));
     if (byInvoice) {
       // Paid on terms: the period moves on now; an unpaid invoice shows as overdue on Finans.
       await tx

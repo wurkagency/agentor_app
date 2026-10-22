@@ -2,6 +2,12 @@
 
 import {
   approveSupportInvoice,
+  claimCreditRefund,
+  createCreditNote,
+  CreditNoteError,
+  invoiceCreditState,
+  recordCreditRefund,
+  type CreditableLine,
   getPlatformSettings,
   isUuid,
   logFinanceAction,
@@ -20,6 +26,7 @@ import { reportCsv } from '@/server/finance-export';
 import { financeInvoicesAll, financeSubs, monthReport, parseMonth } from '@/server/finance-data';
 import { db } from '@/server/infra';
 import { brandName } from '@/components/billing/card';
+import { quickpay } from '@/server/billing';
 import { appLink, sendEmail } from '@/server/mail';
 import { requireStaff } from '@/server/platform';
 
@@ -296,4 +303,125 @@ export async function setTimelogAction(input: {
   }
   revalidatePath('/platform/finance', 'layout');
   return { ok: true };
+}
+
+/* ---- Credit notes (I02, F4/F6 "Kreditér") ------------------------------------------------------ */
+
+/** The invoice's lines with what is left to credit, for the sheet. */
+export async function creditStateAction(input: {
+  tenantId: string;
+  invoiceId: string;
+}): Promise<ActionResult<{ lines: CreditableLine[]; canRefund: boolean }>> {
+  const { actor } = await requireStaff(true);
+  if (!isUuid(input.tenantId) || !isUuid(input.invoiceId)) return { ok: false, error: 'invalid' };
+  const [lines, invoices] = await Promise.all([
+    invoiceCreditState(db(), actor.userId, input.tenantId, input.invoiceId),
+    financeInvoicesAll(actor),
+  ]);
+  const inv = invoices.find((i) => i.id === input.invoiceId && i.tenantId === input.tenantId);
+  if (!inv) return { ok: false, error: 'NOT_FOUND' };
+  return {
+    ok: true,
+    data: {
+      lines,
+      canRefund: inv.status === 'paid' && inv.paymentMethod !== 'invoice',
+    },
+  };
+}
+
+const creditSchema = z.object({
+  tenantId: uuid,
+  invoiceId: uuid,
+  full: z.boolean(),
+  lines: z
+    .array(
+      z.object({
+        idx: z.number().int().min(0).max(1000),
+        quantityMilli: z.number().int().min(1).max(100_000_000),
+        amountOre: z.number().int().min(1).max(1_000_000_000),
+      }),
+    )
+    .max(500),
+  reason: z.string().trim().min(1).max(1000),
+  refund: z.enum(['card', 'offset']),
+});
+
+/** Card refunds go to QuickPay once; the credit note is marked refunded only on its approval. */
+async function refundCard(
+  actor: { userId: string; name: string },
+  tenantId: string,
+  creditNoteId: string,
+): Promise<'done' | 'pending' | 'failed'> {
+  const claim = await claimCreditRefund(db(), actor.userId, tenantId, creditNoteId);
+  if (!claim) return 'pending';
+  if (!claim.paymentId) {
+    await recordCreditRefund(db(), actor, tenantId, creditNoteId, false, null);
+    return 'failed';
+  }
+  try {
+    const r = await quickpay().refund({ paymentId: claim.paymentId, amountOre: claim.grossOre });
+    // An answer without a status may still go through: like no answer, it stays pending.
+    if (r.state === 'unknown') return 'pending';
+    const ok = r.state === 'accepted';
+    await recordCreditRefund(db(), actor, tenantId, creditNoteId, ok, r.operationId);
+    return ok ? 'done' : 'failed';
+  } catch (err) {
+    // No answer from QuickPay: the refund may or may not have happened, so it stays pending
+    // and can't be claimed again (no double refund); check it in QuickPay's manager.
+    console.error('credit note refund unanswered', err instanceof Error ? err.message : err);
+    return 'pending';
+  }
+}
+
+/** "Opret kreditnota": full or partial, a reason, and the refund method. Audit-logged. */
+export async function createCreditNoteAction(
+  input: z.input<typeof creditSchema>,
+): Promise<ActionResult<{ number: string; refund: 'done' | 'pending' | 'failed' | 'offset' }>> {
+  const { actor } = await requireStaff(true);
+  const parsed = creditSchema.safeParse(input);
+  if (!parsed.success)
+    return {
+      ok: false,
+      error: parsed.error.issues.some((i) => i.path[0] === 'reason')
+        ? 'REASON_REQUIRED'
+        : 'invalid',
+    };
+  const p = parsed.data;
+  if (!p.full && p.lines.length === 0) return { ok: false, error: 'LINE_INVALID' };
+  let note;
+  try {
+    note = await createCreditNote(db(), actor, {
+      tenantId: p.tenantId,
+      invoiceId: p.invoiceId,
+      lines: p.full ? null : p.lines,
+      reason: p.reason,
+      refund: p.refund,
+    });
+  } catch (e) {
+    if (e instanceof CreditNoteError) return { ok: false, error: e.code };
+    return fail(e);
+  }
+  await logFinanceAction(db(), actor, 'finance.credit_note_created', {
+    tenantId: p.tenantId,
+    invoiceId: p.invoiceId,
+    creditNote: note.number,
+    netOre: note.netOre,
+    refund: p.refund,
+  });
+  const refund = p.refund === 'card' ? await refundCard(actor, p.tenantId, note.id) : 'offset';
+  revalidatePath('/platform/finance', 'layout');
+  return { ok: true, data: { number: note.number, refund } };
+}
+
+/** "Prøv tilbageførsel igen" on a credit note whose refund failed. */
+export async function retryCreditRefundAction(input: {
+  tenantId: string;
+  creditNoteId: string;
+}): Promise<ActionResult<{ refund: 'done' | 'pending' | 'failed' }>> {
+  const { actor } = await requireStaff(true);
+  if (!isUuid(input.tenantId) || !isUuid(input.creditNoteId))
+    return { ok: false, error: 'invalid' };
+  const refund = await refundCard(actor, input.tenantId, input.creditNoteId);
+  revalidatePath('/platform/finance', 'layout');
+  return { ok: true, data: { refund } };
 }

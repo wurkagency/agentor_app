@@ -55,6 +55,10 @@ export const tenants = pgTable(
     signupStateAt: timestamp('signup_state_at', { withTimezone: true, mode: 'date' }),
     /** The receipt for the first payment was mailed (once, by app.claim_signup_receipt). */
     signupReceiptSentAt: timestamp('signup_receipt_sent_at', { withTimezone: true, mode: 'date' }),
+    /** "Kundenr. K-1042" on invoices and credit notes (I01/I02): a running number per company. */
+    customerNumber: integer('customer_number')
+      .notNull()
+      .default(sql`nextval('app.customer_number_seq')`),
     /** Systems chosen on SU3 (connector ids); pre-select onboarding and drive recommendations. */
     chosenConnectors: text('chosen_connectors')
       .array()
@@ -69,6 +73,7 @@ export const tenants = pgTable(
     updatedAt: updatedAt(),
   },
   (t) => [
+    unique('tenants_customer_number_key').on(t.customerNumber),
     check('tenants_alert_rate_check', sql`${t.alertErrorRatePct} between 1 and 100`),
     check('tenants_alert_failures_check', sql`${t.alertConsecutiveFailures} between 1 and 100`),
     check('tenants_locale_check', sql`${t.locale} in ('da', 'en')`),

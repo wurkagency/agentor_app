@@ -9,6 +9,7 @@ import {
   type SupportLine,
 } from '@agentor/core';
 import {
+  financeCreditNotes,
   financeInvoices,
   financeSubscriptions,
   financeTime,
@@ -114,6 +115,11 @@ export const financeInvoicesAll = cache(async (actor: StaffActor) => {
   const cur = currentMonth();
   return financeInvoices(db(), actor, shiftMonth(cur, -24).start, shiftMonth(cur, 2).start);
 });
+
+/** Every credit note, all customers (F4, F6; I02). */
+export const financeCreditNotesAll = cache((actor: StaffActor) =>
+  financeCreditNotes(db(), actor.userId),
+);
 
 export const financeTimeFor = cache((actor: StaffActor, firstDay: string, lastDay: string) =>
   financeTime(db(), actor, firstDay, lastDay),

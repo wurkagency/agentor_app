@@ -282,6 +282,9 @@ importers:
       '@agentor/keybox':
         specifier: workspace:*
         version: link:../../packages/keybox
+      '@agentor/pdf':
+        specifier: workspace:*
+        version: link:../../packages/pdf
       '@agentor/storage':
         specifier: workspace:*
         version: link:../../packages/storage

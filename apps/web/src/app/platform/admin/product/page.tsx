@@ -1,5 +1,5 @@
 import { withVat } from '@agentor/core';
-import { listPlans, listPlanVersions, listSupportVersions } from '@agentor/db';
+import { getPlatformSettings, listPlans, listPlanVersions, listSupportVersions } from '@agentor/db';
 import { formatDate, formatNumber, type Locale } from '@agentor/i18n';
 import { MobilePageTitle, MobileShell, Responsive } from '@agentor/ui/mobile';
 import { getLocale, getTranslations } from 'next-intl/server';
@@ -9,6 +9,7 @@ import {
   type ProductPlan,
 } from '@/components/platform/admin/product-form';
 import { PlatformTopBar } from '@/components/mobile/chrome';
+import { CompanyDetailsForm } from '@/components/platform/admin/company-details-form';
 import { PlatformSubTabs } from '@/components/mobile/sub-tabs';
 import { ProductFormMobile } from '@/components/platform/admin/product-form-mobile';
 import { PageBody } from '@/components/shell/secondary-nav';
@@ -28,11 +29,22 @@ export default async function ProductPage() {
   const { actor } = await requireStaff(true);
   const t = await getTranslations('platform.product');
   const locale = (await getLocale()) as Locale;
-  const [plans, supportVersions, planVersions] = await Promise.all([
+  const [plans, supportVersions, planVersions, settings] = await Promise.all([
     listPlans(db()),
     listSupportVersions(db(), actor),
     listPlanVersions(db()),
+    getPlatformSettings(db(), actor.userId),
   ]);
+  const company = {
+    companyName: settings.companyName ?? '',
+    companyAddress: settings.companyAddress ?? '',
+    companyPostalCity: settings.companyPostalCity ?? '',
+    companyCvr: settings.companyCvr ?? '',
+    companyEmail: settings.companyEmail ?? '',
+    bankReg: settings.bankReg ?? '',
+    bankAccount: settings.bankAccount ?? '',
+    bankIban: settings.bankIban ?? '',
+  };
   const support = supportVersions[0];
   const rateInclKr = support ? withVat(support.rateOre).gross / 100 : 800;
   const productPlans: ProductPlan[] = plans
@@ -104,6 +116,7 @@ export default async function ProductPage() {
       desktop={
         <PageBody>
           <ProductForm support={formSupport} plans={productPlans} history={history} />
+          <CompanyDetailsForm initial={company} />
         </PageBody>
       }
       mobile={
@@ -112,6 +125,9 @@ export default async function ProductPage() {
           <PlatformSubTabs />
           <MobilePageTitle title={t('title')} />
           <ProductFormMobile support={formSupport} plans={productPlans} history={history} />
+          <div className="px-4 pb-8">
+            <CompanyDetailsForm initial={company} />
+          </div>
         </MobileShell>
       }
     />

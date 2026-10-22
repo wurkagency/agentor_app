@@ -937,7 +937,17 @@
     "switchYearlyBody": "Fra næste fornyelse {date} betaler du {price} for et helt år. Et år koster det samme som 10 måneder.",
     "switchMonthlyBody": "Fra næste fornyelse {date} betaler du {price} hver måned.",
     "yearlyDone": "Du betaler årligt fra næste fornyelse",
-    "monthlyDone": "Du betaler månedligt fra næste fornyelse"
+    "monthlyDone": "Du betaler månedligt fra næste fornyelse",
+    "creditNotes": "Kreditnotaer",
+    "creditFor": "Krediterer faktura {number}",
+    "downloadCreditPdf": "Hent kreditnota {number} som PDF",
+    "refundState": {
+      "none": "Modregnes",
+      "pending": "Tilbageføres",
+      "done": "Tilbageført",
+      "failed": "Tilbageføres",
+      "offset": "Modregnes"
+    }
   },
   "checkout": {
     "title": "Tilføj kort",
@@ -3089,6 +3099,61 @@
         "subscriptions": "Abonnementer",
         "support": "Support",
         "invoicing": "Fakturering"
+      },
+      "credit": {
+        "action": "Kreditér",
+        "actionOf": "Kreditér faktura {number}",
+        "title": "Kreditér faktura {number}",
+        "intro": "Kreditnotaen får sit eget nummer og henviser til fakturaen, som ikke ændres.",
+        "loading": "Henter fakturaens linjer…",
+        "mode": "Kredit",
+        "full": "Hel kredit",
+        "partial": "Delvis kredit",
+        "line": "Linje",
+        "quantity": "Antal",
+        "amount": "Beløb ekskl. moms",
+        "left": "Tilbage {amount}",
+        "nothingLeft": "Krediteret",
+        "hours": "timer",
+        "pieces": "stk.",
+        "reason": "Årsag",
+        "reasonHelp": "Står på kreditnotaen. Fx: Fejl hos Agentor: 30 min. på sag #2271 skulle ikke have været faktureret.",
+        "refund": "Tilbageførsel",
+        "refundCard": "Tilbagefør til kortet",
+        "refundCardHelp": "QuickPay sender pengene tilbage til kortet, fakturaen blev betalt med.",
+        "refundCardOff": "Kun for fakturaer, der er betalt med kort.",
+        "refundOffset": "Modregn i næste faktura",
+        "refundOffsetHelp": "Beløbet trækkes fra kundens næste faktura.",
+        "total": "Krediteres i alt {amount} inkl. moms",
+        "submit": "Opret kreditnota",
+        "created": "Kreditnota {number} er oprettet",
+        "refunded": "Pengene er tilbageført til kortet",
+        "refundPending": "Tilbageførslen afventer QuickPay",
+        "refundFailed": "Tilbageførslen fejlede. Prøv igen fra listen over kreditnotaer.",
+        "retry": "Prøv tilbageførsel igen",
+        "listTitle": "Kreditnotaer",
+        "colNumber": "Nummer",
+        "colDate": "Dato",
+        "colInvoice": "Faktura",
+        "colReason": "Årsag",
+        "colAmount": "Beløb inkl. moms",
+        "colRefund": "Tilbageførsel",
+        "state": {
+          "none": "Ikke startet",
+          "pending": "Afventer QuickPay",
+          "done": "Tilbageført",
+          "failed": "Fejlede",
+          "offset": "Modregnes"
+        },
+        "errors": {
+          "CREDIT_EXCEEDS_INVOICE": "Beløbet er større end det, der er tilbage på fakturaen.",
+          "NOTHING_TO_CREDIT": "Der er intet tilbage at kreditere på fakturaen.",
+          "REASON_REQUIRED": "Skriv en årsag.",
+          "REFUND_NOT_POSSIBLE": "Fakturaen er ikke betalt med kort, så beløbet kan kun modregnes.",
+          "INVOICE_NOT_ISSUED": "Fakturaen er ikke udstedt endnu.",
+          "LINE_INVALID": "Vælg mindst én linje med et beløb.",
+          "generic": "Kreditnotaen kunne ikke oprettes. Prøv igen."
+        }
       }
     },
     "section": {
@@ -3236,6 +3301,21 @@
         "whiteLabel": "White-label",
         "supportAudit": "Supportadgang og audit-log",
         "eanInvoice": "Betaling på faktura (EAN)"
+      },
+      "company": {
+        "title": "Firmaoplysninger på fakturaer",
+        "intro": "Står i toppen og bunden af fakturaer og kreditnotaer. Tomme felter vises som pladsholdere, fx [CVR].",
+        "name": "Firmanavn",
+        "address": "Adresse",
+        "postalCity": "Postnr. og by",
+        "cvr": "CVR",
+        "email": "E-mail på fakturaer",
+        "bankReg": "Reg.nr.",
+        "bankAccount": "Kontonr.",
+        "iban": "IBAN",
+        "save": "Gem firmaoplysninger",
+        "saved": "Firmaoplysningerne er gemt",
+        "error": "Firmaoplysningerne kunne ikke gemmes. Tjek felterne."
       }
     },
     "adminStatus": {

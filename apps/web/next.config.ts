@@ -55,6 +55,7 @@ const config: NextConfig = {
     '@agentor/db',
     '@agentor/email',
     '@agentor/jobs',
+    '@agentor/pdf',
     '@agentor/storage',
     'bullmq',
     'pg',

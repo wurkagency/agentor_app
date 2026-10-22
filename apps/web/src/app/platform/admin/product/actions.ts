@@ -10,6 +10,7 @@ import {
   listSupportVersions,
   markPriceNoticeSent,
   NON_BILLABLE_REASONS,
+  setPlatformSettings,
   type PlanValueKey,
 } from '@agentor/db';
 import { revalidatePath } from 'next/cache';
@@ -200,4 +201,39 @@ async function sendPriceNotices(
     );
   }
   return subs.length;
+}
+
+const optionalText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .max(max)
+    .transform((v) => v || null);
+
+const companySchema = z.object({
+  companyName: optionalText(160),
+  companyAddress: optionalText(160),
+  companyPostalCity: optionalText(80),
+  companyCvr: z.union([z.literal(''), z.string().regex(/^\d{8}$/)]).transform((v) => v || null),
+  companyEmail: z.union([z.literal(''), z.email().max(200)]).transform((v) => v || null),
+  bankReg: z.union([z.literal(''), z.string().regex(/^\d{4}$/)]).transform((v) => v || null),
+  bankAccount: z.union([z.literal(''), z.string().regex(/^\d{6,10}$/)]).transform((v) => v || null),
+  bankIban: z
+    .union([z.literal(''), z.string().regex(/^[A-Z]{2}\d{2}[A-Z0-9 ]{10,30}$/)])
+    .transform((v) => (v ? v.replace(/\s+/g, ' ').trim() : null)),
+});
+
+/**
+ * "Firmaoplysninger på fakturaer" (A2): Agentor's own name, address, CVR and bank on invoices and
+ * credit notes. Superadmin only; written to the platform audit log (settings.updated).
+ */
+export async function saveCompanyDetailsAction(
+  input: z.input<typeof companySchema>,
+): Promise<ActionResult> {
+  const { actor } = await requireStaff(true);
+  const parsed = companySchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: 'invalid' };
+  await setPlatformSettings(db(), actor, parsed.data);
+  revalidatePath('/platform/admin/product');
+  return { ok: true };
 }

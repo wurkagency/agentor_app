@@ -143,21 +143,21 @@ Forhåndsvisning: `apps/web/src/app/dev/emails/` (kun når `NODE_ENV !== 'produc
 
 ## 6. Fakturaer (I01)
 
-**Firmaoplysninger:** nye nøgler i `platform.settings` (Superadmin, Administration › Produkt › "Firmaoplysninger"): `companyName`, `companyAddress`, `companyPostalCity`, `companyCvr`, `companyEmail`, `bankReg`, `bankAccount`, `bankIban`, `bankSwift`. Tomme felter vises som `[CVR]` osv. på PDF'en, som på tegnefladen, og Finans viser en advarsel, indtil de er udfyldt. Ændringer audit-logges (`settings.updated`).
+**Firmaoplysninger:** nye nøgler i `platform.settings` (Superadmin, Administration › Produkt › "Firmaoplysninger"): `companyName`, `companyAddress`, `companyPostalCity`, `companyCvr`, `companyEmail`, `bankReg`, `bankAccount`, `bankIban`. Tomme felter vises som `[CVR]` osv. på PDF'en, som på tegnefladen. Ændringer audit-logges (`settings.updated`). *Som bygget:* ingen `bankSwift` (IBAN rækker til danske kunder) og endnu ingen advarsel i Finans, mens felterne er tomme.
 
 **Kundenummer:** `K-` + tenantens løbenummer. Ny kolonne `tenants.customer_number` (sekvens, udfyldt for eksisterende tenants i oprettelsesrækkefølge).
 
 **Varianter fra én skabelon** (`packages/pdf/src/invoice.ts`): abonnement (én linje: plan, interval, periode), support (én linje pr. sag med registreret og oprundet tid, timepris 640,00 ekskl. moms; tidsloggen som bilag på efterfølgende sider når `attach_timelog`), EAN (statusboksen viser forfald, EAN-nr. og bankoplysninger). Lange lister deler sig over sider med gentaget tabelhoved.
 
-**Lagring:** når en faktura får nummer og status `open`/`paid` (ikke kladde), renderes PDF'en én gang og gemmes i `@agentor/storage` under `documents/invoices/<tenant>/<id>/<sha256>.pdf`. Ny tabel `documents` (`tenant_id`, `id`, `kind` invoice|credit_note, `ref_id`, `storage_key`, `sha256`, `bytes`, `created_at`, FORCE RLS). Ændres status bagefter (betalt), renderes der ikke igen; statusboksen på den gemte PDF viser status ved udstedelse, og "betalt" fremgår af kvitteringen. Se Q5.
+**Lagring (som bygget):** PDF'en renderes første gang den hentes i en given tilstand og gemmes i `@agentor/storage` under `documents/<tenant>/<kind>/<ref>/<sha256>.pdf`. Tilstanden er fakturaens status (`open`/`paid`/…) eller kreditnotaens `refund-<metode>-<tilstand>`; hver tilstand gemmes én gang og overskrives aldrig, så en betalt faktura får et nyt, separat dokument i stedet for at ændre det udstedte. Privat tabel `app.documents` (`tenant_id`, `kind`, `ref_id`, `variant`, `storage_key`, `sha256`, `bytes`), kun tilgængelig gennem `app.document_find/document_save/document_by_id`. Ved udlevering tjekkes filens sha256 mod tabellen. Renderingen er deterministisk (samme input → samme bytes). Se Q5.
 
-**Download:** de to eksisterende ruter (`/billing/invoices/[id]/pdf` og Finans) slår dokumentet op og streamer den gemte fil efter adgangstjek (RLS for kunden, `requireStaff(true)` for Superadmin). E-mails linker til `/billing/invoices/<id>` (kræver login), ikke til en offentlig URL. Det opfylder "signeret, kortlivet URL" uden at lægge en token i mailen; se Q7.
+**Download (som bygget):** ruterne `/billing/invoices/[id]/pdf`, `/billing/credit-notes/[id]/pdf` (kun ejeren af virksomheden) og `/platform/finance/{invoices,credit-notes}/[tenant]/[id]/pdf` (Superadmin) tjekker adgang, sikrer det gemte dokument og svarer `303` til `/api/documents/<id>?exp=…&sig=…`: HMAC-SHA256 (nøgle afledt af `BETTER_AUTH_SECRET`) over dokument-id og udløb, gyldigt i 5 minutter, `no-store`. E-mails linker til siden bag login, aldrig til selve filen; se Q7.
 
 **Nummer:** uændret `app.next_invoice_number()` (`INV/ÅÅÅÅ/nnnnn`, mindst 5 cifre, aldrig afkortet, 0043). Tegnefladens "2026-1061" er eksempeldata.
 
 ## 7. Kreditnotaer (I02)
 
-**Model** (migration `0054_documents_credit_notes.sql`):
+**Model** (migration `0057_credit_notes_documents.sql`; 0054–0056 er e-mailkøen, ugentlig tilmelding og modtageropslag):
 
 ```
 credit_notes (tenant_id, id, number text unique not null, invoice_id, invoice_number, invoice_date,
@@ -171,9 +171,10 @@ app.credit_note_counters (year int primary key, last int)
 - Oprettes kun gennem `app.create_credit_note(invoice_id, lines jsonb, reason, refund_method)` (SECURITY DEFINER, kun Superadmin): låser fakturaen (`FOR UPDATE`), beregner det endnu ikke krediterede pr. linje og i alt, afviser hvis summen overstiger det, skriver kreditnota og linjer og audit-logger i både platformens og kundens log.
 - Fakturaen ændres aldrig. "Efter kredit" og "krediteret" beregnes (`invoice_credit_totals` view).
 - Tilbageførsel til kort: `QuickPayClient.refund(paymentId, amountOre)` (`POST /payments/{id}/refund?synchronized`, `QuickPay-Callback-Url`). Idempotent via `refund_state` (kun fra `none`→`pending` én gang) og QuickPay-ordre-id. Markeres `done` kun når QuickPays callback (eller synkront svar) bekræfter `accepted`. Mock-klienten bekræfter med det samme.
-- "Modregnes i næste faktura": `refund_method='offset'`; næste fornyelses-/supportfaktura får en negativ linje "Modregning kreditnota K-…" (højst op til fakturaens beløb; resten følger med til næste).
+- "Modregnes i næste faktura": `refund_method='offset'`; `prepareCharge` giver næste abonnementsfornyelse en negativ linje "Modregning kreditnota K-…" og sætter `offset_invoice_id`. *Som bygget:* en kreditnota modregnes kun hel, og kun mens fakturaen stadig er over 0; ellers venter den til næste fornyelse. Supportfakturaer modregnes ikke endnu.
+- *Som bygget:* svarer QuickPay ikke ved tilbageførsel, står kreditnotaen som `pending` (ikke `failed`), så den ikke tilbageføres to gange; Finans har "Prøv tilbageførsel igen" for `failed`.
 
-**UI:** F4 (kundens økonomi) og F6 (fakturering): "Kreditér" på en betalt/åben faktura åbner et ark (desktop dialog, mobil bundark) med Hel/Delvis, linjer og mængder ved delvis, årsag (påkrævet) og tilbageførselsmetode. Kun Superadmin.
+**UI:** F4 (kundens økonomi) og F6 (fakturering): "Kreditér" på en betalt/åben faktura åbner et ark (*som bygget:* dialogen også på mobil; bundark mangler) med Hel/Delvis, linjer og mængder ved delvis, årsag (påkrævet) og tilbageførselsmetode. Kun Superadmin.
 
 **Kunden:** Abonnement › Fakturaer viser kreditnotaer under fakturaen med PDF-download.
 
@@ -213,7 +214,20 @@ Pr. board gælder acceptkriteriet: emne, forhåndstekst, overskrift, brødtekst,
 | Q2 | Kreditnotanummer: 0043 forbereder `CRED/ÅÅÅÅ/nnnnn` (fortløbende på tværs af år), tegnefladen og briefen siger `K-ÅÅÅÅ-nnnn` | `K-ÅÅÅÅ-nnnn`, ny tæller pr. år, uden huller. `CRED`-sekvensen er aldrig brugt, så intet nummer er udstedt i det gamle format | Ét ord, så skifter jeg formatet i funktionen |
 | Q3 | PDF/A-2b og indlejrede skrifttyper | PDF 1.4 med Helvetica/Courier (ikke PDF/A) | TTF-filer for Plus Jakarta Sans og JetBrains Mono (OFL) i repoet, eller Playwright/Chromium som runtime-afhængighed på serveren |
 | Q4 | Svar på E12 genåbner sagen: kræver indgående mail (Brevo Inbound Parsing + MX på fx `svar.agentor.dk`) | Reply-To `sag+<token>@<CASE_REPLY_DOMAIN>`; indgående webhook `POST /mail/inbound` på ingest med delt hemmelighed; genåbner inden for 14 dage. Uden `CASE_REPLY_DOMAIN` bruges `support@agentor.dk` og intet genåbnes automatisk | DNS og Brevo-opsætning |
-| Q5 | Skal den gemte faktura-PDF vise "Betalt", når den betales efter udstedelse? | Abonnementsfakturaer udstedes betalt (kort trækkes først). Support-/EAN-fakturaer gemmes ved udstedelse med forfald; en betalt EAN-faktura får ikke ny PDF (dokumentet er uforanderligt) | Beslutning om "kvittering som separat dokument" |
+| Q5 | Skal den gemte faktura-PDF vise "Betalt", når den betales efter udstedelse? | Ét uforanderligt dokument pr. tilstand: den udstedte (åbne) PDF bevares, og betalingen giver et nyt dokument med "Betalt" | Beslutning om "kvittering som separat dokument" i stedet |
 | Q6 | E03 "Aarhus, Danmark (cirka)": appen har ingen IP-geolokation | Sted vises kun, hvis proxyen sender et land (`cf-ipcountry`/`x-country`); ellers udelades rækken | En GeoIP-database (ny afhængighed) |
-| Q7 | "Signeret kortlivet URL" til PDF | Download går gennem appens rute med adgangstjek og `no-store`. Mails linker til siden bag login | Hvis der ønskes link uden login, laves HMAC-URL med 15 min. udløb |
-| Q8 | E16 skal åbne QuickPays hostede side | Mailens knap peger på `/billing/payment/update?invoice=<id>` (kræver login), som opretter QuickPay-linket i det øjeblik der klikkes. Et QuickPay-link direkte i mailen ville udløbe og kunne videresendes | — |
+| Q7 | "Signeret kortlivet URL" til PDF | Ruten med adgangstjek udsteder et HMAC-signeret link med 5 min. udløb til den gemte fil. Mails linker til siden bag login | Længere udløb eller link direkte i mailen |
+| Q8 | E16 skal åbne QuickPays hostede side | Mailens knap peger på `/billing/payment` (kræver login), hvor ejeren starter QuickPays kortformular. Et QuickPay-link direkte i mailen ville udløbe og kunne videresendes | — |
+
+## 11. Øvrige afvigelser og valg under byggeriet
+
+- **Ugentligt overblik (E22):** `weekly_summary` står nu som standard til *fra* for e-mail; man tilmelder sig. Tilmeldinger samles i `weekly_optins` (trigger på indstillingerne), som schedulerens `weekly_summary_recipients()` læser på tværs af tenants (0055). E22 viser problemer først.
+- **Modtagere:** workeren har ingen adgang til `auth`, så adresse og navn slås op gennem `app.email_recipient` (0056).
+- **E01:** skabelonen findes, men bruges formentlig ikke: Better Auths `emailOTP` overtager e-mailbekræftelsen (E06/E07).
+- **E17:** tegnefladens annotationslinje er udeladt (den er en note til designet, ikke tekst i mailen).
+- **PDF-motor:** PDF 1.4, Helvetica/Courier med WinAnsi (− og → mappes), logo som vektor. Ikke PDF/A (Q3).
+- **Kundenummer:** `tenants.customer_number` fra `app.customer_number_seq`, nummereret i oprettelsesrækkefølge for eksisterende kunder.
+- **Ikke verificeret:** mørk tilstand i rigtige mailklienter (kun browserens `prefers-color-scheme`); Brevo Inbound og MX for `CASE_REPLY_DOMAIN`; QuickPays rigtige refund-endpoint (kun mock og enhedstest af klienten).
+- **Kredit af rabatterede fakturaer:** negative linjer (rabat, modregning) trækkes fra de første positive linjer, før der krediteres, så der kun kan krediteres det, kunden faktisk betalte (`app.invoice_credit_state`).
+- **Tilbageførsel uden status:** svarer QuickPay uden status på refund-operationen, står kreditnotaen som `pending` ligesom ved intet svar; kun et afvist svar giver `failed` (og "Prøv igen").
+- **Sletning af en kunde** sletter også dens kreditnotaer (som fakturaerne, `ON DELETE CASCADE`). Det giver huller i K-serien, hvis en kunde med kreditnotaer slettes; afklares sammen med bogføringskravene for fakturaer.

@@ -205,3 +205,84 @@ export const invoices = pgTable(
     check('invoices_amounts_check', sql`${t.amountOre} >= 0 and ${t.vatOre} >= 0`),
   ],
 );
+
+export const CREDIT_REFUND_METHODS = ['card', 'offset'] as const;
+export type CreditRefundMethod = (typeof CREDIT_REFUND_METHODS)[number];
+export const CREDIT_REFUND_STATES = ['none', 'pending', 'done', 'failed'] as const;
+export type CreditRefundState = (typeof CREDIT_REFUND_STATES)[number];
+
+/**
+ * Credit notes (I02, PLAN-EMAILS-PDF §7): K-ÅÅÅÅ-nnnn from a gap-free yearly counter, always for
+ * one invoice, which is never changed. Created only through app.create_credit_note(), which
+ * checks that the credit never exceeds what is still uncredited. Amounts are net øre, negative.
+ */
+export const creditNotes = pgTable(
+  'credit_notes',
+  {
+    tenantId: tenantIdColumn(),
+    id: idColumn(),
+    number: text('number').notNull(),
+    invoiceId: uuid('invoice_id').notNull(),
+    invoiceNumber: text('invoice_number').notNull(),
+    invoiceIssuedAt: ts('invoice_issued_at').notNull(),
+    reason: text('reason').notNull(),
+    /** Back to the card through QuickPay, or set off against the next invoice. */
+    refundMethod: text('refund_method').$type<CreditRefundMethod>().notNull(),
+    /** Card refunds: done only on QuickPay's confirmation. */
+    refundState: text('refund_state').$type<CreditRefundState>().notNull().default('none'),
+    refundPaymentId: text('refund_payment_id'),
+    refundedAt: ts('refunded_at'),
+    /** Set-off: the invoice that took the credit. */
+    offsetInvoiceId: uuid('offset_invoice_id'),
+    netOre: integer('net_ore').notNull(),
+    vatOre: integer('vat_ore').notNull(),
+    createdByUserId: uuid('created_by_user_id'),
+    createdByName: text('created_by_name').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.id] }),
+    unique('credit_notes_number_key').on(t.number),
+    foreignKey({ columns: [t.tenantId], foreignColumns: [tenants.id] }).onDelete('cascade'),
+    foreignKey({
+      columns: [t.tenantId, t.invoiceId],
+      foreignColumns: [invoices.tenantId, invoices.id],
+    }),
+    index('credit_notes_invoice_idx').on(t.tenantId, t.invoiceId),
+    check('credit_notes_amounts_check', sql`${t.netOre} < 0 and ${t.vatOre} <= 0`),
+    check('credit_notes_refund_method_check', sql`${t.refundMethod} in ('card', 'offset')`),
+    check(
+      'credit_notes_refund_state_check',
+      sql`${t.refundState} in ('none', 'pending', 'done', 'failed')`,
+    ),
+    check('credit_notes_number_format', sql`${t.number} ~ '^K-[0-9]{4}-[0-9]{4,}$'`),
+  ],
+);
+
+/** The credited lines: which invoice line (index), how much of it, negative amounts. */
+export const creditNoteLines = pgTable(
+  'credit_note_lines',
+  {
+    tenantId: tenantIdColumn(),
+    id: idColumn(),
+    creditNoteId: uuid('credit_note_id').notNull(),
+    /** The line's position in the invoice's line list (app.invoice_lines). */
+    sourceIndex: integer('source_index').notNull(),
+    text: text('text').notNull(),
+    detail: text('detail'),
+    unit: text('unit').$type<'hours' | 'pieces'>().notNull(),
+    /** Thousandths of an hour or a piece, negative. */
+    quantityMilli: integer('quantity_milli').notNull(),
+    unitPriceOre: integer('unit_price_ore'),
+    amountOre: integer('amount_ore').notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.tenantId, t.id] }),
+    foreignKey({
+      columns: [t.tenantId, t.creditNoteId],
+      foreignColumns: [creditNotes.tenantId, creditNotes.id],
+    }).onDelete('cascade'),
+    check('credit_note_lines_amount_check', sql`${t.amountOre} < 0 and ${t.quantityMilli} <= 0`),
+    check('credit_note_lines_unit_check', sql`${t.unit} in ('hours', 'pieces')`),
+  ],
+);

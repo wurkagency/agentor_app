@@ -217,6 +217,15 @@ export interface PlatformSettingsValues {
   warnConcurrentGrants: number;
   /** Where Finans sends the monthly report (F7 "Send til bogholder"). */
   bookkeeperEmail: string | null;
+  /** Agentor's own details on invoices and credit notes (I01/I02); empty prints a placeholder. */
+  companyName: string | null;
+  companyAddress: string | null;
+  companyPostalCity: string | null;
+  companyCvr: string | null;
+  companyEmail: string | null;
+  bankReg: string | null;
+  bankAccount: string | null;
+  bankIban: string | null;
 }
 
 const SETTING_DEFAULTS: PlatformSettingsValues = {
@@ -225,6 +234,14 @@ const SETTING_DEFAULTS: PlatformSettingsValues = {
   maxHours: 24,
   requireCaseAndReason: true,
   warnConcurrentGrants: 3,
+  companyName: null,
+  companyAddress: null,
+  companyPostalCity: null,
+  companyCvr: null,
+  companyEmail: null,
+  bankReg: null,
+  bankAccount: null,
+  bankIban: null,
 };
 
 export async function getPlatformSettings(
@@ -248,12 +265,14 @@ export async function setPlatformSettings(
   await asStaff(db, actor.userId, async (tx) => {
     for (const [key, value] of Object.entries(values)) {
       if (!(key in SETTING_DEFAULTS) || value === undefined) continue;
+      // A cleared field is stored as JSON null; the column itself is NOT NULL.
+      const json = value === null ? sql`'null'::jsonb` : value;
       await tx
         .insert(platformSettings)
-        .values({ key, value, updatedByName: actor.name })
+        .values({ key, value: json, updatedByName: actor.name })
         .onConflictDoUpdate({
           target: platformSettings.key,
-          set: { value, updatedByName: actor.name, updatedAt: new Date() },
+          set: { value: json, updatedByName: actor.name, updatedAt: new Date() },
         });
     }
     await platformLog(tx, actor, 'settings.updated', values);

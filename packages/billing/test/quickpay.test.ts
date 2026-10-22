@@ -97,6 +97,48 @@ describe('clients', () => {
     });
   });
 
+  it('refunds synchronously and accepts only an approved refund operation', async () => {
+    const reply = (code: string | null) =>
+      vi.fn(async () =>
+        Response.json({
+          id: 7,
+          operations: [
+            { id: 1, type: 'capture', qp_status_code: '20000' },
+            { id: 2, type: 'refund', qp_status_code: code },
+          ],
+        }),
+      );
+    const ok = reply('20000');
+    const qp = new HttpQuickPayClient('test', 'k', ok as typeof fetch, 'https://qp.test');
+    const r = await qp.refund({
+      paymentId: '7',
+      amountOre: 40000,
+      callbackUrl: 'https://ingest.example/billing/quickpay',
+    });
+    expect(r).toEqual({ state: 'accepted', operationId: '2' });
+    const [url, init] = ok.mock.calls[0] as unknown as [string, RequestInit];
+    expect(url).toBe('https://qp.test/payments/7/refund?synchronized');
+    expect(JSON.parse(String(init.body))).toEqual({ amount: 40000 });
+    const declined = new HttpQuickPayClient(
+      'test',
+      'k',
+      reply('40000') as typeof fetch,
+      'https://qp.test',
+    );
+    expect(
+      (await declined.refund({ paymentId: '7', amountOre: 1, callbackUrl: 'https://x.test' }))
+        .state,
+    ).toBe('rejected');
+    // No status yet: the refund may still go through, so it is not a failure.
+    const open = new HttpQuickPayClient(
+      'test',
+      'k',
+      reply(null) as typeof fetch,
+      'https://qp.test',
+    );
+    expect((await open.refund({ paymentId: '7', amountOre: 1 })).state).toBe('unknown');
+  });
+
   it('offers card only in the payment window', async () => {
     const fetchMock = vi.fn(async () => Response.json({ url: 'https://payment.quickpay.net/x' }));
     const qp = new HttpQuickPayClient('test', 'k', fetchMock as typeof fetch, 'https://qp.test');

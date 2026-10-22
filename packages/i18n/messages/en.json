@@ -937,7 +937,17 @@
     "switchYearlyBody": "From the next renewal on {date} you pay {price} for a whole year. A year costs the same as 10 months.",
     "switchMonthlyBody": "From the next renewal on {date} you pay {price} every month.",
     "yearlyDone": "You pay yearly from the next renewal",
-    "monthlyDone": "You pay monthly from the next renewal"
+    "monthlyDone": "You pay monthly from the next renewal",
+    "creditNotes": "Credit notes",
+    "creditFor": "Credits invoice {number}",
+    "downloadCreditPdf": "Download credit note {number} as PDF",
+    "refundState": {
+      "none": "Offset",
+      "pending": "Being refunded",
+      "done": "Refunded",
+      "failed": "Being refunded",
+      "offset": "Offset"
+    }
   },
   "checkout": {
     "title": "Add card",
@@ -3089,6 +3099,61 @@
         "subscriptions": "Subscriptions",
         "support": "Support",
         "invoicing": "Invoicing"
+      },
+      "credit": {
+        "action": "Credit",
+        "actionOf": "Credit invoice {number}",
+        "title": "Credit invoice {number}",
+        "intro": "The credit note gets its own number and refers to the invoice, which is not changed.",
+        "loading": "Loading the invoice's lines…",
+        "mode": "Credit",
+        "full": "Full credit",
+        "partial": "Partial credit",
+        "line": "Line",
+        "quantity": "Quantity",
+        "amount": "Amount excl. VAT",
+        "left": "{amount} left",
+        "nothingLeft": "Credited",
+        "hours": "hours",
+        "pieces": "pcs.",
+        "reason": "Reason",
+        "reasonHelp": "Printed on the credit note. E.g.: Agentor error: 30 min. on case #2271 should not have been invoiced.",
+        "refund": "Refund",
+        "refundCard": "Refund to the card",
+        "refundCardHelp": "QuickPay sends the money back to the card the invoice was paid with.",
+        "refundCardOff": "Only for invoices paid by card.",
+        "refundOffset": "Offset against the next invoice",
+        "refundOffsetHelp": "The amount is deducted from the customer's next invoice.",
+        "total": "Credited in total {amount} incl. VAT",
+        "submit": "Create credit note",
+        "created": "Credit note {number} created",
+        "refunded": "The money is refunded to the card",
+        "refundPending": "The refund is waiting for QuickPay",
+        "refundFailed": "The refund failed. Try again from the list of credit notes.",
+        "retry": "Retry refund",
+        "listTitle": "Credit notes",
+        "colNumber": "Number",
+        "colDate": "Date",
+        "colInvoice": "Invoice",
+        "colReason": "Reason",
+        "colAmount": "Amount incl. VAT",
+        "colRefund": "Refund",
+        "state": {
+          "none": "Not started",
+          "pending": "Waiting for QuickPay",
+          "done": "Refunded",
+          "failed": "Failed",
+          "offset": "Offset"
+        },
+        "errors": {
+          "CREDIT_EXCEEDS_INVOICE": "The amount is more than what is left on the invoice.",
+          "NOTHING_TO_CREDIT": "There is nothing left to credit on the invoice.",
+          "REASON_REQUIRED": "Write a reason.",
+          "REFUND_NOT_POSSIBLE": "The invoice was not paid by card, so the amount can only be offset.",
+          "INVOICE_NOT_ISSUED": "The invoice has not been issued yet.",
+          "LINE_INVALID": "Choose at least one line with an amount.",
+          "generic": "The credit note could not be created. Try again."
+        }
       }
     },
     "section": {
@@ -3236,6 +3301,21 @@
         "whiteLabel": "White label",
         "supportAudit": "Support access and audit log",
         "eanInvoice": "Pay by invoice (EAN)"
+      },
+      "company": {
+        "title": "Company details on invoices",
+        "intro": "Printed at the top and bottom of invoices and credit notes. Empty fields show as placeholders, e.g. [CVR].",
+        "name": "Company name",
+        "address": "Address",
+        "postalCity": "Postcode and city",
+        "cvr": "CVR",
+        "email": "E-mail on invoices",
+        "bankReg": "Reg. no.",
+        "bankAccount": "Account no.",
+        "iban": "IBAN",
+        "save": "Save company details",
+        "saved": "The company details are saved",
+        "error": "The company details could not be saved. Check the fields."
       }
     },
     "adminStatus": {

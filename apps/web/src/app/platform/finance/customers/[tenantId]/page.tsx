@@ -23,6 +23,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ButtonLink } from '@/components/button-link';
 import { StatementButton } from '@/components/platform/finance/action-buttons';
+import { CreditButton, RetryRefundButton } from '@/components/platform/finance/credit-dialog';
 import {
   PanelHeader,
   dayMonth,
@@ -37,6 +38,7 @@ import { PageBody } from '@/components/shell/secondary-nav';
 import {
   counted,
   currentMonth,
+  financeCreditNotesAll,
   financeInvoicesAll,
   growthPct,
   monthsBack,
@@ -70,11 +72,16 @@ export default async function CustomerFinancePage({
   const now = new Date();
   const cur = currentMonth(now);
   const prev = shiftMonth(cur, -1);
-  const [subs, all, support] = await Promise.all([
+  const [subs, all, support, allCredits, tc] = await Promise.all([
     subscriptionRows(actor, now),
     financeInvoicesAll(actor),
     supportForMonth(actor, cur),
+    financeCreditNotesAll(actor),
+    getTranslations('platform.finance.credit'),
   ]);
+  const credits = allCredits
+    .filter((c) => c.tenantId === tenantId)
+    .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   const sub = subs.find((s) => s.tenantId === tenantId);
   if (!sub) notFound();
   const invoices = all
@@ -382,15 +389,20 @@ export default async function CustomerFinancePage({
                       {t('customer.open')}
                     </ButtonLink>
                   ) : (
-                    <ButtonLink
-                      size="s"
-                      href={`/platform/finance/invoices/${tenantId}/${i.id}/pdf`}
-                      prefetch={false}
-                      aria-label={t('customer.pdfOf', { number: i.number ?? '' })}
-                    >
-                      <Icon icon={Download} size={14} />
-                      PDF
-                    </ButtonLink>
+                    <span className="inline-flex gap-2">
+                      {i.number && i.status !== 'void' && (
+                        <CreditButton tenantId={tenantId} invoiceId={i.id} number={i.number} />
+                      )}
+                      <ButtonLink
+                        size="s"
+                        href={`/platform/finance/invoices/${tenantId}/${i.id}/pdf`}
+                        prefetch={false}
+                        aria-label={t('customer.pdfOf', { number: i.number ?? '' })}
+                      >
+                        <Icon icon={Download} size={14} />
+                        PDF
+                      </ButtonLink>
+                    </span>
                   )}
                 </Td>
               </Tr>
@@ -398,6 +410,71 @@ export default async function CustomerFinancePage({
           </tbody>
         </Table>
       </Card>
+
+      {credits.length > 0 && (
+        <Card padding="none">
+          <PanelHeader title={tc('listTitle')} />
+          <Table>
+            <thead>
+              <tr>
+                <Th className="pl-5">{tc('colNumber')}</Th>
+                <Th>{tc('colDate')}</Th>
+                <Th>{tc('colInvoice')}</Th>
+                <Th>{tc('colReason')}</Th>
+                <Th numeric>{tc('colAmount')}</Th>
+                <Th>{tc('colRefund')}</Th>
+                <Th className="pr-5">
+                  <span className="sr-only">PDF</span>
+                </Th>
+              </tr>
+            </thead>
+            <tbody>
+              {credits.map((c) => (
+                <Tr key={c.id}>
+                  <Td className="pl-5 font-mono">{c.number}</Td>
+                  <Td>
+                    {dayMonth(c.createdAt, locale)} {c.createdAt.getFullYear()}
+                  </Td>
+                  <Td className="font-mono">{c.invoiceNumber}</Td>
+                  <Td className="max-w-80 truncate">{c.reason}</Td>
+                  <Td numeric>{money(c.netOre + c.vatOre, locale)}</Td>
+                  <Td>
+                    <StatusPill
+                      status={
+                        c.refundMethod === 'offset'
+                          ? 'info'
+                          : c.refundState === 'done'
+                            ? 'ok'
+                            : c.refundState === 'failed'
+                              ? 'error'
+                              : 'warn'
+                      }
+                      compact
+                    >
+                      {tc(`state.${c.refundMethod === 'offset' ? 'offset' : c.refundState}`)}
+                    </StatusPill>
+                  </Td>
+                  <Td className="pr-5 text-right">
+                    <span className="inline-flex gap-2">
+                      {c.refundMethod === 'card' && c.refundState === 'failed' && (
+                        <RetryRefundButton tenantId={tenantId} creditNoteId={c.id} />
+                      )}
+                      <ButtonLink
+                        size="s"
+                        href={`/platform/finance/credit-notes/${tenantId}/${c.id}/pdf`}
+                        prefetch={false}
+                      >
+                        <Icon icon={Download} size={14} />
+                        PDF
+                      </ButtonLink>
+                    </span>
+                  </Td>
+                </Tr>
+              ))}
+            </tbody>
+          </Table>
+        </Card>
+      )}
     </PageBody>
   );
   const draftHref = `/platform/finance/support/${tenantId}?month=${cur.key}`;

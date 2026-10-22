@@ -41,6 +41,28 @@ export interface QuickPayClient {
   recurring(input: RecurringInput): Promise<RecurringResult>;
   /** Unfinished signups are purged after 24 h; their saved card goes first (PLAN-SIGNUP B1). */
   cancelSubscription(subscriptionId: string): Promise<void>;
+  /**
+   * Credit notes (I02): money back to the card a payment came from. Synchronous; `accepted` only
+   * when QuickPay approved the refund (status 20000), `rejected` when it answered with another
+   * status, and `unknown` when the refund operation has no status yet (it may still go through).
+   */
+  refund(input: RefundInput): Promise<RefundResult>;
+}
+
+export interface RefundInput {
+  paymentId: string;
+  amountOre: number;
+  /**
+   * Usually left out: the synchronous answer is the confirmation, and a payment callback for a
+   * refund must not reach the charge handler.
+   */
+  callbackUrl?: string;
+}
+
+export interface RefundResult {
+  state: 'accepted' | 'rejected' | 'unknown';
+  /** QuickPay's id of the refund operation, when there is one. */
+  operationId: string | null;
 }
 
 /** QuickPay order ids: 4–20 alphanumerics. "AG" + 12 random base-36 characters. */
@@ -133,6 +155,21 @@ export class HttpQuickPayClient implements QuickPayClient {
     );
   }
 
+  async refund(i: RefundInput): Promise<RefundResult> {
+    const r = await this.call<{
+      operations?: { id: number; type: string; qp_status_code: string }[];
+    }>(
+      'POST',
+      `/payments/${encodeURIComponent(i.paymentId)}/refund?synchronized`,
+      { amount: i.amountOre },
+      i.callbackUrl ? { 'QuickPay-Callback-Url': i.callbackUrl } : {},
+    );
+    const op = [...(r.operations ?? [])].reverse().find((o) => o.type === 'refund');
+    const code = op?.qp_status_code;
+    const state = code === '20000' ? 'accepted' : code ? 'rejected' : 'unknown';
+    return { state, operationId: op ? String(op.id) : null };
+  }
+
   async recurring(i: RecurringInput) {
     const r = await this.call<{ id: number; accepted: boolean; state: string }>(
       'POST',
@@ -201,6 +238,10 @@ export class MockQuickPayClient implements QuickPayClient {
   }
 
   async cancelSubscription() {}
+
+  async refund(i: RefundInput): Promise<RefundResult> {
+    return { state: 'accepted', operationId: `mock_refund_${i.paymentId}` };
+  }
 }
 
 export function quickPayMode(value: string | undefined): QuickPayMode {

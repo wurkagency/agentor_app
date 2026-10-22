@@ -209,6 +209,19 @@ export async function seedFixtures(admin: pg.ClientBase): Promise<void> {
        ($2, 'AG-TEST-B', '2026-10-01', '2026-11-01', 'Startup · månedlig', 9875, 1975)`,
     [ID.tenantA, ID.tenantB],
   );
+  // I02: one credit note per tenant, numbered in a year no test uses (the series is checked).
+  await q(
+    `with n as (
+       insert into credit_notes (tenant_id, number, invoice_id, invoice_number, invoice_issued_at,
+                                 reason, refund_method, net_ore, vat_ore, created_by_name)
+       select i.tenant_id, 'K-2000-000' || row_number() over (order by i.number), i.id, i.number,
+              i.period_start, 'Fixture', 'offset', -1000, -250, 'Fixture'
+         from invoices i where i.number in ('AG-TEST-A', 'AG-TEST-B')
+       returning tenant_id, id)
+     insert into credit_note_lines (tenant_id, credit_note_id, source_index, text, unit,
+                                    quantity_milli, unit_price_ore, amount_ore)
+     select tenant_id, id, 0, 'Fixture', 'pieces', -1000, 1000, -1000 from n`,
+  );
   // M6: flows, runs, records, links, lookups, notifications. Flow A2 is not granted to the
   // restricted developer, so its version, run and record must stay invisible to them.
   await q(

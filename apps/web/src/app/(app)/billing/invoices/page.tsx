@@ -1,10 +1,10 @@
-import { listInvoices } from '@agentor/db';
+import { listCreditNotes, listInvoices } from '@agentor/db';
 import { formatDate, formatMoney } from '@agentor/i18n';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { requireRole } from '@/server/auth/session';
 import { db } from '@/server/infra';
-import { InvoiceTable } from '../invoice-table';
+import { CreditNoteTable, InvoiceTable } from '../invoice-table';
 
 export async function generateMetadata() {
   const t = await getTranslations('billing');
@@ -13,7 +13,8 @@ export async function generateMetadata() {
 
 export default async function InvoicesPage() {
   const ctx = await requireRole(['owner']);
-  const invoices = await listInvoices(db(), { tenantId: ctx.tenant.tenantId, userId: ctx.user.id });
+  const c = { tenantId: ctx.tenant.tenantId, userId: ctx.user.id };
+  const [invoices, credits] = await Promise.all([listInvoices(db(), c), listCreditNotes(db(), c)]);
   const t = await getTranslations('billing');
   const locale = (await getLocale()) as 'da' | 'en';
   return (
@@ -29,6 +30,16 @@ export default async function InvoicesPage() {
           description: i.description,
           amount: formatMoney((i.amountOre + i.vatOre) / 100, locale),
           status: i.status === 'draft' ? 'open' : i.status,
+        }))}
+      />
+      <CreditNoteTable
+        notes={credits.map((n) => ({
+          id: n.id,
+          number: n.number,
+          date: formatDate(n.createdAt, locale),
+          invoiceNumber: n.invoiceNumber,
+          amount: formatMoney((n.netOre + n.vatOre) / 100, locale),
+          state: n.refundMethod === 'offset' ? 'offset' : n.refundState,
         }))}
       />
     </PageBody>

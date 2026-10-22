@@ -20,6 +20,7 @@ import Link from 'next/link';
 import { Responsive } from '@agentor/ui/mobile';
 import { ButtonLink } from '@/components/button-link';
 import { NotifyButton } from '@/components/platform/finance/action-buttons';
+import { CreditButton } from '@/components/platform/finance/credit-dialog';
 import {
   CustomerChip,
   FilterChips,
@@ -431,7 +432,18 @@ export default async function PaymentsPage({
                 <Td>{x.i.dueAt ? dayMonth(x.i.dueAt, locale) : '–'}</Td>
                 <Td numeric>{money(x.i.grossOre, locale)}</Td>
                 <Td>{status(x)}</Td>
-                <Td className="pr-5 text-right">{action(x)}</Td>
+                <Td className="pr-5 text-right">
+                  <span className="inline-flex gap-2">
+                    {action(x)}
+                    {x.i.number && (
+                      <CreditButton
+                        tenantId={x.i.tenantId}
+                        invoiceId={x.i.id}
+                        number={x.i.number}
+                      />
+                    )}
+                  </span>
+                </Td>
               </Tr>
             ))}
             {rows.length === 0 && (
@@ -460,7 +472,8 @@ export default async function PaymentsPage({
               <Th>{t('col.issued')}</Th>
               <Th>{t('kpi.paid')}</Th>
               <Th numeric>{t('draft.amount')}</Th>
-              <Th className="pr-5">{t('col.status')}</Th>
+              <Th>{t('col.status')}</Th>
+              <Th className="pr-5" aria-label={t('col.actions')} />
             </tr>
           </thead>
           <tbody>
@@ -475,7 +488,12 @@ export default async function PaymentsPage({
                 <Td>{dayMonth(x.i.issuedAt ?? x.i.createdAt, locale)}</Td>
                 <Td>{dayMonth(x.i.paidAt!, locale)}</Td>
                 <Td numeric>{money(x.i.grossOre, locale)}</Td>
-                <Td className="pr-5">{status(x)}</Td>
+                <Td>{status(x)}</Td>
+                <Td className="pr-5 text-right">
+                  {x.i.number && (
+                    <CreditButton tenantId={x.i.tenantId} invoiceId={x.i.id} number={x.i.number} />
+                  )}
+                </Td>
               </Tr>
             ))}
           </tbody>

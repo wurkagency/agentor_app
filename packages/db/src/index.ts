@@ -29,3 +29,4 @@ export * from './repo/signup.js';
 export * from './repo/admin.js';
 export * from './repo/profile.js';
 export * from './repo/email.js';
+export * from './repo/documents.js';

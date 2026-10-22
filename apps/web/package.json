@@ -24,6 +24,7 @@
     "@agentor/i18n": "workspace:*",
     "@agentor/jobs": "workspace:*",
     "@agentor/keybox": "workspace:*",
+    "@agentor/pdf": "workspace:*",
     "@agentor/storage": "workspace:*",
     "@agentor/ui": "workspace:*",
     "@better-auth/drizzle-adapter": "^1.0.0",
