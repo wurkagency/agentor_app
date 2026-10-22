@@ -3,3 +3,7 @@
 # is already on a pushed review branch.
 c25c475dcf2e25f43e4eecc59e8d92e8056399ca:apps/web/e2e/screenshots.spec.ts:generic-api-key:57
 c25c475dcf2e25f43e4eecc59e8d92e8056399ca:apps/web/e2e/billing.spec.ts:generic-api-key:23
+
+# Fictional case-reply tokens in tests (commit 8b5ab5a), already pushed; made per run since.
+8b5ab5a0c8be3a5d546930fbe8f96300f1d884c8:apps/web/e2e/emails.spec.ts:generic-api-key:128
+8b5ab5a0c8be3a5d546930fbe8f96300f1d884c8:packages/db/test/isolation/email.test.ts:generic-api-key:29

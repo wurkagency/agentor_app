@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, inject, it } from 'vitest';
 import { createDatabase, type DatabaseHandle } from '../../src/client.js';
 import { notify } from '../../src/repo/engine.js';
@@ -26,8 +27,9 @@ let worker: DatabaseHandle;
 let web: DatabaseHandle;
 const CASE = '0190a000-0000-7000-8000-0000000ae001';
 const CASE_OLD = '0190a000-0000-7000-8000-0000000ae002';
-const TOKEN = 'a1b2c3d4e5f60718293a4b5c6d7e8f90';
-const TOKEN_OLD = 'ffffeeeeddddccccbbbbaaaa99998888';
+// Reply tokens are made per run: fixed hex literals read as credentials to gitleaks.
+const TOKEN = randomBytes(16).toString('hex');
+const TOKEN_OLD = randomBytes(16).toString('hex');
 
 beforeAll(async () => {
   const db = inject('isolationDb');

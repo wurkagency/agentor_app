@@ -1,4 +1,5 @@
 import { execFile } from 'node:child_process';
+import { randomBytes } from 'node:crypto';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { lastWeekKey } from '@agentor/core';
@@ -125,7 +126,8 @@ test('a resolved case is mailed as E12, and a reply by e-mail reopens it', async
     );
 
     // The reply arrives through agentor-ingest (/mail/inbound) as app.case_reply_by_email.
-    const token = '0123456789abcdef0123456789abcdef';
+    // Made per run: a fixed hex literal reads as a credential to gitleaks.
+    const token = randomBytes(16).toString('hex');
     await adminQuery(`update platform.cases set reply_token = $2 where id = $1`, [caseId, token]);
     const [r] = await adminQuery<{ r: string }>(
       `select app.case_reply_by_email($1, $2, 'Nu sker det igen for ordre #10511.') as r`,

@@ -10,7 +10,8 @@ import { BOARD, EMAIL_KEYS, renderEmail, SAMPLES, SAMPLE_NOW } from '@agentor/em
 import { chromium } from '@playwright/test';
 
 const out =
-  process.argv[2] ?? join(import.meta.dirname, '..', '..', '..', 'docs', 'screenshots', 'emails-pdf');
+  process.argv[2] ??
+  join(import.meta.dirname, '..', '..', '..', 'docs', 'screenshots', 'emails-pdf');
 const appUrl = process.env.APP_URL ?? 'http://localhost:3000';
 
 async function main() {
@@ -18,11 +19,17 @@ async function main() {
   const browser = await chromium.launch();
   try {
     for (const scheme of ['light', 'dark'] as const) {
-      const page = await browser.newPage({ viewport: { width: 680, height: 900 }, colorScheme: scheme });
+      const page = await browser.newPage({
+        viewport: { width: 680, height: 900 },
+        colorScheme: scheme,
+      });
       for (const key of EMAIL_KEYS) {
         const mail = renderEmail(key, SAMPLES[key] as never, { appUrl, now: SAMPLE_NOW });
         await page.setContent(mail.html, { waitUntil: 'networkidle' });
-        await page.screenshot({ path: join(out, `${BOARD[key]}-${key}-${scheme}.png`), fullPage: true });
+        await page.screenshot({
+          path: join(out, `${BOARD[key]}-${key}-${scheme}.png`),
+          fullPage: true,
+        });
       }
       await page.close();
     }
