@@ -1,0 +1,16 @@
+Du har allerede en konto
+
+Hej
+
+Nogen, forhåbentlig dig, forsøgte at oprette en konto med denne e-mail. Du har allerede en konto, så du kan bare logge ind.
+
+Log ind på Agentor: https://app.agentor.dk/login
+
+Har du glemt adgangskoden, kan du nulstille den på login-siden. Var det ikke dig, skal du ikke gøre noget.
+
+Venlig hilsen
+Agentor
+
+-- 
+Agentor ApS · app.agentor.dk · support@agentor.dk
+Du får denne mail, fordi mette@nordlys-cykler.dk blev brugt til at oprette en konto.

@@ -1,0 +1,5 @@
+@import 'tailwindcss';
+@import '@agentor/ui/styles.css';
+
+/* Scan the shared component library for class names. */
+@source '../../../../packages/ui/src';

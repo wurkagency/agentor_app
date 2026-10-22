@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>Tokens</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F1}
+.ds{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1A1A18;font-size:14px;line-height:1.55}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px}
+.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.card{background:#FFFFFF;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:24px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6B6B67;margin:0}
+.sec{font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em;margin:0}
+.ct{font-size:16px;font-weight:600;line-height:1.4;margin:0}
+.meta{font-size:12px;font-weight:500;color:#6B6B67}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;line-height:1.4}
+.tbl th{height:40px;text-align:left;font-size:12px;font-weight:600;color:#1A1A18;border-bottom:1px solid #E4E1DB;padding:0 12px}
+.tbl td{height:44px;border-bottom:1px solid #E4E1DB;padding:0 12px;vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;box-sizing:border-box;padding:0 10px;border-radius:9999px;font-size:12px;font-weight:600;color:#1A1A18;white-space:nowrap}
+.pill .i{width:14px;height:14px}
+.badge{display:inline-flex;align-items:center;gap:5px;height:22px;box-sizing:border-box;padding:0 9px;border-radius:9999px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge .i{width:13px;height:13px}
+.ok{display:inline-flex;align-items:center;gap:4px;font-weight:600;color:#2F7D4F}
+.bad{display:inline-flex;align-items:center;gap:4px;font-weight:600;color:#B42318}
+.sw{height:88px;border-radius:12px 12px 0 0}
+.swc{background:#FFFFFF;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden;display:flex;flex-direction:column}
+.swb{padding:12px 16px 16px;display:flex;flex-direction:column;gap:2px}
+</style>
+</helmet>
+<div class="ds" style="width: 1440px; min-height: 2240px; box-sizing: border-box; padding: 64px 80px; background: #F7F5F1; display: flex; flex-direction: column; gap: 48px">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+<symbol id="cc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></symbol>
+<symbol id="ta" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></symbol>
+<symbol id="cx" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></symbol>
+<symbol id="up" viewBox="0 0 24 24"><path d="m19 5 3-3"></path><path d="m2 22 3-3"></path><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"></path><path d="M7.5 13.5 10 11"></path><path d="M10.5 16.5 13 14"></path><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"></path></symbol>
+<symbol id="cp" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="10" x2="10" y1="15" y2="9"></line><line x1="14" x2="14" y1="15" y2="9"></line></symbol>
+<symbol id="fc" viewBox="0 0 24 24"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"></path><path d="M8.5 2h7"></path><path d="M7 16h10"></path></symbol>
+<symbol id="pl" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path><path d="m15 5 3 3"></path></symbol>
+<symbol id="rd" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path></symbol>
+<symbol id="fp" viewBox="0 0 24 24"><path d="M12.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v9.5"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M13.378 15.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"></path></symbol>
+<symbol id="ck" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></symbol>
+<symbol id="xx" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></symbol>
+</svg>
+
+<header style="display: flex; justify-content: space-between; align-items: flex-end; gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<p class="eyebrow">Agentor App · Runde 1 · Etape 1</p>
+<h1 style="margin: 0; font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em">Tokens</h1>
+<p style="margin: 0; color: #6B6B67; max-width: 720px">Alle værdier her er tokens fra webdesignsystemet plus de godkendte app-undtagelser (præfiks <span class="mono">--app-</span> og <span class="mono">--status-</span>). Komponenter må ikke bruge andre værdier. Canvas er gjort lysere end web (#F7F5F1) for et roligere og mere eksklusivt udtryk; #F0EDE8 bruges nu kun som fyld inde i hvide flader.</p>
+</div>
+<div class="meta">18. okt. 2026 · Designspecifikation v1, afsnit 2</div>
+</header>
+
+<section style="display: flex; flex-direction: column; gap: 16px">
+<h2 class="sec">Farver · brand</h2>
+<div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px">
+<div class="swc"><div class="sw" style="background: #D0E84A"></div><div class="swb"><strong>Lime</strong><span class="mono">--color-primary</span><span class="meta">#D0E84A · handling, valgt, fremdrift</span><span class="meta">Mørk tekst 12,72:1</span></div></div>
+<div class="swc"><div class="sw" style="background: #DCEE55"></div><div class="swb"><strong>Lime lys</strong><span class="mono">--color-primary-bright</span><span class="meta">#DCEE55 · hover på lime</span></div></div>
+<div class="swc"><div class="sw" style="background: #1A1A18"></div><div class="swb"><strong>Mørk</strong><span class="mono">--color-fg-1</span><span class="meta">#1A1A18 · tekst, fokusring</span><span class="meta">På hvid 17,43:1</span></div></div>
+<div class="swc"><div class="sw" style="background: #6B6B67"></div><div class="swb"><strong>Sekundær tekst</strong><span class="mono">--color-fg-2</span><span class="meta">#6B6B67 · labels, metadata</span><span class="meta">Hvid 5,35:1 · canvas 4,91:1</span></div></div>
+<div class="swc"><div class="sw" style="background: #9B9B97"></div><div class="swb"><strong>Tertiær</strong><span class="mono">--color-fg-3</span><span class="meta">#9B9B97 · kun ikoner og pile</span><span class="meta" style="color: #B42318">Hvid 2,79:1 · ikke til tekst</span></div></div>
+<div class="swc"><div class="sw" style="background: #13293A"></div><div class="swb"><strong>Navy</strong><span class="mono">--color-secondary-navy</span><span class="meta">#13293A · sidebar, Live</span><span class="meta">Hvid 14,94:1 · hvid 78 % 9,61:1</span></div></div>
+<div class="swc"><div class="sw" style="background: #F7F5F1; box-shadow: inset 0 -1px 0 #E4E1DB"></div><div class="swb"><strong>Canvas</strong><span class="mono">--app-canvas</span><span class="meta">#F7F5F1 · baggrund bag flader · ny</span><span class="meta">Mørk tekst 16,01:1 · fg-2 4,91:1</span></div></div>
+<div class="swc"><div class="sw" style="background: #F0EDE8"></div><div class="swb"><strong>Fyld</strong><span class="mono">--color-bg-base</span><span class="meta">#F0EDE8 · fyld i hvide flader, skeleton, hover</span></div></div>
+<div class="swc"><div class="sw" style="background: #FFFFFF; box-shadow: inset 0 -1px 0 #E4E1DB"></div><div class="swb"><strong>Flade</strong><span class="mono">--app-surface</span><span class="meta">#FFFFFF · kort, tabeller, paneler</span></div></div>
+<div class="swc"><div class="sw" style="background: #E4E1DB"></div><div class="swb"><strong>Linje</strong><span class="mono">--color-border</span><span class="meta">#E4E1DB · tabeller, inputs</span></div></div>
+<div class="swc"><div class="sw" style="background: #C8C5BF"></div><div class="swb"><strong>Linje stærk</strong><span class="mono">--color-border-strong</span><span class="meta">#C8C5BF · sekundær knap, hover</span></div></div>
+<div class="swc"><div class="sw" style="background-color: #F7F5F1; background-image: radial-gradient(#DCD8D1 1px, transparent 1px); background-size: 16px 16px"></div><div class="swb"><strong>Prikgrid</strong><span class="mono">--app-canvas-dots</span><span class="meta">#DCD8D1 · 1 px prik, 16 px</span></div></div>
+<div class="swc" style="background: #13293A; color: #FFFFFF"><div class="sw" style="background: #13293A; display: flex; align-items: center; padding: 0 16px; gap: 8px"><span style="display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 9999px; background: #D0E84A; color: #1A1A18; font-weight: 600; font-size: 14px">Aktiv</span><span style="color: rgba(255,255,255,.78); font-weight: 500">Punkt</span></div><div class="swb"><strong>På navy</strong><span class="mono" style="color: rgba(255,255,255,.78)">--color-on-navy-muted</span><span style="font-size: 12px; color: rgba(255,255,255,.78)">Hvid 78 % · lime pill = aktiv</span></div></div>
+</div>
+</section>
+
+<section style="display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start">
+<div class="card" style="padding: 8px 12px 4px">
+<div style="padding: 16px 12px 8px; display: flex; justify-content: space-between; align-items: baseline"><h2 class="sec">Farver · status</h2><span class="meta">Kun til status · altid ikon + tekst · tekst i pill er altid #1A1A18</span></div>
+<table class="tbl">
+<thead><tr><th>Status</th><th>Pill</th><th>Lucide-ikon</th><th>--status-*-fg</th><th>--status-*-bg</th><th class="num">Ikon på bg (≥ 3:1)</th><th class="num">fg på hvid (≥ 4,5:1)</th><th class="num">Tekst på bg</th></tr></thead>
+<tbody>
+<tr><td><strong>Aktiv</strong> <span class="meta">ok</span></td><td><span class="pill" style="background: #E6F2EA"><svg class="i" style="color: #2F7D4F"><use href="#cc"></use></svg>Aktiv</span></td><td class="mono">circle-check</td><td><span class="mono">#2F7D4F</span></td><td><span class="mono">#E6F2EA</span></td><td class="num">4,38:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">5,04:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">15,15:1</td></tr>
+<tr><td><strong>Advarsel</strong> <span class="meta">warn</span></td><td><span class="pill" style="background: #FBF0DC"><svg class="i" style="color: #A86412"><use href="#ta"></use></svg>Advarsel</span></td><td class="mono">triangle-alert</td><td><span class="mono">#A86412</span></td><td><span class="mono">#FBF0DC</span></td><td class="num">4,14:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">4,67:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">15,44:1</td></tr>
+<tr><td><strong>Fejl</strong> <span class="meta">error</span></td><td><span class="pill" style="background: #FBE7E4"><svg class="i" style="color: #B42318"><use href="#cx"></use></svg>Fejl</span></td><td class="mono">circle-x</td><td><span class="mono">#B42318</span></td><td><span class="mono">#FBE7E4</span></td><td class="num">5,53:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">6,57:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">14,65:1</td></tr>
+<tr><td><strong>Afbrudt</strong> <span class="meta">broken</span></td><td><span class="pill" style="background: #FBE7E4"><svg class="i" style="color: #B42318"><use href="#up"></use></svg>Afbrudt</span></td><td class="mono">unplug</td><td><span class="mono">#B42318</span></td><td><span class="mono">#FBE7E4</span></td><td class="num">5,53:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">6,57:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">14,65:1</td></tr>
+<tr><td><strong>Pauset</strong> <span class="meta">paused</span></td><td><span class="pill" style="background: #EFEDE8"><svg class="i" style="color: #6B6B67"><use href="#cp"></use></svg>Pauset</span></td><td class="mono">circle-pause</td><td><span class="mono">#6B6B67</span></td><td><span class="mono">#EFEDE8</span></td><td class="num">4,57:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">5,35:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">14,90:1</td></tr>
+<tr><td><strong>Test</strong> <span class="meta">info</span></td><td><span class="pill" style="background: #E5EDF5"><svg class="i" style="color: #2B5C8A"><use href="#fc"></use></svg>Test</span></td><td class="mono">flask-conical</td><td><span class="mono">#2B5C8A</span></td><td><span class="mono">#E5EDF5</span></td><td class="num">5,92:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">7,00:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">14,74:1</td></tr>
+<tr><td><strong>Kladde</strong> <span class="meta">draft</span></td><td><span class="pill" style="border: 1px dashed #C8C5BF"><svg class="i" style="color: #6B6B67"><use href="#pl"></use></svg>Kladde</span></td><td class="mono">pencil-line</td><td><span class="mono">#6B6B67</span></td><td><span class="meta">stiplet #C8C5BF</span></td><td class="num">5,35:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">5,35:1 <span class="ok"><svg class="i"><use href="#ck"></use></svg></span></td><td class="num">17,43:1</td></tr>
+</tbody>
+</table>
+</div>
+<div style="display: flex; flex-direction: column; gap: 24px">
+<div class="card" style="display: flex; flex-direction: column; gap: 16px">
+<h3 class="ct">Kørselstilstand</h3>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between"><span class="badge" style="background: #13293A; color: #FFFFFF"><svg class="i"><use href="#rd"></use></svg>Live</span><span class="meta">Navy · hvid tekst 14,94:1</span></div>
+<div style="display: flex; align-items: center; justify-content: space-between"><span class="badge" style="background: #FFFFFF; box-shadow: inset 0 0 0 1px #C8C5BF; color: #1A1A18"><svg class="i"><use href="#fp"></use></svg>Kladde</span><span class="meta">Bogføres som kladde</span></div>
+<div style="display: flex; align-items: center; justify-content: space-between"><span class="badge" style="background: #E5EDF5; color: #1A1A18"><svg class="i" style="color: #2B5C8A"><use href="#fc"></use></svg>Test</span><span class="meta">Prøvekørsel · skriver intet</span></div>
+</div>
+</div>
+<div class="card" style="display: flex; flex-direction: column; gap: 12px">
+<h3 class="ct">Kontrast · fund til afklaring</h3>
+<div style="display: flex; gap: 8px; align-items: flex-start"><span class="bad"><svg class="i"><use href="#xx"></use></svg></span><span style="font-size: 13px"><strong>fg-3 #9B9B97</strong> er 2,79:1 på hvid og består ikke AA som tekst. Jeg bruger fg-2 til metadata og placeholder og fg-3 kun til ikoner og pile ved siden af tekst.</span></div>
+<div style="display: flex; gap: 8px; align-items: flex-start"><span class="bad"><svg class="i"><use href="#xx"></use></svg></span><span style="font-size: 13px"><strong>Inputlinje #E4E1DB</strong> er 1,31:1. Felter genkendes på label og hvid flade, og fokus/fejl giver en tydelig ring. Bør vurderes mod WCAG 1.4.11.</span></div>
+<div style="display: flex; gap: 8px; align-items: flex-start"><span class="ok"><svg class="i"><use href="#ck"></use></svg></span><span style="font-size: 13px">Alle status-fg består 4,5:1 på hvid og 3:1 mod deres egen bg.</span></div>
+</div>
+</div>
+</section>
+
+<section class="card" style="display: flex; flex-direction: column; gap: 8px; padding: 24px 24px 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 class="sec">Typografi · app-skala</h2><span class="meta">Plus Jakarta Sans · tal i tabeller med tabular-nums · JetBrains Mono kun til id'er, JSON og udtryk</span></div>
+<table class="tbl">
+<thead><tr><th style="width: 180px">Rolle</th><th style="width: 220px">Størrelse / vægt / linje · tracking</th><th>Eksempel</th></tr></thead>
+<tbody>
+<tr><td>Sidetitel</td><td class="meta">28 / 600 / 1.2 · −0.01em</td><td><span style="font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em">Integrationer</span></td></tr>
+<tr><td>Sektion</td><td class="meta">20 / 600 / 1.3 · −0.01em</td><td><span style="font-size: 20px; font-weight: 600; letter-spacing: -0.01em">Kræver handling</span></td></tr>
+<tr><td>Korttitel</td><td class="meta">16 / 600 / 1.4</td><td><span style="font-size: 16px; font-weight: 600">Ordrer → Dinero Fakturaer</span></td></tr>
+<tr><td>Brødtekst</td><td class="meta">14 / 400 / 1.55</td><td>Kontoen 1010 findes ikke længere i Dinero. Vælg en ny konto for EU-salg.</td></tr>
+<tr><td>Tabel</td><td class="meta">13 / 400 / 1.4 · header 12 / 600, mørk</td><td style="font-size: 13px">#10447 · 4.395,00 kr. · for 4 min. siden</td></tr>
+<tr><td>Metadata</td><td class="meta">12 / 500 / 1.4</td><td class="meta">Sidst kørt 18. okt. 2026 kl. 14:02</td></tr>
+<tr><td>Eyebrow</td><td class="meta">12 / 600 / UPPERCASE · +0.08em</td><td><span class="eyebrow">Konto</span></td></tr>
+<tr><td>Stat-tal</td><td class="meta">40 / 700 / 1 · −0.03em</td><td><span style="font-size: 40px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; font-variant-numeric: tabular-nums">184.320</span> <span style="font-size: 16px; font-weight: 500; color: #6B6B67">kr.</span></td></tr>
+<tr><td>Stat-tal kompakt</td><td class="meta">24 / 700 / 1 · −0.02em</td><td><span style="font-size: 24px; font-weight: 700; letter-spacing: -0.02em">1.906</span></td></tr>
+<tr><td>Primær knap</td><td class="meta">12 / 700 / UPPERCASE · +0.10em</td><td><span style="font-size: 12px; font-weight: 700; letter-spacing: 0.10em; text-transform: uppercase">Nyt flow</span></td></tr>
+<tr><td>Tæt knap</td><td class="meta">13 / 600 / sentence case</td><td><span style="font-size: 13px; font-weight: 600">Gentag fejlede</span></td></tr>
+<tr><td>Mono</td><td class="meta">JetBrains Mono 12.5 / 400</td><td><span class="mono">flow_8f2a91 · order.total * 0.8</span></td></tr>
+</tbody>
+</table>
+</section>
+
+<section style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+<div class="card" style="display: flex; flex-direction: column; gap: 16px">
+<h3 class="ct">Afstande · 4 px-grid</h3>
+<div style="display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 12px"><span class="meta" style="width: 28px">4</span><span style="height: 12px; width: 4px; background: #13293A; border-radius: 2px"></span></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meta" style="width: 28px">8</span><span style="height: 12px; width: 8px; background: #13293A; border-radius: 2px"></span></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meta" style="width: 28px">12</span><span style="height: 12px; width: 12px; background: #13293A; border-radius: 2px"></span></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meta" style="width: 28px">16</span><span style="height: 12px; width: 16px; background: #13293A; border-radius: 2px"></span><span class="meta">kompakt kortpadding</span></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meta" style="width: 28px">24</span><span style="height: 12px; width: 24px; background: #13293A; border-radius: 2px"></span><span class="meta">kortpadding · titel → indhold</span></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meta" style="width: 28px">32</span><span style="height: 12px; width: 32px; background: #13293A; border-radius: 2px"></span><span class="meta">sektionsafstand · sidepadding</span></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meta" style="width: 28px">40</span><span style="height: 12px; width: 40px; background: #13293A; border-radius: 2px"></span></div>
+<div style="display: flex; align-items: center; gap: 12px"><span class="meta" style="width: 28px">48</span><span style="height: 12px; width: 48px; background: #13293A; border-radius: 2px"></span></div>
+</div>
+</div>
+<div class="card" style="display: flex; flex-direction: column; gap: 16px">
+<h3 class="ct">Radier</h3>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 64px; border-radius: 8px; background: #F0EDE8; box-shadow: inset 0 0 0 1px #C8C5BF"></div><strong style="font-size: 13px">8</strong><span class="meta">inputs, chips i tabeller, tooltip</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 64px; border-radius: 12px; background: #F0EDE8; box-shadow: inset 0 0 0 1px #C8C5BF"></div><strong style="font-size: 13px">12</strong><span class="meta">noder i editoren</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 64px; border-radius: 16px; background: #F0EDE8; box-shadow: inset 0 0 0 1px #C8C5BF"></div><strong style="font-size: 13px">16</strong><span class="meta">kort, paneler, dialoger</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 64px; border-radius: 20px; background: #D0E84A"></div><strong style="font-size: 13px">20</strong><span class="meta">fremhævede lime-paneler</span></div>
+<div style="display: flex; flex-direction: column; gap: 6px"><div style="height: 64px; border-radius: 9999px; background: #F0EDE8; box-shadow: inset 0 0 0 1px #C8C5BF"></div><strong style="font-size: 13px">Fuld</strong><span class="meta">knapper, pills, avatarer</span></div>
+</div>
+</div>
+<div class="card" style="display: flex; flex-direction: column; gap: 16px; background: transparent; box-shadow: none; padding: 0">
+<h3 class="ct">Skygger</h3>
+<div style="display: flex; flex-direction: column; gap: 20px">
+<div style="background: #FFFFFF; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.06); padding: 16px; display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 13px">--shadow-sm</strong><span class="mono">0 2px 12px rgba(0,0,0,.06)</span><span class="meta">Kort på canvas, noder. Ingen border.</span></div>
+<div style="background: #FFFFFF; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.10); padding: 16px; display: flex; flex-direction: column; gap: 2px"><strong style="font-size: 13px">--shadow-card</strong><span class="mono">0 8px 32px rgba(0,0,0,.10)</span><span class="meta">Dialoger, popovers, flydende inspektør.</span></div>
+</div>
+</div>
+</section>
+
+<section class="card" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h3 class="ct">Ikoner · Lucide 0.460, stroke 1.75</h3>
+<div style="display: flex; align-items: flex-end; gap: 24px">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><svg class="i" style="width: 16px; height: 16px"><use href="#cc"></use></svg><span class="meta">16 tabel, pill</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><svg class="i" style="width: 18px; height: 18px"><use href="#cc"></use></svg><span class="meta">18 knap, menu</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 6px"><svg class="i" style="width: 24px; height: 24px"><use href="#cc"></use></svg><span class="meta">24 tom tilstand, mobil</span></div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h3 class="ct">Fokus</h3>
+<div style="display: flex; gap: 24px; align-items: center">
+<span style="display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border-radius: 9999px; background: #D0E84A; font-size: 13px; font-weight: 600; outline: 2px solid #1A1A18; outline-offset: 2px">På lys flade</span>
+<span style="display: inline-flex; align-items: center; padding: 10px; background: #13293A; border-radius: 12px"><span style="display: inline-flex; align-items: center; height: 36px; padding: 0 16px; border-radius: 9999px; color: #FFFFFF; font-size: 13px; font-weight: 600; outline: 2px solid #FFFFFF; outline-offset: 2px">På navy</span></span>
+</div>
+<span class="meta">2 px ring, 2 px afstand. Hvid ring på navy.</span>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<h3 class="ct">Bevægelse</h3>
+<span style="font-size: 13px">150–250 ms ease. Udfoldning af rækker 200 ms. Prik langs aktiv rute 1,4 s loop. Roterende <span class="mono">refresh-cw</span> ved "Kører".</span>
+<span class="meta">Alt slås fra ved prefers-reduced-motion.</span>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2240}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

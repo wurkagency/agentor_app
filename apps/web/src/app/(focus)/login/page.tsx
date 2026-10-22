@@ -1,0 +1,38 @@
+import { getTranslations } from 'next-intl/server';
+import { redirect } from 'next/navigation';
+import { FocusCard } from '@/components/focus-card';
+import { getUserSession } from '@/server/auth/session';
+import { safeNext } from '@/lib/safe-next';
+import { env } from '@/server/env';
+import { LoginForm } from './login-form';
+import { Responsive } from '@agentor/ui/mobile';
+import { MobileLogin } from './mobile-login';
+
+export async function generateMetadata() {
+  const t = await getTranslations('auth');
+  return { title: t('loginTitle') };
+}
+
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string; sso?: string }>;
+}) {
+  const sp = await searchParams;
+  const next = safeNext(sp.next);
+  if (await getUserSession()) redirect(next);
+  const t = await getTranslations('auth');
+  const form = (
+    <LoginForm next={next} ssoEnabled={env().SSO_MODE !== 'off'} ssoFailed={sp.sso === 'failed'} />
+  );
+  return (
+    <Responsive
+      desktop={
+        <FocusCard title={t('loginTitle')} intro={t('loginIntro')}>
+          {form}
+        </FocusCard>
+      }
+      mobile={<MobileLogin next={next} form={form} />}
+    />
+  );
+}

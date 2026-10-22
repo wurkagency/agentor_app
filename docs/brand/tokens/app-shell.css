@@ -1,0 +1,20 @@
+/* =============================================================
+   AGENTOR — APP SHELL LAYOUT TOKENS
+   Structural measurements for the product (iPaaS) shell: sidebar,
+   header, right settings panel. Not brand/theme-able — see
+   tokens/theming.css for what tenants may override.
+   ============================================================= */
+
+:root {
+  --app-sidebar-width:            260px;
+  --app-sidebar-width-collapsed:  76px;
+  --app-header-height:            64px;
+  --app-rightpanel-width:         400px;
+  --app-content-max-width:        1320px;
+  --app-content-padding:          32px;
+
+  --z-app-header:      100; /* @kind other */
+  --z-app-sidebar:      90; /* @kind other */
+  --z-app-rightpanel:  200; /* @kind other */
+  --z-app-overlay:     190; /* @kind other */
+}

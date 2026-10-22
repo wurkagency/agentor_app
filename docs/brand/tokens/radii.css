@@ -1,0 +1,15 @@
+/* =============================================================
+   AGENTOR — BORDER RADIUS TOKENS
+   The brand uses heavily-rounded corners throughout — pill
+   buttons, rounded cards, and very generous outer frames.
+   Confidence: 88%
+   ============================================================= */
+
+:root {
+  --radius-sm:    8px;    /* inner chips, small elements */
+  --radius-md:    16px;   /* standard cards, stat cards — confidence 90% */
+  --radius-lg:    20px;   /* feature cards / panels */
+  --radius-xl:    28px;   /* outer wrapper / mockup frames */
+  --radius-2xl:   44px;   /* device / phone frames */
+  --radius-full:  9999px; /* pill buttons, avatar borders, progress bars */
+}

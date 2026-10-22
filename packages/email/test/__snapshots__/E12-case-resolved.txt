@@ -1,0 +1,31 @@
+Din sag er løst
+
+Hej Mette. Fakturaerne til EU-kunder bliver nu bogført igen, og de 3 ordrer er gentaget uden fejl. Skriv endelig, hvis du ser noget lignende igen.
+
+FORLØB
+
+Mette Holm · i dag 11:02
+Fakturaer til EU-kunder fejler siden i morges. Kan I kigge på det?
+
+Agentor support · 11:15
+Vi kiggede på 3 fejlede ordrer og mappingen for Ordrer → Dinero Fakturaer.
+
+Anne Sørensen · 11:59
+Kontoen til EU-salg (1010) findes ikke længere i Dinero. Vælg 1015 Salg EU under Mapping › Konti og publicér.
+
+Status · 14:40
+Sagen er markeret som løst.
+
+Tidsforbrug i alt: 1 t 27 min.
+
+Var du tilfreds med hjælpen?
+Svar Ja eller Nej på denne e-mail.
+
+Svar på denne e-mail for at genåbne sagen (#2291). Efter 14 dage arkiveres den.
+
+Venlig hilsen
+Anne, Agentor support
+
+-- 
+Agentor ApS · app.agentor.dk · support@agentor.dk
+Du får denne mail, fordi du er kontaktperson på sag #2291 hos Nordlys Cykler ApS.
