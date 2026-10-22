@@ -284,3 +284,55 @@ export function WeekBars({
     </MobileCard>
   );
 }
+
+/* ---- KpiStrip: the page's key figures as compact cards in a row that scrolls sideways ----------
+   For list pages whose board has no figures of their own (MP01, MP02, MP06, MP23): the same
+   numbers as the desktop cards, 156 px wide, the first one on the lime hero ground. */
+
+export interface KpiStripItem {
+  label: string;
+  value: ReactNode;
+  trend?: Growth | undefined;
+  meta?: ReactNode;
+}
+
+export function KpiStrip({ label, items }: { label: string; items: KpiStripItem[] }) {
+  return (
+    // Focusable, so the row can be scrolled from the keyboard as well (WCAG 2.1.1).
+    <section
+      aria-label={label}
+      tabIndex={0}
+      className="no-scrollbar -mx-4 -my-1 flex flex-none snap-x gap-2.5 overflow-x-auto px-4 py-1 outline-none focus-visible:shadow-ring-dark"
+    >
+      {items.map((k, i) => (
+        <MobileCard
+          key={k.label}
+          className={cn(
+            'flex w-39 flex-none snap-start flex-col gap-1 px-3.5 py-3',
+            i === 0 && 'bg-hero',
+          )}
+        >
+          <span className="flex items-center justify-between gap-1.5 overflow-hidden whitespace-nowrap">
+            <span
+              className={cn('truncate text-meta font-medium', i === 0 ? 'text-fg-1' : 'text-fg-2')}
+            >
+              {k.label}
+            </span>
+            {k.trend && <TrendPill growth={k.trend} />}
+          </span>
+          <strong className="truncate text-m-kpi tabular">{k.value}</strong>
+          {k.meta && (
+            <span
+              className={cn(
+                'line-clamp-2 text-micro leading-4',
+                i === 0 ? 'text-fg-1' : 'text-fg-2',
+              )}
+            >
+              {k.meta}
+            </span>
+          )}
+        </MobileCard>
+      ))}
+    </section>
+  );
+}

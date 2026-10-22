@@ -159,7 +159,7 @@
       "supporter": "Support Agent"
     },
     "staff": {
-      "eyebrow": "{role} · Agentor Platform",
+      "eyebrow": "{role}",
       "since": "Hos Agentor siden {date}",
       "kpiResolved": "Løste sager i {month}",
       "kpiResolvedShort": "Løste sager i {month}",
@@ -3409,7 +3409,7 @@
       "typeLabel": "Rapporttype",
       "type": {
         "revenue": "Omsætning",
-        "support": "Support og tid",
+        "support": "Support & Tid",
         "invoicing": "Fakturering"
       },
       "pdf": "PDF",
@@ -3518,7 +3518,16 @@
         "outstandingSub": "Inkl. moms"
       },
       "pdfMobile": "Gem som PDF",
-      "csvMobile": "Eksportér CSV"
+      "csvMobile": "Eksportér CSV",
+      "export": "Eksport",
+      "preset": {
+        "thisMonth": "Denne måned",
+        "lastMonth": "Sidste måned",
+        "lastQuarter": "Sidste kvartal",
+        "yearToDate": "År til dato",
+        "custom": "Vælg datointerval"
+      },
+      "sendBookkeeper": "Send {month} til bogholder"
     },
     "customerAdmin": {
       "menu": "Administrér",
@@ -4129,7 +4138,8 @@
         "grantNone": "Ingen adgang",
         "errors": "{count, plural, one {# fejl} other {# fejl}}",
         "empty": "Ingen kunder matcher",
-        "emptyBody": "Prøv et andet navn eller CVR-nummer."
+        "emptyBody": "Prøv et andet navn eller CVR-nummer.",
+        "kpiLabel": "Nøgletal for kunder"
       },
       "cases": {
         "title": "Sager",
@@ -4146,7 +4156,8 @@
         "noDue": "Ingen svarfrist",
         "empty": "Ingen sager her",
         "emptyBody": "Når en sag passer til filtret, står den her.",
-        "archive": "Arkiv"
+        "archive": "Arkiv",
+        "kpiLabel": "Nøgletal for sager"
       },
       "case": {
         "replyCustomer": "Svar kunden",
@@ -4224,7 +4235,9 @@
         "payments": "Fakturaer og betalinger",
         "paymentsMeta": "Forfaldent {amount}",
         "reports": "Rapporter",
-        "reportsMeta": "{month} lukket · {amount}"
+        "reportsMeta": "{month} lukket · {amount}",
+        "kpiLabel": "Nøgletal for Finans",
+        "mrrShort": "Mdl. omsætning"
       },
       "overdue": {
         "title": "Forfaldne betalinger",
@@ -4531,7 +4544,8 @@
       "avgPerCustomer": "Gns. pr. kunde",
       "topMeta": "{month} · andel af supportomsætning",
       "staffMeta": "{month} · {pct} % logget automatisk",
-      "noTime": "Ingen registreret tid i måneden"
+      "noTime": "Ingen registreret tid i måneden",
+      "kpiLabel": "Nøgletal for måneden"
     },
     "platformUsers": {
       "count": "{count, plural, one {# medarbejder} other {# medarbejdere}}",

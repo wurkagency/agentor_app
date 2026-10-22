@@ -3,6 +3,8 @@ import { formatRelative, type Locale } from '@agentor/i18n';
 import { StatusPill } from '@agentor/ui';
 import {
   ChipGroup,
+  KpiStrip,
+  type KpiStripItem,
   MobileCard,
   MobileEmpty,
   MobileLogo,
@@ -23,10 +25,12 @@ export async function CustomersMobile({
   items,
   query,
   filter,
+  kpis,
 }: {
   items: CustomerItem[];
   query: string;
   filter: 'all' | 'attention';
+  kpis: KpiStripItem[];
 }) {
   const t = await getTranslations('mobile.platform.customers');
   const ts = await getTranslations('status');
@@ -41,12 +45,13 @@ export async function CustomersMobile({
   const href = (f: string) => {
     const p = new URLSearchParams();
     if (q) p.set('q', query);
-    if (f === 'all') p.set('filter', 'all');
+    if (f === 'attention') p.set('filter', 'attention');
     return `/platform/customers${p.size ? `?${p}` : ''}`;
   };
 
   return (
     <MobileShell topBar={<PlatformTopBar />}>
+      <KpiStrip label={t('kpiLabel')} items={kpis} />
       <form action="/platform/customers" role="search" className="flex">
         <label className="flex h-11 flex-1 items-center gap-2 rounded-full bg-surface px-4 text-fg-2 shadow-sm">
           <Search aria-hidden width={18} height={18} />
@@ -58,7 +63,7 @@ export async function CustomersMobile({
             placeholder={t('search')}
             className="min-w-0 flex-1 border-0 bg-transparent font-sans text-m-input text-fg-1 outline-none"
           />
-          {filter === 'all' && <input type="hidden" name="filter" value="all" />}
+          {filter === 'attention' && <input type="hidden" name="filter" value="attention" />}
         </label>
       </form>
       <ChipGroup
@@ -66,12 +71,12 @@ export async function CustomersMobile({
         value={filter}
         linkAs={Link}
         items={[
+          { key: 'all', label: t('all', { count: matches.length }), href: href('all') },
           {
             key: 'attention',
             label: t('attention', { count: attention.length }),
             href: href('attention'),
           },
-          { key: 'all', label: t('all', { count: matches.length }), href: href('all') },
         ]}
       />
       {shown.length === 0 ? (

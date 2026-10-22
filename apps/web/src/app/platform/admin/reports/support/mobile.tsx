@@ -17,12 +17,12 @@ import type { SupportReport } from '@/server/reports';
 export async function SupportReportMobile({
   r,
   range,
-  query,
+  custom,
   growth,
 }: {
   r: SupportReport;
   range: DateRange;
-  query: string;
+  custom: boolean;
   growth: {
     registered?: Growth | undefined;
     billed?: Growth | undefined;
@@ -69,7 +69,7 @@ export async function SupportReportMobile({
   ];
   return (
     <MobileShell topBar={<PlatformTopBar />}>
-      <ReportMobileHead type="support" range={range} query={query} />
+      <ReportMobileHead type="support" range={range} custom={custom} />
       <div className="grid grid-cols-2 gap-3">
         {kpis.map((k) => (
           <MobileCard key={k.label} className="flex min-w-0 flex-col gap-1 px-3.5 py-3">
@@ -124,7 +124,7 @@ export async function SupportReportMobile({
           </NameValue>
         ))}
       </ExpandCard>
-      <ReportMobileExports type="support" query={query} />
+      <ReportMobileExports type="support" range={range} />
     </MobileShell>
   );
 }

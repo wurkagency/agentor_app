@@ -1,5 +1,6 @@
 import type { Growth } from '@agentor/ui';
 import {
+  KpiStrip,
   MobileCard,
   MobileEmpty,
   MobilePageTitle,
@@ -7,8 +8,6 @@ import {
   RowIcon,
   RowLink,
   SectionHeading,
-  StackedValue,
-  TrendPill,
 } from '@agentor/ui/mobile';
 import { CircleCheck, Clock, CreditCard } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
@@ -38,96 +37,46 @@ export interface FinanceMobileData {
 
 const OVERDUE = '/platform/finance/invoices?status=overdue';
 
-/** MP06 Finans (Superadmin): key figures and what needs action; the areas are the sub-tabs above. */
+/**
+ * MP06 Finans (Superadmin): the key figures as cards (as on desktop F1, at the user's request),
+ * and what needs action; the areas are the sub-tabs above.
+ */
 export async function FinanceMobile({ d }: { d: FinanceMobileData }) {
   const t = await getTranslations('mobile.platform.finance');
   return (
     <MobileShell topBar={<PlatformTopBar />}>
       <PlatformSubTabs />
       <MobilePageTitle title={t('title')} aside={d.month} />
-      <MobileCard>
-        <RowLink
-          href="/platform/finance/subscriptions"
-          linkAs={Link}
-          title={t('mrr')}
-          trailing={
-            <StackedValue
-              value={d.mrr}
-              {...(d.mrrGrowth ? { pill: <TrendPill growth={d.mrrGrowth} /> } : {})}
-            />
-          }
-        />
-        <RowLink
-          href="/platform/finance/subscriptions"
-          linkAs={Link}
-          title={t('subscriptions')}
-          trailing={
-            <StackedValue
-              value={d.subscriptions}
-              {...(d.newSubs
-                ? {
-                    pill: (
-                      <TrendPill
-                        growth={{
-                          direction: 'up',
-                          tone: 'good',
-                          text: t('newSubs', { count: d.newSubs }),
-                        }}
-                      />
-                    ),
-                  }
-                : {})}
-            />
-          }
-        />
-        <RowLink
-          href="/platform/finance/support"
-          linkAs={Link}
-          title={t('support', { month: d.monthName })}
-          trailing={
-            <StackedValue
-              value={d.supportNet}
-              pill={
-                <TrendPill growth={{ direction: 'flat', tone: 'neutral', text: d.supportTime }} />
-              }
-            />
-          }
-        />
-        <RowLink
-          href={OVERDUE}
-          linkAs={Link}
-          title={t('overdue')}
-          trailing={
-            <StackedValue
-              value={d.overdue}
-              {...(d.overdueCount
-                ? {
-                    pill: (
-                      <TrendPill
-                        growth={{
-                          direction: 'down',
-                          tone: 'bad',
-                          text: t('overdueCount', { count: d.overdueCount }),
-                        }}
-                      />
-                    ),
-                  }
-                : {})}
-            />
-          }
-        />
-        <RowLink
-          href="/platform/admin/reports/revenue"
-          linkAs={Link}
-          title={t('ytd')}
-          trailing={
-            <StackedValue
-              value={d.ytd}
-              {...(d.ytdGrowth ? { pill: <TrendPill growth={d.ytdGrowth} /> } : {})}
-            />
-          }
-        />
-      </MobileCard>
+      <KpiStrip
+        label={t('kpiLabel')}
+        items={[
+          { label: t('mrrShort'), value: d.mrr, trend: d.mrrGrowth },
+          {
+            label: t('subscriptions'),
+            value: d.subscriptions,
+            trend: d.newSubs
+              ? { direction: 'up', tone: 'good', text: t('newSubs', { count: d.newSubs }) }
+              : undefined,
+          },
+          {
+            label: t('support', { month: d.monthName }),
+            value: d.supportNet,
+            meta: d.supportTime,
+          },
+          {
+            label: t('overdue'),
+            value: d.overdue,
+            trend: d.overdueCount
+              ? {
+                  direction: 'down',
+                  tone: 'bad',
+                  text: t('overdueCount', { count: d.overdueCount }),
+                }
+              : undefined,
+          },
+          { label: t('ytd'), value: d.ytd, trend: d.ytdGrowth },
+        ]}
+      />
 
       <SectionHeading>{t('needsAction')}</SectionHeading>
       {d.actions.length === 0 ? (

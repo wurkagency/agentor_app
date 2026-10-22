@@ -97,7 +97,7 @@ const SCREENS: Screen[] = [
     user: 'mette',
     path: '/',
     texts: [
-      /God ?(morgen|dag|aften), Mette/,
+      /God ?(morgen|eftermiddag|dag|aften), Mette/,
       /kræver handling/,
       'Records i dag',
       'Transaktioner',
@@ -303,7 +303,7 @@ const SCREENS: Screen[] = [
     path: '/platform/finance',
     texts: [
       'Finans',
-      'Mdl. abonnementsomsætning',
+      'Mdl. omsætning',
       'År til dato',
       'Kræver handling',
       'Abonnementer',
@@ -733,9 +733,9 @@ const SCREENS: Screen[] = [
     texts: [
       'Rapporter',
       'Omsætning',
-      'Fra',
+      'Sidste måned',
+      'Eksport',
       'Omsætning i alt',
-      'Send til bogholder',
       'Største kunder i support',
       'Tid pr. supporter',
     ],
@@ -788,8 +788,9 @@ const SCREENS: Screen[] = [
       'Tid pr. supporter',
       'Tid pr. kategori',
       'Største kunder i support',
-      'Gem som PDF',
-      'Eksportér CSV',
+      'Support & Tid',
+      'Sidste måned',
+      'Eksport',
     ],
   },
   {

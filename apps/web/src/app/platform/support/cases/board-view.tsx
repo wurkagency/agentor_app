@@ -8,7 +8,7 @@ import { CaseBoard, type BoardCase } from '@/components/platform/case-board';
 import { NewCaseButton } from '@/components/platform/new-case-button';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
-import { Responsive } from '@agentor/ui/mobile';
+import { Responsive, type KpiStripItem } from '@agentor/ui/mobile';
 import { CasesMobile, type CaseFilter } from './mobile';
 import { requireStaff } from '@/server/platform';
 import { customersFor, initials, statsFor, tenantNames } from '@/server/platform-data';
@@ -182,11 +182,49 @@ export async function BoardView({
       />
     </PageBody>
   );
+  // The desktop figures for the phone (MP02 has none of its own).
+  const kpis: KpiStripItem[] = [
+    {
+      label: t('statOpen'),
+      value: String(stats.open),
+      meta: t('statOpenSub', { count: stats.mine }),
+    },
+    {
+      label: t('statOverdue'),
+      value: String(stats.overdue),
+      meta:
+        overdueName && stats.overdueTop
+          ? `${overdueName} · ${formatMinutes(stats.overdueTop.minutes, locale)}`
+          : t('statOverdueNone'),
+    },
+    {
+      label: t('statWaiting'),
+      value: String(stats.waiting),
+      meta:
+        stats.oldestWaitingDays === null
+          ? '–'
+          : t('statWaitingSub', { count: stats.oldestWaitingDays }),
+    },
+    {
+      label: t('statResolved'),
+      value: String(stats.resolvedThisWeek),
+      meta:
+        stats.medianResolveMinutes === null
+          ? '–'
+          : t('statResolvedSub', { time: formatMinutes(stats.medianResolveMinutes, locale) }),
+    },
+    {
+      label: t('statTime'),
+      value: formatMinutes(stats.teamMinutesToday, locale),
+      meta: t('statTimeSub', { count: stats.teamSize }),
+    },
+  ];
   return (
     <Responsive
       desktop={desktop}
       mobile={
         <CasesMobile
+          kpis={kpis}
           cases={items}
           userId={actor.userId}
           filter={filter}

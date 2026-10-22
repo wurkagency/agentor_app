@@ -77,3 +77,53 @@ export function monthOf(range: DateRange): { year: number; month: number } | nul
     ? { year: y, month: m }
     : null;
 }
+
+export type PeriodPreset = 'thisMonth' | 'lastMonth' | 'lastQuarter' | 'yearToDate';
+export const PERIOD_PRESETS: PeriodPreset[] = [
+  'thisMonth',
+  'lastMonth',
+  'lastQuarter',
+  'yearToDate',
+];
+
+const lastDayOfMonth = (y: number, m: number) =>
+  `${y}-${String(m).padStart(2, '0')}-${String(new Date(Date.UTC(y, m, 0)).getUTCDate()).padStart(2, '0')}`;
+const firstDay = (y: number, m: number) => `${y}-${String(m).padStart(2, '0')}-01`;
+
+/**
+ * The report period presets in Copenhagen days (Rapporter › Periode): this month and last month
+ * as whole months, the last whole calendar quarter, and 1 January to today.
+ */
+export function presetRange(
+  preset: PeriodPreset,
+  now = new Date(),
+): { fromIso: string; toIso: string } {
+  const today = copenhagenToday(now);
+  const y = Number(today.slice(0, 4));
+  const m = Number(today.slice(5, 7));
+  switch (preset) {
+    case 'thisMonth':
+      return { fromIso: firstDay(y, m), toIso: lastDayOfMonth(y, m) };
+    case 'lastMonth': {
+      const [py, pm] = m === 1 ? [y - 1, 12] : [y, m - 1];
+      return { fromIso: firstDay(py, pm), toIso: lastDayOfMonth(py, pm) };
+    }
+    case 'lastQuarter': {
+      const q = Math.floor((m - 1) / 3); // 0-based quarter we're in
+      const [qy, qStart] = q === 0 ? [y - 1, 10] : [y, (q - 1) * 3 + 1];
+      return { fromIso: firstDay(qy, qStart), toIso: lastDayOfMonth(qy, qStart + 2) };
+    }
+    case 'yearToDate':
+      return { fromIso: `${y}-01-01`, toIso: today };
+  }
+}
+
+/** Which preset a ?from=&to= period is, or null when it is a picked range. */
+export function presetOf(fromIso: string, toIso: string, now = new Date()): PeriodPreset | null {
+  return (
+    PERIOD_PRESETS.find((p) => {
+      const r = presetRange(p, now);
+      return r.fromIso === fromIso && r.toIso === toIso;
+    }) ?? null
+  );
+}

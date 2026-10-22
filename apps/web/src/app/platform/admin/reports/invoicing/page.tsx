@@ -39,7 +39,7 @@ const SHOWN = 100;
 export default async function InvoicingReportPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; to?: string; status?: string }>;
+  searchParams: Promise<{ from?: string; to?: string; status?: string; period?: string }>;
 }) {
   const { actor } = await requireStaff(true);
   const sp = await searchParams;
@@ -69,7 +69,7 @@ export default async function InvoicingReportPage({
       <PageHeader
         title={t('title')}
         subtitle={t('invoicing.intro')}
-        actions={<ReportToolbar type="invoicing" range={range} query={query} />}
+        actions={<ReportToolbar type="invoicing" range={range} custom={sp.period === 'custom'} />}
       />
       {invalid && <Banner tone="warn">{t('rangeInvalid')}</Banner>}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-kpi-hero-3">
@@ -215,6 +215,7 @@ export default async function InvoicingReportPage({
           filter={filter}
           range={range}
           query={query}
+          custom={sp.period === 'custom'}
           invoicedGrowth={invoicedGrowth}
           now={now}
         />

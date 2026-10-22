@@ -34,7 +34,7 @@ export async function generateMetadata() {
 export default async function SupportReportPage({
   searchParams,
 }: {
-  searchParams: Promise<{ from?: string; to?: string }>;
+  searchParams: Promise<{ from?: string; to?: string; period?: string }>;
 }) {
   const { actor } = await requireStaff(true);
   const sp = await searchParams;
@@ -56,7 +56,6 @@ export default async function SupportReportPage({
     };
   };
   const rounding = r.billedMinutes - r.registeredMinutes;
-  const query = `from=${range.fromIso}&to=${range.toIso}`;
   const period = `${formatDate(range.from, locale)} – ${formatDate(new Date(range.to.getTime() - 1), locale)}`;
   const sum = (k: 'billable' | 'nonBillable' | 'cases') => r.perStaff.reduce((a, s) => a + s[k], 0);
   const opt = <T,>(key: string, v: T | undefined) => (v === undefined ? {} : { [key]: v });
@@ -81,7 +80,7 @@ export default async function SupportReportPage({
       <PageHeader
         title={t('title')}
         subtitle={t('support.intro')}
-        actions={<ReportToolbar type="support" range={range} query={query} />}
+        actions={<ReportToolbar type="support" range={range} custom={sp.period === 'custom'} />}
       />
       {invalid && <Banner tone="warn">{t('rangeInvalid')}</Banner>}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-kpi-hero-3">
@@ -266,7 +265,9 @@ export default async function SupportReportPage({
   return (
     <Responsive
       desktop={desktop}
-      mobile={<SupportReportMobile r={r} range={range} query={query} growth={growth} />}
+      mobile={
+        <SupportReportMobile r={r} range={range} custom={sp.period === 'custom'} growth={growth} />
+      }
     />
   );
 }

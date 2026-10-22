@@ -119,7 +119,8 @@ test('the monthly report exports and goes to the bookkeeper', async ({ page }) =
   expect(await csv.text()).toContain('Omsætning ekskl. moms');
   const pdf = await page.request.get('/platform/admin/reports/revenue/export.pdf');
   expect(pdf.headers()['content-type']).toBe('application/pdf');
-  await page.getByRole('button', { name: 'Send til bogholder' }).click();
+  await page.getByRole('button', { name: 'Eksport' }).click();
+  await page.getByRole('menuitem', { name: /^Send \S+ til bogholder$/ }).click();
   await expect(
     page.getByText('Sendt til bogholder@agentor.test').filter({ visible: true }),
   ).toBeVisible();

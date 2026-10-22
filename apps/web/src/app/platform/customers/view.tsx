@@ -10,7 +10,7 @@ import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { db } from '@/server/infra';
 import { requireStaff } from '@/server/platform';
 import { customersFor, initials, planNames, statsFor, tenantNames } from '@/server/platform-data';
-import { Responsive } from '@agentor/ui/mobile';
+import { Responsive, type KpiStripItem } from '@agentor/ui/mobile';
 import { CustomersMobile } from './mobile';
 
 /**
@@ -191,10 +191,45 @@ export async function CustomersView({
       <CustomersTable items={items} initialQuery={query} superadmin={actor.role === 'superadmin'} />
     </PageBody>
   );
+  // The desktop figures for the phone (MP01 has none of its own).
+  const kpis: KpiStripItem[] = [
+    {
+      label: t('statCustomers'),
+      value: String(customers.length),
+      trend: newThisMonth
+        ? { direction: 'up', tone: 'good', text: t('statNew', { count: newThisMonth }) }
+        : undefined,
+      meta: t('statCustomersSub', { count: activeThisMonth }),
+    },
+    {
+      label: t('statAttention'),
+      value: String(broken + errors),
+      meta: t('statAttentionSub', { broken, errors }),
+    },
+    {
+      label: t('statGrants'),
+      value: String(grants.length),
+      meta: nextExpiry
+        ? t('statGrantsMine', {
+            count: myActive.length,
+            when: formatRelative(nextExpiry, now, locale),
+          })
+        : t('statGrantsNone'),
+    },
+    {
+      label: t('statCases'),
+      value: String(stats.open),
+      meta: t('statCasesSplit', {
+        progress: open.filter((o) => o.status === 'in_progress').length,
+        waiting: open.filter((o) => o.status === 'waiting').length,
+        fresh: open.filter((o) => o.status === 'new').length,
+      }),
+    },
+  ];
   return (
     <Responsive
       desktop={desktop}
-      mobile={<CustomersMobile items={items} query={query} filter={filter} />}
+      mobile={<CustomersMobile items={items} query={query} filter={filter} kpis={kpis} />}
     />
   );
 }

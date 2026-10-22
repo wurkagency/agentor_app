@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { addDaysIso, copenhagenToday, monthOf, parseDateRange } from './date-range';
+import {
+  addDaysIso,
+  copenhagenToday,
+  monthOf,
+  parseDateRange,
+  presetOf,
+  presetRange,
+} from './date-range';
 
 describe('parseDateRange', () => {
   it('takes whole Copenhagen days, both ends inclusive', () => {
@@ -37,5 +44,25 @@ describe('days', () => {
     expect(addDaysIso('2026-10-31', 1)).toBe('2026-11-01');
     expect(addDaysIso('2026-03-01', -1)).toBe('2026-02-28');
     expect(copenhagenToday(new Date('2026-10-20T22:30:00Z'))).toBe('2026-10-21');
+  });
+});
+
+describe('report period presets', () => {
+  // 22 Oct 2026, 01:30 in Copenhagen (still the 21st in UTC).
+  const now = new Date('2026-10-21T23:30:00Z');
+  it('resolve to Copenhagen calendar periods', () => {
+    expect(presetRange('thisMonth', now)).toEqual({ fromIso: '2026-10-01', toIso: '2026-10-31' });
+    expect(presetRange('lastMonth', now)).toEqual({ fromIso: '2026-09-01', toIso: '2026-09-30' });
+    expect(presetRange('lastQuarter', now)).toEqual({ fromIso: '2026-07-01', toIso: '2026-09-30' });
+    expect(presetRange('yearToDate', now)).toEqual({ fromIso: '2026-01-01', toIso: '2026-10-22' });
+  });
+  it('wrap the year in January', () => {
+    const jan = new Date('2027-01-15T12:00:00Z');
+    expect(presetRange('lastMonth', jan)).toEqual({ fromIso: '2026-12-01', toIso: '2026-12-31' });
+    expect(presetRange('lastQuarter', jan)).toEqual({ fromIso: '2026-10-01', toIso: '2026-12-31' });
+  });
+  it('recognise a preset from its dates', () => {
+    expect(presetOf('2026-07-01', '2026-09-30', now)).toBe('lastQuarter');
+    expect(presetOf('2026-07-02', '2026-09-30', now)).toBeNull();
   });
 });

@@ -159,7 +159,7 @@
       "supporter": "Support Agent"
     },
     "staff": {
-      "eyebrow": "{role} · Agentor Platform",
+      "eyebrow": "{role}",
       "since": "At Agentor since {date}",
       "kpiResolved": "Cases resolved in {month}",
       "kpiResolvedShort": "Cases resolved in {month}",
@@ -3409,7 +3409,7 @@
       "typeLabel": "Report type",
       "type": {
         "revenue": "Revenue",
-        "support": "Support and time",
+        "support": "Support & Time",
         "invoicing": "Invoicing"
       },
       "pdf": "PDF",
@@ -3518,7 +3518,16 @@
         "outstandingSub": "Incl. VAT"
       },
       "pdfMobile": "Save as PDF",
-      "csvMobile": "Export CSV"
+      "csvMobile": "Export CSV",
+      "export": "Export",
+      "preset": {
+        "thisMonth": "This month",
+        "lastMonth": "Last month",
+        "lastQuarter": "Last quarter",
+        "yearToDate": "Year to date",
+        "custom": "Pick a date range"
+      },
+      "sendBookkeeper": "Send {month} to the bookkeeper"
     },
     "customerAdmin": {
       "menu": "Manage",
@@ -4129,7 +4138,8 @@
         "grantNone": "No access",
         "errors": "{count, plural, one {# error} other {# errors}}",
         "empty": "No customers match",
-        "emptyBody": "Try another name or CVR number."
+        "emptyBody": "Try another name or CVR number.",
+        "kpiLabel": "Key figures for customers"
       },
       "cases": {
         "title": "Cases",
@@ -4146,7 +4156,8 @@
         "noDue": "No response time",
         "empty": "No cases here",
         "emptyBody": "When a case fits the filter, it shows here.",
-        "archive": "Archive"
+        "archive": "Archive",
+        "kpiLabel": "Key figures for cases"
       },
       "case": {
         "replyCustomer": "Reply to customer",
@@ -4224,7 +4235,9 @@
         "payments": "Invoices and payments",
         "paymentsMeta": "Overdue {amount}",
         "reports": "Reports",
-        "reportsMeta": "{month} closed · {amount}"
+        "reportsMeta": "{month} closed · {amount}",
+        "kpiLabel": "Key figures for Finance",
+        "mrrShort": "Monthly revenue"
       },
       "overdue": {
         "title": "Overdue payments",
@@ -4531,7 +4544,8 @@
       "avgPerCustomer": "Avg. per customer",
       "topMeta": "{month} · share of support revenue",
       "staffMeta": "{month} · {pct}% logged automatically",
-      "noTime": "No time registered in the month"
+      "noTime": "No time registered in the month",
+      "kpiLabel": "Key figures for the month"
     },
     "platformUsers": {
       "count": "{count, plural, one {# staff member} other {# staff members}}",

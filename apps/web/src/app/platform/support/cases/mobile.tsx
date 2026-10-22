@@ -1,6 +1,13 @@
 import { formatMinutes, type Locale } from '@agentor/i18n';
 import { cn } from '@agentor/ui';
-import { ChipGroup, MobileEmpty, MobilePageTitle, MobileShell } from '@agentor/ui/mobile';
+import {
+  ChipGroup,
+  KpiStrip,
+  MobileEmpty,
+  MobilePageTitle,
+  MobileShell,
+  type KpiStripItem,
+} from '@agentor/ui/mobile';
 import { MessageSquare } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
@@ -26,7 +33,9 @@ export async function CasesMobile({
   filter,
   minutesToday,
   customers,
+  kpis,
 }: {
+  kpis: KpiStripItem[];
   cases: BoardCase[];
   userId: string;
   filter: CaseFilter;
@@ -61,6 +70,7 @@ export async function CasesMobile({
           </Link>
         }
       />
+      <KpiStrip label={t('kpiLabel')} items={kpis} />
       <ChipGroup
         label={t('filterLabel')}
         value={filter}

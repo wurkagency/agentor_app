@@ -34,6 +34,7 @@ export async function InvoicingReportMobile({
   filter,
   range,
   query,
+  custom,
   invoicedGrowth,
   now,
 }: {
@@ -42,6 +43,7 @@ export async function InvoicingReportMobile({
   filter: InvoiceFilter;
   range: DateRange;
   query: string;
+  custom: boolean;
   invoicedGrowth: Growth | undefined;
   now: Date;
 }) {
@@ -53,7 +55,7 @@ export async function InvoicingReportMobile({
   const chipFilter = CHIPS.includes(filter) ? filter : 'all';
   return (
     <MobileShell topBar={<PlatformTopBar />}>
-      <ReportMobileHead type="invoicing" range={range} query={query} />
+      <ReportMobileHead type="invoicing" range={range} custom={custom} />
       <div className="grid grid-cols-2 gap-3">
         <MobileCard className="flex min-w-0 flex-col gap-1 px-3.5 py-3">
           <span className="flex items-center justify-between gap-1.5 overflow-hidden whitespace-nowrap">
@@ -136,7 +138,7 @@ export async function InvoicingReportMobile({
       <MobileFootnote>
         {t('invoicing.footer', { shown: Math.min(SHOWN, rows.length), total: r.rows.length })}
       </MobileFootnote>
-      <ReportMobileExports type="invoicing" query={query} />
+      <ReportMobileExports type="invoicing" range={range} />
     </MobileShell>
   );
 }

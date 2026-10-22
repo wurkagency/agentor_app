@@ -15,8 +15,7 @@ import {
 import { CircleCheck, Clock, FileText, Headphones, TriangleAlert } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { Responsive } from '@agentor/ui/mobile';
-import { SendReportButton } from '@/components/platform/finance/action-buttons';
+import { Responsive, type KpiStripItem } from '@agentor/ui/mobile';
 import {
   PanelHeader,
   dayMonth,
@@ -37,6 +36,7 @@ import {
   monthQuery,
   pct,
   shiftMonth,
+  monthRange,
 } from '@/server/finance-data';
 import { requireStaff } from '@/server/platform';
 import { ReportsMobile } from './mobile';
@@ -154,13 +154,7 @@ export default async function ReportsPage({
       <PageHeader
         title={t('report.title')}
         subtitle={t('report.intro')}
-        actions={
-          <ReportToolbar
-            type="revenue"
-            query={monthQuery(m)}
-            extra={<SendReportButton month={m.key} label={t('report.sendBookkeeper')} />}
-          />
-        }
+        actions={<ReportToolbar type="revenue" range={monthRange(m)} />}
       />
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-12">
         <Card padding="none" className="h-max overflow-hidden p-2 lg:col-span-3 xl:col-span-2">
@@ -438,12 +432,50 @@ export default async function ReportsPage({
       </div>
     </PageBody>
   );
+  // The desktop figures for the chosen month, as cards on the phone (MP23 has none of its own).
+  const kpis: KpiStripItem[] = [
+    {
+      label: t('report.revenue'),
+      value: `${kr(r.revenueOre, locale)} kr.`,
+      trend: g(r.revenueOre, before.revenueOre),
+      meta: t('report.exVat'),
+    },
+    {
+      label: t('kind.subscription'),
+      value: `${kr(r.subscriptionOre, locale)} kr.`,
+      trend: g(r.subscriptionOre, before.subscriptionOre),
+      meta: t('report.activeEnd', { count: r.activeAtEnd }),
+    },
+    {
+      label: t('kind.support'),
+      value: `${kr(r.supportOre, locale)} kr.`,
+      trend: g(r.supportOre, before.supportOre),
+      meta: formatMinutes(r.billedMinutes, locale),
+    },
+    {
+      label: t('billing.rate'),
+      value: `${formatNumber(pct(r.billableMinutes, r.billableMinutes + r.nonBillableMinutes), locale)} %`,
+      meta: t('report.rateDetail', {
+        billable: formatMinutes(r.billableMinutes, locale),
+        not: formatMinutes(r.nonBillableMinutes, locale),
+      }),
+    },
+    {
+      label: t('report.outstanding'),
+      value: `${kr(r.outstandingGross, locale)} kr.`,
+      meta: t('report.outstandingDetail', {
+        pct: formatNumber(r.paidShare, locale),
+        days: r.oldestOverdueDays,
+      }),
+    },
+  ];
   const mobile = (
     <ReportsMobile
       d={{
         months: reports.map((x, i) => ({ r: x, before: reports[i + 1] ?? oldest })),
         selected: r,
       }}
+      kpis={kpis}
     />
   );
   return <Responsive desktop={desktop} mobile={mobile} />;

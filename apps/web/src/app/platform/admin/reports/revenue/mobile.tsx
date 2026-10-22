@@ -1,22 +1,21 @@
 import { formatMinutes, formatNumber, type Locale } from '@agentor/i18n';
 import { StatusPill } from '@agentor/ui';
 import {
-  CardActions,
-  CardButton,
   ExpandCard,
+  KpiStrip,
+  type KpiStripItem,
   KV,
   MobileShell,
   RowIcon,
   TrendPill,
 } from '@agentor/ui/mobile';
-import { CalendarDays, Download } from 'lucide-react';
+import { CalendarDays } from 'lucide-react';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { PlatformTopBar } from '@/components/mobile/chrome';
-import { ReportMobileHead } from '@/components/platform/admin/report-toolbar';
+import { ReportMobileExports, ReportMobileHead } from '@/components/platform/admin/report-toolbar';
 import { growthOf, kr, monthLong, monthYear } from '@/components/platform/finance/bits';
-import { MobileSendReport } from '@/components/platform/finance/mobile-actions';
 import { NameValue } from '@/components/platform/finance/mobile-bits';
-import { growthPct, monthQuery, monthRange, pct, type MonthReport } from '@/server/finance-data';
+import { growthPct, monthRange, pct, type MonthReport } from '@/server/finance-data';
 
 export interface ReportsMobileData {
   /** Newest first, each with the month before it for the trend. */
@@ -26,7 +25,7 @@ export interface ReportsMobileData {
 }
 
 /** MP23 Rapporter (F7): one foldable row per month, the largest customers and time per supporter. */
-export async function ReportsMobile({ d }: { d: ReportsMobileData }) {
+export async function ReportsMobile({ d, kpis }: { d: ReportsMobileData; kpis: KpiStripItem[] }) {
   const t = await getTranslations('mobile.reports');
   const tf = await getTranslations('platform.finance');
   const locale = (await getLocale()) as Locale;
@@ -37,7 +36,8 @@ export async function ReportsMobile({ d }: { d: ReportsMobileData }) {
   const selectedName = monthLong(s.month.start, locale);
   return (
     <MobileShell topBar={<PlatformTopBar />}>
-      <ReportMobileHead type="revenue" query={monthQuery(s.month)} range={monthRange(s.month)} />
+      <ReportMobileHead type="revenue" range={monthRange(s.month)} />
+      <KpiStrip label={t('kpiLabel')} items={kpis} />
       {d.months.map(({ r, before }) => {
         const growth = growthOf(
           growthPct(r.revenueOre, before.revenueOre),
@@ -93,21 +93,6 @@ export async function ReportsMobile({ d }: { d: ReportsMobileData }) {
             </KV>
             <KV k={tf('report.casesResolved')}>{formatNumber(r.casesResolved, locale)}</KV>
             <KV k={tf('report.autoLogged')}>{formatNumber(r.autoShare, locale)} %</KV>
-            <CardActions>
-              <CardButton
-                href={`/platform/admin/reports/revenue/export.csv?${monthQuery(r.month)}`}
-                icon={Download}
-              >
-                CSV
-              </CardButton>
-              <CardButton
-                href={`/platform/admin/reports/revenue/export.pdf?${monthQuery(r.month)}`}
-                icon={Download}
-              >
-                PDF
-              </CardButton>
-              <MobileSendReport month={r.month.key} label={tf('report.sendBookkeeper')} />
-            </CardActions>
           </ExpandCard>
         );
       })}
@@ -140,6 +125,7 @@ export async function ReportsMobile({ d }: { d: ReportsMobileData }) {
           ))
         )}
       </ExpandCard>
+      <ReportMobileExports type="revenue" range={monthRange(s.month)} />
     </MobileShell>
   );
 }

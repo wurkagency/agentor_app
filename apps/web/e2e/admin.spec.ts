@@ -114,10 +114,8 @@ test('Rapporter: Fakturering for October exports CSV and PDF that match the tabl
   await login(page, 'kasper');
   const started = new Date();
   await page.goto('/platform/admin/reports/revenue');
-  await page
-    .getByRole('navigation', { name: 'Rapporttype' })
-    .getByRole('link', { name: 'Fakturering' })
-    .click();
+  await page.getByRole('button', { name: /^Rapporttype: Omsætning/ }).click();
+  await page.getByRole('menuitem', { name: 'Fakturering' }).click();
   await expect(page).toHaveURL(/\/platform\/admin\/reports\/invoicing/);
   await page.goto('/platform/admin/reports/invoicing?from=2026-10-01&to=2026-10-31');
   await expect(page.getByRole('heading', { name: 'Rapporter', exact: true })).toBeVisible();
