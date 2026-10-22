@@ -66,7 +66,8 @@ function lookup(tree: Tree, key: string): string | undefined {
   let node: string | Tree | undefined = tree;
   for (const part of key.split('.')) {
     if (typeof node !== 'object' || node === null) return undefined;
-    node = node[part];
+    // Own keys only: "__proto__" or "constructor" in a key never walks into a prototype.
+    node = Object.getOwnPropertyDescriptor(node, part)?.value as string | Tree | undefined;
   }
   return typeof node === 'string' ? node : undefined;
 }
