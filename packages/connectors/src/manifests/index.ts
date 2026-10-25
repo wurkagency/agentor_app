@@ -1,3 +1,4 @@
+import { EU_COUNTRIES } from '../model.js';
 import type {
   ConnectorManifest,
   MappingGroup,
@@ -702,51 +703,6 @@ export const dinero: ConnectorManifest = {
     { version: '1.3.0', kind: 'additive', note: 'Fragt kan bogføres på egen konto.' },
     { version: '1.0.0', kind: 'additive', note: 'Første version.' },
   ],
-};
-
-const ECONOMIC_ACCOUNT_GROUP: MappingGroup = {
-  ...ACCOUNT_GROUP,
-  description: 'Hvor salget bogføres i e-conomic.',
-  fields: ACCOUNT_GROUP.fields.map(({ expectVatCodes: _codes, ...f }) => f),
-};
-
-export const economic: ConnectorManifest = {
-  ...dinero,
-  id: 'economic',
-  name: 'e-conomic',
-  version: '1.0.0',
-  logo: '/logos/economic.svg',
-  auth: {
-    type: 'api_key',
-    fields: [
-      {
-        key: 'grantToken',
-        label: 'Agreement grant token',
-        type: 'secret',
-        help: 'Findes i e-conomic under Apps.',
-      },
-    ],
-  },
-  accountHint: 'Aftale i e-conomic',
-  connectionSettings: [],
-  lookups: ['accounts'],
-  outputs: [
-    { entity: 'customer', label: 'Kontakter', trigger: { kind: 'poll', minMinutes: 15 } },
-    // Retur-flows (§4.2): stock counts from the ERP back to the shops.
-    { entity: 'stock', label: 'Lagerantal', trigger: { kind: 'poll', minMinutes: 15 } },
-  ],
-  // Dinero's field limits and VAT codes are not e-conomic's: no targets, no VAT-code checks.
-  inputs: dinero.inputs.map(({ targets: _targets, tables: _tables, ...p }) => p),
-  routeSettings: {
-    order: [DINERO_INVOICE_SETTINGS[0]!, DINERO_INVOICE_SETTINGS[1]!, DINERO_INVOICE_SETTINGS[2]!],
-  },
-  dependencies: { order: ['customer', 'product'], creditNote: ['customer'] },
-  mapping: {
-    order: [ECONOMIC_ACCOUNT_GROUP],
-    creditNote: [ECONOMIC_ACCOUNT_GROUP],
-  },
-  rateLimit: { perMinute: 120 },
-  changelog: [{ version: '1.0.0', kind: 'additive', note: 'Første version.' }],
 };
 
 export const hubspot: ConnectorManifest = {
@@ -1493,6 +1449,753 @@ export const odoo: ConnectorManifest = {
       kind: 'additive',
       note: 'Første version: lager, leveringer og fakturastatus.',
     },
+  ],
+};
+
+/* ---- e-conomic (PLAN-INTEGRATIONS-ECONOMIC) ---------------------------------------------------- */
+
+const ECONOMIC_CUSTOMER_VARIABLES: VariableDef[] = [
+  v('customer.sourceId', 'Kundenummer'),
+  ...customerVariables('customer.'),
+];
+
+const ECONOMIC_PRODUCT_VARIABLES: VariableDef[] = [
+  v('product.sku', 'Varenummer'),
+  v('product.name', 'Varenavn'),
+  v('product.price', 'Salgspris uden moms', 'money'),
+  v('product.ean', 'Stregkode (EAN)'),
+  v('product.category', 'Varegruppe'),
+];
+
+const ECONOMIC_STOCK_VARIABLES: VariableDef[] = [
+  v('stock.sku', 'Varenummer'),
+  v('stock.quantity', 'Antal på lager', 'number'),
+];
+
+const ECONOMIC_INVOICE_STATUS_VARIABLES: VariableDef[] = [
+  v('invoiceStatus.number', 'Fakturanummer'),
+  v('invoiceStatus.orderRef', 'Butikkens ordrenummer'),
+  v('invoiceStatus.kind', 'Faktura eller kreditnota'),
+  v('invoiceStatus.paymentState', 'Betalingsstatus'),
+  v('invoiceStatus.total', 'Total inkl. moms', 'money'),
+  v('invoiceStatus.residual', 'Mangler at blive betalt', 'money'),
+  v('invoiceStatus.currency', 'Valuta'),
+  v('invoiceStatus.date', 'Fakturadato', 'date'),
+  v('invoiceStatus.dueDate', 'Forfaldsdato', 'date'),
+];
+
+/** How customers are found and kept up to date in e-conomic (§4.3 Kunder). */
+const ECONOMIC_CONTACT_SETTINGS: SettingField[] = [
+  {
+    key: 'contact.match',
+    label: 'Find kunden i e-conomic på',
+    type: 'select',
+    default: 'email',
+    options: [
+      opt('email', 'E-mail'),
+      opt('cvr', 'CVR- eller momsnummer'),
+      opt('number', 'Butikkens kundenummer'),
+      opt('none', 'Brug én fælles kunde'),
+    ],
+  },
+  {
+    key: 'contact.shared',
+    label: 'Kundenummer på den fælles kunde',
+    type: 'number',
+    default: 0,
+    showIf: { key: 'contact.match', equals: 'none' },
+  },
+  {
+    key: 'contact.numberOffset',
+    label: 'Læg til butikkens kundenummer',
+    type: 'number',
+    default: 0,
+    level: 'advanced',
+    showIf: { key: 'contact.match', equals: 'number' },
+    help: 'Fx 100000, så webshopkunder får deres egen nummerserie.',
+  },
+  {
+    key: 'contact.update',
+    label: 'Opdater på kunder, der findes',
+    type: 'multiselect',
+    default: ['name', 'address', 'zip', 'city', 'country', 'email', 'phone', 'ean'],
+    options: [
+      opt('name', 'Navn'),
+      opt('address', 'Adresse'),
+      opt('zip', 'Postnummer'),
+      opt('city', 'By'),
+      opt('country', 'Land'),
+      opt('email', 'E-mail'),
+      opt('phone', 'Telefon'),
+      opt('cvr', 'CVR-nummer'),
+      opt('ean', 'EAN-nummer'),
+    ],
+  },
+  {
+    key: 'contact.group',
+    label: 'Kundegruppe for nye kunder',
+    type: 'select',
+    default: '',
+    lookup: 'customerGroups',
+    help: 'Tom: forbindelsens kundegruppe.',
+  },
+  {
+    key: 'contact.groupForeign',
+    label: 'Kundegruppe for udenlandske kunder',
+    type: 'select',
+    default: '',
+    lookup: 'customerGroups',
+    level: 'advanced',
+    help: 'Tom: samme som andre nye kunder.',
+  },
+  {
+    key: 'contact.attention',
+    label: 'Køberen som att.-person hos firmakunder',
+    type: 'boolean',
+    default: true,
+    level: 'advanced',
+  },
+];
+
+const ECONOMIC_PRODUCT_SETTINGS: SettingField[] = [
+  {
+    key: 'products.match',
+    label: 'Find varen i e-conomic på',
+    type: 'select',
+    default: 'sku',
+    options: [
+      opt('sku', 'Varenummer (SKU)'),
+      opt('barcode', 'Stregkode (EAN)'),
+      opt('none', 'Brug altid standardvaren'),
+    ],
+    help: 'e-conomic bogfører linjen på varens varegruppe, så hver linje skal have en vare.',
+  },
+  {
+    key: 'products.missing',
+    label: 'Når varen ikke findes i e-conomic',
+    type: 'select',
+    default: 'useGeneric',
+    options: [
+      opt('useGeneric', 'Brug standardvaren'),
+      opt('create', 'Opret varen'),
+      opt('fail', 'Stop posten'),
+    ],
+  },
+  {
+    key: 'products.group',
+    label: 'Varegruppe for nye varer',
+    type: 'select',
+    default: '',
+    lookup: 'productGroups',
+    showIf: { key: 'products.missing', equals: 'create' },
+    help: 'Bruges, når kategorien ikke har sin egen række.',
+  },
+  {
+    key: 'lines.unit',
+    label: 'Enhed på linjerne',
+    type: 'select',
+    default: '',
+    lookup: 'units',
+    level: 'advanced',
+  },
+];
+
+const ECONOMIC_PAYMENT_SETTINGS: SettingField[] = [
+  {
+    key: 'payment.register',
+    label: 'Registrer betaling på betalte ordrer',
+    type: 'boolean',
+    default: true,
+    help: 'Betalingen lægges i kassekladden mod den bogførte faktura.',
+  },
+  {
+    key: 'payment.journal',
+    label: 'Kassekladde til betalinger',
+    type: 'select',
+    default: '',
+    lookup: 'journals',
+    showIf: { key: 'payment.register', equals: true },
+  },
+  {
+    key: 'payment.account',
+    label: 'Modkonto for betalinger',
+    type: 'select',
+    default: '',
+    lookup: 'accounts',
+    help: 'Fx bank eller kortindløserens mellemregning. Bruges, når betalingsmetoden ikke har sin egen.',
+  },
+  {
+    key: 'payment.book',
+    label: 'Bogfør betalingen',
+    type: 'boolean',
+    default: false,
+    help: 'Slået fra: betalingen venter i kassekladden. Kun Agentors egne posteringer bogføres.',
+  },
+];
+
+const ECONOMIC_ROUNDING_SETTINGS: SettingField[] = [
+  {
+    key: 'rounding.policy',
+    label: 'Øreafrunding',
+    type: 'select',
+    default: 'line',
+    options: [
+      opt('line', 'Afrundingslinje'),
+      opt('ignoreBelow', 'Accepter forskellen'),
+      opt('fail', 'Stop posten'),
+    ],
+  },
+  {
+    key: 'rounding.maxDiff',
+    label: 'Største afrunding (kr.)',
+    type: 'number',
+    default: 1,
+    level: 'advanced',
+  },
+];
+
+/** What the e-conomic client honours on invoices (§4.3 Fakturaer). */
+const ECONOMIC_INVOICE_SETTINGS: SettingField[] = [
+  {
+    key: 'posting.type',
+    label: 'Bogfør ordrer som',
+    type: 'select',
+    default: 'invoice',
+    options: [opt('invoice', 'Faktura i e-conomic'), opt('journal', 'Bilag i kassekladden')],
+    help: 'Bilag: butikkens egen faktura er bilaget, og linjerne bogføres på de valgte konti.',
+  },
+  {
+    key: 'invoice.bookAutomatically',
+    label: 'Bogfør fakturaer automatisk',
+    type: 'boolean',
+    default: false,
+    showIf: { key: 'posting.type', equals: 'invoice' },
+    help: 'Slået fra: fakturaerne venter som kladder i e-conomic. Kun i Live.',
+  },
+  {
+    key: 'invoice.updateDrafts',
+    label: 'Opdater kladder, når ordren ændres',
+    type: 'boolean',
+    default: true,
+    help: 'En bogført faktura ændres aldrig.',
+  },
+  {
+    key: 'invoice.layout',
+    label: 'Layout',
+    type: 'select',
+    default: '',
+    lookup: 'layouts',
+    showIf: { key: 'posting.type', equals: 'invoice' },
+    help: 'Tom: forbindelsens layout.',
+  },
+  {
+    key: 'paymentTerms.paid',
+    label: 'Betalingsbetingelse på betalte ordrer',
+    type: 'select',
+    default: '',
+    lookup: 'paymentTerms',
+    help: 'Fx "Betalt" eller "Kontant". Tom: som ubetalte ordrer.',
+  },
+  {
+    key: 'paymentTerms.unpaid',
+    label: 'Betalingsbetingelse på ubetalte ordrer',
+    type: 'select',
+    default: '',
+    lookup: 'paymentTerms',
+    help: 'Tom: kundens egen betingelse i e-conomic.',
+  },
+  {
+    key: 'oss.mode',
+    label: 'EU-salg til private',
+    type: 'select',
+    default: 'danishVat',
+    options: [
+      opt('danishVat', 'Dansk moms (under grænsen)'),
+      opt('destinationVat', 'Købers lands moms (OSS)'),
+    ],
+    help: 'OSS: kunden får sit lands momszone i e-conomic.',
+  },
+  {
+    key: 'invoice.delivery',
+    label: 'Leveringsadresse på fakturaen',
+    type: 'boolean',
+    default: true,
+    showIf: { key: 'posting.type', equals: 'invoice' },
+  },
+  {
+    key: 'invoice.date',
+    label: 'Fakturadato',
+    type: 'select',
+    default: 'paid',
+    options: [opt('paid', 'Betalingsdato'), opt('order', 'Ordredato'), opt('today', 'Dagens dato')],
+    level: 'advanced',
+  },
+  {
+    key: 'invoice.bookWithShopNumber',
+    label: 'Brug butikkens ordrenummer som fakturanummer',
+    type: 'boolean',
+    default: false,
+    level: 'advanced',
+    help: 'Kun når ordrenummeret er et tal. Ellers bruges e-conomics nummerserie.',
+  },
+  ...ECONOMIC_PRODUCT_SETTINGS,
+  ...ECONOMIC_ROUNDING_SETTINGS,
+  ...ECONOMIC_PAYMENT_SETTINGS,
+  {
+    key: 'send.eInvoice',
+    label: 'Send EAN-faktura',
+    type: 'boolean',
+    default: false,
+    help: 'Når kunden har et EAN-nummer. Sendes, når fakturaen bogføres.',
+  },
+  {
+    key: 'send.email',
+    label: 'Send fakturaen på e-mail fra e-conomic',
+    type: 'boolean',
+    default: false,
+    level: 'advanced',
+  },
+  {
+    key: 'journal.number',
+    label: 'Kassekladde til bilag',
+    type: 'select',
+    default: '',
+    lookup: 'journals',
+    showIf: { key: 'posting.type', equals: 'journal' },
+  },
+  {
+    key: 'journal.book',
+    label: 'Bogfør bilagene',
+    type: 'boolean',
+    default: false,
+    showIf: { key: 'posting.type', equals: 'journal' },
+    help: 'Kun i Live, og kun Agentors egne posteringer.',
+  },
+  ...ECONOMIC_CONTACT_SETTINGS,
+];
+
+const ECONOMIC_CREDIT_NOTE_SETTINGS: SettingField[] = [
+  {
+    key: 'creditNote.bookAutomatically',
+    label: 'Bogfør kreditnotaer automatisk',
+    type: 'boolean',
+    default: false,
+    help: 'Kun i Live.',
+  },
+  {
+    key: 'creditNote.missingInvoice',
+    label: 'Når fakturaen ikke er bogført endnu',
+    type: 'select',
+    default: 'wait',
+    options: [opt('wait', 'Vent og prøv igen'), opt('standalone', 'Lav kreditnotaen alligevel')],
+  },
+  {
+    key: 'creditNote.registerRefund',
+    label: 'Registrer udbetalingen, når butikken har refunderet',
+    type: 'boolean',
+    default: false,
+  },
+  ECONOMIC_INVOICE_SETTINGS[2]!,
+  ECONOMIC_INVOICE_SETTINGS[3]!,
+  ECONOMIC_INVOICE_SETTINGS[6]!,
+  ...ECONOMIC_PRODUCT_SETTINGS,
+  ...ECONOMIC_ROUNDING_SETTINGS,
+  ...ECONOMIC_PAYMENT_SETTINGS.slice(1),
+  ...ECONOMIC_CONTACT_SETTINGS,
+];
+
+const ECONOMIC_PRODUCT_WRITE_SETTINGS: SettingField[] = [
+  { key: 'product.create', label: 'Opret nye varer', type: 'boolean', default: true },
+  { key: 'product.update', label: 'Opdater varer, der findes', type: 'boolean', default: true },
+  {
+    key: 'product.fields',
+    label: 'Felter der opdateres',
+    type: 'multiselect',
+    default: ['name', 'barcode'],
+    options: [opt('name', 'Navn'), opt('price', 'Salgspris'), opt('barcode', 'Stregkode')],
+    help: 'Priser ændres kun, hvis du vælger det.',
+  },
+  (({ showIf: _showIf, ...f }) => f)(ECONOMIC_PRODUCT_SETTINGS[2]!),
+  ECONOMIC_PRODUCT_SETTINGS[3]!,
+];
+
+const zoneField = (key: string, label: string, help: string) => ({
+  key,
+  label,
+  required: false,
+  lookup: 'vatZones' as const,
+  help,
+});
+
+/** The VAT zone per sale kind (E6). Empty: the standard zones of a Danish agreement. */
+const ECONOMIC_ZONE_GROUP: MappingGroup = {
+  key: 'zones',
+  title: 'Momszoner',
+  description: 'Zonen afgør momsen og kontoen sammen med varegruppen i e-conomic.',
+  fields: [
+    zoneField('zones.domestic', 'Danmark', 'Tom: zone 1 (Indland).'),
+    zoneField('zones.euB2b', 'EU-firmaer med momsnummer', 'Tom: zone 2 (EU).'),
+    zoneField('zones.euB2c', 'EU-private (dansk moms)', 'Tom: som Danmark. Ved OSS: købers land.'),
+    zoneField('zones.export', 'Uden for EU', 'Tom: zone 3 (Udland).'),
+  ],
+};
+
+/** The products lines book through when the shop's product isn't in e-conomic (E5). */
+const ECONOMIC_PRODUCT_GROUP: MappingGroup = {
+  key: 'products',
+  title: 'Varer',
+  description: 'Hver fakturalinje skal have en vare i e-conomic. Varegruppen afgør kontoen.',
+  fields: [
+    {
+      key: 'products.generic',
+      label: 'Standardvare',
+      required: false,
+      lookup: 'products',
+      help: 'Bruges, når varen ikke findes i e-conomic.',
+    },
+    {
+      key: 'products.genericServices',
+      label: 'Standardvare for ydelser',
+      required: false,
+      lookup: 'products',
+      help: 'Til EU- og eksportsalg af ydelser. Tom: standardvaren.',
+    },
+    { key: 'products.shipping', label: 'Fragt', required: false, lookup: 'products' },
+    { key: 'products.fees', label: 'Gebyrer', required: false, lookup: 'products' },
+    {
+      key: 'products.rounding',
+      label: 'Øreafrunding',
+      required: false,
+      lookup: 'products',
+      help: 'Bør ligge i en momsfri varegruppe.',
+    },
+  ],
+};
+
+/** Accounts for the journal posting type only (X3); stable keys from v1. */
+const ECONOMIC_ACCOUNT_GROUP: MappingGroup = {
+  ...ACCOUNT_GROUP,
+  description: 'Kun ved bilag i kassekladden: hvor salget bogføres.',
+  fields: ACCOUNT_GROUP.fields.map(({ expectVatCodes: _codes, required, requiredIf, ...f }) => ({
+    ...f,
+    required: false,
+    ...(required || requiredIf
+      ? { requiredIf: { setting: 'posting.type', equals: 'journal' } }
+      : {}),
+  })),
+};
+
+const ECONOMIC_PAYMENT_METHODS: MappingTable = {
+  key: 'paymentMethods',
+  title: 'Betalingsmetoder',
+  description: 'Hvor betalingen registreres i e-conomic.',
+  from: { lookup: 'paymentGateways', label: 'Betalingsmetode' },
+  to: [
+    { key: 'account', label: 'Modkonto', lookup: 'accounts' },
+    { key: 'journal', label: 'Kassekladde', lookup: 'journals' },
+  ],
+};
+
+const ECONOMIC_PRODUCT_GROUPS: MappingTable = {
+  key: 'productGroups',
+  title: 'Varegrupper',
+  description: 'Hvilken varegruppe nye varer oprettes i.',
+  from: { lookup: 'categories', label: 'Kategori' },
+  to: [{ key: 'group', label: 'Varegruppe', lookup: 'productGroups' }],
+};
+
+const ECONOMIC_OSS_ZONES: MappingTable = {
+  key: 'ossZones',
+  title: 'OSS-zoner',
+  description: 'Momszone pr. land ved OSS. Tom: zonen med landets navn.',
+  from: {
+    lookup: 'countries',
+    label: 'Land',
+    options: [...EU_COUNTRIES]
+      .filter((c) => c !== 'DK')
+      .sort()
+      .map((c) => ({ value: c, label: c })),
+  },
+  to: [{ key: 'zone', label: 'Momszone', lookup: 'vatZones' }],
+};
+
+/** What e-conomic writes that templates fill (§4.5). `externalId` is the idempotency key (E8). */
+const ECONOMIC_INVOICE_TARGETS: TargetField[] = [
+  t('invoice.externalId', 'Ekstern id', 'ag:{connection.short}:o:{order.sourceId}', 'expression', {
+    required: true,
+    maxLength: 50,
+  }),
+  t('invoice.otherReference', 'Anden reference', '{order.number}', 'template', {
+    required: true,
+    maxLength: 250,
+  }),
+  t('invoice.heading', 'Overskrift', 'Ordre {order.number}', 'template', { maxLength: 250 }),
+  t('invoice.textLine1', 'Tekst 1', '{order.note}', 'template', { maxLength: 1000 }),
+  t('invoice.textLine2', 'Tekst 2', undefined, 'template', { maxLength: 1000 }),
+  t('invoice.publicEntryNumber', 'Rekvisitionsnummer (EAN)', undefined, 'template', {
+    maxLength: 30,
+  }),
+  t(
+    'payment.text',
+    'Betalingens tekst',
+    '{order.paymentMethod.title} {order.transactionId}',
+    'template',
+    {
+      maxLength: 250,
+    },
+  ),
+  t('voucher.text', 'Bilagstekst', 'Ordre {order.number}', 'template', { maxLength: 250 }),
+  t('customer.name', 'Kundens navn', undefined, 'template', { maxLength: 255 }),
+  { ...ODOO_LINE_NAME, key: 'line.description', maxLength: 2500 },
+];
+
+const ECONOMIC_CREDIT_NOTE_TARGETS: TargetField[] = [
+  t(
+    'creditNote.externalId',
+    'Ekstern id',
+    'ag:{connection.short}:r:{creditNote.sourceId}',
+    'expression',
+    { required: true, maxLength: 50 },
+  ),
+  t(
+    'creditNote.invoiceReference',
+    'Fakturaens reference',
+    '{creditNote.meta.orderNumber}',
+    'expression',
+    {
+      required: true,
+      maxLength: 250,
+    },
+  ),
+  t(
+    'creditNote.otherReference',
+    'Anden reference',
+    '{creditNote.meta.orderNumber}-R{creditNote.number}',
+    'template',
+    { required: true, maxLength: 250 },
+  ),
+  t(
+    'creditNote.heading',
+    'Overskrift',
+    'Kreditnota for ordre {creditNote.meta.orderNumber}',
+    'template',
+    {
+      maxLength: 250,
+    },
+  ),
+  t('creditNote.textLine1', 'Tekst 1', undefined, 'template', { maxLength: 1000 }),
+  t('creditNote.textLine2', 'Tekst 2', '{creditNote.reason}', 'template', { maxLength: 1000 }),
+  { ...ODOO_LINE_NAME, key: 'line.description', maxLength: 2500 },
+];
+
+const ECONOMIC_CUSTOMER_TARGETS: TargetField[] = [
+  t('customer.name', 'Navn', undefined, 'template', { maxLength: 255 }),
+];
+
+const ECONOMIC_PRODUCT_TARGETS: TargetField[] = [
+  t('product.name', 'Varenavn', undefined, 'template', { maxLength: 300 }),
+];
+
+/**
+ * e-conomic (PLAN-INTEGRATIONS-ECONOMIC): invoices through products and VAT zones, credit notes
+ * as negative invoices, payments and vouchers in the kassekladde; customers, products, stock and
+ * invoice status as a source. Writes need the Plus plan or higher (E3).
+ */
+export const economic: ConnectorManifest = {
+  id: 'economic',
+  name: 'e-conomic',
+  version: '2.0.0',
+  category: 'erp',
+  logo: '/logos/economic.svg',
+  auth: {
+    type: 'api_key',
+    fields: [
+      {
+        key: 'grantToken',
+        label: 'Agreement grant token',
+        type: 'secret',
+        help: 'Vises, når du tilføjer Agentor under Apps i e-conomic. Revisorer klikker først Administrér på kundens aftale.',
+      },
+    ],
+  },
+  accountHint: 'Aftale i e-conomic',
+  connectionSettings: [
+    {
+      key: 'layout',
+      label: 'Fakturalayout',
+      type: 'select',
+      default: '',
+      lookup: 'layouts',
+      help: 'Tom: det første layout i aftalen.',
+    },
+    {
+      key: 'customerGroup',
+      label: 'Kundegruppe for nye kunder',
+      type: 'select',
+      default: '',
+      lookup: 'customerGroups',
+    },
+    {
+      key: 'paymentTerms',
+      label: 'Betalingsbetingelse for nye kunder',
+      type: 'select',
+      default: '',
+      lookup: 'paymentTerms',
+      help: 'Tom: aftalens standard.',
+    },
+    {
+      key: 'stock.quantity',
+      label: 'Antal på lager til butikken',
+      type: 'select',
+      default: 'available',
+      options: [
+        opt('available', 'Disponibelt (på lager minus bestilt af kunder)'),
+        opt('inStock', 'På lager'),
+      ],
+      help: 'Kræver modulet Lager i e-conomic.',
+    },
+    {
+      key: 'stock.safetyBuffer',
+      label: 'Sikkerhedslager',
+      type: 'number',
+      default: 0,
+      help: 'Trækkes fra antallet, så butikken ikke sælger de sidste.',
+    },
+    {
+      key: 'stock.scan',
+      label: 'Læs lager',
+      type: 'select',
+      default: 'all',
+      level: 'advanced',
+      options: [opt('all', 'Alle lagervarer hver gang'), opt('changed', 'Kun ændrede varer')],
+    },
+    {
+      key: 'invoiceStatus.days',
+      label: 'Fakturastatus for de seneste (dage)',
+      type: 'number',
+      default: 90,
+      level: 'advanced',
+    },
+    {
+      key: 'invoiceStatus.orderRefPattern',
+      label: 'Ordrenummer i "Anden reference" (regex)',
+      type: 'text',
+      default: '',
+      level: 'advanced',
+      help: 'Første gruppe er ordrenummeret. Tom: hele referencen.',
+    },
+    {
+      key: 'countryNames',
+      label: 'Landenavne i e-conomic',
+      type: 'select',
+      default: 'da',
+      level: 'advanced',
+      options: [opt('da', 'Dansk'), opt('en', 'Engelsk')],
+    },
+    {
+      key: 'webhooks.mode',
+      label: 'Hent ændringer',
+      type: 'select',
+      default: 'webhook+poll',
+      level: 'advanced',
+      options: [
+        opt('webhook+poll', 'Webhooks og kontrol hvert kvarter'),
+        opt('poll', 'Kun kontrol'),
+      ],
+    },
+  ],
+  lookups: [
+    'layouts',
+    'vatZones',
+    'paymentTerms',
+    'customerGroups',
+    'productGroups',
+    'units',
+    'journals',
+    'accounts',
+    'vatCodes',
+    'products',
+  ],
+  outputs: [
+    {
+      entity: 'customer',
+      label: 'Kunder',
+      trigger: { kind: 'webhook' },
+      variables: ECONOMIC_CUSTOMER_VARIABLES,
+    },
+    {
+      entity: 'product',
+      label: 'Varer',
+      trigger: { kind: 'webhook' },
+      variables: ECONOMIC_PRODUCT_VARIABLES,
+    },
+    // Retur-flows (§4.2): stock counts from the ERP back to the shops.
+    {
+      entity: 'stock',
+      label: 'Lagerantal',
+      trigger: { kind: 'poll', minMinutes: 15 },
+      variables: ECONOMIC_STOCK_VARIABLES,
+    },
+    {
+      entity: 'invoiceStatus',
+      label: 'Fakturastatus',
+      trigger: { kind: 'poll', minMinutes: 15 },
+      variables: ECONOMIC_INVOICE_STATUS_VARIABLES,
+    },
+  ],
+  inputs: [
+    {
+      entity: 'order',
+      label: 'Fakturaer',
+      modes: [...ORDER_MODES],
+      targets: ECONOMIC_INVOICE_TARGETS,
+      tables: [ECONOMIC_PAYMENT_METHODS, ECONOMIC_PRODUCT_GROUPS, ECONOMIC_OSS_ZONES],
+    },
+    {
+      entity: 'creditNote',
+      label: 'Kreditnotaer',
+      modes: [...ORDER_MODES],
+      targets: ECONOMIC_CREDIT_NOTE_TARGETS,
+      tables: [ECONOMIC_PAYMENT_METHODS, ECONOMIC_PRODUCT_GROUPS, ECONOMIC_OSS_ZONES],
+    },
+    {
+      entity: 'customer',
+      label: 'Kunder',
+      modes: ['dry_run', 'live'],
+      targets: ECONOMIC_CUSTOMER_TARGETS,
+    },
+    {
+      entity: 'product',
+      label: 'Varer',
+      modes: ['dry_run', 'live'],
+      targets: ECONOMIC_PRODUCT_TARGETS,
+      tables: [ECONOMIC_PRODUCT_GROUPS],
+    },
+  ],
+  mapping: {
+    order: [ECONOMIC_ZONE_GROUP, ECONOMIC_PRODUCT_GROUP, ECONOMIC_ACCOUNT_GROUP],
+    creditNote: [ECONOMIC_ZONE_GROUP, ECONOMIC_PRODUCT_GROUP],
+    customer: [ECONOMIC_ZONE_GROUP],
+  },
+  routeSettings: {
+    order: ECONOMIC_INVOICE_SETTINGS,
+    creditNote: ECONOMIC_CREDIT_NOTE_SETTINGS,
+    customer: ECONOMIC_CONTACT_SETTINGS,
+    product: ECONOMIC_PRODUCT_WRITE_SETTINGS,
+  },
+  // Lines find their products themselves (E5); customers come first.
+  dependencies: { order: ['customer'], creditNote: ['customer'] },
+  counts: ['customer', 'product'],
+  // A cost-based token bucket per app + agreement (E15); requests go one at a time.
+  rateLimit: { perMinute: 300 },
+  webhook: { signatureHeader: 'x-agentor-secret', scheme: 'secret-header' },
+  changelog: [
+    {
+      version: '2.0.0',
+      kind: 'breaking',
+      note: 'Live forbindelse. Fakturaer bogføres gennem varer og momszoner; konti bruges kun til bilag i kassekladden.',
+    },
+    { version: '1.0.0', kind: 'additive', note: 'Første version.' },
   ],
 };
 

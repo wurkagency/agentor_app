@@ -61,10 +61,12 @@ export const TEMPLATES: Template[] = [
     source: ['woocommerce'],
     destinations: ['economic'],
     routes: [
-      { entity: 'order', targetEntity: 'order', to: 'economic' },
+      // Lines book through e-conomic products and VAT zones (PLAN-INTEGRATIONS-ECONOMIC E5, E6).
+      { entity: 'order', targetEntity: 'order', to: 'economic', sourceOptions: PAID_ORDERS },
+      { entity: 'creditNote', targetEntity: 'creditNote', to: 'economic' },
       { entity: 'customer', targetEntity: 'customer', to: 'economic' },
     ],
-    tags: ['order', 'customer'],
+    tags: ['order', 'creditNote', 'customer'],
     priority: 8,
     accountHints: ERP_HINTS,
   },
@@ -95,6 +97,19 @@ export const TEMPLATES: Template[] = [
     ],
     tags: ['stock', 'shipment', 'invoiceStatus'],
     priority: 7,
+  },
+  {
+    // The return flow (PLAN-INTEGRATIONS-ECONOMIC §5): stock and booked/paid invoices to the shop.
+    id: 'economic-webshop',
+    category: 'erp',
+    source: ['economic'],
+    destinations: ['woocommerce'],
+    routes: [
+      { entity: 'stock', targetEntity: 'stock', to: 'woocommerce' },
+      { entity: 'invoiceStatus', targetEntity: 'invoiceStatus', to: 'woocommerce' },
+    ],
+    tags: ['stock', 'invoiceStatus'],
+    priority: 6,
   },
   {
     id: 'shopify-dinero',

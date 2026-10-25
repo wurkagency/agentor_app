@@ -39,6 +39,12 @@ const schema = z.object({
   DINERO_CLIENT_SECRET: z.string().optional(),
   /** Tests only: another Visma Connect origin. */
   VISMA_CONNECT_URL: z.url().optional(),
+  /**
+   * e-conomic app (PLAN-INTEGRATIONS-ECONOMIC §4.1): the public token opens the installation URL.
+   * The secret token lives in the worker only. The URL template overrides the documented format.
+   */
+  ECONOMIC_APP_PUBLIC_TOKEN: z.string().optional(),
+  ECONOMIC_INSTALL_URL: z.string().optional(),
   CVR_PROVIDER: z.enum(['fixture', 'virkdata']).default('fixture'),
   VIRKDATA_API_KEY: z.string().optional(),
   /** Web Push (PLAN-MOBILE M3): the public half goes to browsers; without it push is off. */

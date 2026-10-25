@@ -1,7 +1,7 @@
 import {
   countRecords,
   manifestFor,
-  verifyWebhookSignature,
+  verifyWebhook as verifyWebhookBody,
   type ConnectorAdapter,
   type LookupId,
 } from '@agentor/connectors';
@@ -46,6 +46,8 @@ export interface ConnectionDeps {
   connectorMode: 'mock' | 'live';
   /** OAuth clients for token refresh, per connector (Dinero: Visma Connect). */
   oauth?: Partial<Record<string, { clientId: string; clientSecret: string }>>;
+  /** Our e-conomic app's secret token (PLAN-INTEGRATIONS-ECONOMIC E1); never in a key box. */
+  economic?: { appSecretToken: string };
   log: Logger;
   /** Webhooks start runs on the flows queue. */
   flowQueue?: Queue;
@@ -123,6 +125,7 @@ export function connectionAdapter(
     connectionId: conn.id,
     persist: (patch) => persistCredentials(deps, tenantId, conn.id, patch),
     ...(deps.oauth ? { oauth: deps.oauth } : {}),
+    ...(deps.economic ? { economic: deps.economic } : {}),
   });
 }
 
@@ -241,7 +244,8 @@ async function verifyWebhook(deps: ConnectionDeps, tenantId: string, eventId: st
   }
   const creds = await credentials(deps, tenantId, conn.id);
   const secret = creds?.webhookSecret ?? creds?.consumerSecret ?? '';
-  const ok = verifyWebhookSignature(
+  const ok = verifyWebhookBody(
+    manifest.webhook.scheme,
     event.body,
     event.headers[manifest.webhook.signatureHeader],
     secret,

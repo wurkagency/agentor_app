@@ -1,7 +1,9 @@
 import {
   dynamicRouteTargets,
   manifestFor,
+  saleKeys,
   saleKind,
+  settingValue,
   vatMismatch,
   WriteError,
   type ConnectorAdapter,
@@ -9,7 +11,6 @@ import {
   type LookupOption,
   type Order,
   type OrderLine,
-  type SaleKind,
   type TargetField,
   type WriteMode,
   type WriteOptions,
@@ -143,21 +144,6 @@ export function failedFilter(
 }
 
 /**
- * The mapping keys to try for a line, most specific first; the last one is the key reported
- * when none is set. EU and export sales split goods and services (PLAN F8); EU sales to private
- * customers are booked like domestic sales unless the route uses OSS (D3).
- */
-function accountKeys(kind: SaleKind, vatRate: number, services: boolean, oss: boolean): string[] {
-  const local = vatRate === 0 ? 'accounts.vatFree' : 'accounts.domestic';
-  if (kind === 'euB2b')
-    return services ? ['accounts.euB2bServices', 'accounts.euB2b'] : ['accounts.euB2b'];
-  if (kind === 'export')
-    return services ? ['accounts.exportServices', 'accounts.export'] : ['accounts.export'];
-  if (kind === 'euB2c') return oss ? ['accounts.euB2c'] : ['accounts.euB2c', local];
-  return [local];
-}
-
-/**
  * Chooses the account for each order line (D3): product exception → category row → the
  * sale-type account (EU B2B, export, VAT-free, domestic). Shipping has its own accounts.
  * Category rows apply to sales booked like domestic sales; abroad the sale type decides.
@@ -188,7 +174,7 @@ export function planInvoice(
     const categoryRow = route.categoryAccounts.find((r) => !r.product && r.category === l.category);
     const services =
       (l.supplyType ?? exception?.supplyType ?? categoryRow?.supplyType) === 'services';
-    const keys = accountKeys(kind, l.vatRate, services, oss);
+    const keys = saleKeys(kind, l.vatRate, services, oss);
     const key = keys.find((k) => route.mapping[k]) ?? keys[keys.length - 1]!;
     const likeDomestic = key === 'accounts.domestic' || key === 'accounts.vatFree';
     const byCategory = likeDomestic ? (exception ?? categoryRow) : undefined;
@@ -256,7 +242,10 @@ export function renderTargets(
   connectionId: string,
   shaped: unknown = rec,
 ): { fields: Record<string, string>; lineFields: Record<string, string>[] } {
-  const ctx = { [route.entity]: rec, connection: { id: connectionId } };
+  const ctx = {
+    [route.entity]: rec,
+    connection: { id: connectionId, short: connectionId.slice(0, 8) },
+  };
   const lines = (rec as { lines?: OrderLine[] }).lines ?? [];
   const fields: Record<string, string> = {};
   const lineFields: Record<string, string>[] = lines.map(() => ({}));
@@ -331,11 +320,23 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
   );
   const targets = [...(inPort?.targets ?? []), ...dynamicRouteTargets(inPort, route)];
   const statuses = route.sourceOptions['trigger.statuses'];
-  // Destinations that book on accounts (Dinero, e-conomic) need them mapped; Odoo takes the
-  // income account from the product, so an empty account mapping is not an error there.
-  const needsAccounts = (
-    manifestFor(destination.connectorId)?.mapping?.[route.targetEntity] ?? []
-  ).some((g) => g.fields.some((f) => f.key.startsWith('accounts.')));
+  // Destinations that book on accounts (Dinero, e-conomic journals) need them mapped. Odoo and
+  // e-conomic invoices take the income account from the product, so there an empty account
+  // mapping is not an error: accounts count only when required under the route's settings.
+  const destManifest = manifestFor(destination.connectorId);
+  const needsAccounts = (destManifest?.mapping?.[route.targetEntity] ?? []).some((g) =>
+    g.fields.some(
+      (f) =>
+        f.key.startsWith('accounts.') &&
+        (f.required ||
+          (f.requiredIf !== undefined &&
+            settingValue(
+              destManifest?.routeSettings?.[route.targetEntity],
+              route.settings,
+              f.requiredIf.setting,
+            ) === f.requiredIf.equals)),
+    ),
+  );
   for (const rec of input.records) {
     const started = now();
     const base = {

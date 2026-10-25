@@ -210,7 +210,7 @@ export function validateDefinition(def: FlowDefinition, ctx: ValidationContext):
 
 /** A template variable the source declares; `order.meta.*` covers every meta alias. */
 function knownVariable(src: Port, path: string, lineScope: boolean): boolean {
-  if (path === 'connection.id') return true;
+  if (path === 'connection.id' || path === 'connection.short') return true;
   return (src.variables ?? []).some((v) => {
     if (v.scope === 'line' && !lineScope) return false;
     return v.path.endsWith('.*') ? path.startsWith(v.path.slice(0, -1)) : v.path === path;

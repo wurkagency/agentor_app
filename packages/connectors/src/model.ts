@@ -225,7 +225,8 @@ export interface EntityRecord {
   invoiceStatus: InvoiceStatus;
 }
 
-const EU = new Set([
+/** EU member states (ISO 3166-1 alpha-2). */
+export const EU_COUNTRIES = new Set([
   'AT',
   'BE',
   'BG',
@@ -283,7 +284,7 @@ export function saleKind(
 ): SaleKind {
   const country = o.customer.address.country.toUpperCase();
   if (country === 'DK') return 'domestic';
-  const eu = EU.has(country);
+  const eu = EU_COUNTRIES.has(country);
   const charged = chargedRates(o).filter((r) => r > 0);
   if (charged.length) {
     if (charged.every((r) => rateEq(r, DANISH_VAT_RATE)))
@@ -292,6 +293,28 @@ export function saleKind(
   }
   if (eu) return o.customer.vatNumber ? 'euB2b' : 'euB2c';
   return 'export';
+}
+
+/**
+ * The mapping keys to try for a line, most specific first; the last one is the key reported
+ * when none is set. EU and export sales split goods and services (PLAN F8); EU sales to private
+ * customers are booked like domestic sales unless the route uses OSS (D3). The engine uses it
+ * for accounts (`accounts.`), e-conomic for its VAT zones (`zones.`).
+ */
+export function saleKeys(
+  kind: SaleKind,
+  vatRate: number,
+  services: boolean,
+  oss: boolean,
+  prefix = 'accounts.',
+): string[] {
+  const local = vatRate === 0 ? `${prefix}vatFree` : `${prefix}domestic`;
+  if (kind === 'euB2b')
+    return services ? [`${prefix}euB2bServices`, `${prefix}euB2b`] : [`${prefix}euB2b`];
+  if (kind === 'export')
+    return services ? [`${prefix}exportServices`, `${prefix}export`] : [`${prefix}export`];
+  if (kind === 'euB2c') return oss ? [`${prefix}euB2c`] : [`${prefix}euB2c`, local];
+  return [local];
 }
 
 /**

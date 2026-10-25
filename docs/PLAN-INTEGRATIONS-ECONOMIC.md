@@ -1,6 +1,6 @@
 # PLAN: e-conomic integration module (source and destination)
 
-Status: **draft for review, 25 Oct 2026. P0–P3 built in the same pass (status after §8).** Base branch: `v1.0`.
+Status: **draft for review, 25 Oct 2026. P0–P3 built in the same pass (status in §8). Decisions ED1–ED7 are built as recommended and open for review.** Base branch: `v1.0`.
 
 **Sources**
 - Official e-conomic docs and live calls with the public demo tokens, 25 Oct 2026 (links in §13).
@@ -152,7 +152,6 @@ Stock and invoice-status options are connection settings, not route options, for
 | `contact.update` | multiselect name, address, zip, city, country, email, phone, cvr, ean | all but cvr | Fields overwritten on customers that exist. REST PUT is a full replace, so the client reads the customer, merges the chosen fields and writes it back |
 | `contact.group` | select (lookup `customerGroups`) | connection `customerGroup` | |
 | `contact.groupForeign` | select (lookup `customerGroups`) | (same) | advanced: group for EU and export customers |
-| `contact.currency` | select `base` / `order` | `order` | advanced |
 | `contact.attention` | boolean | true | Company customers get the buyer as a customer contact, set as `attention` |
 
 **Varer** (`product`): `product.create` (true), `product.update` (true), `product.fields` (multiselect name, price, barcode; default name and barcode), `products.group` (as above), `lines.unit`.
@@ -289,7 +288,39 @@ Generated from the manifest, as for Dinero and Odoo:
 
 ## 8. Build status
 
-See the commit that adds this file; this section is updated at the end of the build pass.
+**P0–P3 status (25 Oct 2026): built and tested against a recorded agreement; the read paths also run against e-conomic's public demo agreement.** No write has been made against a real agreement yet (no trial agreement or app tokens in `.env.local`).
+
+- **P0 framework**:
+  - X1: lookups `layouts`, `vatZones`, `customerGroups`, `productGroups`, `units`, `products`, plus `countries` for fixed table rows. A mapping table can declare fixed rows (`from.options`), so the OSS table lists the EU countries without a source lookup.
+  - X2: manifest scheme `secret-header`, `verifyWebhookSecret()`/`verifyWebhook()`. The worker verifies by scheme. Ingest keeps the `x-agentor-secret` header.
+  - X3: the engine asks for accounts only when an `accounts.*` field is required under the route's settings.
+  - X4: `saleKeys()` in `@agentor/connectors`, used by the engine and the e-conomic adapter. `EU_COUNTRIES` is exported.
+  - X5: `connection.short` in templates and validation.
+  - X6: `LiveContext.economic`, filled by the worker from `ECONOMIC_APP_SECRET_TOKEN`.
+- **P1–P2 client** (`live/economic.ts`):
+  - One client for REST and the OpenAPI families, with the OpenAPI versions in `ECONOMIC_APIS`.
+  - Error mapping (E16), `Idempotency-Key` on creates, booking and payments, and `/self` test with the plan and base currency stored.
+  - Lookups with VAT codes on accounts, and counts.
+  - Source: customers, products, stock and invoice status (§5), webhooks (register, heal, parse).
+  - Destination: customers (match, merged PUT, attention contact), products (match, create, update), invoices as Q2C drafts (external id, update with `objectVersion` and a single retry on 409, lines in bulk, prices incl. VAT when the zone says so), rounding, booking (shop number, EAN), payments in the journal (only our entry booked), credit notes (wait for the invoice, original zone, refund payout), journal vouchers.
+- **P3 wiring**:
+  - Manifest `economic` 2.0.0.
+  - Connect flow: "Gå til e-conomic" in the catalogue in live mode when `ECONOMIC_APP_PUBLIC_TOKEN` is set, and the callback stores `grantToken`. Manual token entry stays.
+  - Env vars in `.env.example`.
+  - Templates: "Webshop til e-conomic" now sends paid orders and credit notes; new "Lager og fakturastatus fra e-conomic".
+  - Danish and English texts.
+- **Tests**:
+  - `test/economic.test.ts` (41 cases) against `test/fake-economic.ts`.
+  - `packages/flows/test/economic-routes.test.ts`, covering accounts only for journal vouchers and the short external id.
+  - `test/economic.live.test.ts`: `ECONOMIC_TEST_DEMO=1` passes against the demo agreement for `/self`, lookups, the customer, product, stock and invoice filters, and the Q2C `externalId` filter.
+- **Where the build differs from the text above**:
+  - `contact.currency` is not built. New customers get the agreement's base currency from `/self`, because the customer route has no order to take a currency from.
+  - Payment-method rows carry a contra account and a journal. There is no "register?" column; an empty row falls back to the route's settings.
+  - The journal posting type skips orders that already have a voucher (cross-reference), because draft journal entries can't be found by an external id.
+- **Not built yet**:
+  - The browser check of the new catalogue dialog and the e-conomic mapping groups. The dev server on port 3000 belongs to another session and serves an older build.
+  - The PDF of the booked invoice back to the shop, and orders and quotes (§12).
+  - EV1–EV8 need a trial agreement (§11).
 
 ---
 

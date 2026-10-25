@@ -176,6 +176,39 @@ function KeyDialog({ item, onClose }: { item: CatalogueItem; onClose: () => void
     }
   };
 
+  // Systems without a shop address (e-conomic): the system's own install page gives the key.
+  if (!manual && !urlField)
+    return (
+      <Dialog
+        open
+        onOpenChange={(o) => !o && onClose()}
+        title={t('liveConnect.title', { name: item.name })}
+        description={t('liveConnect.installIntro', { name: item.name })}
+        width={560}
+        closeLabel={tc('close')}
+        footer={
+          <>
+            <Button variant="ghost" size="m" onClick={() => setManual(true)}>
+              {t('liveConnect.manualToken')}
+            </Button>
+            <Button
+              variant="primary"
+              size="m"
+              onClick={() =>
+                window.location.assign(
+                  `/connect/${item.id}/start?${new URLSearchParams({ return: '/connections' })}`,
+                )
+              }
+            >
+              {t('liveConnect.goTo', { name: item.name })}
+            </Button>
+          </>
+        }
+      >
+        <p className="m-0 text-meta text-fg-2">{t('liveConnect.installHelp')}</p>
+      </Dialog>
+    );
+
   if (!manual && urlField)
     return (
       <Dialog

@@ -15,7 +15,7 @@ export async function generateMetadata() {
 }
 
 /** Systems whose own key flow replaces pasting keys in live mode (PLAN-INTEGRATIONS §4.1). */
-const LIVE_KEY_FLOW = new Set(['woocommerce']);
+const LIVE_KEY_FLOW = new Set(['woocommerce', 'economic']);
 
 /** Tilføj forbindelse (D9-Katalog): 24 systems in 5 groups (D9 plus Odoo). */
 export default async function CataloguePage() {
@@ -49,7 +49,9 @@ export default async function CataloguePage() {
               type: 'key' as const,
               fields: m.auth.fields,
               webhook: Boolean(m.webhook),
-              ...(live && LIVE_KEY_FLOW.has(m.id)
+              ...(live &&
+              LIVE_KEY_FLOW.has(m.id) &&
+              (m.id !== 'economic' || Boolean(env().ECONOMIC_APP_PUBLIC_TOKEN))
                 ? { live: { keyFlow: true, autoWebhook: Boolean(m.webhook) } }
                 : {}),
             },

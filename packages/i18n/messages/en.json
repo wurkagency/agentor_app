@@ -1105,7 +1105,11 @@
       "shopUrl": "The shop's address",
       "shopUrlHelp": "You are sent to the shop to approve access there. The keys come straight to Agentor.",
       "go": "Go to the shop",
-      "manual": "Enter keys yourself"
+      "manual": "Enter keys yourself",
+      "installIntro": "You are sent to {name} to add Agentor as an app. The access comes straight to Agentor.",
+      "installHelp": "Accountants: first click Administer on the client's agreement in e-conomic, then open the link in the same browser. The agreement needs at least e-conomic Plus for Agentor to book.",
+      "goTo": "Go to {name}",
+      "manualToken": "Enter a token myself"
     }
   },
   "flows": {
@@ -2039,7 +2043,11 @@
       },
       "webshop-economic": {
         "title": "Webshop to e-conomic",
-        "body": "Invoices and customers in e-conomic."
+        "body": "Invoices, credit notes and customers in e-conomic."
+      },
+      "economic-webshop": {
+        "title": "Stock and invoice status from e-conomic",
+        "body": "Stock counts and paid invoices go back to the shop."
       },
       "webshop-odoo": {
         "title": "Webshop to Odoo",

@@ -1105,7 +1105,11 @@
       "shopUrl": "Butikkens adresse",
       "shopUrlHelp": "Du sendes til butikken og godkender adgangen der. Nøglerne kommer direkte til Agentor.",
       "go": "Gå til butikken",
-      "manual": "Indtast nøgler selv"
+      "manual": "Indtast nøgler selv",
+      "installIntro": "Du sendes til {name} og tilføjer Agentor som app. Adgangen kommer direkte til Agentor.",
+      "installHelp": "Revisorer: klik først Administrér på kundens aftale i e-conomic, og åbn så linket i samme browser. Aftalen skal mindst være e-conomic Plus for at Agentor kan bogføre.",
+      "goTo": "Gå til {name}",
+      "manualToken": "Indtast token selv"
     }
   },
   "flows": {
@@ -2039,7 +2043,11 @@
       },
       "webshop-economic": {
         "title": "Webshop til e-conomic",
-        "body": "Fakturaer og kunder i e-conomic."
+        "body": "Fakturaer, kreditnotaer og kunder i e-conomic."
+      },
+      "economic-webshop": {
+        "title": "Lager og fakturastatus fra e-conomic",
+        "body": "Lagerantal og betalte fakturaer går tilbage til butikken."
       },
       "webshop-odoo": {
         "title": "Webshop til Odoo",

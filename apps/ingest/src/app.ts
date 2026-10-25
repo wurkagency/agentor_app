@@ -53,8 +53,11 @@ const sameSecret = (a: string, b: string) => {
   return timingSafeEqual(x, y);
 };
 
-/** Headers kept with a webhook: signatures, topics and delivery ids. Nothing else is stored. */
-const KEEP_HEADERS = /^(x-wc-webhook-|x-shopify-|content-type$)/;
+/**
+ * Headers kept with a webhook: signatures, topics and delivery ids. Nothing else is stored.
+ * e-conomic can't sign and sends the connection's secret in x-agentor-secret instead.
+ */
+const KEEP_HEADERS = /^(x-wc-webhook-|x-shopify-|x-agentor-secret$|content-type$)/;
 
 /**
  * agentor-ingest: receives webhooks, verifies them, enqueues, answers 200 fast

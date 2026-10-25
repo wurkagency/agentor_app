@@ -5,7 +5,12 @@ import { getUserSession } from '@/server/auth/session';
 import { env } from '@/server/env';
 import { db } from '@/server/infra';
 import { mockCredentials, takeOAuthState } from '@/server/oauth';
-import { dineroCredentials, rememberedConnection, storeConnection } from '@/server/providers';
+import {
+  dineroCredentials,
+  economicCredentials,
+  rememberedConnection,
+  storeConnection,
+} from '@/server/providers';
 
 const MANAGERS = new Set(['owner', 'admin', 'developer']);
 
@@ -18,7 +23,8 @@ const MANAGERS = new Set(['owner', 'admin', 'developer']);
  *
  * Live providers (PLAN-INTEGRATIONS §4.1, §5.1): Dinero sends a code that is exchanged for tokens
  * here; WooCommerce already posted the keys to /api/connect/woocommerce/keys and only sends the
- * browser back (`success=1`).
+ * browser back (`success=1`); e-conomic sends the grant token itself (`token`,
+ * PLAN-INTEGRATIONS-ECONOMIC §4.1).
  */
 async function handle(connector: string, q: URLSearchParams) {
   const state = await takeOAuthState(q.get('state'));
@@ -28,8 +34,13 @@ async function handle(connector: string, q: URLSearchParams) {
   const back = (query: string) => NextResponse.redirect(new URL(`${state.returnTo}?${query}`, app));
   const live = env().CONNECTOR_MODE === 'live';
   const wooReturn = live && connector === 'woocommerce';
-  if (q.get('error') || (wooReturn ? q.get('success') !== '1' : !q.get('code')))
-    return back('connectError=denied');
+  const grantReturn = live && connector === 'economic';
+  const given = wooReturn
+    ? q.get('success') === '1'
+    : grantReturn
+      ? !!q.get('token')
+      : !!q.get('code');
+  if (q.get('error') || !given) return back('connectError=denied');
   const membership = await getMembership(db(), state.tenantId, state.userId);
   if (!membership || !MANAGERS.has(membership.role) || membership.signupState !== 'active')
     return back('connectError=forbidden');
@@ -44,6 +55,8 @@ async function handle(connector: string, q: URLSearchParams) {
       id = remembered;
     } else if (connector === 'dinero') {
       id = await storeConnection(state, await dineroCredentials(q.get('code')!));
+    } else if (connector === 'economic') {
+      id = await storeConnection(state, economicCredentials(q.get('token')!));
     } else return back('connectError=notAvailable');
   } catch {
     return back('connectError=failed');
@@ -67,7 +80,7 @@ export async function POST(
 ) {
   const form = await request.formData().catch(() => null);
   const q = new URLSearchParams();
-  for (const k of ['code', 'state', 'error'])
+  for (const k of ['code', 'state', 'error', 'token'])
     if (typeof form?.get(k) === 'string') q.set(k, form.get(k) as string);
   const res = await handle((await params).connector, q);
   // A redirect after POST must become a GET.

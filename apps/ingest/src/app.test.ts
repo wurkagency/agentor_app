@@ -138,6 +138,8 @@ describe('connection webhooks', () => {
       headers: {
         'content-type': 'application/json',
         'x-wc-webhook-signature': 'sig',
+        // e-conomic can't sign; it sends the connection secret we configured.
+        'x-agentor-secret': 'eco-secret',
         cookie: 'should-not-be-stored',
       },
       payload: '{"id":10447}',
@@ -147,6 +149,7 @@ describe('connection webhooks', () => {
     expect(stored[0]!.headers).toEqual({
       'content-type': 'application/json',
       'x-wc-webhook-signature': 'sig',
+      'x-agentor-secret': 'eco-secret',
     });
     expect(queued).toEqual(['e1']);
   });

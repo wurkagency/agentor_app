@@ -25,7 +25,7 @@ export function MappingTables(p: {
   return (
     <>
       {p.tables.map((table) => {
-        const rows = p.sourceLookups[table.from.lookup] ?? [];
+        const rows = table.from.options ?? p.sourceLookups[table.from.lookup] ?? [];
         const saved = p.route.tables[table.key] ?? [];
         const set = (from: string, col: string, value: string) =>
           p.update((x) => {

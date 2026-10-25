@@ -207,6 +207,36 @@ const MOCK_LOOKUPS: Partial<Record<LookupId, LookupOption[]>> = {
     { value: 'Reservedele', label: 'Reservedele' },
     { value: 'Tøj', label: 'Tøj' },
   ],
+  // e-conomic (PLAN-INTEGRATIONS-ECONOMIC X1): a standard Danish agreement.
+  layouts: [{ value: '21', label: 'DK. std. m. bankoplys.' }],
+  vatZones: [
+    { value: '1', label: 'Indland' },
+    { value: '2', label: 'EU' },
+    { value: '3', label: 'Udland' },
+    { value: '13', label: 'Tyskland' },
+  ],
+  paymentTerms: [
+    { value: '1', label: 'Netto 8 dage' },
+    { value: '5', label: 'Betalt' },
+  ],
+  customerGroups: [
+    { value: '1', label: 'Danske kunder' },
+    { value: '2', label: 'Udenlandske kunder' },
+  ],
+  productGroups: [
+    { value: '1', label: 'Varer m/moms' },
+    { value: '2', label: 'Varer u/moms' },
+  ],
+  units: [{ value: '1', label: 'stk.' }],
+  journals: [
+    { value: '1', label: 'Daglig' },
+    { value: '2', label: 'Indbetalinger' },
+  ],
+  products: [
+    { value: 'WEB', label: 'WEB · Webshopvare' },
+    { value: 'FRAGT', label: 'FRAGT · Fragt' },
+    { value: 'ORE', label: 'ORE · Øreafrunding' },
+  ],
 };
 
 /**
@@ -353,4 +383,27 @@ export function verifyWebhookSignature(
     return false;
   }
   return given.length === expected.length && timingSafeEqual(given, expected);
+}
+
+/**
+ * A webhook from a system that can't sign (e-conomic, PLAN-INTEGRATIONS-ECONOMIC X2): the
+ * header must carry the connection's secret, compared in constant time.
+ */
+export function verifyWebhookSecret(given: string | undefined, secret: string): boolean {
+  if (!given || !secret) return false;
+  const a = createHash('sha256').update(given).digest();
+  const b = createHash('sha256').update(secret).digest();
+  return timingSafeEqual(a, b);
+}
+
+/** Checks a stored webhook the way the connector's manifest says it is protected. */
+export function verifyWebhook(
+  scheme: 'hmac-sha256-base64' | 'secret-header',
+  rawBody: Buffer | string,
+  header: string | undefined,
+  secret: string,
+): boolean {
+  return scheme === 'secret-header'
+    ? verifyWebhookSecret(header, secret)
+    : verifyWebhookSignature(rawBody, header, secret);
 }

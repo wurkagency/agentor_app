@@ -66,6 +66,10 @@ const connectionDeps = {
           },
         }
       : {},
+  // The e-conomic app's secret token (PLAN-INTEGRATIONS-ECONOMIC E1), sent with every call.
+  ...(process.env.ECONOMIC_APP_SECRET_TOKEN
+    ? { economic: { appSecretToken: process.env.ECONOMIC_APP_SECRET_TOKEN } }
+    : {}),
   log: log.child({ queue: QUEUES.connections }),
 };
 

@@ -1,5 +1,5 @@
 import { createConnection, reauthorizeConnection } from '@agentor/db';
-import { dineroAuthorizeUrl, vismaToken } from '@agentor/connectors/live';
+import { dineroAuthorizeUrl, economicInstallUrl, vismaToken } from '@agentor/connectors/live';
 import { manifestFor } from '@agentor/connectors';
 import { enqueueConnectionTest, hasWebhook, sealCredentials } from './connections';
 import { env } from './env';
@@ -12,6 +12,8 @@ import type { OAuthState } from './oauth';
  * - WooCommerce: the shop's own key flow (/wc-auth/v1/authorize). The shop posts the keys to us
  *   server-to-server, then sends the browser back.
  * - Dinero: Visma Connect authorization code flow.
+ * - e-conomic: the app's installation URL; e-conomic returns the grant token as `token`
+ *   (PLAN-INTEGRATIONS-ECONOMIC §4.1).
  */
 
 export const WOO_KEYS_PATH = '/api/connect/woocommerce/keys';
@@ -45,7 +47,22 @@ export function providerAuthorizeUrl(state: OAuthState, token: string): string |
       ...(connectUrl ? { connectUrl } : {}),
     });
   }
+  if (state.connectorId === 'economic') {
+    const { ECONOMIC_APP_PUBLIC_TOKEN: appPublicToken, ECONOMIC_INSTALL_URL: template } = env();
+    if (!appPublicToken) return null;
+    return economicInstallUrl({
+      appPublicToken,
+      redirectUrl: new URL(`/connect/economic/callback?state=${token}`, app).toString(),
+      ...(template ? { template } : {}),
+    });
+  }
   return null;
+}
+
+/** e-conomic hands the grant token to the browser's return; it is all the connection stores. */
+export function economicCredentials(grantToken: string): Record<string, string> {
+  if (!/^[A-Za-z0-9_-]{8,200}$/.test(grantToken)) throw new Error('invalid e-conomic grant token');
+  return { grantToken };
 }
 
 /** Visma Connect: the code from the callback for tokens, never seen by the browser. */

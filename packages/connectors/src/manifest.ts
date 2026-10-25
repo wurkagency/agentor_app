@@ -37,6 +37,15 @@ export type LookupId =
   | 'productCategories'
   | 'carriers'
   | 'apps'
+  // e-conomic (PLAN-INTEGRATIONS-ECONOMIC X1).
+  | 'layouts'
+  | 'vatZones'
+  | 'customerGroups'
+  | 'productGroups'
+  | 'units'
+  | 'products'
+  /** Fixed rows (no system answers it): EU countries for OSS tables. */
+  | 'countries'
   /** Any record list in the system by model, answered with a name search: `relation:res.partner`. */
   | `relation:${string}`
   /** The fields of a model, read from the system (Odoo `fields_get`): `fields:sale.order`. */
@@ -165,8 +174,11 @@ export interface MappingTable {
   key: string;
   title: string;
   description?: string;
-  /** The row key: a source lookup (payment gateways, shipping methods). */
-  from: { lookup: LookupId; label: string };
+  /**
+   * The row key: a source lookup (payment gateways, shipping methods), or fixed rows when the
+   * rows don't come from the source (e-conomic's OSS zones per EU country).
+   */
+  from: { lookup: LookupId; label: string; options?: { value: string; label: string }[] };
   /** Columns per row, each a destination lookup. */
   to: { key: string; label: string; lookup: LookupId }[];
 }
@@ -200,8 +212,11 @@ export interface ConnectorManifest {
    * connection test reports them, e.g. OB2 "Vi fandt 1.284 ordrer, 812 kunder og 146 produkter".
    */
   counts?: Entity[];
-  /** Webhook signature scheme for sources that push. */
-  webhook?: { signatureHeader: string; scheme: 'hmac-sha256-base64' };
+  /**
+   * Webhook signature scheme for sources that push. `secret-header`: the system can't sign, so
+   * it sends the connection's secret in a header we configured (e-conomic, PLAN X2).
+   */
+  webhook?: { signatureHeader: string; scheme: 'hmac-sha256-base64' | 'secret-header' };
   changelog: { version: string; kind: 'additive' | 'breaking'; note: string }[];
 }
 
