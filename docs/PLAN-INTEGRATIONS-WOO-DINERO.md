@@ -498,6 +498,15 @@ on 58 → re-GET, retry once; on 429 → rate_limited 60 s; on 480 → platform 
 
 P1 and P2 can run in parallel after P0.
 
+**P0 status (25 Oct 2026): done.** Where the build differs from the text above, following produktspecifikation §4.5 (stable keys, additive changes):
+- **Account keys:** `accounts.euB2b` and `accounts.export` keep their keys and now mean goods. `accounts.euB2bServices` and `accounts.exportServices` are optional and fall back to them. `accounts.euB2c` is optional and falls back to domestic, except under `oss.mode` = `destinationVat`, where it is required (`requiredIf`).
+- **Booking key:** `invoice.bookAutomatically` keeps its key; it is not renamed to `invoice.book`. `categoryAccounts` stays, with a new `supplyType` column.
+- **Model:** the v2 model fields are optional. `shipping` stays scalar for now, and `shippingLines` comes with the live WooCommerce client.
+- **Source option defaults:** these preserve v1 behaviour. `trigger.statuses` = [] means all statuses, and `skipZeroTotal` = false. The WooCommerce → Dinero template is where processing + completed should be set.
+- **Dinero stock output:** removing it (F2, D4) moves to P2. The seeded "Lager retur" flow still uses Dinero as its stock source and must move first.
+- **Settings in manifests:** only settings the engine actually honours were added (`oss.mode`, `trigger.statuses`, `skipZeroTotal`). The remaining §4.3/§5.3 options arrive with the live clients that use them.
+- **Rendered fields:** templates go to the adapter as `WriteOptions.fields` and `lineFields`. Warnings (`VAT_FOREIGN` and similar) go on `RecordResult.warnings`. Showing them in the UI is P3.
+
 ---
 
 ## 8. Test matrix (must pass before Live)

@@ -1,5 +1,13 @@
-import { manifestFor, type ConnectorManifest, type LookupOption } from '@agentor/connectors';
+import {
+  manifestFor,
+  settingValue,
+  type ConnectorManifest,
+  type LookupId,
+  type LookupOption,
+  type Port,
+} from '@agentor/connectors';
 import { destinations, sourceNode, type FlowDefinition, type Route } from './definition.js';
+import { TemplateError, templateVariables } from './templates.js';
 
 /**
  * Continuous validation (produktspecifikation §5.4): every finding points at a route and field
@@ -18,6 +26,10 @@ export interface Finding {
     | 'MODE_UNSUPPORTED'
     | 'MAPPING_REQUIRED'
     | 'ACCOUNT_NOT_FOUND'
+    | 'ACCOUNT_VAT_MISMATCH'
+    | 'TEMPLATE_INVALID'
+    | 'TEMPLATE_UNKNOWN_VARIABLE'
+    | 'TEMPLATE_UNKNOWN_FIELD'
     | 'ROUTE_IN_TEST';
   routeId?: string;
   nodeId?: string;
@@ -33,7 +45,7 @@ export interface ValidationContext {
     { connectorId: string; status: 'ok' | 'broken' | 'checking'; name: string }
   >;
   /** connectionId → live lookup lists (chart of accounts etc.), when fetched. */
-  lookups: Record<string, Partial<Record<'accounts' | 'vatCodes' | 'templates', LookupOption[]>>>;
+  lookups: Record<string, Partial<Record<LookupId, LookupOption[]>>>;
   /** Plan limit, null = unlimited. */
   maxDestinations: number | null;
 }
@@ -108,12 +120,18 @@ export function validateDefinition(def: FlowDefinition, ctx: ValidationContext):
     // Guided mapping: required fields, and accounts that must exist in the destination.
     const groups = to.manifest?.mapping?.[r.targetEntity] ?? [];
     const lookups = to.node ? ctx.lookups[to.node.connectionId] : undefined;
+    const settingsFields = to.manifest?.routeSettings?.[r.targetEntity];
     for (const g of groups)
       for (const f of g.fields) {
         const v = r.mapping[f.key];
         const path = `mapping.${f.key}`;
         if (!v) {
-          if (f.required)
+          const required =
+            f.required ||
+            (f.requiredIf !== undefined &&
+              settingValue(settingsFields, r.settings, f.requiredIf.setting) ===
+                f.requiredIf.equals);
+          if (required)
             out.push({
               severity: 'error',
               code: 'MAPPING_REQUIRED',
@@ -131,6 +149,22 @@ export function validateDefinition(def: FlowDefinition, ctx: ValidationContext):
             routeId: r.id,
             path,
             params: { route: label, field: f.label, value: v, system: to.manifest?.name ?? '' },
+          });
+        // Dinero books VAT by the account (PLAN F1): warn when its VAT code fits another sale.
+        const vatCode = list?.find((o) => o.value === v)?.vatCode;
+        if (f.expectVatCodes && vatCode && !f.expectVatCodes.includes(vatCode))
+          out.push({
+            severity: 'warning',
+            code: 'ACCOUNT_VAT_MISMATCH',
+            routeId: r.id,
+            path,
+            params: {
+              route: label,
+              field: f.label,
+              value: v,
+              vatCode,
+              expected: f.expectVatCodes.join(', '),
+            },
           });
       }
     for (const row of r.categoryAccounts) {
@@ -150,6 +184,8 @@ export function validateDefinition(def: FlowDefinition, ctx: ValidationContext):
         });
     }
 
+    out.push(...templateFindings(r, label, outPort, inPort));
+
     if (r.mode === 'test' && !r.paused)
       out.push({
         severity: 'warning',
@@ -158,6 +194,66 @@ export function validateDefinition(def: FlowDefinition, ctx: ValidationContext):
         path: 'general.mode',
         params: { route: label, system: to.manifest?.name ?? '' },
       });
+  }
+  return out;
+}
+
+/** A template variable the source declares; `order.meta.*` covers every meta alias. */
+function knownVariable(src: Port, path: string, lineScope: boolean): boolean {
+  if (path === 'connection.id') return true;
+  return (src.variables ?? []).some((v) => {
+    if (v.scope === 'line' && !lineScope) return false;
+    return v.path.endsWith('.*') ? path.startsWith(v.path.slice(0, -1)) : v.path === path;
+  });
+}
+
+/**
+ * Route templates (PLAN §3.3): they must parse, write to a field the destination offers to
+ * templates, and read only variables the source declares. Sources without a variable catalogue
+ * are not checked for variables.
+ */
+function templateFindings(r: Route, label: string, src: Port, dst: Port): Finding[] {
+  const out: Finding[] = [];
+  for (const [key, template] of Object.entries(r.templates)) {
+    const path = `templates.${key}`;
+    const target = dst.targets?.find((t) => t.key === key && t.editable === 'template');
+    if (!target) {
+      out.push({
+        severity: 'error',
+        code: 'TEMPLATE_UNKNOWN_FIELD',
+        routeId: r.id,
+        path,
+        params: { route: label, field: key },
+      });
+      continue;
+    }
+    let vars: string[];
+    try {
+      vars = templateVariables(template);
+    } catch (e) {
+      out.push({
+        severity: 'error',
+        code: 'TEMPLATE_INVALID',
+        routeId: r.id,
+        path,
+        params: {
+          route: label,
+          field: target.label,
+          message: e instanceof TemplateError ? e.message : 'invalid template',
+        },
+      });
+      continue;
+    }
+    if (!src.variables) continue;
+    for (const v of vars)
+      if (!knownVariable(src, v, target.scope === 'line'))
+        out.push({
+          severity: 'error',
+          code: 'TEMPLATE_UNKNOWN_VARIABLE',
+          routeId: r.id,
+          path,
+          params: { route: label, field: target.label, variable: v },
+        });
   }
   return out;
 }

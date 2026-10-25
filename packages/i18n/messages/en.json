@@ -1210,7 +1210,8 @@
       "generic": "{system} rejected the record. Try again in a moment.",
       "rejected": "{system} rejected the data in the record: {message}",
       "dependency": "{system} needs {entity} first, and it could not be created.",
-      "expression": "The expression for the field {field} could not run."
+      "expression": "The expression for the field {field} could not run.",
+      "template": "The template for the field {field} could not be filled in."
     },
     "fix": {
       "openMapping": "Open the route’s mapping.",
@@ -1230,7 +1231,8 @@
       "accountNotFound": "Account {value} does not exist in {system}.",
       "rejected": "Rejected: the data needs fixing.",
       "dependency": "{entity} is missing.",
-      "expression": "Error in the expression for {field}."
+      "expression": "Error in the expression for {field}.",
+      "template": "Error in the template for {field}."
     },
     "summary": {
       "order": "{count, plural, one {# order could not be booked in {system}.} other {# orders could not be booked in {system}.}}",
@@ -1773,6 +1775,22 @@
       "ROUTE_IN_TEST": {
         "title": "{route} is in Test",
         "body": "The route writes nothing to {system} until you change its mode."
+      },
+      "ACCOUNT_VAT_MISMATCH": {
+        "title": "Account {value} has VAT code {vatCode}",
+        "body": "{field} on the route {route} expects VAT code {expected}. Check the account before going live."
+      },
+      "TEMPLATE_INVALID": {
+        "title": "The template for {field} is invalid",
+        "body": "Fix the template on the route {route}: {message}"
+      },
+      "TEMPLATE_UNKNOWN_VARIABLE": {
+        "title": "Unknown variable in {field}",
+        "body": "The variable {variable} does not exist in the source for the route {route}."
+      },
+      "TEMPLATE_UNKNOWN_FIELD": {
+        "title": "The field {field} cannot be filled in",
+        "body": "The destination on the route {route} has no field {field}."
       }
     },
     "testIntro": "A test run fetches the latest records from the source and shows what would happen. Nothing is written.",

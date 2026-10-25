@@ -13,6 +13,13 @@ export type RouteMode = (typeof ROUTE_MODES)[number];
 
 const entity = z.enum(ENTITIES);
 
+/** Stable setting keys (§4.5), e.g. "trigger.statuses"; never prototype keys. */
+const settingKey = z
+  .string()
+  .regex(/^[A-Za-z][\w]*(\.[A-Za-z][\w]*){0,7}$/)
+  .max(80)
+  .refine((k) => !k.split('.').some((p) => ['__proto__', 'constructor', 'prototype'].includes(p)));
+
 export const filterRuleSchema = z.object({
   field: z.enum(['total', 'status', 'country', 'customerKind']),
   op: z.enum(['gt', 'gte', 'lt', 'eq', 'neq']),
@@ -34,6 +41,19 @@ export const routeSchema = z.object({
   pausedAt: z.string().nullish(),
   /** Manifest route settings by stable key, e.g. "invoice.bookAutomatically". */
   settings: z.record(z.string(), z.union([z.string(), z.boolean(), z.number()])).default({}),
+  /** Source port options by stable key (PLAN §3.2), e.g. "trigger.statuses" → ["completed"]. */
+  sourceOptions: z
+    .record(
+      settingKey,
+      z.union([z.string().max(200), z.boolean(), z.number(), z.array(z.string().max(80)).max(50)]),
+    )
+    .default({}),
+  /** Generic mapping tables by key, e.g. payment method → deposit account (PLAN §5.4). */
+  tables: z
+    .record(settingKey, z.array(z.record(settingKey, z.string().max(120))).max(500))
+    .default({}),
+  /** Customer templates per destination target field, e.g. "invoice.description". */
+  templates: z.record(settingKey, z.string().max(500)).default({}),
   /** Guided mapping by stable key, e.g. "accounts.euB2b" → "1015". */
   mapping: z.record(z.string(), z.string().max(64)).default({}),
   /** Category → account rows (n+1 mapping, §4.5); product exceptions win. */
@@ -43,23 +63,14 @@ export const routeSchema = z.object({
         category: z.string().max(80),
         account: z.string().max(32),
         product: z.string().max(80).nullish(),
+        /** Goods or services: picks the EU and export accounts (PLAN F8). */
+        supplyType: z.enum(['goods', 'services']).nullish(),
       }),
     )
     .default([]),
   filters: z.array(filterRuleSchema).default([]),
   /** Developer mapping: JSONata expression per target field, e.g. "customer.name". */
-  expressions: z
-    .record(
-      z
-        .string()
-        .regex(/^[A-Za-z][\w]*(\.[A-Za-z][\w]*){0,7}$/)
-        .max(80)
-        .refine(
-          (k) => !k.split('.').some((p) => ['__proto__', 'constructor', 'prototype'].includes(p)),
-        ),
-      z.string().max(2000),
-    )
-    .default({}),
+  expressions: z.record(settingKey, z.string().max(2000)).default({}),
   /** Update existing records in the destination (matched via the cross-reference). */
   updateExisting: z.boolean().default(true),
 });
@@ -133,6 +144,9 @@ export function diffDefinitions(
       out.push({ routeId: r.id, kind: 'filters', before: p.filters, after: r.filters });
     if (
       JSON.stringify(p.settings) !== JSON.stringify(r.settings) ||
+      JSON.stringify(p.sourceOptions) !== JSON.stringify(r.sourceOptions) ||
+      JSON.stringify(p.tables) !== JSON.stringify(r.tables) ||
+      JSON.stringify(p.templates) !== JSON.stringify(r.templates) ||
       JSON.stringify(p.categoryAccounts) !== JSON.stringify(r.categoryAccounts) ||
       p.updateExisting !== r.updateExisting
     )

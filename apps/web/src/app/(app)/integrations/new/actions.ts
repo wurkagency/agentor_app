@@ -54,6 +54,9 @@ export async function createFromTemplate(
       filters: [],
       updateExisting: true,
       expressions: {},
+      sourceOptions: {},
+      tables: {},
+      templates: {},
     });
   const id = await createFlow(db(), await actorFor(ctx), {
     name: name.trim().slice(0, 120) || 'Nyt flow',

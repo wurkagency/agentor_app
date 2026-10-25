@@ -179,6 +179,9 @@ export async function createOnboardingFlow(input: unknown): Promise<ActionResult
       filters: [],
       updateExisting: true,
       expressions: {},
+      sourceOptions: {},
+      tables: {},
+      templates: {},
     });
   }
   const flowId =

@@ -1,5 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
-import type { WriteMode } from './manifest.js';
+import type { LookupId, WriteMode } from './manifest.js';
 import { manifestFor } from './manifests/index.js';
 import { ENTITIES, type Entity, type EntityRecord } from './model.js';
 import { CUSTOMERS, DINERO_ACCOUNTS, MOCK_ACCOUNTS, ORDERS, PRODUCTS } from './mock/fixtures.js';
@@ -27,6 +27,8 @@ export interface WriteResult {
 export interface LookupOption {
   value: string;
   label: string;
+  /** For accounts: the VAT code the account books with (Dinero `VatCode`, e.g. "U25"). */
+  vatCode?: string;
 }
 
 export interface FetchOptions {
@@ -46,6 +48,12 @@ export interface WriteOptions {
    * (manifest `dependencies`), e.g. `{ 'customer:c-901': '412', 'product:p-1': '88' }`.
    */
   refs?: Record<string, string>;
+  /**
+   * Target fields rendered from the route's templates (manifest `targets`), e.g.
+   * `{ 'invoice.description': 'Ordre 10447' }`. Line fields are per record line, in order.
+   */
+  fields?: Record<string, string>;
+  lineFields?: Record<string, string>[];
 }
 
 /** What a verified webhook says changed. */
@@ -62,7 +70,7 @@ export interface ConnectorAdapter {
   fetch<E extends Entity>(entity: E, opts: FetchOptions): Promise<EntityRecord[E][]>;
   /** One record by its source id; null when it no longer exists. */
   get<E extends Entity>(entity: E, sourceId: string): Promise<EntityRecord[E] | null>;
-  lookup(list: 'accounts' | 'vatCodes' | 'templates'): Promise<LookupOption[]>;
+  lookup(list: LookupId): Promise<LookupOption[]>;
   /**
    * How many records of an entity the account holds, for the entities in the manifest's `counts`;
    * null when the system cannot say. Optional: a live client adds it when its API supports it.
@@ -201,14 +209,15 @@ class MockAdapter implements ConnectorAdapter {
     return this.all(entity).length;
   }
 
-  async lookup(list: 'accounts' | 'vatCodes' | 'templates') {
+  async lookup(list: LookupId): Promise<LookupOption[]> {
     if (list === 'accounts') return DINERO_ACCOUNTS;
     if (list === 'vatCodes')
       return [
         { value: 'I25', label: 'Salgsmoms 25 %' },
         { value: 'IEUV', label: 'EU-salg af varer' },
       ];
-    return [{ value: 'standard', label: 'Standard' }];
+    if (list === 'templates') return [{ value: 'standard', label: 'Standard' }];
+    return [];
   }
 
   async write<E extends Entity>(

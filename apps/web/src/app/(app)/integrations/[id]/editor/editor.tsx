@@ -392,6 +392,9 @@ export function Editor(p: EditorProps) {
         filters: [],
         updateExisting: true,
         expressions: {},
+        sourceOptions: {},
+        tables: {},
+        templates: {},
       });
       setTimeout(() => {
         setSelected(id);

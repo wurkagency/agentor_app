@@ -87,6 +87,14 @@ export function explain(t: (k: string, p?: Record<string, string>) => string, e:
         short: t('short.expression', { field: p.field ?? '' }),
         mappingField: null,
       };
+    case 'TEMPLATE_ERROR':
+      return {
+        what,
+        why: t('why.template', { field: p.field ?? '' }),
+        steps: [t('fix.openMapping'), t('fix.publishRetry')],
+        short: t('short.template', { field: p.field ?? '' }),
+        mappingField: null,
+      };
     default:
       return {
         what,

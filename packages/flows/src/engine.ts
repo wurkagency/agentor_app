@@ -1,13 +1,19 @@
 import {
+  manifestFor,
   saleKind,
+  vatMismatch,
   WriteError,
   type ConnectorAdapter,
   type EntityRecord,
   type LookupOption,
   type Order,
+  type OrderLine,
+  type SaleKind,
+  type TargetField,
   type WriteMode,
 } from '@agentor/connectors';
 import type { FilterRule, FlowDefinition, Route } from './definition.js';
+import { renderTemplate, resolvePath, TemplateError } from './templates.js';
 
 /**
  * The engine's per-record decisions (produktspecifikation §4.1 steps 4–6): filter, map, write.
@@ -23,6 +29,12 @@ export interface PlannedLine {
   account: string | null;
   accountLabel: string | null;
   kind: 'line' | 'shipping';
+}
+
+/** Something worth a look that does not stop the record, e.g. foreign VAT on an EU sale. */
+export interface RecordWarning {
+  code: 'VAT_FOREIGN' | 'VAT_ON_REVERSE_CHARGE' | 'VAT_ON_EXPORT';
+  params: Record<string, string>;
 }
 
 export interface RecordResult {
@@ -46,7 +58,10 @@ export interface RecordResult {
     lines: PlannedLine[];
     total: number | null;
     vatFree: boolean;
+    /** Destination fields rendered from templates (PLAN §5.5). */
+    fields?: Record<string, string>;
   } | null;
+  warnings?: RecordWarning[];
   durationMs: number;
   /**
    * Why a failed record failed, which decides what happens next: `invalid` and `mapping` need
@@ -117,26 +132,41 @@ export function failedFilter(
   return first;
 }
 
-const accountKey = (o: Order, vatRate: number) => {
-  const kind = saleKind(o);
-  if (kind === 'euB2b') return 'accounts.euB2b';
-  if (kind === 'export') return 'accounts.export';
-  return vatRate === 0 ? 'accounts.vatFree' : 'accounts.domestic';
-};
+/**
+ * The mapping keys to try for a line, most specific first; the last one is the key reported
+ * when none is set. EU and export sales split goods and services (PLAN F8); EU sales to private
+ * customers are booked like domestic sales unless the route uses OSS (D3).
+ */
+function accountKeys(kind: SaleKind, vatRate: number, services: boolean, oss: boolean): string[] {
+  const local = vatRate === 0 ? 'accounts.vatFree' : 'accounts.domestic';
+  if (kind === 'euB2b')
+    return services ? ['accounts.euB2bServices', 'accounts.euB2b'] : ['accounts.euB2b'];
+  if (kind === 'export')
+    return services ? ['accounts.exportServices', 'accounts.export'] : ['accounts.export'];
+  if (kind === 'euB2c') return oss ? ['accounts.euB2c'] : ['accounts.euB2c', local];
+  return [local];
+}
 
 /**
  * Chooses the account for each order line (D3): product exception → category row → the
  * sale-type account (EU B2B, export, VAT-free, domestic). Shipping has its own accounts.
+ * Category rows apply to sales booked like domestic sales; abroad the sale type decides.
  */
 export function planInvoice(
   route: Route,
   o: Order,
   accounts: LookupOption[] | undefined,
-): { lines: PlannedLine[]; missing: { key: string; value: string | null } | null } {
+): {
+  lines: PlannedLine[];
+  missing: { key: string; value: string | null } | null;
+  warnings: RecordWarning[];
+} {
   const label = (v: string | null) =>
     v ? (accounts?.find((a) => a.value === v)?.label ?? null) : null;
   const kind = saleKind(o);
+  const oss = route.settings['oss.mode'] === 'destinationVat';
   const lines: PlannedLine[] = [];
+  const warnings: RecordWarning[] = [];
   let missing: { key: string; value: string | null } | null = null;
   const check = (key: string, value: string | null) => {
     if (missing) return;
@@ -145,16 +175,21 @@ export function planInvoice(
   };
   for (const l of o.lines) {
     const exception = route.categoryAccounts.find((r) => r.product && r.product === l.name);
-    const byCategory =
-      kind === 'domestic'
-        ? route.categoryAccounts.find((r) => !r.product && r.category === l.category)
-        : undefined;
-    const key = accountKey(o, l.vatRate);
-    const account =
-      kind === 'domestic'
-        ? (exception?.account ?? byCategory?.account ?? route.mapping[key] ?? null)
-        : (route.mapping[key] ?? null);
-    check(exception || byCategory ? 'mapping.categoryAccounts' : key, account);
+    const categoryRow = route.categoryAccounts.find((r) => !r.product && r.category === l.category);
+    const services =
+      (l.supplyType ?? exception?.supplyType ?? categoryRow?.supplyType) === 'services';
+    const keys = accountKeys(kind, l.vatRate, services, oss);
+    const key = keys.find((k) => route.mapping[k]) ?? keys[keys.length - 1]!;
+    const likeDomestic = key === 'accounts.domestic' || key === 'accounts.vatFree';
+    const byCategory = likeDomestic ? (exception ?? categoryRow) : undefined;
+    const account = byCategory?.account ?? route.mapping[key] ?? null;
+    check(byCategory ? 'mapping.categoryAccounts' : key, account);
+    const mismatch = vatMismatch(kind, l.vatRate);
+    if (mismatch)
+      warnings.push({
+        code: mismatch === 'FOREIGN_VAT' ? 'VAT_FOREIGN' : mismatch,
+        params: { line: l.name, rate: String(Math.round(l.vatRate * 1000) / 10), kind },
+      });
     lines.push({
       description: l.name,
       amount: l.unitPrice * l.quantity,
@@ -175,7 +210,45 @@ export function planInvoice(
       kind: 'shipping',
     });
   }
-  return { lines, missing };
+  return { lines, missing, warnings };
+}
+
+/**
+ * Renders the destination's target fields (manifest `targets`) from the route's templates or
+ * the manifest defaults. Templates read the record under its entity name (`order.number`) and
+ * the source connection (`connection.id`). An expression for the same key wins.
+ */
+export function renderTargets(
+  targets: TargetField[],
+  route: Route,
+  rec: EntityRecord[keyof EntityRecord],
+  connectionId: string,
+  shaped: unknown = rec,
+): { fields: Record<string, string>; lineFields: Record<string, string>[] } {
+  const ctx = { [route.entity]: rec, connection: { id: connectionId } };
+  const lines = (rec as { lines?: OrderLine[] }).lines ?? [];
+  const fields: Record<string, string> = {};
+  const lineFields: Record<string, string>[] = lines.map(() => ({}));
+  for (const t of targets) {
+    if (Object.hasOwn(route.expressions, t.key)) {
+      const v = resolvePath(shaped, t.key);
+      if (typeof v === 'string' || typeof v === 'number') fields[t.key] = String(v);
+      continue;
+    }
+    const src = t.editable === 'template' ? (route.templates[t.key] ?? t.default) : t.default;
+    if (src === undefined) continue;
+    const opts = { maxLength: t.maxLength };
+    try {
+      if (t.scope === 'record') fields[t.key] = renderTemplate(src, ctx, opts);
+      else
+        lines.forEach((line, i) => {
+          lineFields[i]![t.key] = renderTemplate(src, { ...ctx, line }, opts);
+        });
+    } catch (e) {
+      throw e instanceof TemplateError ? Object.assign(e, { field: t.key }) : e;
+    }
+  }
+  return { fields, lineFields };
 }
 
 function labelOf(entity: string, rec: EntityRecord[keyof EntityRecord]): string {
@@ -221,6 +294,11 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
   const now = input.now ?? (() => Date.now());
   const out: RecordResult[] = [];
   const dry = input.dryRun || route.mode === 'test';
+  const sourceConnection = input.def.nodes.find((n) => n.id === route.from)?.connectionId ?? '';
+  const targets =
+    manifestFor(destination.connectorId)?.inputs.find((p) => p.entity === route.targetEntity)
+      ?.targets ?? [];
+  const statuses = route.sourceOptions['trigger.statuses'];
   for (const rec of input.records) {
     const started = now();
     const base = {
@@ -245,6 +323,27 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
       out.push({ ...base, outcome: 'skipped', skipReason: `trigger:${trigger}`, durationMs: 0 });
       continue;
     }
+    // Source options (PLAN §4.3): which order statuses to send; empty means all.
+    if (route.entity === 'order' && Array.isArray(statuses) && statuses.length) {
+      const o = rec as Order;
+      if (!statuses.includes(o.status) && !(o.sourceStatus && statuses.includes(o.sourceStatus))) {
+        out.push({
+          ...base,
+          outcome: 'skipped',
+          skipReason: `status:${o.sourceStatus ?? o.status}`,
+          durationMs: 0,
+        });
+        continue;
+      }
+    }
+    if (
+      route.entity === 'order' &&
+      route.sourceOptions.skipZeroTotal === true &&
+      (rec as Order).total === 0
+    ) {
+      out.push({ ...base, outcome: 'skipped', skipReason: 'zeroTotal', durationMs: 0 });
+      continue;
+    }
     const rule = failedFilter(route, rec);
     if (rule) {
       out.push({
@@ -256,6 +355,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
       continue;
     }
     let preview: RecordResult['preview'] = null;
+    let warnings: RecordWarning[] = [];
     if (route.entity === 'order' && route.targetEntity === 'order') {
       const o = rec as Order;
       const plan = planInvoice(route, o, input.accounts);
@@ -268,6 +368,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         total: o.total,
         vatFree: saleKind(o) === 'euB2b' || saleKind(o) === 'export',
       };
+      warnings = plan.warnings;
       if (plan.missing) {
         out.push({
           ...base,
@@ -303,6 +404,29 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         continue;
       }
     }
+    // Destination fields from templates (PLAN §5.5), after expressions so they can override.
+    let rendered: ReturnType<typeof renderTargets> | null = null;
+    if (targets.length) {
+      try {
+        rendered = renderTargets(targets, route, rec, sourceConnection, shaped);
+        if (preview) preview.fields = rendered.fields;
+      } catch (e) {
+        out.push({
+          ...base,
+          preview,
+          outcome: 'failed',
+          errorCode: 'TEMPLATE_ERROR',
+          errorParams: {
+            field: (e as { field?: string }).field ?? '',
+            message: e instanceof Error ? e.message.slice(0, 200) : 'invalid template',
+          },
+          durationMs: now() - started,
+          failure: 'mapping',
+        });
+        continue;
+      }
+    }
+    const withWarnings = warnings.length ? { warnings } : {};
     const existing = input.existingId(base.sourceId);
     if (existing && !route.updateExisting) {
       out.push({ ...base, preview, outcome: 'skipped', skipReason: 'exists', durationMs: 0 });
@@ -331,6 +455,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         mode: dry ? 'dry_run' : MODE[route.mode],
         existingId: existing,
         ...(refs ? { refs } : {}),
+        ...(rendered ? { fields: rendered.fields, lineFields: rendered.lineFields } : {}),
       });
       out.push({
         ...base,
@@ -346,6 +471,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
               : 'created',
         destinationId: res.destinationId,
         durationMs: now() - started,
+        ...withWarnings,
       });
     } catch (e) {
       const kind = e instanceof WriteError ? e.kind : 'transient';

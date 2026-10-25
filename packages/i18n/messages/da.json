@@ -1210,7 +1210,8 @@
       "generic": "{system} afviste recordet. Prøv igen om lidt.",
       "rejected": "{system} afviste data i recordet: {message}",
       "dependency": "{system} skal have {entity} først, og den kunne ikke oprettes.",
-      "expression": "Udtrykket for feltet {field} kunne ikke køres."
+      "expression": "Udtrykket for feltet {field} kunne ikke køres.",
+      "template": "Skabelonen for feltet {field} kunne ikke udfyldes."
     },
     "fix": {
       "openMapping": "Åbn mappingen for ruten.",
@@ -1230,7 +1231,8 @@
       "accountNotFound": "Konto {value} findes ikke i {system}.",
       "rejected": "Afvist: data skal rettes.",
       "dependency": "{entity} mangler.",
-      "expression": "Fejl i udtryk for {field}."
+      "expression": "Fejl i udtryk for {field}.",
+      "template": "Fejl i skabelon for {field}."
     },
     "summary": {
       "order": "{count, plural, one {# ordre kunne ikke bogføres i {system}.} other {# ordrer kunne ikke bogføres i {system}.}}",
@@ -1773,6 +1775,22 @@
       "ROUTE_IN_TEST": {
         "title": "{route} er i Test",
         "body": "Ruten skriver intet til {system}, før du skifter tilstand."
+      },
+      "ACCOUNT_VAT_MISMATCH": {
+        "title": "Konto {value} har momskode {vatCode}",
+        "body": "{field} på ruten {route} forventer momskode {expected}. Tjek kontoen, før du går live."
+      },
+      "TEMPLATE_INVALID": {
+        "title": "Skabelonen for {field} er ugyldig",
+        "body": "Ret skabelonen på ruten {route}: {message}"
+      },
+      "TEMPLATE_UNKNOWN_VARIABLE": {
+        "title": "Ukendt variabel i {field}",
+        "body": "Variablen {variable} findes ikke i kilden for ruten {route}."
+      },
+      "TEMPLATE_UNKNOWN_FIELD": {
+        "title": "Feltet {field} kan ikke udfyldes",
+        "body": "Destinationen på ruten {route} har ikke feltet {field}."
       }
     },
     "testIntro": "Testkør henter de seneste poster fra kilden og viser, hvad der ville ske. Der skrives intet.",
