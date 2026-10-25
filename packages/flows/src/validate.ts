@@ -1,4 +1,5 @@
 import {
+  expandPort,
   manifestFor,
   settingValue,
   type ConnectorManifest,
@@ -184,7 +185,16 @@ export function validateDefinition(def: FlowDefinition, ctx: ValidationContext):
         });
     }
 
-    out.push(...templateFindings(r, label, outPort, inPort));
+    // The customer's own fields (Odoo custom fields) count as variables and targets too.
+    const srcLookups = from.node ? ctx.lookups[from.node.connectionId] : undefined;
+    out.push(
+      ...templateFindings(
+        r,
+        label,
+        expandPort(outPort, srcLookups) ?? outPort,
+        expandPort(inPort, lookups) ?? inPort,
+      ),
+    );
 
     if (r.mode === 'test' && !r.paused)
       out.push({

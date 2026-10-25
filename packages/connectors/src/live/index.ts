@@ -39,4 +39,5 @@ export function openAdapter(ctx: LiveContext): ConnectorAdapter {
 export * from './dinero.js';
 export * from './http.js';
 export * from './odoo.js';
+export * from './odoo-write.js';
 export * from './woocommerce.js';

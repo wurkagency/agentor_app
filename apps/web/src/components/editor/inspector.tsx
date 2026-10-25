@@ -1,5 +1,6 @@
 'use client';
 
+import { expandPort } from '@agentor/connectors';
 import type { Status } from '@agentor/core';
 import type { FilterRule, Finding, FlowDefinition, Route, RouteMode } from '@agentor/flows';
 import {
@@ -93,8 +94,15 @@ export function Inspector(p: InspectorProps) {
   const destLookups: LookupMap = (destNode && p.lookups[destNode.connectionId]) || {};
   const srcLookups: LookupMap = (srcNode && p.lookups[srcNode.connectionId]) || {};
   const accounts = destLookups.accounts;
-  const inPort = dst?.inputs.find((x) => x.entity === r.targetEntity);
-  const outPort = src?.outputs.find((x) => x.entity === r.entity);
+  // With the customer's own fields from the systems (Odoo custom fields, PLAN-…-ODOO16 §3.1).
+  const inPort = expandPort(
+    dst?.inputs.find((x) => x.entity === r.targetEntity),
+    destLookups,
+  );
+  const outPort = expandPort(
+    src?.outputs.find((x) => x.entity === r.entity),
+    srcLookups,
+  );
   const sourceOptions = outPort?.options ?? [];
   const modes: RouteMode[] = (['test', 'draft', 'live'] as RouteMode[]).filter(
     (m) => m === 'test' || inPort?.modes?.includes(m) || (!inPort?.modes && m === 'live'),

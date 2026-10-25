@@ -164,6 +164,12 @@ export interface Stock {
   raw?: unknown;
 }
 
+/** Which connection and source record an ERP document was created from. */
+export interface OrderSource {
+  connectionId: string;
+  sourceId: string;
+}
+
 /**
  * A delivery that left the warehouse (PLAN-INTEGRATIONS-WOO-ODOO16 §3.4), e.g. an Odoo
  * `stock.picking` that is done. `orderRef` is the shop's order number as the ERP knows it.
@@ -173,6 +179,8 @@ export interface Shipment {
   /** The ERP's delivery number, e.g. "WH/OUT/00042". */
   number: string;
   orderRef: string | null;
+  /** The shop order this came from, when Agentor created the ERP order (its external id). */
+  orderSource?: OrderSource | null;
   state: 'done' | 'cancelled';
   doneAt: string | null;
   carrier: string | null;
@@ -192,6 +200,7 @@ export interface InvoiceStatus {
   /** The ERP's document number; null while it is a draft. */
   number: string | null;
   orderRef: string | null;
+  orderSource?: OrderSource | null;
   state: 'draft' | 'posted' | 'cancelled';
   paymentState: 'notPaid' | 'partial' | 'inPayment' | 'paid' | 'reversed';
   currency: string;

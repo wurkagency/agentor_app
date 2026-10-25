@@ -19,10 +19,13 @@ import type {
   Customer,
   Entity,
   EntityRecord,
+  InvoiceStatus,
   Order,
   OrderLine,
+  OrderSource,
   Party,
   Product,
+  Shipment,
   Stock,
   VatLine,
 } from '../model.js';
@@ -489,7 +492,11 @@ export function normaliseRefund(
     total: amount,
     reason: r.reason?.trim() || null,
     refundsPayment: r.refunded_payment ?? false,
-    meta: { ...parent.meta, orderNumber: parent.number },
+    meta: {
+      ...parent.meta,
+      orderNumber: parent.number,
+      ...(parent.paymentMethod ? { paymentMethod: parent.paymentMethod.id } : {}),
+    },
     raw: rawOf(r, s),
   };
 }
@@ -923,6 +930,8 @@ export class WooAdapter implements ConnectorAdapter {
     record: EntityRecord[E],
     opts: WriteOptions,
   ): Promise<WriteResult> {
+    if (entity === 'shipment') return this.writeShipment(record as Shipment, opts);
+    if (entity === 'invoiceStatus') return this.writeInvoiceStatus(record as InvoiceStatus, opts);
     if (entity !== 'stock')
       throw new WriteError(`WooCommerce does not receive ${entity}`, 'invalid');
     const s = record as Stock;
@@ -960,6 +969,82 @@ export class WooAdapter implements ConnectorAdapter {
   }
 
   /** An internal note on the order, e.g. "Bogført i Dinero som faktura 1042" (PLAN §4.6). */
+  /**
+   * The shop order an ERP document belongs to (PLAN-INTEGRATIONS-WOO-ODOO16 §5.5): the order
+   * Agentor created it from when the external id names this connection, else the order number.
+   */
+  private async orderFor(src: OrderSource | null | undefined, ref: string | null): Promise<string> {
+    if (src && (!this.ctx.connectionId || src.connectionId === this.ctx.connectionId))
+      return src.sourceId;
+    if (ref) {
+      const { data } = await this.client.request<WooOrder[]>('GET', '/orders', {
+        query: { search: ref, per_page: 10, status: 'any' },
+      });
+      const hit = (data ?? []).find((o) => String(o.number) === ref || String(o.id) === ref);
+      if (hit) return String(hit.id);
+    }
+    throw new WriteError(`order ${ref ?? '(unknown)'} is not in the shop`, 'invalid');
+  }
+
+  /** A delivery done in the ERP: status and a note with tracking (PLAN-INTEGRATIONS-WOO-ODOO16 §5.5). */
+  private async writeShipment(sh: Shipment, opts: WriteOptions): Promise<WriteResult> {
+    if (sh.state !== 'done') return { action: 'skip', destinationId: null };
+    const settings = opts.route?.settings ?? {};
+    try {
+      const orderId = await this.orderFor(sh.orderSource, sh.orderRef);
+      if (opts.mode === 'dry_run') return { action: 'update', destinationId: null };
+      const note = opts.fields?.['note.text'];
+      if (note) await this.addOrderNote(orderId, note, settings['shipment.customerNote'] !== false);
+      const status =
+        typeof settings['shipment.status'] === 'string' ? settings['shipment.status'] : 'completed';
+      if (status) await this.setOrderStatus(orderId, status);
+      return { action: 'update', destinationId: `${orderId}:shipment:${sh.sourceId}` };
+    } catch (e) {
+      throw toWriteError(e);
+    }
+  }
+
+  /**
+   * Invoice status from the ERP as an order note, and optionally a status (§5.5). Each event is
+   * written once: the ones already done are kept in the cross-reference id.
+   */
+  private async writeInvoiceStatus(inv: InvoiceStatus, opts: WriteOptions): Promise<WriteResult> {
+    const settings = opts.route?.settings ?? {};
+    const wanted = Array.isArray(settings['invoice.events'])
+      ? (settings['invoice.events'] as string[])
+      : ['paid'];
+    const event =
+      inv.kind === 'creditNote'
+        ? inv.state === 'posted'
+          ? 'creditNote'
+          : null
+        : inv.state === 'cancelled'
+          ? 'cancelled'
+          : inv.state === 'posted' &&
+              (inv.paymentState === 'paid' || inv.paymentState === 'inPayment')
+            ? 'paid'
+            : inv.state === 'posted'
+              ? 'posted'
+              : null;
+    const done = (opts.existingId ?? '').split(':').slice(3);
+    if (!event || !wanted.includes(event) || done.includes(event))
+      return { action: 'skip', destinationId: opts.existingId ?? null };
+    try {
+      const orderId = await this.orderFor(inv.orderSource, inv.orderRef);
+      if (opts.mode === 'dry_run') return { action: 'update', destinationId: null };
+      const note = opts.fields?.[`note.${event}`];
+      if (note) await this.addOrderNote(orderId, note, false);
+      const status = event === 'paid' ? settings['invoice.statusOnPaid'] : null;
+      if (typeof status === 'string' && status) await this.setOrderStatus(orderId, status);
+      return {
+        action: 'update',
+        destinationId: [orderId, 'invoice', inv.sourceId, ...done, event].join(':'),
+      };
+    } catch (e) {
+      throw toWriteError(e);
+    }
+  }
+
   async addOrderNote(orderId: string, note: string, customerNote = false): Promise<void> {
     try {
       await this.client.request('POST', `/orders/${encodeURIComponent(orderId)}/notes`, {

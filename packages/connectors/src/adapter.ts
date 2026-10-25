@@ -22,6 +22,11 @@ export interface WriteResult {
   action: 'create' | 'update' | 'skip';
   /** The record's id in the destination; null for dry runs. */
   destinationId: string | null;
+  /**
+   * Things worth a look that did not stop the write, e.g. Odoo's tax rate differs from the
+   * shop's, or a payment could not be registered. Shown with the record (RecordWarning codes).
+   */
+  warnings?: { code: string; params: Record<string, string> }[];
 }
 
 export interface LookupOption {

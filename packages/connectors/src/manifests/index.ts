@@ -106,7 +106,7 @@ const WOO_ORDER_OPTIONS: SettingField[] = [
 export const woocommerce: ConnectorManifest = {
   id: 'woocommerce',
   name: 'WooCommerce',
-  version: '1.1.0',
+  version: '1.2.0',
   category: 'webshop',
   logo: '/logos/woocommerce.svg',
   auth: {
@@ -186,12 +186,121 @@ export const woocommerce: ConnectorManifest = {
     },
     { entity: 'product', label: 'Produkter', trigger: { kind: 'poll', minMinutes: 5 } },
   ],
-  inputs: [{ entity: 'stock', label: 'Lager', modes: ['dry_run', 'live'] }],
+  inputs: [
+    { entity: 'stock', label: 'Lager', modes: ['dry_run', 'live'] },
+    {
+      entity: 'shipment',
+      label: 'Afsendelser',
+      modes: ['dry_run', 'live'],
+      targets: [
+        {
+          key: 'note.text',
+          label: 'Ordrenote',
+          scope: 'record',
+          required: false,
+          default:
+            'Ordren er sendt med {shipment.carrier|default:"fragt"}. Trackingnummer: {shipment.trackingRef|default:"-"}',
+          editable: 'template',
+        },
+      ],
+    },
+    {
+      entity: 'invoiceStatus',
+      label: 'Fakturastatus',
+      modes: ['dry_run', 'live'],
+      targets: [
+        {
+          key: 'note.paid',
+          label: 'Note når fakturaen er betalt',
+          scope: 'record',
+          required: false,
+          default: 'Faktura {invoiceStatus.number} er betalt.',
+          editable: 'template',
+        },
+        {
+          key: 'note.posted',
+          label: 'Note når fakturaen er bogført',
+          scope: 'record',
+          required: false,
+          default: 'Faktura {invoiceStatus.number} er bogført.',
+          editable: 'template',
+        },
+        {
+          key: 'note.cancelled',
+          label: 'Note når fakturaen er annulleret',
+          scope: 'record',
+          required: false,
+          default: 'Fakturaen er annulleret i regnskabet.',
+          editable: 'template',
+        },
+        {
+          key: 'note.creditNote',
+          label: 'Note når der er lavet en kreditnota',
+          scope: 'record',
+          required: false,
+          default: 'Kreditnota {invoiceStatus.number} er bogført.',
+          editable: 'template',
+        },
+      ],
+    },
+  ],
+  routeSettings: {
+    shipment: [
+      {
+        key: 'shipment.status',
+        label: 'Ordrestatus når ordren er afsendt',
+        type: 'select',
+        default: 'completed',
+        options: [
+          { value: 'completed', label: 'Gennemført' },
+          { value: '', label: 'Uændret' },
+        ],
+        help: 'WooCommerce sender sin egen e-mail, når status skifter, hvis den er slået til.',
+      },
+      {
+        key: 'shipment.customerNote',
+        label: 'Vis noten for kunden',
+        type: 'boolean',
+        default: true,
+        help: 'Kunden får noten på e-mail fra WooCommerce.',
+      },
+    ],
+    invoiceStatus: [
+      {
+        key: 'invoice.events',
+        label: 'Skriv en note, når fakturaen',
+        type: 'multiselect',
+        default: ['paid'],
+        options: [
+          { value: 'posted', label: 'er bogført' },
+          { value: 'paid', label: 'er betalt' },
+          { value: 'cancelled', label: 'er annulleret' },
+          { value: 'creditNote', label: 'er krediteret' },
+        ],
+      },
+      {
+        key: 'invoice.statusOnPaid',
+        label: 'Ordrestatus når fakturaen er betalt',
+        type: 'select',
+        default: '',
+        options: [
+          { value: '', label: 'Uændret' },
+          { value: 'completed', label: 'Gennemført' },
+          { value: 'processing', label: 'Behandles' },
+        ],
+      },
+    ],
+  },
   counts: ['order', 'customer', 'product'],
   lookups: ['orderStatuses', 'paymentGateways', 'shippingMethods', 'categories'],
   rateLimit: { perMinute: 120 },
   webhook: { signatureHeader: 'x-wc-webhook-signature', scheme: 'hmac-sha256-base64' },
   changelog: [
+    {
+      version: '1.2.0',
+      kind: 'additive',
+      note: 'Afsendelser og fakturastatus fra regnskabet som ordrenoter og status.',
+    },
     {
       version: '1.1.0',
       kind: 'additive',
@@ -719,14 +828,494 @@ const ODOO_INVOICE_STATUS_VARIABLES: VariableDef[] = [
   v('invoiceStatus.dueDate', 'Forfaldsdato', 'date'),
 ];
 
+const opt = (value: string, label: string) => ({ value, label });
+
+const t = (
+  key: string,
+  label: string,
+  defaultTemplate: string | undefined,
+  editable: TargetField['editable'] = 'template',
+  extra: Partial<TargetField> = {},
+): TargetField => ({
+  key,
+  label,
+  scope: 'record',
+  required: false,
+  ...(defaultTemplate !== undefined ? { default: defaultTemplate } : {}),
+  editable,
+  ...extra,
+});
+
+/** How contacts are found and kept up to date in Odoo (PLAN-INTEGRATIONS-WOO-ODOO16 §4.3). */
+const ODOO_CONTACT_SETTINGS: SettingField[] = [
+  {
+    key: 'contact.match',
+    label: 'Find kunden i Odoo på',
+    type: 'select',
+    default: 'email',
+    options: [
+      opt('email', 'E-mail'),
+      opt('vat', 'Momsnummer'),
+      opt('ref', 'Kundens reference'),
+      opt('none', 'Brug én fælles kunde'),
+    ],
+  },
+  {
+    key: 'contact.shared',
+    label: 'Fælles kunde',
+    type: 'select',
+    default: '',
+    lookup: 'relation:res.partner',
+    showIf: { key: 'contact.match', equals: 'none' },
+  },
+  {
+    key: 'contact.update',
+    label: 'Opdater på kunder, der findes',
+    type: 'multiselect',
+    default: ['name', 'street', 'zip', 'city', 'country', 'phone', 'email'],
+    options: [
+      opt('name', 'Navn'),
+      opt('street', 'Adresse'),
+      opt('zip', 'Postnummer'),
+      opt('city', 'By'),
+      opt('country', 'Land'),
+      opt('phone', 'Telefon'),
+      opt('email', 'E-mail'),
+      opt('vat', 'Momsnummer'),
+    ],
+    help: 'Odoo kontrollerer momsnumre, så de opdateres kun, hvis du vælger det.',
+  },
+  {
+    key: 'contact.shippingAddress',
+    label: 'Leveringsadresse',
+    type: 'select',
+    default: 'childDelivery',
+    options: [
+      opt('childDelivery', 'Som leveringsadresse under kunden'),
+      opt('none', 'Brug kundens adresse'),
+    ],
+    level: 'advanced',
+  },
+];
+
+const ODOO_TAX_SETTINGS: SettingField[] = [
+  {
+    key: 'tax.strategy',
+    label: 'Moms på linjerne',
+    type: 'select',
+    default: 'shopTax',
+    options: [
+      opt('shopTax', 'Den moms, butikken opkrævede (anbefalet)'),
+      opt('odoo', 'Lad Odoo vælge ud fra varer og skatteregler'),
+    ],
+  },
+  {
+    key: 'tax.verify',
+    label: 'Når Odoos moms ikke passer med butikkens',
+    type: 'select',
+    default: 'warn',
+    options: [opt('warn', 'Advar'), opt('fail', 'Stop posten'), opt('off', 'Ignorer')],
+    level: 'advanced',
+  },
+  {
+    key: 'oss.mode',
+    label: 'EU-salg til private',
+    type: 'select',
+    default: 'danishVat',
+    options: [
+      opt('danishVat', 'Dansk moms (under grænsen)'),
+      opt('destinationVat', 'Købers lands moms (OSS)'),
+    ],
+  },
+];
+
+const ODOO_PRODUCT_SETTINGS: SettingField[] = [
+  {
+    key: 'products.match',
+    label: 'Find varen i Odoo på',
+    type: 'select',
+    default: 'sku',
+    options: [
+      opt('sku', 'Varenummer (intern reference)'),
+      opt('barcode', 'Stregkode (EAN)'),
+      opt('none', 'Brug altid standardvaren'),
+    ],
+  },
+  {
+    key: 'products.missing',
+    label: 'Når varen ikke findes i Odoo',
+    type: 'select',
+    default: 'useGeneric',
+    options: [
+      opt('useGeneric', 'Brug standardvaren'),
+      opt('create', 'Opret varen'),
+      opt('fail', 'Stop posten'),
+    ],
+  },
+  {
+    key: 'products.genericId',
+    label: 'Standardvare',
+    type: 'select',
+    default: '',
+    lookup: 'relation:product.product',
+  },
+  {
+    key: 'products.type',
+    label: 'Varetype for nye varer',
+    type: 'select',
+    default: 'consu',
+    options: [
+      opt('consu', 'Forbrugsvare'),
+      opt('product', 'Lagerført vare'),
+      opt('service', 'Ydelse'),
+    ],
+    level: 'advanced',
+  },
+  {
+    key: 'fees.productId',
+    label: 'Vare til gebyrer',
+    type: 'select',
+    default: '',
+    lookup: 'relation:product.product',
+    level: 'advanced',
+  },
+];
+
+const ODOO_PAYMENT_SETTINGS: SettingField[] = [
+  {
+    key: 'payment.register',
+    label: 'Registrer betaling på betalte ordrer',
+    type: 'boolean',
+    default: true,
+  },
+  {
+    key: 'payment.journalId',
+    label: 'Journal til betalinger uden egen række',
+    type: 'select',
+    default: '',
+    lookup: 'journals',
+  },
+  {
+    key: 'payment.differenceHandling',
+    label: 'Små differencer på betalingen',
+    type: 'select',
+    default: 'open',
+    options: [opt('open', 'Lad stå åbent'), opt('reconcile', 'Afskriv')],
+    level: 'advanced',
+  },
+];
+
+/** What the Odoo writer honours on orders (§4.3). */
+const ODOO_ORDER_SETTINGS: SettingField[] = [
+  {
+    key: 'posting.type',
+    label: 'Opret i Odoo som',
+    type: 'select',
+    default: 'saleOrderAndInvoice',
+    options: [
+      opt('saleOrderAndInvoice', 'Salgsordre og faktura'),
+      opt('saleOrder', 'Kun salgsordre'),
+      opt('invoice', 'Kun faktura'),
+    ],
+  },
+  {
+    key: 'order.confirm',
+    label: 'Bekræft salgsordren',
+    type: 'boolean',
+    default: true,
+    help: 'Kun i Live. I Kladde bliver ordren et tilbud.',
+  },
+  {
+    key: 'order.invoiceWhen',
+    label: 'Opret fakturaen',
+    type: 'select',
+    default: 'onPaid',
+    options: [
+      opt('onPaid', 'Når ordren er betalt'),
+      opt('onConfirm', 'Når ordren er bekræftet'),
+      opt('onDelivered', 'Når varerne er leveret i Odoo'),
+      opt('never', 'Aldrig (fakturer i Odoo)'),
+    ],
+    showIf: { key: 'posting.type', equals: 'saleOrderAndInvoice' },
+  },
+  { key: 'invoice.post', label: 'Bogfør fakturaen', type: 'boolean', default: false },
+  {
+    key: 'invoice.updateDrafts',
+    label: 'Opdater kladder og tilbud, når ordren ændres',
+    type: 'boolean',
+    default: true,
+  },
+  {
+    key: 'invoice.journalId',
+    label: 'Salgsjournal',
+    type: 'select',
+    default: '',
+    lookup: 'journals',
+    showIf: { key: 'posting.type', equals: 'invoice' },
+  },
+  {
+    key: 'invoice.date',
+    label: 'Fakturadato',
+    type: 'select',
+    default: 'paid',
+    options: [opt('paid', 'Betalingsdato'), opt('order', 'Ordredato'), opt('today', 'Dagens dato')],
+    level: 'advanced',
+  },
+  {
+    key: 'invoice.lockedPeriod',
+    label: 'Dato i en låst periode',
+    type: 'select',
+    default: 'moveToToday',
+    options: [opt('moveToToday', 'Brug dagens dato'), opt('fail', 'Stop posten')],
+    level: 'advanced',
+  },
+  {
+    key: 'currency',
+    label: 'Valuta',
+    type: 'select',
+    default: 'order',
+    options: [opt('order', 'Ordrens valuta'), opt('company', 'Firmaets valuta')],
+    level: 'advanced',
+  },
+  ...ODOO_TAX_SETTINGS,
+  {
+    key: 'rounding.policy',
+    label: 'Øreafrunding',
+    type: 'select',
+    default: 'line',
+    options: [
+      opt('line', 'Afrundingslinje'),
+      opt('ignoreBelow', 'Accepter forskellen'),
+      opt('fail', 'Stop posten'),
+    ],
+  },
+  {
+    key: 'rounding.productId',
+    label: 'Vare til øreafrunding',
+    type: 'select',
+    default: '',
+    lookup: 'relation:product.product',
+    showIf: { key: 'rounding.policy', equals: 'line' },
+  },
+  {
+    key: 'rounding.maxDiff',
+    label: 'Største afrunding (kr.)',
+    type: 'number',
+    default: 1,
+    level: 'advanced',
+  },
+  ...ODOO_PRODUCT_SETTINGS,
+  {
+    key: 'shipping.productId',
+    label: 'Vare til fragt',
+    type: 'select',
+    default: '',
+    lookup: 'relation:product.product',
+  },
+  {
+    key: 'warehouseId',
+    label: 'Lager der leverer',
+    type: 'select',
+    default: '',
+    lookup: 'warehouses',
+  },
+  {
+    key: 'pricelistId',
+    label: 'Prisliste',
+    type: 'select',
+    default: '',
+    lookup: 'pricelists',
+    level: 'advanced',
+  },
+  ...ODOO_PAYMENT_SETTINGS,
+  { key: 'send.email', label: 'Send fakturaen på e-mail', type: 'boolean', default: false },
+  {
+    key: 'cancel.quotation',
+    label: 'Annulleret ordre med tilbud i Odoo',
+    type: 'select',
+    default: 'cancel',
+    options: [opt('cancel', 'Annuller tilbuddet'), opt('keep', 'Behold det')],
+    level: 'advanced',
+  },
+  {
+    key: 'cancel.confirmed',
+    label: 'Annulleret ordre, der er bekræftet men ikke faktureret',
+    type: 'select',
+    default: 'cancel',
+    options: [opt('cancel', 'Annuller salgsordren'), opt('warn', 'Advar kun')],
+    level: 'advanced',
+  },
+  ...ODOO_CONTACT_SETTINGS,
+];
+
+const ODOO_CREDIT_NOTE_SETTINGS: SettingField[] = [
+  {
+    key: 'creditNote.mode',
+    label: 'Kreditnota',
+    type: 'select',
+    default: 'standalone',
+    options: [
+      opt('standalone', 'Med de refunderede linjer'),
+      opt('reversal', 'Tilbagefør hele fakturaen ved fuld refusion'),
+    ],
+  },
+  { key: 'creditNote.post', label: 'Bogfør kreditnotaen', type: 'boolean', default: false },
+  {
+    key: 'creditNote.registerRefund',
+    label: 'Registrer udbetalingen, når butikken har refunderet',
+    type: 'boolean',
+    default: false,
+  },
+  ...ODOO_TAX_SETTINGS,
+  ...ODOO_PRODUCT_SETTINGS,
+  ODOO_PAYMENT_SETTINGS[1]!,
+];
+
+const ODOO_PRODUCT_WRITE_SETTINGS: SettingField[] = [
+  { key: 'product.create', label: 'Opret nye varer', type: 'boolean', default: true },
+  { key: 'product.update', label: 'Opdater varer, der findes', type: 'boolean', default: true },
+  ODOO_PRODUCT_SETTINGS[3]!,
+];
+
+const taxField = (
+  key: string,
+  label: string,
+  extra: Partial<MappingGroup['fields'][number]> = {},
+): MappingGroup['fields'][number] => ({ key, label, required: false, lookup: 'taxes', ...extra });
+
+/** The Odoo tax per sale type, when the route books the shop's VAT (tax.strategy shopTax, O8). */
+const ODOO_TAX_GROUP: MappingGroup = {
+  key: 'taxes',
+  title: 'Moms',
+  description: 'Hvilken moms i Odoo linjerne får. Kontoen kommer fra varen i Odoo.',
+  fields: [
+    taxField('tax.domestic', 'Salg med dansk moms', {
+      requiredIf: { setting: 'tax.strategy', equals: 'shopTax' },
+    }),
+    taxField('tax.vatFree', 'Momsfrit salg'),
+    taxField('tax.euB2b', 'EU B2B-salg af varer'),
+    taxField('tax.euB2bServices', 'EU B2B-salg af ydelser'),
+    taxField('tax.export', 'Salg af varer uden for EU'),
+    taxField('tax.exportServices', 'Salg af ydelser uden for EU'),
+    taxField('tax.euB2c', 'EU-salg til private (OSS)', {
+      requiredIf: { setting: 'oss.mode', equals: 'destinationVat' },
+    }),
+  ],
+};
+
+const FISCAL_LABELS = {
+  domestic: 'Danmark',
+  euB2b: 'EU B2B',
+  euB2c: 'EU-private',
+  export: 'Uden for EU',
+} as const;
+
+/** Fiscal position per sale type, used when Odoo chooses the taxes (tax.strategy odoo). */
+const ODOO_FISCAL_GROUP: MappingGroup = {
+  key: 'fiscal',
+  title: 'Skatteregler',
+  description: 'Bruges, når Odoo vælger momsen. Tomt: Odoo finder selv reglen ud fra kunden.',
+  fields: Object.entries(FISCAL_LABELS).map(([k, label]) => ({
+    key: `fiscal.${k}`,
+    label,
+    required: false,
+    lookup: 'fiscalPositions' as const,
+  })),
+};
+
+/** Payment method → Odoo journal (§4.4 table 1). */
+const ODOO_PAYMENT_METHODS: MappingTable = {
+  key: 'paymentMethods',
+  title: 'Betalingsmetoder',
+  description: 'Hvilken journal betalingen registreres i i Odoo.',
+  from: { lookup: 'paymentGateways', label: 'Betalingsmetode' },
+  to: [{ key: 'journal', label: 'Journal', lookup: 'journals' }],
+};
+
+const ODOO_LINE_NAME: TargetField = {
+  key: 'line.name',
+  label: 'Linjetekst',
+  scope: 'line',
+  required: true,
+  default: '{line.name}',
+  editable: 'template',
+};
+
+/** What Odoo writes that templates fill (§4.5). External ids are the idempotency key (O7). */
+const ODOO_ORDER_TARGETS: TargetField[] = [
+  t('order.externalId', 'Ekstern id', 'woo_{connection.id}_order_{order.sourceId}', 'expression', {
+    required: true,
+  }),
+  t('order.clientRef', 'Kundens reference', '{order.number}'),
+  t('order.origin', 'Kildedokument', 'WooCommerce {order.number}'),
+  t('order.note', 'Vilkår og bemærkning', '{order.note}'),
+  t('invoice.ref', 'Fakturaens reference', '{order.number}'),
+  t('invoice.paymentReference', 'Betalingsreference', '{order.number}'),
+  t('invoice.narration', 'Fakturatekst', undefined),
+  t('payment.memo', 'Betalingens tekst', '{order.paymentMethod.title} {order.transactionId}'),
+  t(
+    'partner.externalId',
+    'Kundens eksterne id',
+    'woo_{connection.id}_customer_{order.customer.sourceId}',
+    'expression',
+  ),
+  t('partner.name', 'Kundens navn', undefined),
+  ODOO_LINE_NAME,
+];
+
+const ODOO_CREDIT_NOTE_TARGETS: TargetField[] = [
+  t(
+    'creditNote.externalId',
+    'Ekstern id',
+    'woo_{connection.id}_refund_{creditNote.sourceId}',
+    'expression',
+    { required: true },
+  ),
+  t(
+    'creditNote.orderExternalId',
+    'Ordrens eksterne id',
+    'woo_{connection.id}_order_{creditNote.orderSourceId}',
+    'expression',
+    { required: true },
+  ),
+  t(
+    'creditNote.ref',
+    'Reference',
+    'Refusion {creditNote.number} for ordre {creditNote.meta.orderNumber}',
+  ),
+  ODOO_LINE_NAME,
+];
+
+const ODOO_CONTACT_TARGETS: TargetField[] = [
+  t(
+    'partner.externalId',
+    'Ekstern id',
+    'woo_{connection.id}_customer_{customer.sourceId}',
+    'expression',
+  ),
+  t('partner.name', 'Navn', undefined),
+  t('partner.ref', 'Reference', undefined),
+  t('partner.comment', 'Note', undefined),
+];
+
+const ODOO_PRODUCT_TARGETS: TargetField[] = [
+  t(
+    'product.externalId',
+    'Ekstern id',
+    'woo_{connection.id}_product_{product.sourceId}',
+    'expression',
+  ),
+];
+
 /**
  * Odoo (PLAN-INTEGRATIONS-WOO-ODOO16): self-hosted, Odoo.sh or Odoo Online on the Custom plan.
- * P1 reads stock, deliveries and invoice status; writing orders and invoices comes in P2.
+ * Reads stock, deliveries and invoice status; writes contacts, products, sales orders with their
+ * invoice, direct invoices, payments and credit notes.
  */
 export const odoo: ConnectorManifest = {
   id: 'odoo',
   name: 'Odoo',
-  version: '1.0.0',
+  version: '1.1.0',
   category: 'erp',
   logo: '/logos/odoo.svg',
   auth: {
@@ -829,6 +1418,8 @@ export const odoo: ConnectorManifest = {
     'productCategories',
     'carriers',
     'accounts',
+    'relation:product.product',
+    'relation:res.partner',
   ],
   outputs: [
     { entity: 'stock', label: 'Lager', trigger: { kind: 'poll', minMinutes: 5 } },
@@ -849,9 +1440,54 @@ export const odoo: ConnectorManifest = {
       ],
     },
   ],
-  inputs: [],
+  inputs: [
+    {
+      entity: 'order',
+      label: 'Salgsordrer og fakturaer',
+      modes: [...ORDER_MODES],
+      targets: ODOO_ORDER_TARGETS,
+      tables: [ODOO_PAYMENT_METHODS],
+      dynamicTargets: [
+        { model: 'sale.order', scope: 'record', prefix: 'order.fields' },
+        { model: 'account.move', scope: 'record', prefix: 'invoice.fields' },
+      ],
+    },
+    {
+      entity: 'creditNote',
+      label: 'Kreditnotaer',
+      modes: [...ORDER_MODES],
+      targets: ODOO_CREDIT_NOTE_TARGETS,
+      tables: [ODOO_PAYMENT_METHODS],
+    },
+    {
+      entity: 'customer',
+      label: 'Kontakter',
+      modes: ['dry_run', 'live'],
+      targets: ODOO_CONTACT_TARGETS,
+      dynamicTargets: [{ model: 'res.partner', scope: 'record', prefix: 'partner.fields' }],
+    },
+    {
+      entity: 'product',
+      label: 'Produkter',
+      modes: ['dry_run', 'live'],
+      targets: ODOO_PRODUCT_TARGETS,
+    },
+  ],
+  mapping: { order: [ODOO_TAX_GROUP, ODOO_FISCAL_GROUP], creditNote: [ODOO_TAX_GROUP] },
+  routeSettings: {
+    order: ODOO_ORDER_SETTINGS,
+    creditNote: ODOO_CREDIT_NOTE_SETTINGS,
+    customer: ODOO_CONTACT_SETTINGS,
+    product: ODOO_PRODUCT_WRITE_SETTINGS,
+  },
+  dependencies: { order: ['customer'] },
   rateLimit: { perMinute: 120 },
   changelog: [
+    {
+      version: '1.1.0',
+      kind: 'additive',
+      note: 'Salgsordrer, fakturaer, betalinger, kreditnotaer, kontakter og varer.',
+    },
     {
       version: '1.0.0',
       kind: 'additive',

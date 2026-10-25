@@ -69,6 +69,34 @@ export const TEMPLATES: Template[] = [
     accountHints: ERP_HINTS,
   },
   {
+    id: 'webshop-odoo',
+    category: 'erp',
+    source: ['woocommerce'],
+    destinations: ['odoo'],
+    routes: [
+      // Odoo takes the income account from the product; only taxes and products are chosen.
+      { entity: 'order', targetEntity: 'order', to: 'odoo', sourceOptions: PAID_ORDERS },
+      { entity: 'creditNote', targetEntity: 'creditNote', to: 'odoo' },
+      { entity: 'customer', targetEntity: 'customer', to: 'odoo' },
+    ],
+    tags: ['order', 'creditNote', 'customer'],
+    priority: 8,
+  },
+  {
+    // The return flow (PLAN-INTEGRATIONS-WOO-ODOO16 §5): Odoo owns stock (OD3) and deliveries.
+    id: 'odoo-webshop',
+    category: 'erp',
+    source: ['odoo'],
+    destinations: ['woocommerce'],
+    routes: [
+      { entity: 'stock', targetEntity: 'stock', to: 'woocommerce' },
+      { entity: 'shipment', targetEntity: 'shipment', to: 'woocommerce' },
+      { entity: 'invoiceStatus', targetEntity: 'invoiceStatus', to: 'woocommerce' },
+    ],
+    tags: ['stock', 'shipment', 'invoiceStatus'],
+    priority: 7,
+  },
+  {
     id: 'shopify-dinero',
     category: 'erp',
     source: ['shopify'],

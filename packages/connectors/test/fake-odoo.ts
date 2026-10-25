@@ -31,13 +31,33 @@ export interface OdooCall {
 const matches = (row: Row, cond: unknown): boolean => {
   if (!Array.isArray(cond)) return true;
   const [field, op, value] = cond as [string, string, unknown];
-  const v = row[field];
+  // A field the row doesn't have reads as false, as Odoo answers for empty values.
+  const v = row[field] ?? false;
   if (op === '=') return v === value || (Array.isArray(v) && v[0] === value);
   if (op === 'in')
     return (value as unknown[]).some((x) => x === v || (Array.isArray(v) && v[0] === x));
   if (op === '>=') return String(v ?? '') >= String(value);
+  if (op === '=ilike') return String(v ?? '').toLowerCase() === String(value).toLowerCase();
   throw new Error(`fake odoo: operator ${op}`);
 };
+
+/** Line fields per document model: where the lines live and what the quantity and tax are called. */
+const DOCS: Record<string, { lines: string; table: string; qty: string; tax: string }> = {
+  'sale.order': {
+    lines: 'order_line',
+    table: 'sale.order.line',
+    qty: 'product_uom_qty',
+    tax: 'tax_id',
+  },
+  'account.move': {
+    lines: 'invoice_line_ids',
+    table: 'account.move.line',
+    qty: 'quantity',
+    tax: 'tax_ids',
+  },
+};
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
 
 const pick = (row: Row, fields: string[] | undefined) =>
   fields?.length
@@ -58,6 +78,170 @@ function order(rows: Row[], spec: string | undefined): Row[] {
 
 export function fakeOdoo(db: FakeOdooDb): { transport: Transport; calls: OdooCall[] } {
   const calls: OdooCall[] = [];
+  const table = (model: string) => (db.tables[model] ??= []);
+  const nextId = (model: string) => Math.max(0, ...table(model).map((r) => Number(r.id))) + 100;
+  const taxIds = (cmd: unknown): number[] =>
+    Array.isArray(cmd) && Array.isArray(cmd[0]) ? ((cmd[0] as unknown[])[2] as number[]) : [];
+
+  /** Totals as Odoo computes them: price × qty − discount, plus VAT unless the tax includes it. */
+  const recompute = (model: string, doc: Row) => {
+    const spec = DOCS[model];
+    if (!spec) return;
+    let total = 0;
+    for (const l of table(spec.table).filter((x) => x.parent === doc.id)) {
+      const base =
+        Number(l.price_unit) * Number(l[spec.qty] ?? 1) * (1 - Number(l.discount ?? 0) / 100);
+      const tax = taxIds(l[spec.tax])
+        .map((t) => table('account.tax').find((x) => x.id === t))
+        .find(Boolean);
+      const rate = tax ? Number(tax.amount) / 100 : 0;
+      total += tax?.price_include ? base : base * (1 + rate);
+    }
+    doc.amount_total = round2(total);
+    if (model === 'account.move')
+      doc.amount_residual = doc.payment_state === 'paid' ? 0 : doc.amount_total;
+  };
+
+  /** create/write values with one2many commands: (5) clears the lines, (0, 0, vals) adds one. */
+  const apply = (model: string, doc: Row, vals: Row) => {
+    const spec = DOCS[model];
+    for (const [k, v] of Object.entries(vals)) {
+      if (spec && k === spec.lines) {
+        for (const cmd of v as unknown[][]) {
+          if (cmd[0] === 5)
+            db.tables[spec.table] = table(spec.table).filter((l) => l.parent !== doc.id);
+          if (cmd[0] === 0)
+            table(spec.table).push({ id: nextId(spec.table), parent: doc.id, ...(cmd[2] as Row) });
+        }
+      } else doc[k] = v;
+    }
+    recompute(model, doc);
+  };
+
+  const create = (model: string, vals: Row): number => {
+    const doc: Row = {
+      id: nextId(model),
+      state: 'draft',
+      ...(model === 'account.move' ? { name: '/', payment_state: 'not_paid' } : {}),
+    };
+    if (model === 'sale.order')
+      Object.assign(doc, { name: `S${String(doc.id).padStart(5, '0')}`, invoice_ids: [] });
+    table(model).push(doc);
+    apply(model, doc, vals);
+    return doc.id as number;
+  };
+
+  const wizards = new Map<number, { model: string; vals: Row; context: Row }>();
+  let wizardSeq = 9000;
+
+  const linesOf = (model: string, docId: unknown) =>
+    table(DOCS[model]!.table).filter((l) => l.parent === docId);
+
+  const business = (
+    model: string,
+    method: string,
+    args: unknown[],
+    kwargs: Record<string, unknown>,
+  ) => {
+    const ids = (Array.isArray(args[0]) ? args[0] : []) as number[];
+    const rows = table(model).filter((r) => ids.includes(r.id as number));
+    switch (method) {
+      case 'create': {
+        if (model.includes('.') && /wizard|register|advance|reversal/.test(model)) {
+          const wid = ++wizardSeq;
+          wizards.set(wid, { model, vals: args[0] as Row, context: (kwargs.context ?? {}) as Row });
+          return wid;
+        }
+        return create(model, args[0] as Row);
+      }
+      case 'write':
+        for (const r of rows) apply(model, r, args[1] as Row);
+        return true;
+      case 'load': {
+        const [fields, data] = args as [string[], string[][]];
+        const out: number[] = [];
+        for (const row of data) {
+          const xid = row[fields.indexOf('id')]!;
+          const dbid = Number(row[fields.indexOf('.id')]);
+          const [module, name] = xid.split('.') as [string, string];
+          table('ir.model.data').push({
+            id: nextId('ir.model.data'),
+            module,
+            name,
+            model,
+            res_id: dbid,
+          });
+          out.push(dbid);
+        }
+        return { ids: out, messages: [] };
+      }
+      case 'action_confirm':
+        for (const r of rows) r.state = 'sale';
+        return true;
+      case 'action_cancel':
+      case 'button_cancel':
+        for (const r of rows) r.state = 'cancel';
+        return true;
+      case 'action_post':
+        for (const r of rows) {
+          r.state = 'posted';
+          r.name = r.move_type === 'out_refund' ? `RINV/2026/${r.id}` : `INV/2026/${r.id}`;
+        }
+        return true;
+      case 'create_invoices': {
+        const w = wizards.get(ids[0]!)!;
+        for (const soId of w.context.active_ids as number[]) {
+          const so = table('sale.order').find((x) => x.id === soId)!;
+          const inv = create('account.move', {
+            move_type: 'out_invoice',
+            partner_id: so.partner_id,
+            invoice_origin: so.name,
+            invoice_line_ids: linesOf('sale.order', soId).map(
+              ({ id: _i, parent: _p, product_uom_qty, tax_id, ...l }) => [
+                0,
+                0,
+                { ...l, quantity: product_uom_qty, tax_ids: tax_id },
+              ],
+            ),
+          });
+          so.invoice_ids = [...((so.invoice_ids as number[]) ?? []), inv];
+        }
+        return true;
+      }
+      case 'action_create_payments': {
+        const w = wizards.get(ids[0]!)!;
+        for (const mid of w.context.active_ids as number[]) {
+          const m = table('account.move').find((x) => x.id === mid)!;
+          m.payment_state = 'paid';
+          m.amount_residual = 0;
+          table('account.payment').push({ id: nextId('account.payment'), move: mid, ...w.vals });
+        }
+        return true;
+      }
+      case 'reverse_moves': {
+        const w = wizards.get(ids[0]!)!;
+        for (const mid of w.context.active_ids as number[]) {
+          const inv = table('account.move').find((x) => x.id === mid)!;
+          create('account.move', {
+            move_type: 'out_refund',
+            reversed_entry_id: mid,
+            partner_id: inv.partner_id,
+            invoice_line_ids: linesOf('account.move', mid).map(({ id: _i, parent: _p, ...l }) => [
+              0,
+              0,
+              l,
+            ]),
+          });
+        }
+        return true;
+      }
+      case 'message_post_with_template':
+        return 1;
+      default:
+        return undefined;
+    }
+  };
+
   const object = (
     model: string,
     method: string,
@@ -104,8 +288,11 @@ export function fakeOdoo(db: FakeOdooDb): { transport: Transport; calls: OdooCal
         }
         return { result: [...groups.values()] };
       }
-      default:
-        throw new Error(`fake odoo: ${model}.${method}`);
+      default: {
+        const result = business(model, method, args, kwargs);
+        if (result === undefined) throw new Error(`fake odoo: ${model}.${method}`);
+        return { result };
+      }
     }
   };
   const transport: Transport = async (url, req) => {

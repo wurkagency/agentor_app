@@ -6,11 +6,24 @@ import {
   type LookupOption,
   type TestResult,
   type WebhookChange,
+  type WriteOptions,
   type WriteResult,
 } from '../adapter.js';
 import type { LookupId } from '../manifest.js';
-import type { Entity, EntityRecord, InvoiceStatus, Shipment, Stock } from '../model.js';
+import type {
+  CreditNote,
+  Customer,
+  Entity,
+  EntityRecord,
+  InvoiceStatus,
+  Order,
+  OrderSource,
+  Product,
+  Shipment,
+  Stock,
+} from '../model.js';
 import { HttpError, ore, safeTransport, toWriteError, type Transport } from './http.js';
+import { OdooWriter } from './odoo-write.js';
 
 /**
  * Odoo live client (PLAN-INTEGRATIONS-WOO-ODOO16 §4–5): the external API over JSON-RPC
@@ -410,6 +423,7 @@ export class OdooAdapter implements ConnectorAdapter {
   private readonly settings: OdooSettings;
   private profileCache: OdooProfile | null = null;
   private readonly fieldCache = new Map<string, Map<string, Json>>();
+  private readonly writer: OdooWriter;
 
   constructor(private readonly ctx: OdooContext) {
     const c = ctx.credentials;
@@ -420,6 +434,7 @@ export class OdooAdapter implements ConnectorAdapter {
       ...(this.settings.companyId ? { allowed_company_ids: [this.settings.companyId] } : {}),
       ...(this.settings.lang ? { lang: this.settings.lang } : {}),
     });
+    this.writer = new OdooWriter(this.client, this.settings.companyId);
   }
 
   private async profile(): Promise<OdooProfile> {
@@ -655,7 +670,7 @@ export class OdooAdapter implements ConnectorAdapter {
         return (
           entity === 'shipment'
             ? await this.shipments(rows, custom)
-            : rows.map((r) => normaliseInvoiceStatus(r, custom))
+            : await this.invoiceStatuses(rows, custom)
         ) as EntityRecord[E][];
       }
       return [];
@@ -680,7 +695,7 @@ export class OdooAdapter implements ConnectorAdapter {
       const [r] =
         entity === 'shipment'
           ? await this.shipments(rows, custom)
-          : rows.map((x) => normaliseInvoiceStatus(x, custom));
+          : await this.invoiceStatuses(rows, custom);
       return (r ?? null) as EntityRecord[E] | null;
     } catch (e) {
       throw toWriteError(e);
@@ -776,6 +791,40 @@ export class OdooAdapter implements ConnectorAdapter {
     return out;
   }
 
+  /**
+   * Invoice status with the shop order behind it: the invoice's own external id (direct
+   * invoices), else the sales order named in its origin.
+   */
+  private async invoiceStatuses(rows: Json[], custom: string[]): Promise<InvoiceStatus[]> {
+    const direct = await this.writer.sourcesOf(
+      'account.move',
+      rows.map((r) => Number(r.id)),
+    );
+    const origins = [
+      ...new Set(rows.map((r) => text(r.invoice_origin)).filter((x): x is string => !!x)),
+    ];
+    const orders = origins.length
+      ? await this.client.searchRead<{ id: number; name: string }>(
+          'sale.order',
+          [['name', 'in', origins]],
+          ['name'],
+        )
+      : [];
+    const viaOrder = await this.writer.sourcesOf(
+      'sale.order',
+      orders.map((o) => o.id),
+    );
+    const byName = new Map<string, OrderSource>();
+    for (const o of orders) {
+      const src = viaOrder.get(o.id);
+      if (src) byName.set(o.name, src);
+    }
+    return rows.map((r) => ({
+      ...normaliseInvoiceStatus(r, custom),
+      orderSource: direct.get(Number(r.id)) ?? byName.get(String(r.invoice_origin)) ?? null,
+    }));
+  }
+
   /** Deliveries with their lines and the shop's order number from the sales order (§5.1). */
   private async shipments(rows: Json[], custom: string[]): Promise<Shipment[]> {
     if (!rows.length) return [];
@@ -803,12 +852,14 @@ export class OdooAdapter implements ConnectorAdapter {
         text(r.client_order_ref),
       ]),
     );
+    const sources = await this.writer.sourcesOf('sale.order', saleIds);
     return rows.map((r): Shipment => {
       const saleId = m2oId(r.sale_id);
       return {
         sourceId: String(r.id),
         number: String(r.name),
         orderRef: (saleId ? refs.get(saleId) : null) ?? text(r.origin),
+        orderSource: (saleId ? sources.get(saleId) : null) ?? null,
         state: r.state === 'cancel' ? 'cancelled' : 'done',
         doneAt: odooTime(r.date_done),
         carrier: m2oName(r.carrier_id),
@@ -828,9 +879,27 @@ export class OdooAdapter implements ConnectorAdapter {
     });
   }
 
-  write(): Promise<WriteResult> {
-    // Odoo as a destination is P2 (PLAN-INTEGRATIONS-WOO-ODOO16 §7); the manifest has no inputs yet.
-    return Promise.reject(new WriteError('Odoo writes are not available yet', 'invalid'));
+  async write<E extends Entity>(
+    entity: E,
+    record: EntityRecord[E],
+    opts: WriteOptions,
+  ): Promise<WriteResult> {
+    try {
+      if (entity === 'customer') {
+        const res = await this.writer.partner(record as Customer, opts);
+        return {
+          action: res.action,
+          destinationId: opts.mode === 'dry_run' ? null : String(res.id),
+        };
+      }
+      if (entity === 'product') return await this.writer.writeProduct(record as Product, opts);
+      if (entity === 'order') return await this.writer.writeOrder(record as Order, opts);
+      if (entity === 'creditNote')
+        return await this.writer.writeCreditNote(record as CreditNote, opts);
+      throw new WriteError(`Odoo does not receive ${entity}`, 'invalid');
+    } catch (e) {
+      throw toWriteError(e);
+    }
   }
 
   parseWebhook(): WebhookChange | null {

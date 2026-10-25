@@ -263,11 +263,59 @@ export function catalogueFromFields(
       scope: cat.scope,
       required: f.meta?.required === true,
       ...(Number.isFinite(size) && size > 0 ? { maxLength: size } : {}),
-      // Text takes a template; numbers, dates and relations need an expression or a lookup.
-      editable: TEXT_TYPES.has(type) || type === 'many2one' ? 'template' : 'expression',
+      // Text takes a template; numbers, dates and relations (an id) need an expression.
+      editable: TEXT_TYPES.has(type) ? 'template' : 'expression',
     });
   }
   return { variables, targets };
+}
+
+/**
+ * A port with the variables and targets its dynamic catalogues found in the system's cached field
+ * lists (`fields:<model>`), so the editor, validation and the engine see the customer's own fields.
+ */
+export function expandPort(
+  port: Port | undefined,
+  lookups: Partial<Record<string, FieldOption[]>> | undefined,
+): Port | undefined {
+  if (!port || (!port.dynamicVariables?.length && !port.dynamicTargets?.length)) return port;
+  const fieldsOf = (c: DynamicCatalogue) =>
+    catalogueFromFields(lookups?.[`fields:${c.model}`] ?? [], c);
+  const variables = (port.dynamicVariables ?? []).flatMap((c) => fieldsOf(c).variables);
+  const targets = (port.dynamicTargets ?? []).flatMap((c) => fieldsOf(c).targets);
+  return {
+    ...port,
+    ...(port.variables || variables.length
+      ? { variables: [...(port.variables ?? []), ...variables] }
+      : {}),
+    ...(port.targets || targets.length ? { targets: [...(port.targets ?? []), ...targets] } : {}),
+  };
+}
+
+/**
+ * Targets for the customer's own fields that a route fills (templates or expressions under a
+ * dynamic prefix such as `order.fields.`). The engine renders them without the cached field list;
+ * validation checked them against it when the route was published.
+ */
+export function dynamicRouteTargets(
+  port: Port | undefined,
+  route: { templates: Record<string, string>; expressions: Record<string, string> },
+): TargetField[] {
+  const known = new Set((port?.targets ?? []).map((t) => t.key));
+  const out: TargetField[] = [];
+  for (const key of new Set([...Object.keys(route.templates), ...Object.keys(route.expressions)])) {
+    if (known.has(key)) continue;
+    const cat = port?.dynamicTargets?.find((c) => key.startsWith(`${c.prefix}.`));
+    if (!cat) continue;
+    out.push({
+      key,
+      label: key,
+      scope: cat.scope,
+      required: false,
+      editable: Object.hasOwn(route.templates, key) ? 'template' : 'expression',
+    });
+  }
+  return out;
 }
 
 /** A route setting's value, falling back to the manifest default (the UI shows the same). */

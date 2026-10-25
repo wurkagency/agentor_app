@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { saleKind, woocommerce, type CreditNote, type Order } from '../src/index.js';
+import {
+  saleKind,
+  woocommerce,
+  type CreditNote,
+  type InvoiceStatus,
+  type Order,
+  type Shipment,
+} from '../src/index.js';
 import { openAdapter, WooAdapter, type WooOrder } from '../src/live/index.js';
 import { adapterContract } from './contract.js';
 import { fakeTransport, type FakeRoute } from './fake-http.js';
@@ -638,6 +645,121 @@ describe('webhooks', () => {
     expect(persisted).toHaveLength(1);
     expect(persisted[0]!.webhookSecret).toMatch(/^[\w-]{40,}$/);
     expect(await adapter().ensureWebhooks()).toEqual([]);
+  });
+});
+
+describe('deliveries and invoice status from the ERP', () => {
+  const CONN = 'c0ffee00-1111-2222-3333-444455556666';
+  function erpShop() {
+    return fakeTransport([
+      {
+        method: 'GET',
+        path: /\/orders$/,
+        reply: () => ({ json: [{ ...DK_ORDER, id: 1500, number: '10447' }] }),
+      },
+      {
+        method: 'POST',
+        path: /\/orders\/(\d+)\/notes$/,
+        reply: () => ({ status: 201, json: { id: 1 } }),
+      },
+      { method: 'PUT', path: /\/orders\/(\d+)$/, reply: () => ({ json: { id: 1 } }) },
+    ]);
+  }
+  const erpAdapter = (t: ReturnType<typeof erpShop>) =>
+    new WooAdapter({
+      connectorId: 'woocommerce',
+      mode: 'live',
+      connectionId: CONN,
+      credentials: { baseUrl: BASE, consumerKey: 'ck_test', consumerSecret: 'cs_test' },
+      transport: t.transport,
+    });
+  const shipment: Shipment = {
+    sourceId: '500',
+    number: 'WH/OUT/00042',
+    orderRef: '10447',
+    orderSource: { connectionId: CONN, sourceId: '1001' },
+    state: 'done',
+    doneAt: '2026-10-24T10:00:00.000Z',
+    carrier: 'GLS',
+    trackingRef: '0034043',
+    trackingUrl: null,
+    lines: [],
+  };
+
+  it('notes the tracking and completes the order Agentor created it from', async () => {
+    const t = erpShop();
+    const res = await erpAdapter(t).write('shipment', shipment, {
+      mode: 'live',
+      fields: { 'note.text': 'Sendt med GLS: 0034043' },
+      route: {
+        settings: { 'shipment.status': 'completed', 'shipment.customerNote': true },
+        mapping: {},
+        tables: {},
+      },
+    });
+    expect(res).toEqual({ action: 'update', destinationId: '1001:shipment:500' });
+    expect(t.sent.map((s) => `${s.method} ${s.url.pathname}`)).toEqual([
+      'POST /wp-json/wc/v3/orders/1001/notes',
+      'PUT /wp-json/wc/v3/orders/1001',
+    ]);
+    expect(t.sent[0]!.body).toEqual({ note: 'Sendt med GLS: 0034043', customer_note: true });
+    expect(t.sent[1]!.body).toEqual({ status: 'completed' });
+  });
+
+  it('finds the order by number when another connection made it', async () => {
+    const t = erpShop();
+    const res = await erpAdapter(t).write(
+      'shipment',
+      { ...shipment, orderSource: { connectionId: 'other', sourceId: '9' } },
+      { mode: 'live', route: { settings: { 'shipment.status': '' }, mapping: {}, tables: {} } },
+    );
+    expect(res.destinationId).toBe('1500:shipment:500');
+    expect(t.sent.filter((s) => s.method !== 'GET')).toEqual([]);
+  });
+
+  it('writes each invoice event once', async () => {
+    const t = erpShop();
+    const a = erpAdapter(t);
+    const inv: InvoiceStatus = {
+      sourceId: '900',
+      kind: 'invoice',
+      number: 'INV/2026/00123',
+      orderRef: '10447',
+      orderSource: { connectionId: CONN, sourceId: '1001' },
+      state: 'posted',
+      paymentState: 'notPaid',
+      currency: 'DKK',
+      total: 100,
+      residual: 100,
+      date: null,
+      dueDate: null,
+    };
+    const route = {
+      settings: { 'invoice.events': ['posted', 'paid'], 'invoice.statusOnPaid': 'completed' },
+      mapping: {},
+      tables: {},
+    };
+    const fields = { 'note.posted': 'Bogført', 'note.paid': 'Betalt' };
+    const first = await a.write('invoiceStatus', inv, { mode: 'live', fields, route });
+    expect(first.destinationId).toBe('1001:invoice:900:posted');
+    const again = await a.write('invoiceStatus', inv, {
+      mode: 'live',
+      fields,
+      route,
+      existingId: first.destinationId,
+    });
+    expect(again.action).toBe('skip');
+    const paid = await a.write(
+      'invoiceStatus',
+      { ...inv, paymentState: 'paid' },
+      { mode: 'live', fields, route, existingId: first.destinationId },
+    );
+    expect(paid.destinationId).toBe('1001:invoice:900:posted:paid');
+    expect(t.sent.map((s) => s.body)).toEqual([
+      { note: 'Bogført', customer_note: false },
+      { note: 'Betalt', customer_note: false },
+      { status: 'completed' },
+    ]);
   });
 });
 

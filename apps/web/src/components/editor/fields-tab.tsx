@@ -33,6 +33,34 @@ function sampleFor(entity: Route['entity']): Record<string, unknown> {
       meta: { orderNumber: o.number },
     };
   if (entity === 'customer') return o.customer as unknown as Record<string, unknown>;
+  if (entity === 'shipment')
+    return {
+      sourceId: '500',
+      number: 'WH/OUT/00042',
+      orderRef: o.number,
+      state: 'done',
+      doneAt: o.createdAt,
+      carrier: 'GLS',
+      trackingRef: '00340434161094042557',
+      trackingUrl: null,
+      lines: [],
+      fields: {},
+    };
+  if (entity === 'invoiceStatus')
+    return {
+      sourceId: '900',
+      kind: 'invoice',
+      number: 'INV/2026/00123',
+      orderRef: o.number,
+      state: 'posted',
+      paymentState: 'paid',
+      currency: o.currency,
+      total: o.total,
+      residual: 0,
+      date: o.createdAt.slice(0, 10),
+      dueDate: o.createdAt.slice(0, 10),
+      fields: {},
+    };
   return {};
 }
 

@@ -66,6 +66,70 @@ describe.skipIf(!ready)('Odoo live (test database, read-only)', () => {
     expect(fields.some((f) => f.value === 'name')).toBe(true);
   }, 120_000);
 
+  // Opt-in (ODOO_TEST_WRITE=1): a quotation in Kladde for a test contact, cancelled again.
+  it.skipIf(e.ODOO_TEST_WRITE !== '1')(
+    'writes a quotation in Kladde and cancels it',
+    async () => {
+      const a = adapter();
+      const [product] = await a.lookup('relation:product.product');
+      const tax = (await a.lookup('taxes')).find(
+        (x) => x.meta?.amount === 25 && x.meta?.priceInclude === false,
+      );
+      expect(product && tax, 'needs one product and a 25 % sales tax').toBeTruthy();
+      const order = {
+        sourceId: `agentor-test-${Date.now()}`,
+        number: `AGT-${Date.now()}`,
+        createdAt: new Date().toISOString(),
+        paidAt: null,
+        status: 'processing' as const,
+        currency: 'DKK',
+        customer: {
+          sourceId: 'agentor-test',
+          kind: 'person' as const,
+          name: 'Agentor Test',
+          email: 'agentor-test@example.invalid',
+          phone: null,
+          vatNumber: null,
+          address: { line1: 'Testvej 1', postalCode: '8000', city: 'Aarhus C', country: 'DK' },
+        },
+        lines: [
+          {
+            sku: null,
+            productId: null,
+            name: 'Agentor testlinje',
+            quantity: 1,
+            unitPrice: 10000,
+            vatRate: 0.25,
+            category: null,
+          },
+        ],
+        shipping: 0,
+        shippingVatRate: 0,
+        total: 12500,
+      };
+      const route = {
+        settings: {
+          'products.match': 'none',
+          'products.genericId': product!.value,
+          'rounding.policy': 'ignoreBelow',
+        },
+        mapping: { 'tax.domestic': tax!.value },
+        tables: {},
+      };
+      const fields = { 'order.externalId': `agentor_test_order_${order.sourceId}` };
+      const res = await a.write('order', order, { mode: 'draft', fields, route });
+      console.info('Odoo quotation:', res.destinationId, res.warnings ?? []);
+      expect(res.destinationId).toMatch(/^sale\.order,\d+$/);
+      const cancelled = await a.write(
+        'order',
+        { ...order, status: 'cancelled' },
+        { mode: 'live', fields, route },
+      );
+      expect(cancelled.action).toBe('update');
+    },
+    180_000,
+  );
+
   it('reads stock, deliveries and invoice status', async () => {
     const a = adapter();
     for (const entity of ['stock', 'shipment', 'invoiceStatus'] as const) {

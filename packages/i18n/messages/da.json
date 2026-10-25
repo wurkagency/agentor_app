@@ -2041,6 +2041,14 @@
         "title": "Webshop til e-conomic",
         "body": "Fakturaer og kunder i e-conomic."
       },
+      "webshop-odoo": {
+        "title": "Webshop til Odoo",
+        "body": "Ordrer bliver til salgsordrer og fakturaer i Odoo."
+      },
+      "odoo-webshop": {
+        "title": "Lager og levering fra Odoo",
+        "body": "Lagerantal, afsendelser og betalte fakturaer går tilbage til butikken."
+      },
       "shopify-dinero": {
         "title": "Shopify til Dinero",
         "body": "Ordrer fra Shopify bogføres i Dinero."

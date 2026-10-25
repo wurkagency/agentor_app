@@ -1,6 +1,6 @@
 # PLAN: WooCommerce ↔ Odoo 16 integration module
 
-Status: **decisions OD1–OD7 resolved, 25 Oct 2026.** This is a plan only. No code has been written. Base branch: `v1.0`.
+Status: **decisions OD1–OD7 resolved, 25 Oct 2026. P0–P3 built (status after §7).** Base branch: `v1.0`.
 
 **Sources**
 - Official Odoo 16 docs and the `odoo/odoo` 16.0 and 17.0 source, fetched 25 Oct 2026 (links in §12).
@@ -372,6 +372,44 @@ P0 is small. P1 can start right away; P2 follows P1. P3's WooCommerce part can r
   - The Odoo logo: `/logos/odoo.svg` needs the official asset.
   - The `shipment.onlyOurs` / `invoice.onlyOurs` filters, which need P2's external ids.
   - The live run on the test server.
+
+**P2–P3 status (25 Oct 2026): built, tested against a recorded Odoo 16 database and a recorded shop.** Not yet run against the test server (no `ODOO_TEST_*` keys yet). `test/odoo.live.test.ts` reads by default; with `ODOO_TEST_WRITE=1` it also writes a quotation in Kladde for a test contact and cancels it again.
+
+- **P2 Odoo writes** (`live/odoo-write.ts`):
+  - Contacts: match by e-mail, VAT number or reference, or one shared contact. Only the chosen fields are updated, and a delivery address is created under the contact.
+  - Products: match by SKU or barcode. A missing product follows the route's choice: standard product, create, or stop.
+  - Sales orders with `action_confirm`, and the invoice through `sale.advance.payment.inv` on paid, confirmed or delivered. Direct invoices are an alternative.
+  - Totals check with a rounding line, posting (with today's date when the period is locked), payment through `account.payment.register` with the journal from the payment-method table, and e-mail with Odoo's invoice template.
+  - Cancellations: a quotation or an uninvoiced order is cancelled with `disable_cancel_warning`; anything booked only gets a warning.
+  - Credit notes against the posted invoice: with the refunded lines, or a full reversal. A refund before the invoice exists waits and retries every hour.
+  - External ids: looked up in `ir.model.data` and bound through `load(['id', '.id'])`, with a search on the reference fields as a fallback.
+- **P3:**
+  - WooCommerce 1.2.0 gets the inputs `shipment` (Afsendelser: note with tracking and status, default Gennemført) and `invoiceStatus` (Fakturastatus: a note per event, each written once, plus an optional status when paid). The shop order is found through the ERP document's external id, else by order number. Refund meta now carries the payment method.
+  - Engine: an order route into a destination without an accounts mapping no longer asks for accounts. Destinations can return warnings (`WriteResult.warnings`: `VAT_RATE_MISMATCH`, `TOTAL_ROUNDED`, `PAYMENT_NOT_REGISTERED`, `CHANGED_AFTER_BOOKING`, `INVOICE_NOT_READY`). Templates for the customer's own fields are rendered.
+  - `expandPort()` adds the customer's own fields to the editor's variable picker and Felter tab, and to validation.
+  - Templates "Webshop til Odoo" (Ordrer → Salgsordrer og fakturaer, Kreditnotaer, Kontakter) and "Lager og levering fra Odoo" (Lager, Afsendelser, Fakturastatus).
+  - The Odoo logo is in place.
+- **Where the build differs from the text above:**
+  - `tax.strategy` has two values. `shopTax` books the shop's VAT through the tax mapping; `odoo` lets Odoo choose, with an optional fiscal position per sale kind.
+  - There is no `lines.priceBasis`. The price follows the chosen tax: incl. VAT when the tax has `price_include`, else excl. VAT.
+  - `contact.companyMode` is not built. Companies become one partner with `is_company` and the VAT number.
+  - `creditNote.mode` defaults to `standalone` (the refunded lines). `reversal` only applies to full refunds.
+  - `refund.beforeInvoice` waits and retries instead of adjusting the order.
+  - `cancel.posted` only warns.
+  - Relation fields among the customer's own fields take an id from an expression; templates are for text fields.
+- **To verify on the test server** (marked *(verify)* above, or found while building):
+  - `load(['id', '.id'])` binds an external id without `ir.model.data` rights.
+  - `message_post_with_template` sends the invoice e-mail.
+  - The fields of `account.move.reversal`.
+  - The error text from `sale.advance.payment.inv` when products are invoiced on delivered quantities.
+  - Reservations change `stock.quant.write_date`.
+  - The `disable_cancel_warning` context key.
+- **Not built yet:**
+  - Plan options: e-invoice, sales team and salesperson, analytic accounts, and the category, shipping-method, country-language and value-map tables.
+  - Attaching the shop's PDF, returning stock on refunds, `shipment.trackingMeta`.
+  - The browser check of the new screens. The other session's dev server served an old package build, and a second server in the same folder would share `.next`.
+  - P4: credit note → refund through the payment gateway, with approval.
+  - P5: profiles for Odoo 17–19.
 
 ---
 

@@ -2041,6 +2041,14 @@
         "title": "Webshop to e-conomic",
         "body": "Invoices and customers in e-conomic."
       },
+      "webshop-odoo": {
+        "title": "Webshop to Odoo",
+        "body": "Orders become sales orders and invoices in Odoo."
+      },
+      "odoo-webshop": {
+        "title": "Stock and delivery from Odoo",
+        "body": "Stock counts, shipments and paid invoices go back to the shop."
+      },
       "shopify-dinero": {
         "title": "Shopify to Dinero",
         "body": "Orders from Shopify are booked in Dinero."

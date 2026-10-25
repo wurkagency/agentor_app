@@ -1,4 +1,5 @@
 import {
+  dynamicRouteTargets,
   manifestFor,
   saleKind,
   vatMismatch,
@@ -34,7 +35,15 @@ export interface PlannedLine {
 
 /** Something worth a look that does not stop the record, e.g. foreign VAT on an EU sale. */
 export interface RecordWarning {
-  code: 'VAT_FOREIGN' | 'VAT_ON_REVERSE_CHARGE' | 'VAT_ON_EXPORT';
+  code:
+    | 'VAT_FOREIGN'
+    | 'VAT_ON_REVERSE_CHARGE'
+    | 'VAT_ON_EXPORT'
+    // From the destination (WriteResult.warnings), e.g. Odoo's tax differs from the shop's.
+    | 'VAT_RATE_MISMATCH'
+    | 'TOTAL_ROUNDED'
+    | 'PAYMENT_NOT_REGISTERED'
+    | 'CHANGED_AFTER_BOOKING';
   params: Record<string, string>;
 }
 
@@ -317,10 +326,16 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
   const out: RecordResult[] = [];
   const dry = input.dryRun || route.mode === 'test';
   const sourceConnection = input.def.nodes.find((n) => n.id === route.from)?.connectionId ?? '';
-  const targets =
-    manifestFor(destination.connectorId)?.inputs.find((p) => p.entity === route.targetEntity)
-      ?.targets ?? [];
+  const inPort = manifestFor(destination.connectorId)?.inputs.find(
+    (p) => p.entity === route.targetEntity,
+  );
+  const targets = [...(inPort?.targets ?? []), ...dynamicRouteTargets(inPort, route)];
   const statuses = route.sourceOptions['trigger.statuses'];
+  // Destinations that book on accounts (Dinero, e-conomic) need them mapped; Odoo takes the
+  // income account from the product, so an empty account mapping is not an error there.
+  const needsAccounts = (
+    manifestFor(destination.connectorId)?.mapping?.[route.targetEntity] ?? []
+  ).some((g) => g.fields.some((f) => f.key.startsWith('accounts.')));
   for (const rec of input.records) {
     const started = now();
     const base = {
@@ -392,8 +407,8 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         vatFree: saleKind(o) === 'euB2b' || saleKind(o) === 'export',
       };
       warnings = plan.warnings;
-      accounts = plan.lines.map((l) => l.account);
-      if (plan.missing) {
+      accounts = needsAccounts ? plan.lines.map((l) => l.account) : undefined;
+      if (plan.missing && needsAccounts) {
         out.push({
           ...base,
           preview,
@@ -450,7 +465,6 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         continue;
       }
     }
-    const withWarnings = warnings.length ? { warnings } : {};
     const existing = input.existingId(base.sourceId);
     if (existing && !route.updateExisting) {
       out.push({ ...base, preview, outcome: 'skipped', skipReason: 'exists', durationMs: 0 });
@@ -482,6 +496,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         ...(rendered ? { fields: rendered.fields, lineFields: rendered.lineFields } : {}),
         route: routeWriteContext(route, destination.connectorId, accounts),
       });
+      const all = [...warnings, ...((res.warnings ?? []) as RecordWarning[])];
       out.push({
         ...base,
         preview,
@@ -496,7 +511,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
               : 'created',
         destinationId: res.destinationId,
         durationMs: now() - started,
-        ...withWarnings,
+        ...(all.length ? { warnings: all } : {}),
       });
     } catch (e) {
       const kind = e instanceof WriteError ? e.kind : 'transient';
