@@ -1054,7 +1054,8 @@
       "connection_deleted": "disconnected",
       "connection_broken": "registered that the connection broke",
       "connection_restored": "registered that the connection works again",
-      "connection_webhook_rotated": "made a new webhook address"
+      "connection_webhook_rotated": "made a new webhook address",
+      "connection_settings_changed": "changed the settings"
     },
     "account": "Account",
     "configuredBy": "Connected by",
@@ -1079,6 +1080,32 @@
       "httpsRequired": "The address must start with https://.",
       "badUrl": "The address cannot be used. It must be public and use HTTPS.",
       "generic": "Something went wrong. Try again in a moment."
+    },
+    "settings": {
+      "title": "Settings",
+      "shared": "Apply to every flow using the connection",
+      "advanced": "Advanced",
+      "none": "None",
+      "saved": "The settings are saved. The connection is tested again.",
+      "notSaved": "The settings were not saved."
+    },
+    "hooks": {
+      "title": "Webhooks in the shop",
+      "meta": "Agentor keeps them switched on",
+      "failed": "Could not be registered",
+      "status": {
+        "active": "Active",
+        "created": "Created",
+        "reactivated": "Switched on again",
+        "missing": "Missing"
+      }
+    },
+    "liveConnect": {
+      "title": "Connect with {name}",
+      "shopUrl": "The shop's address",
+      "shopUrlHelp": "You are sent to the shop to approve access there. The keys come straight to Agentor.",
+      "go": "Go to the shop",
+      "manual": "Enter keys yourself"
     }
   },
   "flows": {
@@ -1625,7 +1652,8 @@
       "mapping": "Mapping",
       "filters": "Filters",
       "run": "Schedule",
-      "history": "History"
+      "history": "History",
+      "fields": "Fields"
     },
     "general": {
       "mode": "Mode",
@@ -1929,6 +1957,35 @@
       "expression": "Expression for {field}",
       "preview": "Show result",
       "error": "The expression could not run."
+    },
+    "sourceOptions": "From {system}",
+    "destinationSettings": "To {system}",
+    "noneOption": "None",
+    "supplyType": "Type",
+    "supplyTypeFor": "Type for {name}",
+    "supply": {
+      "goods": "Goods",
+      "services": "Services"
+    },
+    "fields": {
+      "intro": "The texts {system} receives. Use variables from {source}, such as the order number.",
+      "insert": "Insert variable",
+      "reset": "Use the default text",
+      "preview": "Example",
+      "previewNote": "The example uses test data, not your own orders.",
+      "maxLength": "At most {count} characters. Longer text is cut.",
+      "expressionOnly": "Used to prevent duplicates. Can only be changed with an expression.",
+      "none": "{system} has no fields to customise here.",
+      "error": {
+        "TEMPLATE_INVALID": "The template cannot be read: {message}",
+        "TEMPLATE_UNKNOWN_VARIABLE": "The variable {variable} does not exist in the source.",
+        "TEMPLATE_UNKNOWN_FIELD": "This field cannot be filled with a template."
+      }
+    },
+    "tables": {
+      "empty": "No {label} found yet. Test the connection to {source} to fetch the list.",
+      "cell": "{column} for {row}",
+      "default": "Default"
     }
   },
   "templates": {

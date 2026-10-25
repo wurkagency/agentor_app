@@ -74,6 +74,15 @@ export const connectionJobs = {
   'connection.test': z.object({ tenantId: z.uuid(), connectionId: z.uuid() }),
   /** A stored inbound webhook to verify; the body stays in the database. */
   'webhook.received': z.object({ tenantId: z.uuid(), eventId: z.uuid() }),
+  /**
+   * A new webhook address (Ny webhook-adresse): the worker puts it in the credentials, which
+   * the web can't read, and registers it in the system again (PLAN-INTEGRATIONS §4.5).
+   */
+  'connection.webhook': z.object({
+    tenantId: z.uuid(),
+    connectionId: z.uuid(),
+    webhookUrl: z.url().max(300),
+  }),
 } as const;
 
 export type ConnectionJobName = keyof typeof connectionJobs;

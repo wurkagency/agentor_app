@@ -2,7 +2,7 @@ import { manifestFor } from '@agentor/connectors';
 import { isUuid } from '@agentor/db';
 import { Banner, ConnectorLogo } from '@agentor/ui';
 import { getTranslations } from 'next-intl/server';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { FocusCard } from '@/components/focus-card';
 import { requireRole } from '@/server/auth/session';
 import { env } from '@/server/env';
@@ -29,6 +29,12 @@ export default async function ConnectPage({
   const { reconnect, state } = await searchParams;
   // Started from /connect/[connector]/start (onboarding, PLAN-SIGNUP B11): the state says who
   // asked, so this stand-in for the provider works without the app's session, like the real one.
+  // Live mode: the real provider's login, through the start route that records the state.
+  if (env().CONNECTOR_MODE === 'live' && !state) {
+    const q = new URLSearchParams({ return: '/connections' });
+    if (reconnect && isUuid(reconnect)) q.set('reconnect', reconnect);
+    redirect(`/connect/${encodeURIComponent(connector)}/start?${q}`);
+  }
   const started = state ? await peekOAuthState(state) : null;
   if (state && (!started || started.connectorId !== connector)) notFound();
   if (!started) await requireRole(['owner', 'admin', 'developer']);

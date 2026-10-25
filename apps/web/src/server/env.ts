@@ -34,6 +34,11 @@ const schema = z.object({
   /** The KEK's public half; the web process can seal credentials but never open them. */
   KEK_PUBLIC_KEY: z.string().optional(),
   CONNECTOR_MODE: z.enum(['mock', 'live']).default('mock'),
+  /** Visma Connect app for Dinero (PLAN-INTEGRATIONS §5.1); the worker refreshes with the same. */
+  DINERO_CLIENT_ID: z.string().optional(),
+  DINERO_CLIENT_SECRET: z.string().optional(),
+  /** Tests only: another Visma Connect origin. */
+  VISMA_CONNECT_URL: z.url().optional(),
   CVR_PROVIDER: z.enum(['fixture', 'virkdata']).default('fixture'),
   VIRKDATA_API_KEY: z.string().optional(),
   /** Web Push (PLAN-MOBILE M3): the public half goes to browsers; without it push is off. */

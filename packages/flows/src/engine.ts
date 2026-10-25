@@ -11,6 +11,7 @@ import {
   type SaleKind,
   type TargetField,
   type WriteMode,
+  type WriteOptions,
 } from '@agentor/connectors';
 import type { FilterRule, FlowDefinition, Route } from './definition.js';
 import { renderTemplate, resolvePath, TemplateError } from './templates.js';
@@ -214,13 +215,34 @@ export function planInvoice(
 }
 
 /**
+ * What the destination needs from the route to build its document (WriteOptions.route): settings
+ * with the manifest defaults filled in, so the adapter and the UI agree on every value.
+ */
+export function routeWriteContext(
+  route: Pick<Route, 'settings' | 'mapping' | 'tables' | 'targetEntity'>,
+  destinationConnectorId: string,
+  accounts?: (string | null)[],
+): NonNullable<WriteOptions['route']> {
+  const fields = manifestFor(destinationConnectorId)?.routeSettings?.[route.targetEntity] ?? [];
+  const settings: Record<string, unknown> = {};
+  for (const f of fields) settings[f.key] = f.default;
+  Object.assign(settings, route.settings);
+  return {
+    settings,
+    mapping: route.mapping,
+    tables: route.tables,
+    ...(accounts ? { accounts } : {}),
+  };
+}
+
+/**
  * Renders the destination's target fields (manifest `targets`) from the route's templates or
  * the manifest defaults. Templates read the record under its entity name (`order.number`) and
  * the source connection (`connection.id`). An expression for the same key wins.
  */
 export function renderTargets(
   targets: TargetField[],
-  route: Route,
+  route: Pick<Route, 'entity' | 'templates' | 'expressions'>,
   rec: EntityRecord[keyof EntityRecord],
   connectionId: string,
   shaped: unknown = rec,
@@ -356,6 +378,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
     }
     let preview: RecordResult['preview'] = null;
     let warnings: RecordWarning[] = [];
+    let accounts: (string | null)[] | undefined;
     if (route.entity === 'order' && route.targetEntity === 'order') {
       const o = rec as Order;
       const plan = planInvoice(route, o, input.accounts);
@@ -369,6 +392,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         vatFree: saleKind(o) === 'euB2b' || saleKind(o) === 'export',
       };
       warnings = plan.warnings;
+      accounts = plan.lines.map((l) => l.account);
       if (plan.missing) {
         out.push({
           ...base,
@@ -456,6 +480,7 @@ export async function runRoute(input: RouteRunInput): Promise<RecordResult[]> {
         existingId: existing,
         ...(refs ? { refs } : {}),
         ...(rendered ? { fields: rendered.fields, lineFields: rendered.lineFields } : {}),
+        route: routeWriteContext(route, destination.connectorId, accounts),
       });
       out.push({
         ...base,

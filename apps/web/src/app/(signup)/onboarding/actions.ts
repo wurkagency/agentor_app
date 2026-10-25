@@ -179,7 +179,7 @@ export async function createOnboardingFlow(input: unknown): Promise<ActionResult
       filters: [],
       updateExisting: true,
       expressions: {},
-      sourceOptions: {},
+      sourceOptions: { ...r.sourceOptions },
       tables: {},
       templates: {},
     });

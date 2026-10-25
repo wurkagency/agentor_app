@@ -507,6 +507,24 @@ P1 and P2 can run in parallel after P0.
 - **Settings in manifests:** only settings the engine actually honours were added (`oss.mode`, `trigger.statuses`, `skipZeroTotal`). The remaining §4.3/§5.3 options arrive with the live clients that use them.
 - **Rendered fields:** templates go to the adapter as `WriteOptions.fields` and `lineFields`. Warnings (`VAT_FOREIGN` and similar) go on `RecordResult.warnings`. Showing them in the UI is P3.
 
+**P1–P3 status (25 Oct 2026): built, tested against recorded APIs.** Not yet run against a real shop or a real Dinero company.
+
+- **P1 WooCommerce** (`@agentor/connectors/live`): client, normaliser (refunds, bundles, meta keys, fees, VAT lines), webhook registration and repair, stock writes, order note/status/refund calls, `wc-auth` key flow, hourly health test (scheduler, migration 0058). Webhook address rotation goes through the worker (`connection.webhook`).
+- **P2 Dinero**:
+  - Visma Connect login and refresh, company choice and licence check.
+  - Lookups with VAT codes.
+  - Contacts, invoices (draft, update, fetch, book) with payment, e-mail and e-invoice.
+  - Credit notes on the booked invoice's accounts, with error mapping (58, 90, 429, 480).
+  - Dinero manifest 2.0.0 (breaking: stock removed, seed "Lager retur" moved to e-conomic; products are no longer a dependency).
+- **P3 UI**: source options and generated settings (number, lookup selects, `showIf`, advanced) in the inspector, a Felter tab (templates, variable picker, preview on test data), payment-method table, supply type per category, VAT code on accounts, connection settings card (Dinero company, WooCommerce meta keys), webhook status, live WooCommerce connect step.
+- **Not done yet:**
+  - Manual-voucher and ledger posting types.
+  - The Dinero → WooCommerce return flow and the gateway-refund approval list (§4.7 B/C; the WooCommerce calls exist, the engine wiring and UI don't).
+  - "Test lookup" for meta keys.
+  - Showing record warnings in run views.
+  - Playwright e2e for the new tabs.
+  - P4 go-live paperwork.
+
 ---
 
 ## 8. Test matrix (must pass before Live)

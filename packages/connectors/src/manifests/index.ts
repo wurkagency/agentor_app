@@ -1,6 +1,7 @@
 import type {
   ConnectorManifest,
   MappingGroup,
+  MappingTable,
   SettingField,
   TargetField,
   VariableDef,
@@ -187,6 +188,7 @@ export const woocommerce: ConnectorManifest = {
   ],
   inputs: [{ entity: 'stock', label: 'Lager', modes: ['dry_run', 'live'] }],
   counts: ['order', 'customer', 'product'],
+  lookups: ['orderStatuses', 'paymentGateways', 'shippingMethods', 'categories'],
   rateLimit: { perMinute: 120 },
   webhook: { signatureHeader: 'x-wc-webhook-signature', scheme: 'hmac-sha256-base64' },
   changelog: [
@@ -282,6 +284,13 @@ const ACCOUNT_GROUP: MappingGroup = {
       required: true,
       lookup: 'accounts',
     },
+    {
+      key: 'accounts.rounding',
+      label: 'Øreafrunding',
+      required: false,
+      lookup: 'accounts',
+      help: 'Tom: små forskelle på totalen ignoreres.',
+    },
   ],
 };
 
@@ -335,6 +344,16 @@ const DINERO_CREDIT_NOTE_TARGETS: TargetField[] = [
     editable: 'expression',
   },
   {
+    // The order's invoice, found by the reference the invoice route gave it.
+    key: 'creditNote.invoiceReference',
+    label: 'Fakturaens reference',
+    scope: 'record',
+    required: true,
+    maxLength: 128,
+    default: 'agentor:{connection.id}:{creditNote.orderSourceId}',
+    editable: 'expression',
+  },
+  {
     key: 'creditNote.description',
     label: 'Overskrift',
     scope: 'record',
@@ -364,10 +383,139 @@ const DINERO_CONTACT_TARGETS: TargetField[] = [
   },
 ];
 
+/** Payment method → deposit account (PLAN §5.4 table 3). */
+const PAYMENT_METHODS: MappingTable = {
+  key: 'paymentMethods',
+  title: 'Betalingsmetoder',
+  description: 'Hvilken konto betalingen registreres på i Dinero.',
+  from: { lookup: 'paymentGateways', label: 'Betalingsmetode' },
+  to: [{ key: 'account', label: 'Indbetalingskonto', lookup: 'depositAccounts' }],
+};
+
+/** What the Dinero client honours on invoices (PLAN §5.3). */
+const DINERO_INVOICE_SETTINGS: SettingField[] = [
+  {
+    key: 'invoice.bookAutomatically',
+    label: 'Bogfør fakturaer automatisk',
+    type: 'boolean',
+    default: false,
+    help: 'Slået fra: fakturaerne lægges som kladder, som du bogfører i Dinero.',
+  },
+  {
+    key: 'invoice.language',
+    label: 'Fakturasprog',
+    type: 'select',
+    default: 'da',
+    options: [
+      { value: 'da', label: 'Dansk' },
+      { value: 'en', label: 'Engelsk' },
+      { value: 'byCountry', label: 'Engelsk uden for Danmark' },
+    ],
+  },
+  {
+    key: 'oss.mode',
+    label: 'Moms ved EU-salg til private',
+    type: 'select',
+    default: 'danishVat',
+    options: [
+      { value: 'danishVat', label: 'Dansk moms (under 10.000 euro om året)' },
+      { value: 'destinationVat', label: 'Købers lands moms (OSS)' },
+    ],
+    help: 'Dinero kan ikke bogføre udenlandsk moms. Ved OSS bogføres salget på egen konto.',
+  },
+  {
+    key: 'invoice.updateDrafts',
+    label: 'Opdatér fakturakladder',
+    type: 'boolean',
+    default: true,
+    help: 'Ændringer i butikken opdaterer kladden. En bogført faktura ændres aldrig.',
+  },
+  {
+    key: 'payment.register',
+    label: 'Registrér betaling',
+    type: 'boolean',
+    default: true,
+    help: 'Betalte ordrer får betalingen registreret, når fakturaen bogføres.',
+  },
+  {
+    key: 'payment.account',
+    label: 'Standardkonto for betalinger',
+    type: 'select',
+    default: '',
+    lookup: 'depositAccounts',
+    showIf: { key: 'payment.register', equals: true },
+    help: 'Bruges, når betalingsmetoden ikke har sin egen konto.',
+  },
+  {
+    key: 'invoice.date',
+    label: 'Fakturadato',
+    type: 'select',
+    default: 'order',
+    level: 'advanced',
+    options: [
+      { value: 'order', label: 'Ordrens dato' },
+      { value: 'today', label: 'Dagens dato' },
+    ],
+  },
+  {
+    key: 'invoice.template',
+    label: 'Fakturaskabelon',
+    type: 'select',
+    default: '',
+    lookup: 'invoiceTemplates',
+    level: 'advanced',
+  },
+  {
+    key: 'rounding.maxDiff',
+    label: 'Største afrunding (kr.)',
+    type: 'number',
+    default: 1,
+    level: 'advanced',
+    help: 'Er forskellen større, stopper fakturaen til gennemsyn.',
+  },
+  {
+    key: 'send.email',
+    label: 'Send faktura på e-mail',
+    type: 'boolean',
+    default: false,
+    help: 'Kræver, at fakturaen bogføres.',
+  },
+  {
+    key: 'send.eInvoice',
+    label: 'Send EAN-faktura',
+    type: 'boolean',
+    default: false,
+    help: 'Når ordren har et EAN-nummer. Sendes i stedet for e-mail.',
+  },
+];
+
+/** How contacts are matched and kept up to date (PLAN §5.3). */
+const DINERO_CONTACT_SETTINGS: SettingField[] = [
+  {
+    key: 'contact.match',
+    label: 'Find kunden i Dinero på',
+    type: 'select',
+    default: 'email',
+    options: [
+      { value: 'email', label: 'E-mail' },
+      { value: 'vatNumber', label: 'Momsnummer' },
+      { value: 'externalReference', label: 'Kun egen reference' },
+    ],
+  },
+  { key: 'contact.update', label: 'Opdatér kunder i Dinero', type: 'boolean', default: true },
+  {
+    key: 'contact.paymentDays',
+    label: 'Betalingsfrist (dage)',
+    type: 'number',
+    default: 8,
+    help: 'For ordrer, der ikke er betalt.',
+  },
+];
+
 export const dinero: ConnectorManifest = {
   id: 'dinero',
   name: 'Dinero',
-  version: '1.4.0',
+  version: '2.0.0',
   category: 'erp',
   logo: '/logos/dinero.svg',
   // Visma Connect (PLAN F3); offline_access gives the refresh token.
@@ -377,17 +525,35 @@ export const dinero: ConnectorManifest = {
     scopes: ['dineropublicapi:read', 'dineropublicapi:write', 'offline_access'],
   },
   accountHint: 'Virksomhed i Dinero',
-  outputs: [
-    { entity: 'customer', label: 'Kontakter', trigger: { kind: 'poll', minMinutes: 15 } },
-    // Retur-flows (§4.2): stock counts from the ERP back to the shops.
-    { entity: 'stock', label: 'Lagerantal', trigger: { kind: 'poll', minMinutes: 15 } },
+  // One login reaches every company the user has; the connection books in one (PLAN §5.1).
+  connectionSettings: [
+    {
+      key: 'organizationId',
+      label: 'Virksomhed',
+      type: 'select',
+      default: '',
+      lookup: 'organizations',
+      help: 'Tom: den første virksomhed med Dinero Pro.',
+    },
+    {
+      key: 'clearingAccount',
+      label: 'Mellemregningskonto for betalinger',
+      type: 'select',
+      default: '',
+      lookup: 'depositAccounts',
+      help: 'Fx kortindløserens konto. Bruges, når en rute ikke har en anden.',
+    },
   ],
+  lookups: ['accounts', 'depositAccounts', 'vatCodes', 'invoiceTemplates', 'organizations'],
+  // Dinero has no stock (PLAN F2): WooCommerce keeps stock itself.
+  outputs: [{ entity: 'customer', label: 'Kontakter', trigger: { kind: 'poll', minMinutes: 15 } }],
   inputs: [
     {
       entity: 'order',
       label: 'Fakturaer',
       modes: [...ORDER_MODES],
       targets: DINERO_INVOICE_TARGETS,
+      tables: [PAYMENT_METHODS],
     },
     {
       entity: 'creditNote',
@@ -406,40 +572,19 @@ export const dinero: ConnectorManifest = {
   // Credit notes are created from the original invoice and reuse its accounts (INVOICE_MISSING).
   mapping: { order: [ACCOUNT_GROUP] },
   routeSettings: {
-    order: [
-      {
-        key: 'invoice.bookAutomatically',
-        label: 'Bogfør fakturaer automatisk',
-        type: 'boolean',
-        default: false,
-        help: 'Slået fra: fakturaerne lægges som kladder, som du bogfører i Dinero.',
-      },
-      {
-        key: 'invoice.language',
-        label: 'Fakturasprog',
-        type: 'select',
-        default: 'da',
-        options: [
-          { value: 'da', label: 'Dansk' },
-          { value: 'en', label: 'Engelsk' },
-        ],
-      },
-      {
-        key: 'oss.mode',
-        label: 'Moms ved EU-salg til private',
-        type: 'select',
-        default: 'danishVat',
-        options: [
-          { value: 'danishVat', label: 'Dansk moms (under 10.000 euro om året)' },
-          { value: 'destinationVat', label: 'Købers lands moms (OSS)' },
-        ],
-        help: 'Dinero kan ikke bogføre udenlandsk moms. Ved OSS bogføres salget på egen konto.',
-      },
-    ],
+    order: [...DINERO_INVOICE_SETTINGS, ...DINERO_CONTACT_SETTINGS],
+    creditNote: [DINERO_INVOICE_SETTINGS[1]!, ...DINERO_CONTACT_SETTINGS],
+    customer: DINERO_CONTACT_SETTINGS,
   },
-  dependencies: { order: ['customer', 'product'], creditNote: ['customer'] },
+  // Invoice lines carry account and text; Dinero products are not needed (PLAN §5.3).
+  dependencies: { order: ['customer'], creditNote: ['customer'] },
   rateLimit: { perMinute: 100 },
   changelog: [
+    {
+      version: '2.0.0',
+      kind: 'breaking',
+      note: 'Live forbindelse. Lagerantal er fjernet, fordi Dinero ikke har lager.',
+    },
     {
       version: '1.4.0',
       kind: 'additive',
@@ -474,8 +619,19 @@ export const economic: ConnectorManifest = {
     ],
   },
   accountHint: 'Aftale i e-conomic',
+  connectionSettings: [],
+  lookups: ['accounts'],
+  outputs: [
+    { entity: 'customer', label: 'Kontakter', trigger: { kind: 'poll', minMinutes: 15 } },
+    // Retur-flows (§4.2): stock counts from the ERP back to the shops.
+    { entity: 'stock', label: 'Lagerantal', trigger: { kind: 'poll', minMinutes: 15 } },
+  ],
   // Dinero's field limits and VAT codes are not e-conomic's: no targets, no VAT-code checks.
-  inputs: dinero.inputs.map(({ targets: _targets, ...p }) => p),
+  inputs: dinero.inputs.map(({ targets: _targets, tables: _tables, ...p }) => p),
+  routeSettings: {
+    order: [DINERO_INVOICE_SETTINGS[0]!, DINERO_INVOICE_SETTINGS[1]!, DINERO_INVOICE_SETTINGS[2]!],
+  },
+  dependencies: { order: ['customer', 'product'], creditNote: ['customer'] },
   mapping: {
     order: [ECONOMIC_ACCOUNT_GROUP],
     creditNote: [ECONOMIC_ACCOUNT_GROUP],

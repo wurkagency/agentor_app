@@ -407,6 +407,13 @@
       "when": 1792644880130,
       "tag": "0057_credit_notes_documents",
       "breakpoints": true
+    },
+    {
+      "idx": 58,
+      "version": "7",
+      "when": 1792943107138,
+      "tag": "0058_connection_health",
+      "breakpoints": true
     }
   ]
 }

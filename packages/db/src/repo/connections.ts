@@ -41,6 +41,8 @@ export interface ConnectionRow {
   lastCheckedAt: Date | null;
   lastWebhookAt: Date | null;
   tokenExpiresAt: Date | null;
+  /** The connection's own settings (manifest `connectionSettings`). */
+  settings: Record<string, unknown>;
   /** Flows using the connection (filled once flows reference connections, M6). */
   usedInFlows: number;
 }
@@ -59,6 +61,7 @@ const columns = {
   lastCheckedAt: connections.lastCheckedAt,
   lastWebhookAt: connections.lastWebhookAt,
   tokenExpiresAt: connections.tokenExpiresAt,
+  settings: connections.settings,
 };
 
 /** How many flows use a connection in their published version or draft (D9 "Bruges i N flows"). */
@@ -111,7 +114,8 @@ export async function createConnection(
     connectorId: string;
     name: string;
     version: string;
-    secretFor: (connectionId: string) => SealedSecret;
+    /** Gets the webhook token too, so the credentials can carry the delivery address. */
+    secretFor: (connectionId: string, webhookToken: string | null) => SealedSecret;
     webhook: boolean;
   },
 ): Promise<{ id: string; webhookToken: string | null }> {
@@ -129,16 +133,16 @@ export async function createConnection(
       })
       .returning({ id: connections.id });
     const id = row!.id;
-    // The ciphertext is bound to (tenant, connection), so it is sealed once the id exists.
-    const s = input.secretFor(id);
-    await tx.execute(
-      sql`select app.insert_connection_secret(${id}, ${s.format}, null, ${s.nonce}, ${s.ciphertext})`,
-    );
     let webhookToken: string | null = null;
     if (input.webhook) {
       webhookToken = randomBytes(32).toString('base64url');
       await tx.execute(sql`select app.register_webhook(${hashWebhookToken(webhookToken)}, ${id})`);
     }
+    // The ciphertext is bound to (tenant, connection), so it is sealed once the id exists.
+    const s = input.secretFor(id, webhookToken);
+    await tx.execute(
+      sql`select app.insert_connection_secret(${id}, ${s.format}, null, ${s.nonce}, ${s.ciphertext})`,
+    );
     await writeAudit(tx, actor, {
       action: 'connection.created',
       objectType: 'connection',
@@ -149,12 +153,16 @@ export async function createConnection(
   });
 }
 
-/** New credentials for an existing connection (Genautentificér). */
+/**
+ * New credentials for an existing connection (Genautentificér). A source that pushes gets a new
+ * webhook address with them, because the old one can't be read back into the new credentials.
+ */
 export async function reauthorizeConnection(
   db: Database,
   actor: Actor,
   id: string,
-  secretFor: (connectionId: string) => SealedSecret,
+  secretFor: (connectionId: string, webhookToken: string | null) => SealedSecret,
+  opts: { webhook?: boolean } = {},
 ): Promise<void> {
   await withTenant(db, actor, async (tx) => {
     const res = await tx
@@ -163,7 +171,12 @@ export async function reauthorizeConnection(
       .where(eq(connections.id, id))
       .returning({ id: connections.id });
     if (!res.length) throw new ConnectionError('NOT_FOUND');
-    const s = secretFor(id);
+    let webhookToken: string | null = null;
+    if (opts.webhook) {
+      webhookToken = randomBytes(32).toString('base64url');
+      await tx.execute(sql`select app.register_webhook(${hashWebhookToken(webhookToken)}, ${id})`);
+    }
+    const s = secretFor(id, webhookToken);
     await tx.execute(
       sql`select app.insert_connection_secret(${id}, ${s.format}, null, ${s.nonce}, ${s.ciphertext})`,
     );
@@ -207,6 +220,40 @@ export async function rotateWebhookToken(db: Database, actor: Actor, id: string)
   });
 }
 
+/**
+ * Saves the connection's own settings (manifest `connectionSettings`), e.g. which WooCommerce meta
+ * field holds the VAT number or which Dinero company to book in. Keys outside `allowed` are
+ * dropped; the caller validates the values against the manifest.
+ */
+export async function updateConnectionSettings(
+  db: Database,
+  actor: Actor,
+  id: string,
+  patch: Record<string, unknown>,
+  allowed: string[],
+): Promise<void> {
+  await withTenant(db, actor, async (tx) => {
+    const [before] = await tx
+      .select({ settings: connections.settings })
+      .from(connections)
+      .where(eq(connections.id, id));
+    if (!before) throw new ConnectionError('NOT_FOUND');
+    const next: Record<string, unknown> = { ...before.settings };
+    for (const k of allowed) if (Object.hasOwn(patch, k)) next[k] = patch[k];
+    await tx
+      .update(connections)
+      .set({ settings: next, updatedAt: new Date() })
+      .where(eq(connections.id, id));
+    await writeAudit(tx, actor, {
+      action: 'connection.settings_changed',
+      objectType: 'connection',
+      objectId: id,
+      before: before.settings,
+      after: next,
+    });
+  });
+}
+
 export async function deleteConnection(db: Database, actor: Actor, id: string): Promise<void> {
   await withTenant(db, actor, async (tx) => {
     const res = await tx
@@ -230,6 +277,7 @@ export interface WorkerConnection {
   connectorId: string;
   name: string;
   status: ConnectionStatus;
+  settings: Record<string, unknown>;
   secret: (SealedSecret & { id: string; keyId: string | null }) | null;
 }
 
@@ -246,6 +294,7 @@ export async function loadConnectionForWorker(
         connectorId: connections.connectorId,
         name: connections.name,
         status: connections.status,
+        settings: connections.settings,
       })
       .from(connections)
       .where(eq(connections.id, connectionId));
@@ -367,6 +416,15 @@ export async function recordConnectionTest(
       });
     }
   });
+}
+
+/** Live connections due for a health test (token refresh, webhook repair), across tenants. */
+export async function dueConnectionTests(db: Database, before: Date, connectorIds: string[]) {
+  if (connectorIds.length === 0) return [];
+  const res = await db.execute<{ tenant_id: string; connection_id: string }>(
+    sql`select * from app.due_connection_tests(${before.toISOString()}::timestamptz, ${connectorIds}::text[])`,
+  );
+  return res.rows.map((r) => ({ tenantId: r.tenant_id, connectionId: r.connection_id }));
 }
 
 export async function loadInboundEvent(db: Database, tenantId: string, eventId: string) {

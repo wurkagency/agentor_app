@@ -40,7 +40,14 @@ import {
   type RecordInsert,
   type RouteRecordInsert,
 } from '@agentor/db';
-import { parseDefinition, runRoute, type FlowDefinition, type Route } from '@agentor/flows';
+import {
+  parseDefinition,
+  renderTargets,
+  routeWriteContext,
+  runRoute,
+  type FlowDefinition,
+  type Route,
+} from '@agentor/flows';
 import { applyExpressions, evaluateSandboxed } from '@agentor/flows/sandbox';
 import {
   enqueueRouteJobs,
@@ -51,7 +58,7 @@ import {
 } from '@agentor/jobs';
 import type { FlowProducer } from 'bullmq';
 import type { Redis } from 'ioredis';
-import { credentials, type ConnectionDeps } from './connections.js';
+import { connectionAdapter, credentials, type ConnectionDeps } from './connections.js';
 import { metrics } from './metrics.js';
 
 /** Records a test run reads: "Seneste 10 ordrer fra nordlys-cykler.dk" (D5). */
@@ -93,10 +100,7 @@ async function engineContext(deps: FlowDeps, tenantId: string, def: FlowDefiniti
     if (!c) return null;
     if (!adapters.has(connectionId)) {
       const creds = (await credentials(deps, tenantId, connectionId)) ?? {};
-      adapters.set(
-        connectionId,
-        adapterFor({ connectorId: c.connectorId, credentials: creds, mode: deps.connectorMode }),
-      );
+      adapters.set(connectionId, connectionAdapter(deps, tenantId, c, creds));
     }
     return adapters.get(connectionId)!;
   };
@@ -367,7 +371,21 @@ async function processRouteJob(
           if (!record) return { missing: dep, reason: `${dep} ${item.id} not found at the source` };
           try {
             await beforeWrite();
-            const w = await destAdapter.write(dep, record as never, { mode: MODE[route.mode] });
+            // The dependency gets the same default fields (external reference) as its own route.
+            const targets = manifest?.inputs.find((p) => p.entity === dep)?.targets ?? [];
+            const fields = targets.length
+              ? renderTargets(
+                  targets,
+                  { entity: dep, templates: {}, expressions: {} },
+                  record as never,
+                  source.connectionId,
+                ).fields
+              : null;
+            const w = await destAdapter.write(dep, record as never, {
+              mode: MODE[route.mode],
+              route: routeWriteContext({ ...route, targetEntity: dep }, destConn.connectorId),
+              ...(fields ? { fields } : {}),
+            });
             if (w.destinationId) {
               await saveLink(deps.db, job.tenantId, {
                 connectionId: dest.connectionId,

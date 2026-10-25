@@ -1,4 +1,11 @@
-import { adapterFor, countRecords, manifestFor, verifyWebhookSignature } from '@agentor/connectors';
+import {
+  countRecords,
+  manifestFor,
+  verifyWebhookSignature,
+  type ConnectorAdapter,
+  type LookupId,
+} from '@agentor/connectors';
+import { openAdapter } from '@agentor/connectors/live';
 import {
   createEngineRun,
   flowsReading,
@@ -37,6 +44,8 @@ export interface ConnectionDeps {
   /** Identifies the KEK a DEK was sealed to, for rotation. */
   kekId: string;
   connectorMode: 'mock' | 'live';
+  /** OAuth clients for token refresh, per connector (Dinero: Visma Connect). */
+  oauth?: Partial<Record<string, { clientId: string; clientSecret: string }>>;
   log: Logger;
   /** Webhooks start runs on the flows queue. */
   flowQueue?: Queue;
@@ -72,6 +81,51 @@ export async function credentials(
   return JSON.parse(plain.toString('utf8')) as Record<string, string>;
 }
 
+/**
+ * Merges changed credentials (a rotated refresh token, a webhook secret) into the key box. The
+ * newest secret is read first, so two changes in a row both survive.
+ */
+export async function persistCredentials(
+  deps: ConnectionDeps,
+  tenantId: string,
+  connectionId: string,
+  patch: Record<string, string>,
+): Promise<void> {
+  const current = (await credentials(deps, tenantId, connectionId)) ?? {};
+  const next = { ...current, ...patch };
+  const dekRow = await tenantDek(deps.db, tenantId, () => ({
+    wrapped: newWrappedDek(deps.kekPublic, tenantId).wrapped,
+    kekId: deps.kekId,
+  }));
+  const dek = unwrapDek(dekRow.wrapped, deps.kekPrivate, tenantId);
+  const bind = secretBinding(tenantId, connectionId);
+  await storeDekSecret(
+    deps.db,
+    tenantId,
+    connectionId,
+    dekRow.id,
+    dekEncrypt(Buffer.from(JSON.stringify(next), 'utf8'), dek, bind),
+  );
+}
+
+/** The adapter for a connection: live client or mock, with its settings and a credential store. */
+export function connectionAdapter(
+  deps: ConnectionDeps,
+  tenantId: string,
+  conn: { id: string; connectorId: string; settings?: Record<string, unknown> },
+  creds: Record<string, string>,
+): ConnectorAdapter {
+  return openAdapter({
+    connectorId: conn.connectorId,
+    credentials: creds,
+    mode: deps.connectorMode,
+    settings: conn.settings ?? {},
+    connectionId: conn.id,
+    persist: (patch) => persistCredentials(deps, tenantId, conn.id, patch),
+    ...(deps.oauth ? { oauth: deps.oauth } : {}),
+  });
+}
+
 const REASONS = {
   unauthorized: 'Adgangen blev afvist. Log ind igen for at give Agentor adgang.',
   unreachable: 'Systemet svarede ikke. Vi prøver igen automatisk.',
@@ -89,11 +143,17 @@ async function testConnection(deps: ConnectionDeps, tenantId: string, connection
     });
     return;
   }
-  const tested = adapterFor({
-    connectorId: conn.connectorId,
-    credentials: creds,
-    mode: deps.connectorMode,
-  });
+  let tested: ConnectorAdapter;
+  try {
+    tested = connectionAdapter(deps, tenantId, conn, creds);
+  } catch (e) {
+    await recordConnectionTest(deps.db, tenantId, connectionId, {
+      ok: false,
+      reason:
+        e instanceof Error && /incomplete/.test(e.message) ? REASONS.unauthorized : REASONS.unknown,
+    });
+    return;
+  }
   const result = await tested.test();
   const manifest = manifestFor(conn.connectorId);
   // What the account holds (OB2 "Vi fandt … ordrer"), only where the manifest says it can count.
@@ -108,19 +168,45 @@ async function testConnection(deps: ConnectionDeps, tenantId: string, connection
   );
   if (result.ok) {
     // Live lookups the editor maps against (chart of accounts, §4.5), cached per connection.
-    const lists = new Set(
-      Object.values(manifest?.mapping ?? {})
+    const lists = new Set<LookupId>([
+      ...Object.values(manifest?.mapping ?? {})
         .flat()
         .flatMap((g) => g!.fields.map((f) => f.lookup))
-        .filter((x): x is 'accounts' | 'vatCodes' | 'templates' => Boolean(x)),
-    );
-    const adapter = adapterFor({
-      connectorId: conn.connectorId,
-      credentials: creds,
-      mode: deps.connectorMode,
-    });
-    for (const list of lists)
-      await saveLookup(deps.db, tenantId, connectionId, list, await adapter.lookup(list));
+        .filter((x): x is LookupId => Boolean(x)),
+      ...(manifest?.lookups ?? []),
+    ]);
+    for (const list of lists) {
+      // One list the system won't give (a missing permission) must not fail the connection.
+      try {
+        await saveLookup(deps.db, tenantId, connectionId, list, await tested.lookup(list));
+      } catch (e) {
+        deps.log.warn(
+          { tenantId, connectionId, list, err: e instanceof Error ? e.message.slice(0, 200) : e },
+          'lookup failed',
+        );
+      }
+    }
+    // Webhooks in the shop (PLAN §4.5): registered, and switched back on after failures.
+    if (manifest?.webhook && tested.ensureWebhooks) {
+      try {
+        const hooks = await tested.ensureWebhooks();
+        await saveLookup(
+          deps.db,
+          tenantId,
+          connectionId,
+          'webhooks',
+          hooks.map((h) => ({ value: h.topic, label: h.status })),
+        );
+      } catch (e) {
+        deps.log.warn(
+          { tenantId, connectionId, err: e instanceof Error ? e.message.slice(0, 200) : e },
+          'webhook registration failed',
+        );
+        await saveLookup(deps.db, tenantId, connectionId, 'webhooks', [
+          { value: 'error', label: e instanceof Error ? e.message.slice(0, 200) : 'failed' },
+        ]);
+      }
+    }
     await resolveNotifications(deps.db, tenantId, { connectionId });
   } else {
     await notify(deps.db, tenantId, {
@@ -167,11 +253,7 @@ async function verifyWebhook(deps: ConnectionDeps, tenantId: string, eventId: st
     deps.log.warn({ tenantId, connectionId: conn.id }, 'webhook signature rejected');
     return;
   }
-  const adapter = adapterFor({
-    connectorId: conn.connectorId,
-    credentials: creds ?? {},
-    mode: deps.connectorMode,
-  });
+  const adapter = connectionAdapter(deps, tenantId, conn, creds ?? {});
   const change = adapter.parseWebhook(event.body.toString('utf8'), event.headers);
   if (!change || change.sourceIds.length === 0) return;
   if (change.deliveryId && !(await markDelivery(deps.db, tenantId, eventId, change.deliveryId))) {
@@ -181,12 +263,19 @@ async function verifyWebhook(deps: ConnectionDeps, tenantId: string, eventId: st
   if (!deps.flowQueue) return;
   for (const f of await flowsReading(deps.db, tenantId, conn.id)) {
     const def = parseDefinition(f.definition);
-    if (!def.routes.some((r) => r.entity === change.entity && !r.paused)) continue;
-    const runId = await createEngineRun(deps.db, tenantId, f.flowId, 'webhook', {
-      entity: change.entity,
-      ids: change.sourceIds,
-    });
-    if (runId) await enqueueFlowRun(deps.flowQueue, { tenantId, runId });
+    const live = def.routes.filter((r) => !r.paused);
+    if (live.some((r) => r.entity === change.entity)) {
+      const runId = await createEngineRun(deps.db, tenantId, f.flowId, 'webhook', {
+        entity: change.entity,
+        ids: change.sourceIds,
+      });
+      if (runId) await enqueueFlowRun(deps.flowQueue, { tenantId, runId });
+    }
+    // E.g. WooCommerce refunds come as order.updated: a cursor poll picks them up.
+    if (live.some((r) => change.alsoPoll?.includes(r.entity))) {
+      const runId = await createEngineRun(deps.db, tenantId, f.flowId, 'webhook');
+      if (runId) await enqueueFlowRun(deps.flowQueue, { tenantId, runId });
+    }
   }
 }
 
@@ -199,6 +288,12 @@ export async function processConnectionJob(deps: ConnectionDeps, name: string, d
     case 'webhook.received': {
       const d = parseConnectionJob('webhook.received', data);
       return verifyWebhook(deps, d.tenantId, d.eventId);
+    }
+    case 'connection.webhook': {
+      const d = parseConnectionJob('connection.webhook', data);
+      if (!(await loadConnectionForWorker(deps.db, d.tenantId, d.connectionId))) return;
+      await persistCredentials(deps, d.tenantId, d.connectionId, { webhookUrl: d.webhookUrl });
+      return testConnection(deps, d.tenantId, d.connectionId);
     }
     default:
       throw new Error(`unknown connection job ${name}`);

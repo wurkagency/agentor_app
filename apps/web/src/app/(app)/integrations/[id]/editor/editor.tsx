@@ -67,7 +67,7 @@ import {
 
 type Lookups = Record<
   string,
-  Partial<Record<'accounts' | 'vatCodes' | 'templates', { value: string; label: string }[]>>
+  Partial<Record<string, { value: string; label: string; vatCode?: string }[]>>
 >;
 
 export interface EditorProps {
@@ -102,7 +102,7 @@ function safe(raw: Record<string, unknown>): FlowDefinition {
   }
 }
 
-const TABS: InspectorTab[] = ['general', 'mapping', 'filters', 'run', 'history'];
+const TABS: InspectorTab[] = ['general', 'mapping', 'fields', 'filters', 'run', 'history'];
 
 export function Editor(p: EditorProps) {
   const t = useTranslations('editor');
@@ -347,6 +347,9 @@ export function Editor(p: EditorProps) {
     if (f.routeId) setSelected(f.routeId);
     if (f.path?.startsWith('mapping')) {
       setTab('mapping');
+      setFocusField(f.path);
+    } else if (f.path?.startsWith('templates')) {
+      setTab('fields');
       setFocusField(f.path);
     } else if (f.path?.startsWith('general')) setTab('general');
   };

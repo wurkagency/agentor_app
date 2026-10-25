@@ -4,6 +4,7 @@ import { Responsive } from '@agentor/ui/mobile';
 import { getTranslations } from 'next-intl/server';
 import { PageBody, PageHeader } from '@/components/shell/secondary-nav';
 import { requireRole } from '@/server/auth/session';
+import { env } from '@/server/env';
 import { db } from '@/server/infra';
 import { Catalogue, type CatalogueItem } from './catalogue';
 import { CatalogueMobile } from './mobile';
@@ -13,11 +14,15 @@ export async function generateMetadata() {
   return { title: t('add') };
 }
 
+/** Systems whose own key flow replaces pasting keys in live mode (PLAN-INTEGRATIONS §4.1). */
+const LIVE_KEY_FLOW = new Set(['woocommerce']);
+
 /** Tilføj forbindelse (D9-Katalog): 23 systems in 5 groups. */
 export default async function CataloguePage() {
   const ctx = await requireRole(['owner', 'admin', 'developer']);
   const rows = await listConnections(db(), { tenantId: ctx.tenant.tenantId, userId: ctx.user.id });
   const t = await getTranslations('connections');
+  const live = env().CONNECTOR_MODE === 'live';
   const items: CatalogueItem[] = CATALOGUE.map((c) => {
     const m = manifestFor(c.id);
     const mine = rows.filter((r) => r.connectorId === c.id);
@@ -40,7 +45,14 @@ export default async function CataloguePage() {
         ? null
         : m.auth.type === 'oauth2'
           ? { type: 'oauth' as const, provider: m.auth.provider, scopes: m.auth.scopes }
-          : { type: 'key' as const, fields: m.auth.fields, webhook: Boolean(m.webhook) },
+          : {
+              type: 'key' as const,
+              fields: m.auth.fields,
+              webhook: Boolean(m.webhook),
+              ...(live && LIVE_KEY_FLOW.has(m.id)
+                ? { live: { keyFlow: true, autoWebhook: Boolean(m.webhook) } }
+                : {}),
+            },
     };
   });
   const desktop = (

@@ -26,7 +26,16 @@ export interface CatalogueItem {
   available: boolean;
   connected: boolean;
   auth:
-    | { type: 'key'; fields: AuthField[]; webhook: boolean }
+    | {
+        type: 'key';
+        fields: AuthField[];
+        webhook: boolean;
+        /**
+         * Live mode: the shop's own key flow is offered first (WooCommerce /wc-auth), and the
+         * webhooks are registered by Agentor, so no address to paste.
+         */
+        live?: { keyFlow: boolean; autoWebhook: boolean };
+      }
     | { type: 'oauth'; provider: string; scopes: string[] }
     | null;
 }
@@ -126,6 +135,7 @@ function KeyDialog({ item, onClose }: { item: CatalogueItem; onClose: () => void
   const router = useRouter();
   const auth = item.auth as Extract<CatalogueItem['auth'], { type: 'key' }>;
   const [values, setValues] = useState<Record<string, string>>({});
+  const [manual, setManual] = useState(!auth.live?.keyFlow);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ id: string; webhookUrl: string | null } | null>(null);
   const [pending, start] = useTransition();
@@ -138,7 +148,7 @@ function KeyDialog({ item, onClose }: { item: CatalogueItem; onClose: () => void
         setError(res.error);
         return;
       }
-      if (res.data?.webhookUrl) setDone(res.data);
+      if (res.data?.webhookUrl && !auth.live?.autoWebhook) setDone(res.data);
       else {
         onClose();
         router.push(`/connections/${res.data!.id}`);
@@ -152,6 +162,63 @@ function KeyDialog({ item, onClose }: { item: CatalogueItem; onClose: () => void
     }
     return t(`errors.${['httpsRequired', 'badUrl'].includes(e) ? e : 'generic'}`);
   };
+
+  const urlField = auth.fields.find((f) => f.type === 'url');
+  const goToShop = () => {
+    const raw = urlField ? (values[urlField.key] ?? '').trim() : '';
+    try {
+      const u = new URL(raw);
+      if (u.protocol !== 'https:') throw new Error('http');
+      const q = new URLSearchParams({ baseUrl: u.origin, return: '/connections' });
+      window.location.assign(`/connect/${item.id}/start?${q}`);
+    } catch {
+      setError(raw.startsWith('http:') ? 'httpsRequired' : 'badUrl');
+    }
+  };
+
+  if (!manual && urlField)
+    return (
+      <Dialog
+        open
+        onOpenChange={(o) => !o && onClose()}
+        title={t('liveConnect.title', { name: item.name })}
+        width={560}
+        closeLabel={tc('close')}
+        footer={
+          <>
+            <Button variant="ghost" size="m" onClick={() => setManual(true)}>
+              {t('liveConnect.manual')}
+            </Button>
+            <Button variant="primary" size="m" onClick={goToShop}>
+              {t('liveConnect.go')}
+            </Button>
+          </>
+        }
+      >
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            goToShop();
+          }}
+        >
+          {error && <Banner tone="error">{errorText(error)}</Banner>}
+          <Field label={t('liveConnect.shopUrl')} help={t('liveConnect.shopUrlHelp')}>
+            {({ id, describedBy }) => (
+              <Input
+                id={id}
+                type="url"
+                autoComplete="url"
+                placeholder={urlField.placeholder}
+                aria-describedby={describedBy}
+                value={values[urlField.key] ?? ''}
+                onChange={(e) => setValues((v) => ({ ...v, [urlField.key]: e.target.value }))}
+              />
+            )}
+          </Field>
+        </form>
+      </Dialog>
+    );
 
   return (
     <Dialog

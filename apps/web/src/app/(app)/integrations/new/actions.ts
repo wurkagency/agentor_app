@@ -54,7 +54,7 @@ export async function createFromTemplate(
       filters: [],
       updateExisting: true,
       expressions: {},
-      sourceOptions: {},
+      sourceOptions: { ...r.sourceOptions },
       tables: {},
       templates: {},
     });

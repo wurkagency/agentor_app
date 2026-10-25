@@ -1054,7 +1054,8 @@
       "connection_deleted": "afbrød forbindelsen",
       "connection_broken": "registrerede, at forbindelsen blev afbrudt",
       "connection_restored": "registrerede, at forbindelsen virker igen",
-      "connection_webhook_rotated": "lavede en ny webhook-adresse"
+      "connection_webhook_rotated": "lavede en ny webhook-adresse",
+      "connection_settings_changed": "ændrede indstillingerne"
     },
     "account": "Konto",
     "configuredBy": "Forbundet af",
@@ -1079,6 +1080,32 @@
       "httpsRequired": "Adressen skal starte med https://.",
       "badUrl": "Adressen kan ikke bruges. Den skal være offentlig og bruge HTTPS.",
       "generic": "Noget gik galt. Prøv igen om lidt."
+    },
+    "settings": {
+      "title": "Indstillinger",
+      "shared": "Gælder alle flows med forbindelsen",
+      "advanced": "Avanceret",
+      "none": "Ingen",
+      "saved": "Indstillingerne er gemt. Forbindelsen testes igen.",
+      "notSaved": "Indstillingerne blev ikke gemt."
+    },
+    "hooks": {
+      "title": "Webhooks i butikken",
+      "meta": "Agentor holder dem slået til",
+      "failed": "Kunne ikke registreres",
+      "status": {
+        "active": "Aktiv",
+        "created": "Oprettet",
+        "reactivated": "Slået til igen",
+        "missing": "Mangler"
+      }
+    },
+    "liveConnect": {
+      "title": "Forbind med {name}",
+      "shopUrl": "Butikkens adresse",
+      "shopUrlHelp": "Du sendes til butikken og godkender adgangen der. Nøglerne kommer direkte til Agentor.",
+      "go": "Gå til butikken",
+      "manual": "Indtast nøgler selv"
     }
   },
   "flows": {
@@ -1625,7 +1652,8 @@
       "mapping": "Mapping",
       "filters": "Filtre",
       "run": "Kørsel",
-      "history": "Historik"
+      "history": "Historik",
+      "fields": "Felter"
     },
     "general": {
       "mode": "Tilstand",
@@ -1929,6 +1957,35 @@
       "expression": "Udtryk for {field}",
       "preview": "Vis resultat",
       "error": "Udtrykket kunne ikke køres."
+    },
+    "sourceOptions": "Fra {system}",
+    "destinationSettings": "Til {system}",
+    "noneOption": "Ingen",
+    "supplyType": "Type",
+    "supplyTypeFor": "Type for {name}",
+    "supply": {
+      "goods": "Varer",
+      "services": "Ydelser"
+    },
+    "fields": {
+      "intro": "Teksterne, {system} får. Brug variabler fra {source}, fx ordrenummeret.",
+      "insert": "Indsæt variabel",
+      "reset": "Brug standardteksten",
+      "preview": "Eksempel",
+      "previewNote": "Eksemplet bruger testdata, ikke dine egne ordrer.",
+      "maxLength": "Højst {count} tegn. Længere tekst bliver afkortet.",
+      "expressionOnly": "Bruges til at undgå dubletter. Kan kun ændres med et udtryk.",
+      "none": "{system} har ingen felter, der kan tilpasses her.",
+      "error": {
+        "TEMPLATE_INVALID": "Skabelonen kan ikke læses: {message}",
+        "TEMPLATE_UNKNOWN_VARIABLE": "Variablen {variable} findes ikke i kilden.",
+        "TEMPLATE_UNKNOWN_FIELD": "Feltet kan ikke udfyldes med en skabelon."
+      }
+    },
+    "tables": {
+      "empty": "Ingen {label} fundet endnu. Test forbindelsen til {source}, så hentes listen.",
+      "cell": "{column} for {row}",
+      "default": "Standard"
     }
   },
   "templates": {

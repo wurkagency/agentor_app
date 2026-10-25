@@ -56,6 +56,16 @@ const connectionDeps = {
   kekPublic: publicKeyFromBase64(kekPublicB64),
   kekId: createHash('sha256').update(kekPublicB64).digest('hex').slice(0, 16),
   connectorMode: (process.env.CONNECTOR_MODE === 'live' ? 'live' : 'mock') as 'mock' | 'live',
+  // Visma Connect client for Dinero token refresh (PLAN §5.1); the same app as the web login.
+  oauth:
+    process.env.DINERO_CLIENT_ID && process.env.DINERO_CLIENT_SECRET
+      ? {
+          dinero: {
+            clientId: process.env.DINERO_CLIENT_ID,
+            clientSecret: process.env.DINERO_CLIENT_SECRET,
+          },
+        }
+      : {},
   log: log.child({ queue: QUEUES.connections }),
 };
 

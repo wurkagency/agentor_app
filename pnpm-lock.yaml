@@ -224,6 +224,9 @@ importers:
 
   apps/scheduler:
     dependencies:
+      '@agentor/connectors':
+        specifier: workspace:*
+        version: link:../../packages/connectors
       '@agentor/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -478,6 +481,10 @@ importers:
   packages/config: {}
 
   packages/connectors:
+    dependencies:
+      '@agentor/http':
+        specifier: workspace:*
+        version: link:../http
     devDependencies:
       '@agentor/config':
         specifier: workspace:*

@@ -5,7 +5,9 @@ import {
   ConnectionError,
   createConnection,
   deleteConnection,
+  getConnection,
   isUuid,
+  updateConnectionSettings,
   reauthorizeConnection,
   requestConnectionTest,
   rotateWebhookToken,
@@ -18,6 +20,7 @@ import { actorFor, type ActionResult } from '@/server/actor';
 import { requireRole } from '@/server/auth/session';
 import {
   enqueueConnectionTest,
+  enqueueWebhookAddress,
   hasWebhook,
   sealCredentials,
   webhookUrl,
@@ -79,7 +82,7 @@ export async function connectWithKey(
     name: initialName(connectorId, checked.creds),
     version: m.version,
     webhook: hasWebhook(connectorId),
-    secretFor: (id) => sealCredentials(actor.tenantId, id, checked.creds),
+    secretFor: (id, token) => sealCredentials(actor.tenantId, id, checked.creds, token),
   });
   await enqueueConnectionTest(actor.tenantId, created.id);
   revalidatePath('/connections');
@@ -111,8 +114,12 @@ export async function completeMockOAuth(
   };
   if (reconnectId) {
     if (!isUuid(reconnectId)) return { ok: false, error: 'invalid' };
-    await reauthorizeConnection(db(), actor, reconnectId, (id) =>
-      sealCredentials(actor.tenantId, id, creds),
+    await reauthorizeConnection(
+      db(),
+      actor,
+      reconnectId,
+      (id, token) => sealCredentials(actor.tenantId, id, creds, token),
+      { webhook: hasWebhook(connectorId) },
     );
     await enqueueConnectionTest(actor.tenantId, reconnectId);
     revalidatePath('/connections');
@@ -123,7 +130,7 @@ export async function completeMockOAuth(
     name: m.name,
     version: m.version,
     webhook: hasWebhook(connectorId),
-    secretFor: (id) => sealCredentials(actor.tenantId, id, creds),
+    secretFor: (id, token) => sealCredentials(actor.tenantId, id, creds, token),
   });
   await enqueueConnectionTest(actor.tenantId, created.id);
   revalidatePath('/connections');
@@ -142,8 +149,12 @@ export async function reconnectWithKey(
   if (!checked.ok) return checked;
   const actor = await actorFor(ctx);
   try {
-    await reauthorizeConnection(db(), actor, connectionId, (id) =>
-      sealCredentials(actor.tenantId, id, checked.creds),
+    await reauthorizeConnection(
+      db(),
+      actor,
+      connectionId,
+      (id, token) => sealCredentials(actor.tenantId, id, checked.creds, token),
+      { webhook: hasWebhook(connectorId) },
     );
   } catch (e) {
     if (e instanceof ConnectionError) return { ok: false, error: e.code };
@@ -174,8 +185,73 @@ export async function newWebhookAddress(
 ): Promise<ActionResult<{ webhookUrl: string }>> {
   const ctx = await requireRole(MANAGERS);
   if (!isUuid(connectionId)) return { ok: false, error: 'invalid' };
-  const token = await rotateWebhookToken(db(), await actorFor(ctx), connectionId);
+  const actor = await actorFor(ctx);
+  const token = await rotateWebhookToken(db(), actor, connectionId);
+  // Live clients register the address themselves; the old one stops working at once.
+  if (env().CONNECTOR_MODE === 'live')
+    await enqueueWebhookAddress(actor.tenantId, connectionId, token);
   return { ok: true, data: { webhookUrl: webhookUrl(token) } };
+}
+
+const settingValueSchema = z.union([
+  z.string().max(200),
+  z.number().finite(),
+  z.boolean(),
+  z.array(z.string().max(80)).max(50),
+]);
+
+/**
+ * Saves the connection's own settings (manifest `connectionSettings`): only the manifest's keys,
+ * values of the declared type and, for fixed options, one of them. A new test follows, because a
+ * setting such as the Dinero company changes what the connection reaches.
+ */
+export async function saveConnectionSettings(
+  connectionId: string,
+  raw: unknown,
+): Promise<ActionResult> {
+  const ctx = await requireRole(MANAGERS);
+  if (!isUuid(connectionId)) return { ok: false, error: 'invalid' };
+  const parsed = z.record(z.string().max(64), settingValueSchema).safeParse(raw);
+  if (!parsed.success) return { ok: false, error: 'invalid' };
+  const conn = await getConnection(
+    db(),
+    { tenantId: ctx.tenant.tenantId, userId: ctx.user.id },
+    connectionId,
+  );
+  const m = conn ? manifestFor(conn.connectorId) : null;
+  if (!conn || !m) return { ok: false, error: 'NOT_FOUND' };
+  const fields = m.connectionSettings ?? [];
+  const clean: Record<string, unknown> = {};
+  for (const f of fields) {
+    if (!Object.hasOwn(parsed.data, f.key)) continue;
+    const v = parsed.data[f.key];
+    const ok =
+      f.type === 'boolean'
+        ? typeof v === 'boolean'
+        : f.type === 'number'
+          ? typeof v === 'number'
+          : f.type === 'multiselect'
+            ? Array.isArray(v)
+            : typeof v === 'string' &&
+              (f.type !== 'select' ||
+                f.lookup ||
+                v === '' ||
+                (f.options ?? []).some((o) => o.value === v));
+    if (!ok) return { ok: false, error: `invalid:${f.key}` };
+    clean[f.key] = v;
+  }
+  const actor = await actorFor(ctx);
+  await updateConnectionSettings(
+    db(),
+    actor,
+    connectionId,
+    clean,
+    fields.map((f) => f.key),
+  );
+  await requestConnectionTest(db(), actor, connectionId);
+  await enqueueConnectionTest(actor.tenantId, connectionId);
+  revalidatePath(`/connections/${connectionId}`);
+  return { ok: true };
 }
 
 export async function disconnect(connectionId: string): Promise<ActionResult> {

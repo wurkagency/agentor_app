@@ -7,6 +7,10 @@
     ".": {
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
+    },
+    "./live": {
+      "types": "./dist/live/index.d.ts",
+      "default": "./dist/live/index.js"
     }
   },
   "files": [
@@ -17,7 +21,9 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@agentor/http": "workspace:*"
+  },
   "devDependencies": {
     "@agentor/config": "workspace:*",
     "@types/node": "^22.20.5",

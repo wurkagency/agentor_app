@@ -75,6 +75,8 @@ export interface Port {
   variables?: VariableDef[];
   /** What this destination writes that templates can fill (inputs). */
   targets?: TargetField[];
+  /** Value tables on routes into this port (inputs). */
+  tables?: MappingTable[];
 }
 
 export interface MappingField {
@@ -114,6 +116,22 @@ export interface SettingField {
   level?: 'basic' | 'advanced';
   /** Shown only when another setting has this value. */
   showIf?: { key: string; equals: SettingValue };
+  /** Options from a live list instead of `options` (a select over the deposit accounts). */
+  lookup?: LookupId;
+}
+
+/**
+ * A value table on a route (PLAN §5.4): rows from a source list mapped to destination values,
+ * e.g. WooCommerce payment method → Dinero deposit account. Stored in the route's `tables`.
+ */
+export interface MappingTable {
+  key: string;
+  title: string;
+  description?: string;
+  /** The row key: a source lookup (payment gateways, shipping methods). */
+  from: { lookup: LookupId; label: string };
+  /** Columns per row, each a destination lookup. */
+  to: { key: string; label: string; lookup: LookupId }[];
 }
 
 export interface ConnectorManifest {
@@ -127,6 +145,8 @@ export interface ConnectorManifest {
   accountHint: string;
   /** Settings that belong to the connection and are shared by every flow using it. */
   connectionSettings?: SettingField[];
+  /** Live lists the worker caches at each connection test, for dropdowns in the editor. */
+  lookups?: LookupId[];
   /** Source ports (read). */
   outputs: Port[];
   /** Destination ports (write). */

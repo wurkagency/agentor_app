@@ -54,6 +54,17 @@ export interface WriteOptions {
    */
   fields?: Record<string, string>;
   lineFields?: Record<string, string>[];
+  /**
+   * The route's choices the destination needs to build its document: settings with manifest
+   * defaults, guided mapping, mapping tables and the account the engine chose per order line
+   * (then shipping), so the adapter never re-decides the accounting.
+   */
+  route?: {
+    settings: Record<string, unknown>;
+    mapping: Record<string, string>;
+    tables: Record<string, Record<string, string>[]>;
+    accounts?: (string | null)[];
+  };
 }
 
 /** What a verified webhook says changed. */
@@ -62,6 +73,17 @@ export interface WebhookChange {
   sourceIds: string[];
   /** The sender's delivery id, used to drop duplicate deliveries. */
   deliveryId: string | null;
+  /**
+   * Entities the change may also have touched, read by a cursor poll rather than by id, e.g.
+   * WooCommerce refunds, which arrive as `order.updated`.
+   */
+  alsoPoll?: Entity[];
+}
+
+/** The state of the webhooks a connection registered in the system (PLAN §4.5). */
+export interface WebhookStatus {
+  topic: string;
+  status: 'active' | 'reactivated' | 'created' | 'missing';
 }
 
 export interface ConnectorAdapter {
@@ -83,6 +105,11 @@ export interface ConnectorAdapter {
   ): Promise<WriteResult>;
   /** Reads a verified webhook body; null when it is not about a synced entity. */
   parseWebhook(rawBody: string, headers: Record<string, string>): WebhookChange | null;
+  /**
+   * Registers the connection's webhooks in the system and switches disabled ones back on.
+   * Optional: only sources that push and can be configured over their API.
+   */
+  ensureWebhooks?(): Promise<WebhookStatus[]>;
 }
 
 /**
@@ -128,6 +155,13 @@ export interface AdapterContext {
   credentials: Record<string, string>;
   /** `mock` until a connector's live client ships (produktspecifikation §13, Fase 1). */
   mode: 'mock' | 'live';
+  /** The connection's own settings (manifest `connectionSettings`, PLAN §3.1 L1). */
+  settings?: Record<string, unknown>;
+  /**
+   * Stores changed credentials (a rotated refresh token, a webhook secret) back in the key box.
+   * Only the worker provides it.
+   */
+  persist?: (patch: Record<string, string>) => Promise<void>;
 }
 
 export class AdapterError extends Error {
@@ -139,6 +173,31 @@ export class AdapterError extends Error {
     this.name = 'AdapterError';
   }
 }
+
+/** Fictional live lists for the mock connectors (Nordlys Cykler, designspecifikation §10.1). */
+const MOCK_LOOKUPS: Partial<Record<LookupId, LookupOption[]>> = {
+  organizations: [{ value: '412983', label: 'Nordlys Cykler' }],
+  depositAccounts: [
+    { value: '55000', label: 'Bank' },
+    { value: '55100', label: 'Kortindløser (QuickPay)' },
+    { value: '55110', label: 'MobilePay' },
+  ],
+  orderStatuses: [
+    { value: 'processing', label: 'Behandles' },
+    { value: 'completed', label: 'Gennemført' },
+    { value: 'on-hold', label: 'Afventer' },
+  ],
+  paymentGateways: [
+    { value: 'quickpay', label: 'Kort (QuickPay)' },
+    { value: 'mobilepay', label: 'MobilePay' },
+    { value: 'bacs', label: 'Bankoverførsel' },
+  ],
+  categories: [
+    { value: 'Cykler', label: 'Cykler' },
+    { value: 'Reservedele', label: 'Reservedele' },
+    { value: 'Tøj', label: 'Tøj' },
+  ],
+};
 
 /**
  * Deterministic stand-in for a connector. Credentials containing "invalid" or "revoked" fail the
@@ -216,8 +275,9 @@ class MockAdapter implements ConnectorAdapter {
         { value: 'I25', label: 'Salgsmoms 25 %' },
         { value: 'IEUV', label: 'EU-salg af varer' },
       ];
-    if (list === 'templates') return [{ value: 'standard', label: 'Standard' }];
-    return [];
+    if (list === 'templates' || list === 'invoiceTemplates')
+      return [{ value: 'standard', label: 'Standard' }];
+    return MOCK_LOOKUPS[list] ?? [];
   }
 
   async write<E extends Entity>(

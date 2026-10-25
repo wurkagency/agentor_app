@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@agentor/connectors": "workspace:*",
     "@agentor/core": "workspace:*",
     "@agentor/db": "workspace:*",
     "@agentor/jobs": "workspace:*",

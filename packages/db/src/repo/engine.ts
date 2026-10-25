@@ -97,10 +97,18 @@ export async function connectionsById(db: Database, tenantId: string, ids: strin
         connectorId: connections.connectorId,
         status: connections.status,
         name: connections.name,
+        settings: connections.settings,
       })
       .from(connections)
       .where(inArray(connections.id, ids)),
   );
+}
+
+/** One option of a cached lookup list; accounts carry their VAT code (Dinero). */
+export interface LookupRow {
+  value: string;
+  label: string;
+  vatCode?: string;
 }
 
 export async function getLookups(db: Database, tenantId: string, connectionId: string) {
@@ -110,7 +118,7 @@ export async function getLookups(db: Database, tenantId: string, connectionId: s
       .from(connectionLookups)
       .where(eq(connectionLookups.connectionId, connectionId));
     return Object.fromEntries(rows.map((r) => [r.list, r.options])) as Partial<
-      Record<'accounts' | 'vatCodes' | 'templates', { value: string; label: string }[]>
+      Record<string, LookupRow[]>
     >;
   });
 }
@@ -119,8 +127,8 @@ export async function saveLookup(
   db: Database,
   tenantId: string,
   connectionId: string,
-  list: 'accounts' | 'vatCodes' | 'templates',
-  options: { value: string; label: string }[],
+  list: string,
+  options: LookupRow[],
 ) {
   await withTenant(db, { tenantId }, (tx) =>
     tx

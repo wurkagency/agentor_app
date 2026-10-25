@@ -35,6 +35,8 @@ export interface Customer {
   /** Bought without an account in the shop; matched by e-mail. */
   isGuest?: boolean;
   shippingAddress?: Address | null;
+  /** Last change at the source (cursor and idempotency version). */
+  updatedAt?: string;
 }
 
 /** A named party on an order: who it is billed to or shipped to. */
@@ -141,6 +143,7 @@ export interface Product {
   categories?: string[];
   variantOf?: string | null;
   taxClass?: string | null;
+  updatedAt?: string;
   raw?: unknown;
 }
 

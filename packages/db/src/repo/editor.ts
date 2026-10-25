@@ -260,7 +260,7 @@ export async function listLookups(db: Database, ctx: { tenantId: string; userId:
   const rows = await withTenant(db, ctx, (tx) => tx.select().from(connectionLookups));
   const out: Record<
     string,
-    Partial<Record<'accounts' | 'vatCodes' | 'templates', { value: string; label: string }[]>>
+    Partial<Record<string, { value: string; label: string; vatCode?: string }[]>>
   > = {};
   for (const r of rows) (out[r.connectionId] ??= {})[r.list] = r.options;
   return out;

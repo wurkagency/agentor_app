@@ -24,13 +24,13 @@ import { MoreHorizontal, PanelRightClose, Plus, Trash2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, type ReactNode } from 'react';
 import { ExpressionEditor } from './expressions';
+import { FieldsTab } from './fields-tab';
+import { MappingTables } from './mapping-tables';
 import { describeFilters, nodeManifest, routeLabel, type ConnMap } from './model';
+import { SettingControl, visibleSettings, type LookupMap } from './setting-control';
 
-export type InspectorTab = 'general' | 'mapping' | 'filters' | 'run' | 'history';
-type Lookups = Record<
-  string,
-  Partial<Record<'accounts' | 'vatCodes' | 'templates', { value: string; label: string }[]>>
->;
+export type InspectorTab = 'general' | 'mapping' | 'fields' | 'filters' | 'run' | 'history';
+type Lookups = Record<string, LookupMap>;
 
 export interface InspectorProps {
   def: FlowDefinition;
@@ -87,14 +87,20 @@ export function Inspector(p: InspectorProps) {
   const ts = useTranslations('status');
   const r = p.route;
   const dst = nodeManifest(p.def, p.conns, r.to);
+  const src = nodeManifest(p.def, p.conns, r.from);
   const destNode = p.def.nodes.find((n) => n.id === r.to);
-  const accounts = destNode ? p.lookups[destNode.connectionId]?.accounts : undefined;
+  const srcNode = p.def.nodes.find((n) => n.id === r.from);
+  const destLookups: LookupMap = (destNode && p.lookups[destNode.connectionId]) || {};
+  const srcLookups: LookupMap = (srcNode && p.lookups[srcNode.connectionId]) || {};
+  const accounts = destLookups.accounts;
   const inPort = dst?.inputs.find((x) => x.entity === r.targetEntity);
+  const outPort = src?.outputs.find((x) => x.entity === r.entity);
+  const sourceOptions = outPort?.options ?? [];
   const modes: RouteMode[] = (['test', 'draft', 'live'] as RouteMode[]).filter(
     (m) => m === 'test' || inPort?.modes?.includes(m) || (!inPort?.modes && m === 'live'),
   );
   const groups = dst?.mapping?.[r.targetEntity] ?? [];
-  const settingsFields = dst?.routeSettings?.[r.targetEntity] ?? [];
+  const settings = visibleSettings(dst?.routeSettings?.[r.targetEntity] ?? [], r.settings);
   const mine = p.findings.filter((f) => f.routeId === r.id);
   const errorsAt = (path: string) => mine.find((f) => f.path === path && f.severity === 'error');
   const mappingErrors = mine.filter(
@@ -109,6 +115,7 @@ export function Inspector(p: InspectorProps) {
     el?.focus();
   }, [p.focusField, p.tab]);
 
+  // The VAT code shows next to each account: in Dinero the account decides the VAT (PLAN F1).
   const accountOptions = (accounts ?? []).map((a) => ({
     value: a.value,
     label: (
@@ -116,11 +123,44 @@ export function Inspector(p: InspectorProps) {
         <span className="font-mono text-mono">{a.value}</span> {a.label}
       </span>
     ),
+    ...(a.vatCode ? { hint: <span className="font-mono text-micro">{a.vatCode}</span> } : {}),
   }));
+  const settingField = (
+    s: (typeof settings.basic)[number],
+    values: Record<string, unknown>,
+    set: (x: Route, v: unknown) => void,
+    lookups: LookupMap,
+  ) => (
+    <Field key={s.key} label={s.label} help={s.help} inline>
+      {({ id, describedBy }) => (
+        <SettingControl
+          field={s}
+          value={values[s.key]}
+          onChange={(v) => p.update((x) => set(x, v))}
+          lookups={lookups}
+          readOnly={ro}
+          id={id}
+          describedBy={describedBy}
+          noneLabel={t('noneOption')}
+        />
+      )}
+    </Field>
+  );
+  const destSetting = (s: (typeof settings.basic)[number]) =>
+    settingField(s, r.settings, (x, v) => void (x.settings[s.key] = v as never), destLookups);
 
   const tabs: { key: InspectorTab; label: string; dot?: boolean }[] = [
     { key: 'general', label: t('tabs.general') },
     { key: 'mapping', label: t('tabs.mapping'), dot: mappingErrors > 0 },
+    ...(inPort?.targets?.length
+      ? [
+          {
+            key: 'fields' as const,
+            label: t('tabs.fields'),
+            dot: mine.some((f) => f.severity === 'error' && f.path?.startsWith('templates')),
+          },
+        ]
+      : []),
     { key: 'filters', label: t('tabs.filters') },
     { key: 'run', label: t('tabs.run') },
     { key: 'history', label: t('tabs.history') },
@@ -217,7 +257,7 @@ export function Inspector(p: InspectorProps) {
                 </span>
               )}
             </Field>
-            {r.entity === 'order' && (
+            {r.entity === 'order' && !sourceOptions.some((o) => o.key === 'trigger.statuses') && (
               <Field label={t('general.sendWhen')} inline>
                 {({ id }) => (
                   <Select
@@ -250,37 +290,31 @@ export function Inspector(p: InspectorProps) {
                 />
               )}
             </Field>
-            {settingsFields.map((s) => (
-              <Field key={s.key} label={s.label} help={s.help} inline>
-                {({ id, describedBy }) =>
-                  s.type === 'boolean' ? (
-                    <Switch
-                      id={id}
-                      aria-describedby={describedBy}
-                      disabled={ro}
-                      checked={Boolean(r.settings[s.key] ?? s.default)}
-                      onCheckedChange={(v) => p.update((x) => void (x.settings[s.key] = v))}
-                    />
-                  ) : s.type === 'select' ? (
-                    <Select
-                      id={id}
-                      disabled={ro}
-                      value={String(r.settings[s.key] ?? s.default)}
-                      onValueChange={(v) => p.update((x) => void (x.settings[s.key] = v))}
-                      options={(s.options ?? []).map((o) => ({ value: o.value, label: o.label }))}
-                    />
-                  ) : (
-                    <Input
-                      id={id}
-                      disabled={ro}
-                      value={String(r.settings[s.key] ?? s.default)}
-                      onChange={(e) => p.update((x) => void (x.settings[s.key] = e.target.value))}
-                    />
-                  )
-                }
-              </Field>
-            ))}
+            {sourceOptions.length > 0 && (
+              <section className="flex flex-col gap-3" aria-labelledby="src-options">
+                <h3 id="src-options" className="m-0 text-body font-semibold">
+                  {t('sourceOptions', { system: src?.name ?? '' })}
+                </h3>
+                {visibleSettings(sourceOptions, r.sourceOptions).basic.map((s) =>
+                  settingField(
+                    s,
+                    r.sourceOptions,
+                    (x, v) => void (x.sourceOptions[s.key] = v as never),
+                    srcLookups,
+                  ),
+                )}
+              </section>
+            )}
+            {settings.basic.length > 0 && (
+              <section className="flex flex-col gap-3" aria-labelledby="dst-settings">
+                <h3 id="dst-settings" className="m-0 text-body font-semibold">
+                  {t('destinationSettings', { system: dst?.name ?? '' })}
+                </h3>
+                {settings.basic.map(destSetting)}
+              </section>
+            )}
             <Advanced label={t('advanced')} {...(p.developer ? { open: true } : {})}>
+              {settings.advanced.map(destSetting)}
               <Field label={t('general.conflict')} inline>
                 {({ id }) => (
                   <Select
@@ -394,6 +428,7 @@ export function Inspector(p: InspectorProps) {
                     <tr className="text-left text-meta">
                       <th className="py-1.5 font-semibold">{t('category')}</th>
                       <th className="py-1.5 font-semibold">{t('account')}</th>
+                      <th className="py-1.5 font-semibold">{t('supplyType')}</th>
                       <th>
                         <span className="sr-only">{t('remove')}</span>
                       </th>
@@ -434,6 +469,26 @@ export function Inspector(p: InspectorProps) {
                             options={accountOptions}
                           />
                         </td>
+                        <td className="py-1.5 pr-2">
+                          {/* EU and export sales of services have their own accounts (PLAN F8). */}
+                          <Select
+                            aria-label={t('supplyTypeFor', { name: row.product ?? row.category })}
+                            density="table"
+                            disabled={ro}
+                            value={row.supplyType ?? 'goods'}
+                            onValueChange={(v) =>
+                              p.update(
+                                (x) =>
+                                  void (x.categoryAccounts[i]!.supplyType =
+                                    v === 'services' ? 'services' : null),
+                              )
+                            }
+                            options={['goods', 'services'].map((v) => ({
+                              value: v,
+                              label: t(`supply.${v}`),
+                            }))}
+                          />
+                        </td>
                         <td className="w-8 text-right">
                           {!ro && (
                             <Button
@@ -456,6 +511,33 @@ export function Inspector(p: InspectorProps) {
               </section>
             )}
           </>
+        )}
+
+        {p.tab === 'mapping' && inPort?.tables && inPort.tables.length > 0 && (
+          <MappingTables
+            route={r}
+            tables={inPort.tables}
+            sourceLookups={srcLookups}
+            destLookups={destLookups}
+            sourceName={src?.name ?? ''}
+            readOnly={ro}
+            update={p.update}
+          />
+        )}
+
+        {p.tab === 'fields' && (
+          <FieldsTab
+            route={r}
+            source={outPort}
+            sourceName={src?.name ?? ''}
+            target={inPort}
+            systemName={dst?.name ?? ''}
+            sourceConnectionId={srcNode?.connectionId ?? ''}
+            findings={p.findings}
+            readOnly={ro}
+            developer={p.developer}
+            update={p.update}
+          />
         )}
 
         {p.tab === 'mapping' && p.developer && (

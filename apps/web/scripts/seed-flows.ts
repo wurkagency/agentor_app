@@ -135,7 +135,7 @@ const NYHEDSBREV = {
 const LAGER = {
   defaultMode: 'live',
   pollMinutes: 15,
-  nodes: nodes(C.dinero, [
+  nodes: nodes(C.economic, [
     ['woo', C.woo],
     ['shopify', C.shopify],
   ]),

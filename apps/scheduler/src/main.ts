@@ -1,7 +1,9 @@
+import { LIVE_CONNECTORS } from '@agentor/connectors/live';
 import {
   createDatabase,
   createEngineRun,
   createScheduledRun,
+  dueConnectionTests,
   dueFlows,
   dueInvoiceJobs,
   dueSubscriptions,
@@ -10,10 +12,18 @@ import {
   retentionSweep,
   weeklyRecipients,
 } from '@agentor/db';
-import { billingQueue, enqueueBilling, enqueueFlowRun, flowsQueue } from '@agentor/jobs';
+import {
+  billingQueue,
+  connectionsQueue,
+  enqueueBilling,
+  enqueueConnectionJob,
+  enqueueFlowRun,
+  flowsQueue,
+} from '@agentor/jobs';
 import { Redis } from 'ioredis';
 import pino from 'pino';
 import { BILLING_INTERVAL_MS, billingTick, invoiceTick } from './billing.js';
+import { CONNECTION_INTERVAL_MS, connectionTick } from './connections.js';
 import {
   FLOW_INTERVAL_MS,
   flowTick,
@@ -134,6 +144,23 @@ const runWeekly = () =>
     );
 const weeklyTimer = setInterval(runWeekly, WEEKLY_INTERVAL_MS);
 
+// Connection health: only live clients have tokens to refresh and webhooks to repair.
+const connQueue = connectionsQueue(redis);
+const runConnections = () =>
+  process.env.CONNECTOR_MODE === 'live'
+    ? connectionTick({
+        isLeader: () => lock.isLeader,
+        due: (before) => dueConnectionTests(database.db, before, [...LIVE_CONNECTORS]),
+        enqueue: (tenantId, connectionId, jobId) =>
+          enqueueConnectionJob(connQueue, 'connection.test', { tenantId, connectionId }, { jobId }),
+      })
+        .then((n) => n && log.info({ connections: n }, 'connection health tests queued'))
+        .catch((err: unknown) =>
+          log.error({ err: err instanceof Error ? err.message : err }, 'connection tick failed'),
+        )
+    : undefined;
+const connectionTimer = setInterval(runConnections, CONNECTION_INTERVAL_MS);
+
 const shutdown = async (signal: string) => {
   log.info({ signal }, 'shutting down');
   clearInterval(billingTimer);
@@ -141,6 +168,8 @@ const shutdown = async (signal: string) => {
   clearInterval(staleTimer);
   clearInterval(retentionTimer);
   clearInterval(weeklyTimer);
+  clearInterval(connectionTimer);
+  await connQueue.close();
   await runQueue.close();
   await lock.stop();
   await queue.close();

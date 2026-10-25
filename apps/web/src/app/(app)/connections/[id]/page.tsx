@@ -1,5 +1,5 @@
 import { manifestFor } from '@agentor/connectors';
-import { getConnection, isUuid, listAudit } from '@agentor/db';
+import { getConnection, isUuid, listAudit, listLookups } from '@agentor/db';
 import { formatDate, formatDateTime, formatRelative, formatTime } from '@agentor/i18n';
 import {
   Card,
@@ -25,6 +25,16 @@ import {
   ConnectionTabs,
   WebhookAddress,
 } from './connection-actions';
+import { ConnectionSettings } from './connection-settings';
+
+/** Registration state per webhook topic, as the worker left it (PLAN-INTEGRATIONS §4.5). */
+const HOOK_STATUS: Record<string, 'ok' | 'warn' | 'error'> = {
+  active: 'ok',
+  created: 'ok',
+  reactivated: 'warn',
+  missing: 'error',
+  error: 'error',
+};
 
 export async function generateMetadata() {
   const t = await getTranslations('connections');
@@ -61,6 +71,8 @@ export default async function ConnectionPage({
   const at = (d: Date) => `${formatDate(d, locale)} kl. ${formatTime(d, locale)}`;
   const oauth = m.auth.type === 'oauth2';
   const rights = [...m.inputs, ...m.outputs].map((p) => p.label.toLowerCase());
+  const lookups = (await listLookups(db(), c0))[id] ?? {};
+  const hooks = lookups.webhooks ?? [];
 
   return (
     <PageBody>
@@ -192,6 +204,40 @@ export default async function ConnectionPage({
                 {t('noFlowsYetBody')}
               </EmptyState>
             </Card>
+            {(m.connectionSettings?.length ?? 0) > 0 && (
+              <ConnectionSettings
+                connectionId={c.id}
+                fields={m.connectionSettings!}
+                values={c.settings}
+                lookups={lookups}
+                canManage={canManage}
+              />
+            )}
+            {hooks.length > 0 && (
+              <Card className="flex flex-col gap-3">
+                <CardHeader title={t('hooks.title')} meta={t('hooks.meta')} />
+                <ul className="m-0 flex list-none flex-col p-0">
+                  {hooks.map((h) => (
+                    <li
+                      key={h.value}
+                      className="flex items-center justify-between gap-3 border-b border-border py-2 text-table last:border-0"
+                    >
+                      <span className="font-mono text-mono">
+                        {h.value === 'error' ? t('hooks.failed') : h.value}
+                      </span>
+                      <StatusPill
+                        status={HOOK_STATUS[h.value === 'error' ? 'error' : h.label] ?? 'error'}
+                        compact
+                      >
+                        {h.value === 'error'
+                          ? h.label
+                          : t(`hooks.status.${h.label}` as 'hooks.status.active')}
+                      </StatusPill>
+                    </li>
+                  ))}
+                </ul>
+              </Card>
+            )}
             {m.webhook && canManage && (
               <WebhookAddress
                 connectionId={c.id}

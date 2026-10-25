@@ -9,7 +9,13 @@ export interface Template {
   category: 'erp' | 'crm' | 'marketing';
   source: string[];
   destinations: string[];
-  routes: { entity: Entity; targetEntity: Entity; to: string }[];
+  routes: {
+    entity: Entity;
+    targetEntity: Entity;
+    to: string;
+    /** Source options the template sets, e.g. which order statuses to send. */
+    sourceOptions?: Record<string, string[] | string | boolean | number>;
+  }[];
   tags: Entity[];
   popular?: boolean;
   /** Higher first when several templates fit the systems chosen on SU3 (OB3 "Anbefalet"). */
@@ -30,6 +36,8 @@ const ERP_HINTS: Record<string, string> = {
   'accounts.shippingVatFree': 'Fragt momsfri',
 };
 
+const PAID_ORDERS = { 'trigger.statuses': ['processing', 'completed'] };
+
 export const TEMPLATES: Template[] = [
   {
     id: 'webshop-dinero',
@@ -37,7 +45,8 @@ export const TEMPLATES: Template[] = [
     source: ['woocommerce'],
     destinations: ['dinero'],
     routes: [
-      { entity: 'order', targetEntity: 'order', to: 'dinero' },
+      // Paid orders only (PLAN-INTEGRATIONS §4.3): not pending or cancelled ones.
+      { entity: 'order', targetEntity: 'order', to: 'dinero', sourceOptions: PAID_ORDERS },
       { entity: 'creditNote', targetEntity: 'creditNote', to: 'dinero' },
       { entity: 'customer', targetEntity: 'customer', to: 'dinero' },
     ],

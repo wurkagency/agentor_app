@@ -5,6 +5,8 @@ import { getUserSession } from '@/server/auth/session';
 import { env } from '@/server/env';
 import { db } from '@/server/infra';
 import { createOAuthState, safeReturn } from '@/server/oauth';
+import { providerAuthorizeUrl } from '@/server/providers';
+import { validatePublicUrl } from '@agentor/http';
 
 const MANAGERS = new Set(['owner', 'admin', 'developer']);
 
@@ -43,7 +45,17 @@ export async function GET(
     }
   }
   const reconnect = url.searchParams.get('reconnect');
-  const token = await createOAuthState({
+  const live = env().CONNECTOR_MODE === 'live';
+  // A self-hosted shop must be public HTTPS before we send anyone there (SSRF, §9.4).
+  if (live && baseUrl) {
+    try {
+      await validatePublicUrl(baseUrl);
+    } catch {
+      return back('connectError=badUrl');
+    }
+  }
+  if (live && m.id === 'woocommerce' && !baseUrl) return back('connectError=badUrl');
+  const state = {
     tenantId: membership.tenantId,
     userId: s.user.id,
     userName: s.user.name,
@@ -51,10 +63,11 @@ export async function GET(
     returnTo: safeReturn(url.searchParams.get('return')),
     baseUrl,
     reconnectId: reconnect && isUuid(reconnect) ? reconnect : null,
-  });
-  if (env().CONNECTOR_MODE !== 'mock') {
-    // FOLLOW-UP (T1): the provider's authorize URL with client id, scopes, state and PKCE.
-    return back('connectError=notAvailable');
+  };
+  const token = await createOAuthState(state);
+  if (live) {
+    const to = providerAuthorizeUrl(state, token);
+    return to ? NextResponse.redirect(to) : back('connectError=notAvailable');
   }
   return NextResponse.redirect(new URL(`/connect/${m.id}?state=${token}`, env().APP_URL));
 }

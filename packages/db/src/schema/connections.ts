@@ -145,8 +145,11 @@ export const connectionLookups = pgTable(
     tenantId: tenantIdColumn(),
     id: idColumn(),
     connectionId: uuid('connection_id').notNull(),
-    list: text('list').$type<'accounts' | 'vatCodes' | 'templates'>().notNull(),
-    options: jsonb('options').$type<{ value: string; label: string }[]>().notNull(),
+    /** A manifest lookup id ("accounts", "orderStatuses") or "webhooks" (registration state). */
+    list: text('list').notNull(),
+    options: jsonb('options')
+      .$type<{ value: string; label: string; vatCode?: string }[]>()
+      .notNull(),
     fetchedAt: ts('fetched_at').notNull().defaultNow(),
   },
   (t) => [
