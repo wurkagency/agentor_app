@@ -71,7 +71,7 @@ Tegnefladerne henter logoer fra lærredets asset-lager (`/_blob/<id>`). Lokalt p
 | `P3-Adgang.dc.html` | Anmod om supportadgang: sag, begrundelse, varighed (1, 8 eller 24 timer), omfang (Kun se / Se og hjælpe) |
 | `P4-Supportvisning.dc.html` | Kundens app med navy supportbjælke: kunde-skifter (⌘J), sag, godkender, nedtælling, "Afslut supportvisning" |
 | `P5-Skift-Kunde.dc.html` | Kunde-skifteren åben: aktive adgange, seneste kunder, søgning |
-| `P6-Platformbrugere.dc.html` | Superadmin: medarbejdere, roller, rettighedsmatrix, regler for supportadgang |
+| `P6-Platformbrugere.dc.html` | Administration › Brugere (Superadmin): medarbejdere, roller, rettighedsmatrix, regler for supportadgang |
 
 ### Supportoverblik (Platform)
 | Fil | Indhold |
@@ -96,7 +96,21 @@ Tegnefladerne henter logoer fra lærredets asset-lager (`/_blob/<id>`). Lokalt p
 | `F4-Kunde-Oekonomi.dc.html` | Én kundes abonnement, løbende support, support pr. måned og fakturaer med betalingsstatus |
 | `F5-Supportfaktura.dc.html` | Kladde til supportfaktura med linjer pr. sag, moms og afsendelse via QuickPay |
 | `F6-Betalinger.dc.html` | Fakturaer og betalinger på tværs: forfaldne, rykkere, fejlede kortbetalinger, seneste betalinger |
-| `F7-Rapporter.dc.html` | Månedsrapport: økonomiske nøgletal og supportomfang, største kunder, tid pr. supporter, tidligere måneder |
+| `F7-Rapporter.dc.html` | Administration › Rapporter › Omsætning. Månedsrapport: økonomiske nøgletal og supportomfang, største kunder, tid pr. supporter, tidligere måneder |
+
+### Platform v2: Support, Administration og profil (beslutning 24)
+
+| Fil | Indhold |
+|---|---|
+| `S9-Adgange.dc.html` | Support › Adgange: aktive og ventende supportadgange (tidligere "Mine adgange" under Kunder), forlæng, afslut, seneste udløbne, filter Mine/Alle |
+| `A1-Systemstatus.dc.html` | Administration › System Status: samlet status, oppetid, kø, webhooks, platformkomponenter, connectors og hændelser |
+| `A2-Produkt.dc.html` | Administration › Produkt: supportpris (timepris, oprunding, fakturering, ikke fakturerbar) og abonnementernes priser og features |
+| `A3-Rapport-Support.dc.html` | Administration › Rapporter › Support og tid: tid pr. supporter, pr. kategori, største kunder. PDF og CSV |
+| `A4-Rapport-Fakturering.dc.html` | Administration › Rapporter › Fakturering: alle fakturaer med status og dage til betaling. PDF og CSV |
+| `PR1-Profil.dc.html` | Platformens profil-dashboard (desktop): hero med avatar og nøgletal, præstationer, engagement, personlige oplysninger, login og sikkerhed, notifikationer |
+| `D15-Profil.dc.html` | Min profil i kundens app (desktop): præstationer, engagement, personlige oplysninger, profilbillede, login og sikkerhed, notifikationer |
+| `MA36-Profil.dc.html` | Profil i kundens app på mobil (femte fane) |
+| `MX1-Navigation-Kunde.dc.html`, `MX2-Navigation-Platform.dc.html` | Den svævende mobilnavigation (kundens app og Platform), som er rullet ud på alle mobilsider |
 
 ### Ny kunde: signup og onboarding
 
@@ -177,17 +191,52 @@ Tegnefladerne henter logoer fra lærredets asset-lager (`/_blob/<id>`). Lokalt p
 | `MP10-Supportvisning.dc.html` | Supportvisning af kundens app med lime supportbjælke og Afslut (P4-Supportvisning) |
 | `MP11-Skift-kunde.dc.html` | Skift kunde under supportvisning (P5-Skift-Kunde) |
 | `MP12-Platformbrugere.dc.html` | Platformbrugere, rettigheder pr. rolle og regler for supportadgang (P6, kun Superadmin) |
-| `MP13-Sager-Arkiv.dc.html` | Arkiv over løste sager med søgning (S2-Sager-Arkiv) |
+| `MP13-Sager-Arkiv.dc.html` | Support › Sager med visningsfilter Arkiv: løste sager med søgning (S2-Sager-Arkiv) |
 | `MP14-Afslut-session.dc.html` | Afslut supportsession: tid, handlinger, knyt til sag, afslut adgang (S5-Session-Slut) |
-| `MP15-Min-tid.dc.html` | Min tid: igangværende session, dagens tid og registreringer (S6-Min-Tid) |
+| `MP15-Min-tid.dc.html` | Support › Tidsforbrug (filter Min tid, Team, Pr. kunde): igangværende session, dagens tid og registreringer (S6-Min-Tid) |
 | `MP16-Loes-sag.dc.html` | Løs sag og send forløb til kunden (S8-Sag-Loes) |
 | `MP17-Kunde-handlinger.dc.html` | Handlinger for en kunde som ark (P1-Kunder-Menu) |
-| `MP18-Abonnementer.dc.html` | Finans: abonnementer med nøgletal og foldbare kunderækker (F2) |
-| `MP19-Supportafregning.dc.html` | Finans: supportafregning pr. kunde med sager (F3) |
+| `MP18-Abonnementer.dc.html` | Finans › Abonnementer: abonnementer med nøgletal og foldbare kunderækker (F2) |
+| `MP19-Supportafregning.dc.html` | Finans › Support: supportafregning pr. kunde med sager (F3) |
 | `MP20-Kunde-oekonomi.dc.html` | Finans: kundens økonomi og fakturaer (F4) |
 | `MP21-Supportfaktura.dc.html` | Finans: supportfaktura-kladde, godkend (F5) |
-| `MP22-Betalinger.dc.html` | Finans: fakturaer og betalinger (F6) |
-| `MP23-Rapporter.dc.html` | Finans: rapporter pr. måned som foldbare rækker (F7) |
+| `MP22-Betalinger.dc.html` | Finans › Fakturering: fakturaer og betalinger (F6) |
+| `MP23-Rapporter.dc.html` | Admin › Rapporter › Omsætning: pr. måned som foldbare rækker, PDF og CSV (F7) |
+| `MP24-Adgange.dc.html` | Support › Adgange på mobil: aktive, ventende og udløbne adgange, forlæng, afslut |
+| `MP25-Systemstatus.dc.html` | Admin › Status på mobil: samlet status, oppetid, platform, connectors, hændelser |
+| `MP26-Produkt.dc.html` | Admin › Produkt på mobil: supportpris og planens priser og features |
+| `MP27-Rapport-Support.dc.html` | Admin › Rapporter › Support og tid på mobil, PDF og CSV |
+| `MP28-Rapport-Fakturering.dc.html` | Admin › Rapporter › Fakturering på mobil, PDF og CSV |
+| `MP29-Profil.dc.html` | Platformens profil på mobil (sidste fane for alle roller) |
+
+### E-mails (siden "Emails & Invoices" · 600 px mail i 800 px ramme)
+
+| Fil | Indhold |
+|---|---|
+| `E01-Bekraeft-email.dc.html` | Bekræft din e-mail (link, 24 timer) |
+| `E02-Nulstil-adgangskode.dc.html` | Nulstil adgangskode (link, 1 time) |
+| `E03-Nyt-login.dc.html` | Nyt login på din konto (sikkerhed, ingen knap) |
+| `E04-Kode-ny-login-email.dc.html` | Kode til ny login-e-mail (6 cifre, 10 min.) |
+| `E05-Login-email-aendret.dc.html` | Login-e-mail er ændret, til den gamle adresse (ingen knap) |
+| `E06-Kode-oprettelse.dc.html` | Kode til oprettelse (6 cifre, 10 min.) |
+| `E07-Allerede-konto.dc.html` | Du har allerede en konto (log ind) |
+| `E08-Kvittering.dc.html` | Kvittering for abonnement (tabel med moms) |
+| `E09-Invitation-team.dc.html` | Invitation til team (7 dage) |
+| `E10-Kunde-oprettet.dc.html` | Kunde oprettet af Agentor (opret login og betal, 14 dage) |
+| `E11-Ny-invitation-ejer.dc.html` | Ny invitation til ejeren (14 dage, gamle links ugyldige) |
+| `E12-Sag-loest.dc.html` | Sag løst med forløb, tidsforbrug og tilfredshed (svar for at genåbne) |
+| `E13-Link-til-computer.dc.html` | Link til computer |
+| `E14-Ny-pris.dc.html` | Ny pris på plan (30 dage før) |
+| `E15-Paamindelse-faktura.dc.html` | Påmindelse om faktura |
+| `E16-Opdater-kort.dc.html` | Opdatér betalingskort |
+| `E17-Kontoudtog.dc.html` | Kontoudtog med åbne poster |
+| `E18-Maanedsrapport.dc.html` | Månedsrapport til bogholder (CSV vedhæftet, intern) |
+| `E19-Forbindelse-afbrudt.dc.html` | Forbindelse afbrudt (ikke bygget endnu) |
+| `E20-Systematisk-fejl.dc.html` | Systematisk fejl (ikke bygget endnu) |
+| `E21-Kvote-80.dc.html` | Kvote over 80 % (ikke bygget endnu) |
+| `E22-Ugentlig-opsummering.dc.html` | Ugentlig opsummering (ikke bygget endnu) |
+| `I01-Faktura.dc.html` | PDF-skabelon til faktura (A4): abonnement, support og EAN fra én skabelon |
+| `I02-Kreditnota.dc.html` | PDF-skabelon til kreditnota (A4), med henvisning til den krediterede faktura, negative beløb og tilbageførsel |
 
 ## Beslutninger truffet under designet (afviger fra specifikationerne)
 
@@ -218,6 +267,43 @@ Disse vinder over Designspecifikation v1 og Produktspecifikation v1.x, hvor de e
 21. **Signup og onboarding** (erstatter de tidligere D14-Onboarding-1..3, som er fjernet): En ny kunde er først aktiv, når abonnementet er betalt. Rækkefølgen er Konto → Virksomhed (CVR og systemer) → Abonnement → Betaling. Derefter følger onboarding: Webshop → Regnskab → Skabelon → Testkørsel → Live som kladde. Systemvalget i SU3 forvælger forbindelserne i onboarding og danner grundlag for den anbefalede plan og skabelon. Til højre er der et navy tillidspanel med logoer for de rigtige forbindelser, eksempler på flows, et diagram der bliver grønt for hver forbindelse, og tre tillidspunkter (data i EU, krypterede nøgler, test før noget skrives). Der er ingen opfundne tal eller citater. Årspris er 10 gange månedsprisen. Enterprises transaktionsgrænse og links til vilkår er pladsholdere ([ANTAL], [Handelsbetingelser], [Databehandleraftale]). Onboarding kan springes over, og så lander kunden på Overblik med en påmindelse.
 22. **Signup og onboarding på mobil** (`MS1`–`MS6`, `MO1`–`MO5`): Samme flow og tekster som på desktop. Det navy tillidspanel bliver til en logo-række, en kort tillidslinje og et lille navy kort med diagrammet, der bliver grønt. Planerne vises med den anbefalede plan foldet ud og de andre som rækker. Testkørslen vises som en liste i stedet for en tabel. Forbindelser oprettes med OAuth i systembrowseren og vender tilbage til appen.
 23. **Hele appen på mobil** (erstatter begrænsningerne i beslutning 20): Alle Desktop-sider har en mobilversion med fuld redigering, undtagen node-editoren, mapping, regler og skabelonguiden. Flows og ruter vises i stedet som foldbare tabeller med alle oplysninger synlige (`MA19`, `MA20`): man kan se alt, vælge flere flows og pause, genoptage eller køre dem, testkøre og publicere, men mapping, filtre, regler og nye flows ændres i editoren på computer. Alt andet kan gøres på mobilen: team og invitationer, roller, sikkerhed og sessioner, audit-log, forbindelser og katalog, afstemning, kørsler med developer-visning, plan og betaling, notifikationer pr. kanal. Platform på mobil kan nu også åbne supportvisning af kundens app (lime supportbjælke, skift kunde, afslut session med tid), anmode om adgang, se kundeside, arkiv, min tid, løse sager og sende forløb, administrere platformbrugere, og Finans har alle undersider (abonnementer, supportafregning, kundens økonomi, supportfaktura, betalinger, rapporter). Tabeller bliver til foldbare rækker (`details`), handlinger på en række ligger i den udfoldede række, og dialoger bliver til ark fra bunden. Lange sider er tegnet i fuld højde på tegnefladen.
+24. **Sitemap for Agentor Platform v2** (erstatter den tidligere topmenu Kunder · Supportsager · Fejl · Tid · Systemstatus · Platformbrugere):
+    - **Kunder** › Kunder. "Mine adgange" er flyttet til Support › Adgange, og "Seneste" er fjernet.
+    - **Support** › Sager · Adgange · Fejl · Tidsforbrug. Tavle, Liste og Arkiv er et visningsfilter på Sager. Fejl filtreres med 24 timer, 7 dage, 30 dage og en datovælger fra/til. Tidsforbrug filtreres med Min tid, Team og Pr. kunde.
+    - **Finans** › Oversigt · Abonnementer · Support · Fakturering (tidligere Supportafregning og Fakturaer og betalinger). Rapporter er flyttet til Administration.
+    - **Administration** › System Status · Brugere (tidligere Platformbrugere) · Produkt (supportpriser, abonnementernes features og priser) · Rapporter (Omsætning `F7`, Support og tid `A3`, Fakturering `A4`; alle kan gemmes som PDF og eksporteres til CSV).
+    - **Profilmenuen** åbner Profil-dashboardet (`PR1`) med engagement og personlige indstillinger.
+    - Topmenuen viser kun det, rollen må: Supporter ser Kunder og Support. Superadmin ser også Finans og Administration.
+    - **Mobil** følger samme sitemap. Superadmin har fanerne Kunder · Support · Finans · Admin · Profil. Supporter har Kunder · Support · Profil (beslutning 25). Inde i Support, Finans og Admin skifter man underside med en vandret fanerække øverst (fx Sager · Adgange · Fejl · Tidsforbrug). Arkiv, periode og Min tid/Team/Pr. kunde er filtre på siden. Nye mobilskærme: `MP24`–`MP29`.
+25. **Profil-dashboard og fem faner på mobil:** Både Platform (`PR1`, `MP29`) og kundens app (`D15`, `MA36`) har et centreret profil-dashboard. Det består af:
+    - en navy hero med stort avatar og kamera-knap til at skifte billede, navn, rolle, kontaktchips og fire nøgletal
+    - præstationer som medaljer, opnåede i lime og låste med fremskridt
+    - engagement med stime og aktivitetskort for 12 uger
+    - personlige oplysninger med profilbillede (upload/fjern)
+    - login og sikkerhed: adgangskode, totrin, passkeys, sessioner og login-e-mail
+    - notifikationer og log ud.
+
+    På desktop åbnes profilen fra konto-knappen i topbjælken. Mobilnavigationen har fem faner med **Profil som den sidste**: kundens app Overblik · Integrationer · Aktivitet · Mere · Profil og Platform for Superadmin Kunder · Support · Finans · Admin · Profil. Supporter har Kunder · Support · Profil, fordi Finans og Admin kun er for Superadmin. Profilkortet øverst på Mere linker også til profilen.
+
+    **Navigationens udseende (gælder alle mobilsider):**
+    - En svævende bjælke med runde ender, 56 px høj, 14 px fra kanterne.
+    - De inaktive faner viser kun ikonet.
+    - Den aktive fane viser ikon og navn i 15 px, fed.
+    - Kundens app: hvid bjælke med blød skygge. Grå ikoner (#9B9B97). Den aktive fane står i sort i en meget lys grå pille (#F3F1EC).
+    - Platform: navy bjælke. Alle ikoner og tekster er hvide. Den aktive fane ligger i en lidt lysere navy-tone (hvid med 10 % dækning). Der er ingen lime.
+    - Forslagene `MX1` og `MX2` viser bjælken.
+26. **E-mails** (`E01`–`E22`, kilde: listen "Agentor e-mails" over hvad appen sender pr. 21. okt. 2026):
+    - **Opbygning:** én skabelon til alle e-mails. Øverst logoet, så en overskrift uden ikon og brødtekst med "du". Derefter én lime knap med linket som tekst under og udløb i en lys chip. Til sidst en tynd skillelinje, en sikkerhedsnote, hilsen og en footer med årsagen til mailen.
+    - **Koder** vises som seks felter, og koden står også først i emnelinjen.
+    - **Sikkerhedsmails** (`E03`, `E05`) har bevidst ingen knap, kun vej til support.
+    - **Beløb** står i tabeller med moms. Kvittering og fakturamails bruger inkl. moms.
+    - **Teknik:** 600 px tabellayout med inline-styles, knapper som tabelceller (Outlook) og altid en tekstversion i samme rækkefølge. Hvert board har en "Til udvikling"-strimmel med emne, forhåndstekst, trigger og felter.
+    - **Ikke bygget endnu:** `E19`–`E22` er de fire notifikationsmails, som indstillingerne lover. De er skrevet her og skal bygges.
+    - **PDF-dokumenter (`I01`, `I02`):** A4 i samme visuelle sprog som e-mailene.
+        - Faktura har et lime mærke, og kreditnota har et navy mærke.
+        - Nummeret står stort i mono, efterfulgt af parter, linjetabel, totaler med moms 25 %, en statusboks (betalt, EAN eller tilbageført) og en footer med firma- og bankoplysninger.
+        - En kreditnota har egen nummerserie (`K-ÅÅÅÅ-nnnn`) og henviser altid til den krediterede faktura, som ikke ændres.
+        - Agentors CVR, adresse og bank er pladsholdere, indtil de ligger i indstillingerne.
 
 ## Kendte pladsholdere
 

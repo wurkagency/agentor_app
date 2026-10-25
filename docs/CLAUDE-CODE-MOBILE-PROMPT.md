@@ -66,7 +66,7 @@ Agentor Platform (navy header, tabs: Kunder, Sager, Fejl, Finans, where Finans i
 
 Build these once and reuse them. Match the boards pixel for pixel at 390 px.
 
-- `MobileShell` (top bar 60 px + content + tab bar 76 px), `TopBar` (logo, or back button + title + subtitle, bell with badge, navy Platform variant), `TabBar` (active tab = lime pill behind the icon, navy pill on Platform).
+- `MobileShell` (top bar 60 px + content + tab bar 76 px), `TopBar` (logo, or back button + title + subtitle, bell with badge, navy Platform variant), `TabBar` (replaced in phase 2 by the floating bar in README decision 25, see `MX1`/`MX2`).
 - `StatusHero` (circle icon + headline + meta), `RowLink` (56 px row: leading icon or logo, title + meta, trailing chevron, pill or button), `FlowCard` (connector logos source → destinations, status pill, name, meta), `ConnectorLogo` (uses the cleaned SVGs in `docs/design/runde-1/logos/`).
 - `MobileKpi` (label + trend pill, value, sparkline, meta, with a lime "featured" variant), `MobileRing`, `WeekBars` (7 days, today hatched, red cap on days with errors).
 - `SectionHeading` (12 px, 700, uppercase, `#1A1A18`, 14 px top margin, as on the boards), `DeskNote`, `Chip` group, `Switch`, `BigButton` (52 px), `Modal` (centred, 20 px radius, close button, focus trap, Esc and backdrop close), `ChatBubble` + `InternalNote` for cases.

@@ -35,7 +35,7 @@ Mobile shows these as collapsible tables with all the information visible (`MA19
 - Test run and publish
 - Bulk pause, resume and run
 
-**Platform on mobile.** Platform gains:
+**Platform on mobile.** Platform follows the new sitemap (README decision 24, see §3) and gains:
 - The support view of a customer's app (with switch customer and end session)
 - Request access
 - The customer page
@@ -59,12 +59,12 @@ The old "Send link til min computer" and grey computer notes remain only where t
 ## 2. Sources (read in this order)
 
 1. `docs/design/runde-1/README.md`:
-   - Decision 23 (binding), decision 20 (now partly replaced) and decisions 16, 18, 19, 21 and 22.
+   - Decisions 23 and 24 (binding), decision 20 (now partly replaced) and decisions 16, 18, 19, 21 and 22.
    - The board table "Mobile: alle sider fra Desktop".
 2. The new boards in `docs/design/runde-1/boards/`. On the live canvas (https://claude.ai/artifact/PM26ZBLDG84UP6EMwvRw1a) they are on page **"Mobile"**, in the two lowest rows.
    - All boards are 390 px wide. Long scrolling screens are drawn at full height, up to 1194 px.
    - Customer app: `MA16`–`MA35`.
-   - Platform, cases and Finans: `MP08`–`MP23`.
+   - Platform: `MP08`–`MP29` (Kunder, Support, Finans, Admin, Profil). `MP01`, `MP02`, `MP05`, `MP06` and `MP07` were updated with the new tabs and sub-tabs.
 3. The matching desktop board for each one (named in the README table) is the source of data, states, validation and copy. The mobile board decides layout and what is shown first.
 4. `docs/specs/produktspecifikation.md` and `docs/specs/designspecifikation.md` for roles, permissions, audit and states.
 
@@ -72,7 +72,7 @@ Where the mobile and desktop boards disagree on data or rules, the spec and READ
 
 ## 3. Board → route map
 
-**Customer app** (tabs Overblik, Integrationer, Aktivitet, Mere):
+**Customer app** (five tabs: Overblik, Integrationer, Aktivitet, Mere, Profil, per README decision 25):
 
 | Board | Route (mobile layout of the existing route) | Notes |
 | --- | --- | --- |
@@ -96,25 +96,47 @@ Where the mobile and desktop boards disagree on data or rules, the spec and READ
 | `MA33-Skift-plan` | `/billing/plan` | Compare and change plan, monthly or yearly. Owner only. Prices from `plan_entitlements`. |
 | `MA34-MFA` | `/login/mfa` | TOTP step with remember device. |
 | `MA35-Notifikationskanaler` | `/settings/notifications` (channels) | App, e-mail, push and SMS per event, plus threshold. Quiet hours stay on `MA11`. |
+| `MA36-Profil` | `/profile` | Fifth tab. Hero with avatar (change photo), achievements as medals, streak and 12-week activity map, personal details, password, 2FA, passkeys, sessions, log out. Same profile API as the desktop `D15-Profil`. |
 
-**Platform** (navy header, tabs Kunder, Sager, Fejl, Finans):
+**Platform** (navy header). The sitemap follows README decision 24:
+- **Superadmin tabs:** Kunder · Support · Finans · Admin · Profil.
+- **Supporter tabs:** Kunder · Support · Profil.
+- Profil is always the last tab (README decision 25).
+- Support, Finans and Admin each start with a horizontal sub-tab row (`PlatformSubTabs`):
+  - Support: Sager · Adgange · Fejl · Tidsforbrug
+  - Finans: Oversigt · Abonnementer · Support · Fakturering
+  - Admin: Status · Brugere · Produkt · Rapporter
+- Views are filters on the page, not routes: Liste/Arkiv on Sager, 24 t/7 d/30 d plus a from/to date picker on Fejl, Min tid/Team/Pr. kunde on Tidsforbrug, and the report type on Rapporter.
 
 | Board | Route | Notes |
 | --- | --- | --- |
+| `MP01-Kunder` | `/platform/customers` | Kunder tab. "Mine adgange" is gone from here (moved to Support › Adgange). |
 | `MP08-Kunde` | `/platform/customers/[id]` | Active grant banner, needs action, contact (collapsible), access log. |
 | `MP09-Anmod-adgang` | request sheet | Case, reason, duration 1/8/24 h, scope. Same server action as P3. |
+| `MP17-Kunde-handlinger` | action sheet from `MP01` | Open as support, customer page, new case, finance, extend or end access. |
 | `MP10-Supportvisning` | customer routes under an active grant | The **lime support bar** sits above the customer top bar on every screen, can't be dismissed and has "Afslut". The customer tabs are used. Everything is audit-logged with the staff member's name. |
 | `MP11-Skift-kunde` | switch sheet | Active grants first, then recent customers. Without a grant, open the customer page. |
-| `MP12-Platformbrugere` | `/platform/staff` | Superadmin only. Staff as collapsible rows, rights per role, support access rules. |
-| `MP13-Sager-Arkiv` | `/platform/cases/archive` | Search title, solution and notes. Collapsible rows. |
 | `MP14-Afslut-session` | end session sheet | Auto-logged time, action list, link to case, internal note, end the grant. |
-| `MP15-Min-tid` | `/platform/time` | Running session, today, week, entries needing a case, entries per case. |
-| `MP16-Loes-sag` | `/platform/cases/[id]/resolve` | Recipients, what to include (internal notes are always excluded and locked), closing message, status after. |
-| `MP17-Kunde-handlinger` | action sheet from `MP01` | Open as support, customer page, new case, finance, extend or end access. |
-| `MP18`–`MP23` | `/platform/finance/*` | Subscriptions, support settlement, customer finance, support invoice draft (approve), invoices and payments, reports. Superadmin only. KPI cards use the compact mobile variants from phase 1. |
+| `MP02-Sager`, `MP13-Sager-Arkiv` | `/platform/support/cases?view=list|archive` | Support › Sager. The Arkiv view adds search in title, solution and notes. Collapsible rows. |
+| `MP03`, `MP04`, `MP16-Loes-sag` | `/platform/support/cases/[id]`, `.../resolve` | Case, time modal, resolve and send history (internal notes always excluded and locked). |
+| `MP24-Adgange` | `/platform/support/access` | Support › Adgange. Filter Mine/Alle. Active, pending and expired grants. Open as support, extend, end, withdraw. "Anmod" floating button opens `MP09`. |
+| `MP05-Fejl` | `/platform/support/errors?period=24h|7d|30d&from=&to=` | Support › Fejl. Period chips and a from/to date picker. Counts only, never customer data. |
+| `MP15-Min-tid` | `/platform/support/time?scope=me|team|customer` | Support › Tidsforbrug. Running session, today, week, entries needing a case, entries per case. |
+| `MP06`, `MP18`, `MP19`, `MP22` | `/platform/finance`, `/subscriptions`, `/support`, `/invoicing` | Finans › Oversigt, Abonnementer, Support, Fakturering. `MP07` (overdue), `MP20` (customer finance) and `MP21` (invoice draft, approve) are detail screens. Superadmin only. |
+| `MP25-Systemstatus` | `/platform/admin/status` | Admin › Status: overall status, uptime, queue, platform components, connectors, incidents. |
+| `MP12-Platformbrugere` | `/platform/admin/users` | Admin › Brugere: staff as collapsible rows, rights per role, support access rules. |
+| `MP26-Produkt` | `/platform/admin/product` | Admin › Produkt: support price (rate, rounding) and each plan's prices and features. Values come from settings and `plan_entitlements`. Saving creates a price version. |
+| `MP23`, `MP27`, `MP28` | `/platform/admin/reports/revenue`, `/support`, `/invoicing` | Admin › Rapporter: Omsætning, Support og tid, Fakturering, with a type switch and a from/to period. The sticky bar has "Gem som PDF" and "Eksportér CSV" for every report type. |
+| `MP29-Profil` | `/platform/profile` | Last tab for every role. Same layout as `MA36`, with staff achievements and engagement. Matches the desktop `PR1-Profil`. |
 
 ## 4. Patterns to build once (extend `packages/ui` mobile namespace)
 
+- **`MobileTabBar`** (see `MX1`/`MX2` and README decision 25):
+  - Layout: a floating rounded bar, 56 px high, 14 px from the screen edges, sitting above the safe area. Five tabs with Profil last.
+  - Tabs: inactive tabs show the icon only, with a 44 × 44 px target. The active tab shows icon + label (15 px, bold) and uses `aria-current="page"`. Every icon-only tab keeps an `aria-label`.
+  - Customer app: white bar, grey icons, active tab in black on a very light grey pill.
+  - Platform: navy bar, white icons and label, active tab on a slightly lighter navy tint, no lime.
+- **`ProfileHero`**, **`AchievementMedal`** and **`ActivityHeatmap`**, shared with the desktop profile.
 - **`CollapsibleRow`**: a semantic `<details>`/`<summary>`, or a button with `aria-expanded` and a region. It has a leading element (checkbox, logo, avatar, time), title, subtitle, trailing status pill and chevron. The body is a key/value list (`KeyValueRow`) and an optional action row. This one component carries every desktop table on mobile. Rows that reveal actions must stay ≥ 44 px tall. The expanded state survives back navigation.
 - **`SelectableList` + `BulkBar`**: checkbox in the row's leading slot and a floating dark bar above the tab bar with the count and actions. Esc and "Fjern valg" clear the selection.
 - **`BottomSheet`**: dialogs become sheets with a handle, title, subtitle and close button. Focus trap, Esc, backdrop close and scrollable content. The existing centred `Modal` stays for time registration.
@@ -155,7 +177,7 @@ Where the mobile and desktop boards disagree on data or rules, the spec and READ
 2. **M5 – Patterns:** the components in §4 in Storybook or on `/dev/mobile`, in every state.
 3. **M6 – Customer app:** `MA16`–`MA35` and the updated links in `MA04`, `MA05`, `MA10`, `MA11` and `MA15`.
 4. **M7 – Platform:** `MP08`–`MP17`, including the support view session (bar, switch, end session with time) and the updated `MP01`/`MP02`.
-5. **M8 – Finans:** `MP18`–`MP23` and the updated `MP06`.
+5. **M8 – Finans, Admin and Profil:** `MP18`–`MP28`, `MP29` and the updated `MP06`/`MP07`. Also the role-based tab bar and `PlatformSubTabs`.
 
 For every milestone:
 - Playwright at 390 × 844 and 360 × 780 for every board, scrolling through full-height boards. Put screenshots next to the board in the PR.
@@ -172,7 +194,7 @@ For every milestone:
 
 ## 7. First reply I expect
 
-1. Confirmation that you have read README decision 23 and found all 36 new boards (`MA16`–`MA35`, `MP08`–`MP23`) plus the 8 updated phase 1 boards. List any that are missing.
+1. Confirmation that you have read README decision 23 and found all 43 new boards (`MA16`–`MA36`, `MP08`–`MP29`) plus the updated phase 1 boards (`MA04`, `MA05`, `MA10`, `MA11`, `MA15`, `MP01`, `MP02`, `MP05`, `MP06`, `MP07`). List any that are missing.
 2. A list of each desktop server action you will reuse, and any that don't exist yet.
 3. Your approach for `CollapsibleRow` (native `<details>` or a custom disclosure) and for keeping the support session state in the layout.
 4. `docs/PLAN-MOBILE-2.md`.

@@ -2,6 +2,34 @@
  "v": 3,
  "attachments": {},
  "boards": {
+  "A1-Systemstatus.dc.html": {
+   "h": 1150,
+   "title": "Administration · system status (Superadmin)",
+   "w": 1440,
+   "x": 0,
+   "y": 20070
+  },
+  "A2-Produkt.dc.html": {
+   "h": 1240,
+   "title": "Administration · produkt: priser og features",
+   "w": 1440,
+   "x": 1520,
+   "y": 20070
+  },
+  "A3-Rapport-Support.dc.html": {
+   "h": 1150,
+   "title": "Administration · rapport, support og tid",
+   "w": 1440,
+   "x": 3040,
+   "y": 20070
+  },
+  "A4-Rapport-Fakturering.dc.html": {
+   "h": 960,
+   "title": "Administration · rapport, fakturering",
+   "w": 1440,
+   "x": 4560,
+   "y": 20070
+  },
   "App-skal-B-Indstillinger.dc.html": {
    "expand": "fill",
    "h": 900,
@@ -146,6 +174,13 @@
    "w": 1440,
    "x": 4560,
    "y": 7580
+  },
+  "D15-Profil.dc.html": {
+   "h": 2260,
+   "title": "Min profil (kundens app)",
+   "w": 1440,
+   "x": 7600,
+   "y": 20070
   },
   "D2-Graense.dc.html": {
    "expand": "fill",
@@ -362,6 +397,14 @@
    "x": 9120,
    "y": 5420
   },
+  "E01-Bekraeft-email.dc.html": {
+   "x": 900,
+   "y": 200,
+   "w": 800,
+   "h": 1120,
+   "title": "E-mail 01 · bekræft din e-mail",
+   "page": "page-p9b0s5"
+  },
   "F1-Finans-Oversigt-Dage.dc.html": {
    "expand": "fill",
    "h": 1340,
@@ -389,7 +432,7 @@
   "F3-Support-Afregning.dc.html": {
    "expand": "fill",
    "h": 1360,
-   "title": "Finans · supportafregning, indeværende måned",
+   "title": "Finans · support, indeværende måned",
    "w": 1440,
    "x": 3040,
    "y": 16700
@@ -413,7 +456,7 @@
   "F6-Betalinger.dc.html": {
    "expand": "fill",
    "h": 1180,
-   "title": "Finans · fakturaer og betalinger",
+   "title": "Finans · fakturering",
    "w": 1440,
    "x": 7600,
    "y": 16700
@@ -421,7 +464,7 @@
   "F7-Rapporter.dc.html": {
    "expand": "fill",
    "h": 1340,
-   "title": "Finans · månedsrapport",
+   "title": "Administration · rapport, omsætning",
    "w": 1440,
    "x": 9120,
    "y": 16700
@@ -581,6 +624,214 @@
    "x": 6580,
    "y": 0
   },
+  "MA16-Kom-i-gang.dc.html": {
+   "h": 994,
+   "page": "mobile",
+   "title": "Kom i gang",
+   "w": 390,
+   "x": 0,
+   "y": 3792
+  },
+  "MA17-Soeg.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Søg",
+   "w": 390,
+   "x": 470,
+   "y": 3792
+  },
+  "MA18-Integrationer-Tom.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Integrationer, tom",
+   "w": 390,
+   "x": 940,
+   "y": 3792
+  },
+  "MA19-Flows-Tabel.dc.html": {
+   "h": 1154,
+   "page": "mobile",
+   "title": "Flows, tabel med valg",
+   "w": 390,
+   "x": 1410,
+   "y": 3792
+  },
+  "MA20-Flow-Ruter.dc.html": {
+   "h": 1144,
+   "page": "mobile",
+   "title": "Flow, ruter som tabel",
+   "w": 390,
+   "x": 1880,
+   "y": 3792
+  },
+  "MA21-Graense.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Integrationer, grænse nået",
+   "w": 390,
+   "x": 2350,
+   "y": 3792
+  },
+  "MA22-Testkoersel.dc.html": {
+   "h": 1124,
+   "page": "mobile",
+   "title": "Testkørsel",
+   "w": 390,
+   "x": 2820,
+   "y": 3792
+  },
+  "MA23-Publicer.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Publicér",
+   "w": 390,
+   "x": 3290,
+   "y": 3792
+  },
+  "MA24-Koersler.dc.html": {
+   "h": 1044,
+   "page": "mobile",
+   "title": "Kørsler",
+   "w": 390,
+   "x": 3760,
+   "y": 3792
+  },
+  "MA25-Koersel-Udvikler.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Kørsel, developer",
+   "w": 390,
+   "x": 4230,
+   "y": 3792
+  },
+  "MA26-Forbindelser.dc.html": {
+   "h": 994,
+   "page": "mobile",
+   "title": "Forbindelser",
+   "w": 390,
+   "x": 4700,
+   "y": 3792
+  },
+  "MA27-Tilfoej-forbindelse.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Tilføj forbindelse",
+   "w": 390,
+   "x": 5170,
+   "y": 3792
+  },
+  "MA28-Afstemning.dc.html": {
+   "h": 1084,
+   "page": "mobile",
+   "title": "Afstemning",
+   "w": 390,
+   "x": 5640,
+   "y": 3792
+  },
+  "MA29-Team.dc.html": {
+   "h": 994,
+   "page": "mobile",
+   "title": "Team og adgang",
+   "w": 390,
+   "x": 6110,
+   "y": 3792
+  },
+  "MA30-Inviter.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Invitér bruger",
+   "w": 390,
+   "x": 6580,
+   "y": 3792
+  },
+  "MA31-Sikkerhed.dc.html": {
+   "h": 994,
+   "page": "mobile",
+   "title": "Sikkerhed",
+   "w": 390,
+   "x": 7050,
+   "y": 3792
+  },
+  "MA32-Auditlog.dc.html": {
+   "h": 964,
+   "page": "mobile",
+   "title": "Audit-log",
+   "w": 390,
+   "x": 7520,
+   "y": 3792
+  },
+  "MA33-Skift-plan.dc.html": {
+   "h": 1154,
+   "page": "mobile",
+   "title": "Skift plan",
+   "w": 390,
+   "x": 7990,
+   "y": 3792
+  },
+  "MA34-MFA.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Totrinsbekræftelse",
+   "w": 390,
+   "x": 8460,
+   "y": 3792
+  },
+  "MA35-Notifikationskanaler.dc.html": {
+   "h": 904,
+   "page": "mobile",
+   "title": "Notifikationer pr. hændelse",
+   "w": 390,
+   "x": 8930,
+   "y": 3792
+  },
+  "MA36-Profil.dc.html": {
+   "h": 1704,
+   "page": "mobile",
+   "title": "Profil (kundens app)",
+   "w": 390,
+   "x": 9400,
+   "y": 3792
+  },
+  "MO1-Webshop.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Onboarding 1 · webshop",
+   "w": 390,
+   "x": 2820,
+   "y": 2528
+  },
+  "MO2-Regnskab.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Onboarding 2 · regnskab",
+   "w": 390,
+   "x": 3290,
+   "y": 2528
+  },
+  "MO3-Skabelon.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Onboarding 3 · skabelon",
+   "w": 390,
+   "x": 3760,
+   "y": 2528
+  },
+  "MO4-Testkoersel.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Onboarding 4 · testkørsel",
+   "w": 390,
+   "x": 4230,
+   "y": 2528
+  },
+  "MO5-Klar.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Onboarding 5 · klar",
+   "w": 390,
+   "x": 4700,
+   "y": 2528
+  },
   "MP01-Kunder.dc.html": {
    "h": 844,
    "page": "mobile",
@@ -636,6 +887,246 @@
    "w": 390,
    "x": 2820,
    "y": 1264
+  },
+  "MP08-Kunde.dc.html": {
+   "h": 944,
+   "page": "mobile",
+   "title": "Platform · kunde",
+   "w": 390,
+   "x": 0,
+   "y": 5366
+  },
+  "MP09-Anmod-adgang.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · anmod om supportadgang",
+   "w": 390,
+   "x": 470,
+   "y": 5366
+  },
+  "MP10-Supportvisning.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · supportvisning",
+   "w": 390,
+   "x": 940,
+   "y": 5366
+  },
+  "MP11-Skift-kunde.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · skift kunde",
+   "w": 390,
+   "x": 1410,
+   "y": 5366
+  },
+  "MP12-Platformbrugere.dc.html": {
+   "h": 1124,
+   "page": "mobile",
+   "title": "Platform · admin, brugere",
+   "w": 390,
+   "x": 1880,
+   "y": 5366
+  },
+  "MP13-Sager-Arkiv.dc.html": {
+   "h": 1164,
+   "page": "mobile",
+   "title": "Platform · support, sager som arkiv",
+   "w": 390,
+   "x": 2350,
+   "y": 5366
+  },
+  "MP14-Afslut-session.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · afslut supportsession",
+   "w": 390,
+   "x": 2820,
+   "y": 5366
+  },
+  "MP15-Min-tid.dc.html": {
+   "h": 1264,
+   "page": "mobile",
+   "title": "Platform · support, tidsforbrug",
+   "w": 390,
+   "x": 3290,
+   "y": 5366
+  },
+  "MP16-Loes-sag.dc.html": {
+   "h": 964,
+   "page": "mobile",
+   "title": "Platform · løs sag og send forløb",
+   "w": 390,
+   "x": 3760,
+   "y": 5366
+  },
+  "MP17-Kunde-handlinger.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · kunde, handlinger",
+   "w": 390,
+   "x": 4230,
+   "y": 5366
+  },
+  "MP18-Abonnementer.dc.html": {
+   "h": 1184,
+   "page": "mobile",
+   "title": "Platform · finans, abonnementer",
+   "w": 390,
+   "x": 4700,
+   "y": 5366
+  },
+  "MP19-Supportafregning.dc.html": {
+   "h": 1254,
+   "page": "mobile",
+   "title": "Platform · finans, support",
+   "w": 390,
+   "x": 5170,
+   "y": 5366
+  },
+  "MP20-Kunde-oekonomi.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · finans, kundens økonomi",
+   "w": 390,
+   "x": 5640,
+   "y": 5366
+  },
+  "MP21-Supportfaktura.dc.html": {
+   "h": 1034,
+   "page": "mobile",
+   "title": "Platform · finans, supportfaktura",
+   "w": 390,
+   "x": 6110,
+   "y": 5366
+  },
+  "MP22-Betalinger.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Platform · finans, fakturering",
+   "w": 390,
+   "x": 6580,
+   "y": 5366
+  },
+  "MP23-Rapporter.dc.html": {
+   "h": 1384,
+   "page": "mobile",
+   "title": "Platform · admin, rapport omsætning",
+   "w": 390,
+   "x": 7050,
+   "y": 5366
+  },
+  "MP24-Adgange.dc.html": {
+   "h": 1174,
+   "page": "mobile",
+   "title": "Platform · support, adgange",
+   "w": 390,
+   "x": 7520,
+   "y": 5366
+  },
+  "MP25-Systemstatus.dc.html": {
+   "h": 1424,
+   "page": "mobile",
+   "title": "Platform · admin, system status",
+   "w": 390,
+   "x": 7990,
+   "y": 5366
+  },
+  "MP26-Produkt.dc.html": {
+   "h": 1434,
+   "page": "mobile",
+   "title": "Platform · admin, produkt",
+   "w": 390,
+   "x": 8460,
+   "y": 5366
+  },
+  "MP27-Rapport-Support.dc.html": {
+   "h": 1104,
+   "page": "mobile",
+   "title": "Platform · admin, rapport support og tid",
+   "w": 390,
+   "x": 8930,
+   "y": 5366
+  },
+  "MP28-Rapport-Fakturering.dc.html": {
+   "h": 1254,
+   "page": "mobile",
+   "title": "Platform · admin, rapport fakturering",
+   "w": 390,
+   "x": 9400,
+   "y": 5366
+  },
+  "MP29-Profil.dc.html": {
+   "h": 1704,
+   "page": "mobile",
+   "title": "Platform · profil (Supporter)",
+   "w": 390,
+   "x": 9870,
+   "y": 5366
+  },
+  "MS1-Opret-konto.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Signup 1 · opret konto",
+   "w": 390,
+   "x": 0,
+   "y": 2528
+  },
+  "MS2-Bekraeft-mail.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Signup 2 · bekræft e-mail",
+   "w": 390,
+   "x": 470,
+   "y": 2528
+  },
+  "MS3-Virksomhed.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Signup 3 · virksomhed",
+   "w": 390,
+   "x": 940,
+   "y": 2528
+  },
+  "MS4-Abonnement.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Signup 4 · abonnement",
+   "w": 390,
+   "x": 1410,
+   "y": 2528
+  },
+  "MS5-Betaling.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Signup 5 · betaling",
+   "w": 390,
+   "x": 1880,
+   "y": 2528
+  },
+  "MS6-Velkommen.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Signup 6 · aktivt",
+   "w": 390,
+   "x": 2350,
+   "y": 2528
+  },
+  "MX1-Navigation-Kunde.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Forslag · ny navigation, kundens app",
+   "w": 390,
+   "x": 9870,
+   "y": 3792
+  },
+  "MX2-Navigation-Platform.dc.html": {
+   "h": 844,
+   "page": "mobile",
+   "title": "Forslag · ny navigation, Platform",
+   "w": 390,
+   "x": 10340,
+   "y": 3792
   },
   "Main.dc.html": {
    "h": 2590,
@@ -696,7 +1187,7 @@
    "expand": "fill",
    "h": 920,
    "is_interactive": true,
-   "title": "Platform · Kunder (Supporter)",
+   "title": "Kunder (Supporter)",
    "w": 1440,
    "x": 0,
    "y": 13670
@@ -736,15 +1227,22 @@
   "P6-Platformbrugere.dc.html": {
    "expand": "fill",
    "h": 900,
-   "title": "Platform · brugere og roller (Superadmin)",
+   "title": "Administration · brugere (Superadmin)",
    "w": 1440,
    "x": 9120,
    "y": 13670
   },
+  "PR1-Profil.dc.html": {
+   "h": 2180,
+   "title": "Profil · dashboard (Platform, Supporter)",
+   "w": 1440,
+   "x": 6080,
+   "y": 20070
+  },
   "S1-Sager-Tavle.dc.html": {
    "expand": "fill",
    "h": 1110,
-   "title": "Supportsager · tavle",
+   "title": "Support · sager, tavle",
    "w": 1440,
    "x": 0,
    "y": 15150
@@ -752,7 +1250,7 @@
   "S2-Sager-Arkiv.dc.html": {
    "expand": "fill",
    "h": 900,
-   "title": "Supportsager · arkiv",
+   "title": "Support · sager, arkiv",
    "w": 1440,
    "x": 1520,
    "y": 15150
@@ -784,7 +1282,7 @@
   "S6-Min-Tid.dc.html": {
    "expand": "fill",
    "h": 920,
-   "title": "Tid · ugeoversigt",
+   "title": "Support · tidsforbrug",
    "w": 1440,
    "x": 7600,
    "y": 15150
@@ -792,7 +1290,7 @@
   "S7-Fejl.dc.html": {
    "expand": "fill",
    "h": 920,
-   "title": "Fejl på tværs af kunder",
+   "title": "Support · fejl",
    "w": 1440,
    "x": 9120,
    "y": 15150
@@ -803,6 +1301,13 @@
    "title": "Supportsag · løs og send forløb",
    "w": 1440,
    "x": 10640,
+   "y": 15150
+  },
+  "S9-Adgange.dc.html": {
+   "h": 960,
+   "title": "Support · adgange",
+   "w": 1440,
+   "x": 12160,
    "y": 15150
   },
   "SU1-Opret-konto.dc.html": {
@@ -854,381 +1359,237 @@
    "x": 7600,
    "y": 18480
   },
-  "MS1-Opret-konto.dc.html": {
+  "E02-Nulstil-adgangskode.dc.html": {
+   "x": 1800,
+   "y": 200,
+   "w": 800,
+   "h": 1070,
+   "title": "E-mail 02 · nulstil adgangskode",
+   "page": "page-p9b0s5"
+  },
+  "E03-Nyt-login.dc.html": {
+   "x": 900,
+   "y": 1780,
+   "w": 800,
+   "h": 1135,
+   "title": "E-mail 03 · nyt login på din konto",
+   "page": "page-p9b0s5"
+  },
+  "E04-Kode-ny-login-email.dc.html": {
+   "x": 1800,
+   "y": 1780,
+   "w": 800,
+   "h": 1060,
+   "title": "E-mail 04 · kode til ny login-e-mail",
+   "page": "page-p9b0s5"
+  },
+  "E05-Login-email-aendret.dc.html": {
+   "x": 2700,
+   "y": 1780,
+   "w": 800,
+   "h": 1081,
+   "title": "E-mail 05 · login-e-mail er ændret",
+   "page": "page-p9b0s5"
+  },
+  "E06-Kode-oprettelse.dc.html": {
+   "x": 900,
+   "y": 3375,
+   "w": 800,
+   "h": 1060,
+   "title": "E-mail 06 · kode til oprettelse",
+   "page": "page-p9b0s5"
+  },
+  "E07-Allerede-konto.dc.html": {
+   "x": 1800,
+   "y": 3375,
+   "w": 800,
+   "h": 1060,
+   "title": "E-mail 07 · du har allerede en konto",
+   "page": "page-p9b0s5"
+  },
+  "E08-Kvittering.dc.html": {
+   "x": 2700,
+   "y": 3375,
+   "w": 800,
+   "h": 1174,
+   "title": "E-mail 08 · kvittering for abonnement",
+   "page": "page-p9b0s5"
+  },
+  "E09-Invitation-team.dc.html": {
+   "x": 900,
+   "y": 5009,
+   "w": 800,
+   "h": 1190,
+   "title": "E-mail 09 · invitation til team",
+   "page": "page-p9b0s5"
+  },
+  "E10-Kunde-oprettet.dc.html": {
+   "x": 1800,
+   "y": 5009,
+   "w": 800,
+   "h": 1151,
+   "title": "E-mail 10 · kunde oprettet af Agentor",
+   "page": "page-p9b0s5"
+  },
+  "E11-Ny-invitation-ejer.dc.html": {
+   "x": 2700,
+   "y": 5009,
+   "w": 800,
+   "h": 1060,
+   "title": "E-mail 11 · ny invitation til ejeren",
+   "page": "page-p9b0s5"
+  },
+  "E12-Sag-loest.dc.html": {
+   "x": 900,
+   "y": 6659,
+   "w": 800,
+   "h": 1292,
+   "title": "E-mail 12 · sag løst",
+   "page": "page-p9b0s5"
+  },
+  "E13-Link-til-computer.dc.html": {
+   "x": 1800,
+   "y": 6659,
+   "w": 800,
+   "h": 1060,
+   "title": "E-mail 13 · link til computer",
+   "page": "page-p9b0s5"
+  },
+  "E14-Ny-pris.dc.html": {
+   "x": 900,
+   "y": 8411,
+   "w": 800,
+   "h": 1088,
+   "title": "E-mail 14 · ny pris på plan",
+   "page": "page-p9b0s5"
+  },
+  "E15-Paamindelse-faktura.dc.html": {
+   "x": 1800,
+   "y": 8411,
+   "w": 800,
+   "h": 1060,
+   "title": "E-mail 15 · påmindelse om faktura",
+   "page": "page-p9b0s5"
+  },
+  "E16-Opdater-kort.dc.html": {
+   "x": 2700,
+   "y": 8411,
+   "w": 800,
+   "h": 1060,
+   "title": "E-mail 16 · opdatér betalingskort",
+   "page": "page-p9b0s5"
+  },
+  "E17-Kontoudtog.dc.html": {
+   "x": 3600,
+   "y": 8411,
+   "w": 800,
+   "h": 1060,
+   "title": "E-mail 17 · kontoudtog",
+   "page": "page-p9b0s5"
+  },
+  "E18-Maanedsrapport.dc.html": {
+   "x": 4500,
+   "y": 8411,
+   "w": 800,
+   "h": 1060,
+   "title": "E-mail 18 · månedsrapport til bogholder",
+   "page": "page-p9b0s5"
+  },
+  "E19-Forbindelse-afbrudt.dc.html": {
+   "x": 900,
+   "y": 9959,
+   "w": 800,
+   "h": 1060,
+   "title": "E-mail 19 · forbindelse afbrudt",
+   "page": "page-p9b0s5"
+  },
+  "E20-Systematisk-fejl.dc.html": {
+   "x": 1800,
+   "y": 9959,
+   "w": 800,
+   "h": 1128,
+   "title": "E-mail 20 · systematisk fejl",
+   "page": "page-p9b0s5"
+  },
+  "E21-Kvote-80.dc.html": {
+   "x": 2700,
+   "y": 9959,
+   "w": 800,
+   "h": 1118,
+   "title": "E-mail 21 · kvote over 80 %",
+   "page": "page-p9b0s5"
+  },
+  "E22-Ugentlig-opsummering.dc.html": {
+   "x": 3600,
+   "y": 9959,
+   "w": 800,
+   "h": 1139,
+   "title": "E-mail 22 · ugentlig opsummering",
+   "page": "page-p9b0s5"
+  },
+  "I01-Faktura.dc.html": {
+   "x": 900,
+   "y": 11558,
+   "w": 900,
+   "h": 1400,
+   "title": "PDF · faktura",
+   "page": "page-p9b0s5"
+  },
+  "I02-Kreditnota.dc.html": {
+   "x": 1900,
+   "y": 11558,
+   "w": 900,
+   "h": 1400,
+   "title": "PDF · kreditnota",
+   "page": "page-p9b0s5"
+  },
+  "Portfolio-01-hero.dc.html": {
    "x": 0,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Signup 1 · opret konto",
-   "page": "mobile"
+   "y": 200,
+   "w": 1600,
+   "h": 900,
+   "title": "Portfolio · hero",
+   "page": "page-portfolio"
   },
-  "MS2-Bekraeft-mail.dc.html": {
-   "x": 470,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Signup 2 · bekræft e-mail",
-   "page": "mobile"
+  "Portfolio-02-section-01.dc.html": {
+   "x": 1700,
+   "y": 200,
+   "w": 1200,
+   "h": 900,
+   "title": "Portfolio · section 01",
+   "page": "page-portfolio"
   },
-  "MS3-Virksomhed.dc.html": {
-   "x": 940,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Signup 3 · virksomhed",
-   "page": "mobile"
+  "Portfolio-03-section-02-platform.dc.html": {
+   "x": 3000,
+   "y": 200,
+   "w": 1200,
+   "h": 900,
+   "title": "Portfolio · section 02 · Platform",
+   "page": "page-portfolio"
   },
-  "MS4-Abonnement.dc.html": {
-   "x": 1410,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Signup 4 · abonnement",
-   "page": "mobile"
-  },
-  "MS5-Betaling.dc.html": {
-   "x": 1880,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Signup 5 · betaling",
-   "page": "mobile"
-  },
-  "MS6-Velkommen.dc.html": {
-   "x": 2350,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Signup 6 · aktivt",
-   "page": "mobile"
-  },
-  "MO1-Webshop.dc.html": {
-   "x": 2820,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Onboarding 1 · webshop",
-   "page": "mobile"
-  },
-  "MO2-Regnskab.dc.html": {
-   "x": 3290,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Onboarding 2 · regnskab",
-   "page": "mobile"
-  },
-  "MO3-Skabelon.dc.html": {
-   "x": 3760,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Onboarding 3 · skabelon",
-   "page": "mobile"
-  },
-  "MO4-Testkoersel.dc.html": {
-   "x": 4230,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Onboarding 4 · testkørsel",
-   "page": "mobile"
-  },
-  "MO5-Klar.dc.html": {
-   "x": 4700,
-   "y": 2528,
-   "w": 390,
-   "h": 844,
-   "title": "Onboarding 5 · klar",
-   "page": "mobile"
-  },
-  "MA16-Kom-i-gang.dc.html": {
+  "Portfolio-04-gallery-1.dc.html": {
    "x": 0,
-   "y": 3792,
-   "w": 390,
-   "h": 994,
-   "title": "Kom i gang",
-   "page": "mobile"
+   "y": 1300,
+   "w": 960,
+   "h": 720,
+   "title": "Portfolio · gallery 1",
+   "page": "page-portfolio"
   },
-  "MA17-Soeg.dc.html": {
-   "x": 470,
-   "y": 3792,
-   "w": 390,
-   "h": 844,
-   "title": "Søg",
-   "page": "mobile"
+  "Portfolio-05-gallery-2-platform.dc.html": {
+   "x": 1060,
+   "y": 1300,
+   "w": 960,
+   "h": 720,
+   "title": "Portfolio · gallery 2 · Platform",
+   "page": "page-portfolio"
   },
-  "MA18-Integrationer-Tom.dc.html": {
-   "x": 940,
-   "y": 3792,
-   "w": 390,
-   "h": 844,
-   "title": "Integrationer, tom",
-   "page": "mobile"
-  },
-  "MA19-Flows-Tabel.dc.html": {
-   "x": 1410,
-   "y": 3792,
-   "w": 390,
-   "h": 1154,
-   "title": "Flows, tabel med valg",
-   "page": "mobile"
-  },
-  "MA20-Flow-Ruter.dc.html": {
-   "x": 1880,
-   "y": 3792,
-   "w": 390,
-   "h": 1144,
-   "title": "Flow, ruter som tabel",
-   "page": "mobile"
-  },
-  "MA21-Graense.dc.html": {
-   "x": 2350,
-   "y": 3792,
-   "w": 390,
-   "h": 844,
-   "title": "Integrationer, grænse nået",
-   "page": "mobile"
-  },
-  "MA22-Testkoersel.dc.html": {
-   "x": 2820,
-   "y": 3792,
-   "w": 390,
-   "h": 1124,
-   "title": "Testkørsel",
-   "page": "mobile"
-  },
-  "MA23-Publicer.dc.html": {
-   "x": 3290,
-   "y": 3792,
-   "w": 390,
-   "h": 844,
-   "title": "Publicér",
-   "page": "mobile"
-  },
-  "MA24-Koersler.dc.html": {
-   "x": 3760,
-   "y": 3792,
-   "w": 390,
-   "h": 1044,
-   "title": "Kørsler",
-   "page": "mobile"
-  },
-  "MA25-Koersel-Udvikler.dc.html": {
-   "x": 4230,
-   "y": 3792,
-   "w": 390,
-   "h": 844,
-   "title": "Kørsel, developer",
-   "page": "mobile"
-  },
-  "MA26-Forbindelser.dc.html": {
-   "x": 4700,
-   "y": 3792,
-   "w": 390,
-   "h": 994,
-   "title": "Forbindelser",
-   "page": "mobile"
-  },
-  "MA27-Tilfoej-forbindelse.dc.html": {
-   "x": 5170,
-   "y": 3792,
-   "w": 390,
-   "h": 844,
-   "title": "Tilføj forbindelse",
-   "page": "mobile"
-  },
-  "MA28-Afstemning.dc.html": {
-   "x": 5640,
-   "y": 3792,
-   "w": 390,
-   "h": 1084,
-   "title": "Afstemning",
-   "page": "mobile"
-  },
-  "MA29-Team.dc.html": {
-   "x": 6110,
-   "y": 3792,
-   "w": 390,
-   "h": 994,
-   "title": "Team og adgang",
-   "page": "mobile"
-  },
-  "MA30-Inviter.dc.html": {
-   "x": 6580,
-   "y": 3792,
-   "w": 390,
-   "h": 844,
-   "title": "Invitér bruger",
-   "page": "mobile"
-  },
-  "MA31-Sikkerhed.dc.html": {
-   "x": 7050,
-   "y": 3792,
-   "w": 390,
-   "h": 994,
-   "title": "Sikkerhed",
-   "page": "mobile"
-  },
-  "MA32-Auditlog.dc.html": {
-   "x": 7520,
-   "y": 3792,
-   "w": 390,
-   "h": 964,
-   "title": "Audit-log",
-   "page": "mobile"
-  },
-  "MA33-Skift-plan.dc.html": {
-   "x": 7990,
-   "y": 3792,
-   "w": 390,
-   "h": 1154,
-   "title": "Skift plan",
-   "page": "mobile"
-  },
-  "MA34-MFA.dc.html": {
-   "x": 8460,
-   "y": 3792,
-   "w": 390,
-   "h": 844,
-   "title": "Totrinsbekræftelse",
-   "page": "mobile"
-  },
-  "MA35-Notifikationskanaler.dc.html": {
-   "x": 8930,
-   "y": 3792,
-   "w": 390,
-   "h": 904,
-   "title": "Notifikationer pr. hændelse",
-   "page": "mobile"
-  },
-  "MP08-Kunde.dc.html": {
-   "x": 0,
-   "y": 5366,
-   "w": 390,
-   "h": 944,
-   "title": "Platform · kunde",
-   "page": "mobile"
-  },
-  "MP09-Anmod-adgang.dc.html": {
-   "x": 470,
-   "y": 5366,
-   "w": 390,
-   "h": 844,
-   "title": "Platform · anmod om supportadgang",
-   "page": "mobile"
-  },
-  "MP10-Supportvisning.dc.html": {
-   "x": 940,
-   "y": 5366,
-   "w": 390,
-   "h": 844,
-   "title": "Platform · supportvisning",
-   "page": "mobile"
-  },
-  "MP11-Skift-kunde.dc.html": {
-   "x": 1410,
-   "y": 5366,
-   "w": 390,
-   "h": 844,
-   "title": "Platform · skift kunde",
-   "page": "mobile"
-  },
-  "MP12-Platformbrugere.dc.html": {
-   "x": 1880,
-   "y": 5366,
-   "w": 390,
-   "h": 1054,
-   "title": "Platform · platformbrugere",
-   "page": "mobile"
-  },
-  "MP13-Sager-Arkiv.dc.html": {
-   "x": 2350,
-   "y": 5366,
-   "w": 390,
-   "h": 1034,
-   "title": "Platform · sager, arkiv",
-   "page": "mobile"
-  },
-  "MP14-Afslut-session.dc.html": {
-   "x": 2820,
-   "y": 5366,
-   "w": 390,
-   "h": 844,
-   "title": "Platform · afslut supportsession",
-   "page": "mobile"
-  },
-  "MP15-Min-tid.dc.html": {
-   "x": 3290,
-   "y": 5366,
-   "w": 390,
-   "h": 1134,
-   "title": "Platform · min tid",
-   "page": "mobile"
-  },
-  "MP16-Loes-sag.dc.html": {
-   "x": 3760,
-   "y": 5366,
-   "w": 390,
-   "h": 964,
-   "title": "Platform · løs sag og send forløb",
-   "page": "mobile"
-  },
-  "MP17-Kunde-handlinger.dc.html": {
-   "x": 4230,
-   "y": 5366,
-   "w": 390,
-   "h": 844,
-   "title": "Platform · kunde, handlinger",
-   "page": "mobile"
-  },
-  "MP18-Abonnementer.dc.html": {
-   "x": 4700,
-   "y": 5366,
-   "w": 390,
-   "h": 1124,
-   "title": "Platform · finans, abonnementer",
-   "page": "mobile"
-  },
-  "MP19-Supportafregning.dc.html": {
-   "x": 5170,
-   "y": 5366,
-   "w": 390,
-   "h": 1194,
-   "title": "Platform · finans, supportafregning",
-   "page": "mobile"
-  },
-  "MP20-Kunde-oekonomi.dc.html": {
-   "x": 5640,
-   "y": 5366,
-   "w": 390,
-   "h": 844,
-   "title": "Platform · finans, kundens økonomi",
-   "page": "mobile"
-  },
-  "MP21-Supportfaktura.dc.html": {
-   "x": 6110,
-   "y": 5366,
-   "w": 390,
-   "h": 1034,
-   "title": "Platform · finans, supportfaktura",
-   "page": "mobile"
-  },
-  "MP22-Betalinger.dc.html": {
-   "x": 6580,
-   "y": 5366,
-   "w": 390,
-   "h": 844,
-   "title": "Platform · finans, fakturaer og betalinger",
-   "page": "mobile"
-  },
-  "MP23-Rapporter.dc.html": {
-   "x": 7050,
-   "y": 5366,
-   "w": 390,
-   "h": 1154,
-   "title": "Platform · finans, rapporter",
-   "page": "mobile"
+  "Portfolio-06-gallery-3.dc.html": {
+   "x": 2120,
+   "y": 1300,
+   "w": 960,
+   "h": 720,
+   "title": "Portfolio · gallery 3",
+   "page": "page-portfolio"
   }
  },
  "createdOnFiles": {
@@ -1240,6 +1601,14 @@
   "view": "canvas"
  },
  "notes": {
+  "admin": {
+   "kind": "title1",
+   "maxW": 8000,
+   "text": "Administration og profil · system status, brugere, produkt, rapporter",
+   "w": 240,
+   "x": 0,
+   "y": 19800
+  },
   "etape1": {
    "kind": "title1",
    "maxW": 8000,
@@ -1275,7 +1644,7 @@
   "finans": {
    "kind": "title1",
    "maxW": 8000,
-   "text": "Finans — abonnementer, supportafregning og rapporter (Superadmin)",
+   "text": "Finans · oversigt, abonnementer, support og fakturering (Superadmin)",
    "w": 240,
    "x": 0,
    "y": 16430
@@ -1297,6 +1666,15 @@
    "x": 0,
    "y": -300
   },
+  "mob_app2": {
+   "kind": "title1",
+   "maxW": 8000,
+   "page": "mobile",
+   "text": "Kundens app på mobil · alle sider fra Desktop",
+   "w": 240,
+   "x": 0,
+   "y": 3492
+  },
   "mob_plat": {
    "kind": "title1",
    "maxW": 3210,
@@ -1305,6 +1683,24 @@
    "w": 240,
    "x": 0,
    "y": 964
+  },
+  "mob_plat2": {
+   "kind": "title1",
+   "maxW": 8000,
+   "page": "mobile",
+   "text": "Platform på mobil · Kunder, Support, Finans, Administration og profil",
+   "w": 240,
+   "x": 0,
+   "y": 5066
+  },
+  "mob_signup": {
+   "kind": "title1",
+   "maxW": 5090,
+   "page": "mobile",
+   "text": "Ny kunde på mobil — signup og onboarding",
+   "w": 240,
+   "x": 0,
+   "y": 2228
   },
   "platform": {
    "kind": "title1",
@@ -1326,7 +1722,7 @@
   "sager": {
    "kind": "title1",
    "maxW": 8000,
-   "text": "Supportoverblik — sager, noter og tid",
+   "text": "Support · sager, adgange, fejl og tidsforbrug",
    "w": 240,
    "x": 0,
    "y": 14880
@@ -1339,32 +1735,86 @@
    "x": 0,
    "y": 18210
   },
-  "mob_signup": {
+  "em_login": {
    "kind": "title1",
-   "x": 0,
-   "y": 2228,
+   "x": 900,
+   "y": 0,
    "w": 240,
-   "maxW": 5090,
-   "text": "Ny kunde på mobil — signup og onboarding",
-   "page": "mobile"
+   "maxW": 1800,
+   "text": "E-mails · Login og konto",
+   "page": "page-p9b0s5"
   },
-  "mob_app2": {
+  "em_sik": {
    "kind": "title1",
-   "x": 0,
-   "y": 3492,
+   "x": 900,
+   "y": 1580,
    "w": 240,
-   "maxW": 9400,
-   "text": "Kundens app på mobil · alle sider fra Desktop",
-   "page": "mobile"
+   "maxW": 2700,
+   "text": "E-mails · Sikkerhed",
+   "page": "page-p9b0s5"
   },
-  "mob_plat2": {
+  "em_signup": {
    "kind": "title1",
-   "x": 0,
-   "y": 5066,
+   "x": 900,
+   "y": 3175,
    "w": 240,
-   "maxW": 7520,
-   "text": "Platform, sager og finans på mobil",
-   "page": "mobile"
+   "maxW": 2700,
+   "text": "E-mails · Oprettelse og betaling",
+   "page": "page-p9b0s5"
+  },
+  "em_inv": {
+   "kind": "title1",
+   "x": 900,
+   "y": 4809,
+   "w": 240,
+   "maxW": 2700,
+   "text": "E-mails · Invitationer",
+   "page": "page-p9b0s5"
+  },
+  "em_sup": {
+   "kind": "title1",
+   "x": 900,
+   "y": 6459,
+   "w": 240,
+   "maxW": 1800,
+   "text": "E-mails · Support og app",
+   "page": "page-p9b0s5"
+  },
+  "em_fak": {
+   "kind": "title1",
+   "x": 900,
+   "y": 8211,
+   "w": 240,
+   "maxW": 4500,
+   "text": "E-mails · Fakturering",
+   "page": "page-p9b0s5"
+  },
+  "em_mangler": {
+   "kind": "title1",
+   "x": 900,
+   "y": 9759,
+   "w": 240,
+   "maxW": 3600,
+   "text": "E-mails · Notifikationer · lovet, men ikke bygget endnu",
+   "page": "page-p9b0s5"
+  },
+  "inv_pdf": {
+   "kind": "title1",
+   "x": 900,
+   "y": 11358,
+   "w": 240,
+   "maxW": 2000,
+   "text": "PDF · faktura og kreditnota (A4)",
+   "page": "page-p9b0s5"
+  },
+  "portfolio-title": {
+   "kind": "title1",
+   "maxW": 8000,
+   "text": "Portfolio · multi-sync WooCommerce → Dinero, HubSpot og Brevo",
+   "w": 240,
+   "x": 0,
+   "y": 40,
+   "page": "page-portfolio"
   }
  },
  "order": [
@@ -1520,7 +1970,53 @@
   "MP20-Kunde-oekonomi.dc.html",
   "MP21-Supportfaktura.dc.html",
   "MP22-Betalinger.dc.html",
-  "MP23-Rapporter.dc.html"
+  "MP23-Rapporter.dc.html",
+  "S9-Adgange.dc.html",
+  "A1-Systemstatus.dc.html",
+  "A2-Produkt.dc.html",
+  "A3-Rapport-Support.dc.html",
+  "A4-Rapport-Fakturering.dc.html",
+  "PR1-Profil.dc.html",
+  "MP24-Adgange.dc.html",
+  "MP25-Systemstatus.dc.html",
+  "MP26-Produkt.dc.html",
+  "MP27-Rapport-Support.dc.html",
+  "MP28-Rapport-Fakturering.dc.html",
+  "MP29-Profil.dc.html",
+  "D15-Profil.dc.html",
+  "MA36-Profil.dc.html",
+  "MX1-Navigation-Kunde.dc.html",
+  "MX2-Navigation-Platform.dc.html",
+  "E01-Bekraeft-email.dc.html",
+  "E02-Nulstil-adgangskode.dc.html",
+  "E03-Nyt-login.dc.html",
+  "E04-Kode-ny-login-email.dc.html",
+  "E05-Login-email-aendret.dc.html",
+  "E06-Kode-oprettelse.dc.html",
+  "E07-Allerede-konto.dc.html",
+  "E08-Kvittering.dc.html",
+  "E09-Invitation-team.dc.html",
+  "E10-Kunde-oprettet.dc.html",
+  "E11-Ny-invitation-ejer.dc.html",
+  "E12-Sag-loest.dc.html",
+  "E13-Link-til-computer.dc.html",
+  "E14-Ny-pris.dc.html",
+  "E15-Paamindelse-faktura.dc.html",
+  "E16-Opdater-kort.dc.html",
+  "E17-Kontoudtog.dc.html",
+  "E18-Maanedsrapport.dc.html",
+  "E19-Forbindelse-afbrudt.dc.html",
+  "E20-Systematisk-fejl.dc.html",
+  "E21-Kvote-80.dc.html",
+  "E22-Ugentlig-opsummering.dc.html",
+  "I01-Faktura.dc.html",
+  "I02-Kreditnota.dc.html",
+  "Portfolio-01-hero.dc.html",
+  "Portfolio-02-section-01.dc.html",
+  "Portfolio-03-section-02-platform.dc.html",
+  "Portfolio-04-gallery-1.dc.html",
+  "Portfolio-05-gallery-2-platform.dc.html",
+  "Portfolio-06-gallery-3.dc.html"
  ],
  "pages": [
   {
@@ -1530,6 +2026,14 @@
   {
    "id": "mobile",
    "name": "Mobile"
+  },
+  {
+   "id": "page-p9b0s5",
+   "name": "Emails & Invoices"
+  },
+  {
+   "id": "page-portfolio",
+   "name": "Portfolio"
   }
  ],
  "title": "Agentor App — Runde 1"
