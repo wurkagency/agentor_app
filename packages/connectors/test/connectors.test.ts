@@ -12,14 +12,23 @@ import {
 } from '../src/index.js';
 
 describe('catalogue and manifests', () => {
-  it('lists 23 systems, 7 of them connectable (D9-Katalog)', () => {
-    expect(CATALOGUE).toHaveLength(23);
+  it('lists 24 systems, 8 of them connectable (D9-Katalog plus Odoo)', () => {
+    expect(CATALOGUE).toHaveLength(24);
     expect(
       CATALOGUE.filter((c) => c.available)
         .map((c) => c.id)
         .sort(),
-    ).toEqual(['brevo', 'dinero', 'economic', 'hubspot', 'mailchimp', 'shopify', 'woocommerce']);
-    expect(new Set(CATALOGUE.map((c) => c.id)).size).toBe(23);
+    ).toEqual([
+      'brevo',
+      'dinero',
+      'economic',
+      'hubspot',
+      'mailchimp',
+      'odoo',
+      'shopify',
+      'woocommerce',
+    ]);
+    expect(new Set(CATALOGUE.map((c) => c.id)).size).toBe(24);
   });
 
   it('every manifest has unique stable mapping keys and at least one port', () => {

@@ -29,6 +29,11 @@ export interface LookupOption {
   label: string;
   /** For accounts: the VAT code the account books with (Dinero `VatCode`, e.g. "U25"). */
   vatCode?: string;
+  /**
+   * Facts the editor shows as badges or uses to check a choice, e.g. an Odoo tax's
+   * `{ amount: 25, priceInclude: true }` or a field's `{ type: 'char', required: false }`.
+   */
+  meta?: Record<string, string | number | boolean>;
 }
 
 export interface FetchOptions {
@@ -228,6 +233,8 @@ class MockAdapter implements ConnectorAdapter {
       product: PRODUCTS,
       creditNote: [],
       stock: [],
+      shipment: [],
+      invoiceStatus: [],
     };
     return (source[entity] ?? []) as EntityRecord[E][];
   }

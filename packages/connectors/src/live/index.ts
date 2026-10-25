@@ -1,10 +1,11 @@
 import { adapterFor, type AdapterContext, type ConnectorAdapter } from '../adapter.js';
 import { DineroAdapter, type OAuthClient } from './dinero.js';
 import type { Transport } from './http.js';
+import { OdooAdapter } from './odoo.js';
 import { WooAdapter } from './woocommerce.js';
 
 /**
- * Live clients (PLAN-INTEGRATIONS-WOO-DINERO P1/P2). A separate entry point, so the browser
+ * Live clients (PLAN-INTEGRATIONS-WOO-DINERO P1/P2, PLAN-INTEGRATIONS-WOO-ODOO16 P1). A separate entry point, so the browser
  * bundle that reads manifests never pulls in the network code. Only server code imports it.
  */
 export interface LiveContext extends AdapterContext {
@@ -14,7 +15,7 @@ export interface LiveContext extends AdapterContext {
   oauth?: Partial<Record<string, OAuthClient>>;
 }
 
-export const LIVE_CONNECTORS = ['woocommerce', 'dinero'] as const;
+export const LIVE_CONNECTORS = ['woocommerce', 'dinero', 'odoo'] as const;
 
 export function hasLiveClient(connectorId: string): boolean {
   return (LIVE_CONNECTORS as readonly string[]).includes(connectorId);
@@ -26,6 +27,7 @@ export function hasLiveClient(connectorId: string): boolean {
  */
 export function openAdapter(ctx: LiveContext): ConnectorAdapter {
   if (ctx.mode === 'live' && ctx.connectorId === 'woocommerce') return new WooAdapter(ctx);
+  if (ctx.mode === 'live' && ctx.connectorId === 'odoo') return new OdooAdapter(ctx);
   if (ctx.mode === 'live' && ctx.connectorId === 'dinero') {
     const { oauth, ...rest } = ctx;
     const client = oauth?.dinero;
@@ -36,4 +38,5 @@ export function openAdapter(ctx: LiveContext): ConnectorAdapter {
 
 export * from './dinero.js';
 export * from './http.js';
+export * from './odoo.js';
 export * from './woocommerce.js';

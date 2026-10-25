@@ -697,8 +697,171 @@ export const mailchimp: ConnectorManifest = {
   accountHint: 'Mailchimp-konto',
 };
 
+const ODOO_SHIPMENT_VARIABLES: VariableDef[] = [
+  v('shipment.sourceId', 'Leverings-id'),
+  v('shipment.number', 'Leveringsnummer'),
+  v('shipment.orderRef', 'Butikkens ordrenummer'),
+  v('shipment.doneAt', 'Afsendt', 'date'),
+  v('shipment.carrier', 'Fragtfirma'),
+  v('shipment.trackingRef', 'Trackingnummer'),
+  v('shipment.trackingUrl', 'Trackinglink'),
+];
+
+const ODOO_INVOICE_STATUS_VARIABLES: VariableDef[] = [
+  v('invoiceStatus.sourceId', 'Faktura-id'),
+  v('invoiceStatus.number', 'Fakturanummer'),
+  v('invoiceStatus.orderRef', 'Butikkens ordrenummer'),
+  v('invoiceStatus.state', 'Status'),
+  v('invoiceStatus.paymentState', 'Betalingsstatus'),
+  v('invoiceStatus.total', 'Total inkl. moms', 'money'),
+  v('invoiceStatus.residual', 'Mangler at blive betalt', 'money'),
+  v('invoiceStatus.date', 'Fakturadato', 'date'),
+  v('invoiceStatus.dueDate', 'Forfaldsdato', 'date'),
+];
+
+/**
+ * Odoo (PLAN-INTEGRATIONS-WOO-ODOO16): self-hosted, Odoo.sh or Odoo Online on the Custom plan.
+ * P1 reads stock, deliveries and invoice status; writing orders and invoices comes in P2.
+ */
+export const odoo: ConnectorManifest = {
+  id: 'odoo',
+  name: 'Odoo',
+  version: '1.0.0',
+  category: 'erp',
+  logo: '/logos/odoo.svg',
+  auth: {
+    type: 'api_key',
+    fields: [
+      {
+        key: 'baseUrl',
+        label: 'Odoo-adresse',
+        type: 'url',
+        placeholder: 'https://odoo.firma.dk',
+        help: 'Skal kunne nås fra internettet over HTTPS.',
+      },
+      {
+        key: 'database',
+        label: 'Database',
+        type: 'text',
+        help: 'Databasens navn. Det står i Odoo under Indstillinger, eller hos jeres driftspartner.',
+      },
+      {
+        key: 'login',
+        label: 'Brugerens login',
+        type: 'text',
+        help: 'Brug en bruger kun til integrationen.',
+      },
+      {
+        key: 'apiKey',
+        label: 'API-nøgle',
+        type: 'secret',
+        help: 'Oprettes under Præferencer → Kontosikkerhed → Ny API-nøgle.',
+      },
+    ],
+  },
+  accountHint: 'Firma i Odoo',
+  connectionSettings: [
+    { key: 'companyId', label: 'Firma', type: 'select', default: '', lookup: 'companies' },
+    {
+      key: 'stock.warehouseId',
+      label: 'Lager',
+      type: 'select',
+      default: '',
+      lookup: 'warehouses',
+      help: 'Tomt: alle lagre i firmaet.',
+    },
+    {
+      key: 'stock.quantity',
+      label: 'Antal på lager til butikken',
+      type: 'select',
+      default: 'free_qty',
+      options: [
+        { value: 'free_qty', label: 'Ledigt (på lager minus reserveret)' },
+        { value: 'qty_available', label: 'På lager' },
+        { value: 'virtual_available', label: 'Forventet (med indkøb og salg)' },
+      ],
+    },
+    {
+      key: 'stock.match',
+      label: 'Find varen i butikken på',
+      type: 'select',
+      default: 'sku',
+      options: [
+        { value: 'sku', label: 'Varenummer (intern reference)' },
+        { value: 'barcode', label: 'Stregkode (EAN)' },
+      ],
+    },
+    {
+      key: 'stock.safetyBuffer',
+      label: 'Sikkerhedslager',
+      type: 'number',
+      default: 0,
+      help: 'Trækkes fra antallet, så butikken ikke sælger de sidste.',
+    },
+    {
+      key: 'stock.onlyStorable',
+      label: 'Kun lagerførte varer',
+      type: 'boolean',
+      default: true,
+      level: 'advanced',
+    },
+    {
+      key: 'lang',
+      label: 'Sprog i Odoo',
+      type: 'text',
+      default: '',
+      level: 'advanced',
+      help: 'Fx da_DK. Tomt: brugerens sprog.',
+    },
+    { key: 'batchSize', label: 'Poster pr. kald', type: 'number', default: 200, level: 'advanced' },
+  ],
+  lookups: [
+    'apps',
+    'companies',
+    'warehouses',
+    'locations',
+    'pickingTypes',
+    'journals',
+    'taxes',
+    'fiscalPositions',
+    'paymentTerms',
+    'pricelists',
+    'productCategories',
+    'carriers',
+    'accounts',
+  ],
+  outputs: [
+    { entity: 'stock', label: 'Lager', trigger: { kind: 'poll', minMinutes: 5 } },
+    {
+      entity: 'shipment',
+      label: 'Leveringer',
+      trigger: { kind: 'poll', minMinutes: 5 },
+      variables: ODOO_SHIPMENT_VARIABLES,
+      dynamicVariables: [{ model: 'stock.picking', scope: 'record', prefix: 'shipment.fields' }],
+    },
+    {
+      entity: 'invoiceStatus',
+      label: 'Fakturastatus',
+      trigger: { kind: 'poll', minMinutes: 15 },
+      variables: ODOO_INVOICE_STATUS_VARIABLES,
+      dynamicVariables: [
+        { model: 'account.move', scope: 'record', prefix: 'invoiceStatus.fields' },
+      ],
+    },
+  ],
+  inputs: [],
+  rateLimit: { perMinute: 120 },
+  changelog: [
+    {
+      version: '1.0.0',
+      kind: 'additive',
+      note: 'Første version: lager, leveringer og fakturastatus.',
+    },
+  ],
+};
+
 export const MANIFESTS: Record<string, ConnectorManifest> = Object.fromEntries(
-  [woocommerce, shopify, dinero, economic, hubspot, brevo, mailchimp].map((m) => [m.id, m]),
+  [woocommerce, shopify, dinero, economic, odoo, hubspot, brevo, mailchimp].map((m) => [m.id, m]),
 );
 
 export function manifestFor(id: string): ConnectorManifest | null {

@@ -350,7 +350,9 @@ async function processRouteJob(
             : dep === 'product' && 'lines' in rec
               ? [
                   ...new Set(
-                    rec.lines.map((l) => l.productId).filter((x): x is string => Boolean(x)),
+                    rec.lines
+                      .map((l) => ('productId' in l ? l.productId : null))
+                      .filter((x): x is string => Boolean(x)),
                   ),
                 ].map((id) => ({ id, record: null }))
               : [];

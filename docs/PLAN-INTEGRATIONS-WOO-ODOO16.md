@@ -346,6 +346,33 @@ Generated as for Dinero, plus:
 
 P0 is small. P1 can start right away; P2 follows P1. P3's WooCommerce part can run in parallel with P2.
 
+**P0–P1 status (25 Oct 2026): built, tested against a recorded Odoo 16 database.** Not yet run against the test server, because the `ODOO_TEST_*` keys were not in `.env.local` yet. Run `pnpm --filter @agentor/connectors test` once they are; `test/odoo.live.test.ts` is read-only.
+
+- **P0**:
+  - `LookupId` gains the Odoo lists plus `relation:<model>` and `fields:<model>`.
+  - `LookupOption.meta` (tax rate, `price_include`, field type).
+  - `DynamicCatalogue` on ports (`dynamicVariables` / `dynamicTargets`), and `catalogueFromFields()` that turns a cached field list into variables and targets.
+  - Entities `shipment` and `invoiceStatus`, with Danish and English labels.
+  - The worker caches `fields:<model>` with the other lookups, so no migration is needed.
+- **P1** (`@agentor/connectors/live`, `live/odoo.ts`):
+  - JSON-RPC client with API-key login and the company and language context on every call.
+  - Error mapping (AccessDenied/AccessError → unauthorized, UserError/ValidationError → invalid, serialisation failures → transient).
+  - Profile 16 in `ODOO_PROFILES`.
+  - Connection test (version, login, company access, read rights, wrong-database message).
+  - Lookups, field catalogue, counts.
+  - Polling for stock (quants and done moves, with a cut so the cursor never passes an unread change), deliveries (lines, tracking, the shop's order number from the sales order) and invoice status.
+  - The manifest `odoo` 1.0.0, connectable in the catalogue (now 24 systems).
+- **Where the build differs from the text above:**
+  - The plan's single file `live/odoo.ts` holds the profiles, matching the WooCommerce and Dinero clients, instead of a `live/odoo/` folder.
+  - The stock options (quantity, warehouse, match, safety buffer, storable only) are **connection settings**, not route options. The engine reads each entity once per flow and shares it between routes, so options that shape the read belong to the connection.
+  - Custom fields are read as `<entity>.fields.<x_name>`, with a relation as its display name, instead of under `raw`.
+  - The manifest has no inputs yet. Odoo as a destination is P2.
+- **Not done yet:**
+  - Merging the dynamic catalogue into the editor's variable picker (P3).
+  - The Odoo logo: `/logos/odoo.svg` needs the official asset.
+  - The `shipment.onlyOurs` / `invoice.onlyOurs` filters, which need P2's external ids.
+  - The live run on the test server.
+
 ---
 
 ## 8. Test matrix (on the user's test WooCommerce + Odoo 16e)

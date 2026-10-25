@@ -5,7 +5,15 @@
  * are optional, so records from v1 adapters stay valid.
  */
 
-export const ENTITIES = ['order', 'creditNote', 'customer', 'product', 'stock'] as const;
+export const ENTITIES = [
+  'order',
+  'creditNote',
+  'customer',
+  'product',
+  'stock',
+  'shipment',
+  'invoiceStatus',
+] as const;
 export type Entity = (typeof ENTITIES)[number];
 
 export interface Address {
@@ -151,6 +159,51 @@ export interface Stock {
   sourceId: string;
   sku: string | null;
   quantity: number;
+  /** When the quantity last changed at the source (cursor). */
+  updatedAt?: string;
+  raw?: unknown;
+}
+
+/**
+ * A delivery that left the warehouse (PLAN-INTEGRATIONS-WOO-ODOO16 §3.4), e.g. an Odoo
+ * `stock.picking` that is done. `orderRef` is the shop's order number as the ERP knows it.
+ */
+export interface Shipment {
+  sourceId: string;
+  /** The ERP's delivery number, e.g. "WH/OUT/00042". */
+  number: string;
+  orderRef: string | null;
+  state: 'done' | 'cancelled';
+  doneAt: string | null;
+  carrier: string | null;
+  trackingRef: string | null;
+  trackingUrl: string | null;
+  lines: { sku: string | null; name: string; quantity: number }[];
+  updatedAt?: string;
+  /** The customer's own fields in the system (Odoo `x_…`); relations as their display name. */
+  fields?: Record<string, string | number | boolean | null>;
+  raw?: unknown;
+}
+
+/** Where an invoice or credit note stands in the ERP: posted, paid, cancelled. */
+export interface InvoiceStatus {
+  sourceId: string;
+  kind: 'invoice' | 'creditNote';
+  /** The ERP's document number; null while it is a draft. */
+  number: string | null;
+  orderRef: string | null;
+  state: 'draft' | 'posted' | 'cancelled';
+  paymentState: 'notPaid' | 'partial' | 'inPayment' | 'paid' | 'reversed';
+  currency: string;
+  /** Total incl. VAT and what is still owed, øre. */
+  total: number;
+  residual: number;
+  date: string | null;
+  dueDate: string | null;
+  updatedAt?: string;
+  /** The customer's own fields in the system (Odoo `x_…`); relations as their display name. */
+  fields?: Record<string, string | number | boolean | null>;
+  raw?: unknown;
 }
 
 export interface EntityRecord {
@@ -159,6 +212,8 @@ export interface EntityRecord {
   customer: Customer;
   product: Product;
   stock: Stock;
+  shipment: Shipment;
+  invoiceStatus: InvoiceStatus;
 }
 
 const EU = new Set([

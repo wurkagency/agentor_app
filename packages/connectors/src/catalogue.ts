@@ -2,8 +2,8 @@ import type { Category } from './manifest.js';
 import { MANIFESTS } from './manifests/index.js';
 
 /**
- * The connector catalogue (D9-Katalog, README decision 14): 23 systems in 5 groups. Systems with
- * a manifest can be connected; the rest are "På vej" and collect interest.
+ * The connector catalogue (D9-Katalog, README decision 14, plus Odoo): 24 systems in 5 groups.
+ * Systems with a manifest can be connected; the rest are "På vej" and collect interest.
  */
 export interface CatalogueEntry {
   id: string;
@@ -129,6 +129,7 @@ const SUBTITLE: Record<string, string> = {
   shopify: 'Webshop',
   dinero: 'Regnskab',
   economic: 'Regnskab',
+  odoo: 'ERP og lager',
   hubspot: 'CRM',
   brevo: 'Nyhedsbrev og kontakter',
   mailchimp: 'Lister og tags',

@@ -23,7 +23,24 @@ export type LookupId =
   | 'shippingMethods'
   | 'taxClasses'
   | 'taxRates'
-  | 'categories';
+  | 'categories'
+  // Odoo (PLAN-INTEGRATIONS-WOO-ODOO16 §3.2).
+  | 'companies'
+  | 'warehouses'
+  | 'locations'
+  | 'pickingTypes'
+  | 'journals'
+  | 'taxes'
+  | 'fiscalPositions'
+  | 'paymentTerms'
+  | 'pricelists'
+  | 'productCategories'
+  | 'carriers'
+  | 'apps'
+  /** Any record list in the system by model, answered with a name search: `relation:res.partner`. */
+  | `relation:${string}`
+  /** The fields of a model, read from the system (Odoo `fields_get`): `fields:sale.order`. */
+  | `fields:${string}`;
 
 export interface AuthField {
   key: string;
@@ -63,6 +80,22 @@ export interface TargetField {
   editable: 'template' | 'expression';
 }
 
+/**
+ * Variables or target fields read from the customer's own system rather than fixed in the
+ * manifest (PLAN-INTEGRATIONS-WOO-ODOO16 §3.1): Odoo databases carry custom and Studio fields.
+ * The worker caches the model's fields as the lookup list `fields:<model>` at each connection
+ * test; `catalogueFromFields` turns that list into variables or targets.
+ */
+export interface DynamicCatalogue {
+  /** The system's model, e.g. "stock.picking", "sale.order". */
+  model: string;
+  scope: 'record' | 'line';
+  /** Path prefix, e.g. "shipment.fields" → `shipment.fields.x_studio_channel`. */
+  prefix: string;
+  /** `custom`: only the customer's own fields (Odoo `x_`); `all`: every field, developer view. */
+  include?: 'custom' | 'all';
+}
+
 export interface Port {
   entity: Entity;
   /** The system's own name for the entity, e.g. Dinero "Fakturaer", HubSpot "Kontakter". */
@@ -77,6 +110,10 @@ export interface Port {
   targets?: TargetField[];
   /** Value tables on routes into this port (inputs). */
   tables?: MappingTable[];
+  /** More variables from the system's own fields (outputs). */
+  dynamicVariables?: DynamicCatalogue[];
+  /** More target fields from the system's own fields (inputs). */
+  dynamicTargets?: DynamicCatalogue[];
 }
 
 export interface MappingField {
@@ -166,6 +203,71 @@ export interface ConnectorManifest {
   /** Webhook signature scheme for sources that push. */
   webhook?: { signatureHeader: string; scheme: 'hmac-sha256-base64' };
   changelog: { version: string; kind: 'additive' | 'breaking'; note: string }[];
+}
+
+/** One cached field of a `fields:<model>` lookup list: name, label and what the system says. */
+export interface FieldOption {
+  value: string;
+  label: string;
+  meta?: Record<string, string | number | boolean>;
+}
+
+const VARIABLE_TYPES: Record<string, VariableDef['type']> = {
+  char: 'string',
+  text: 'string',
+  html: 'string',
+  selection: 'string',
+  many2one: 'string',
+  integer: 'number',
+  float: 'number',
+  monetary: 'money',
+  date: 'date',
+  datetime: 'date',
+  boolean: 'boolean',
+};
+
+const TEXT_TYPES = new Set(['char', 'text', 'html']);
+
+/** Bookkeeping fields every Odoo model carries; never useful in a template. */
+const SYSTEM_FIELD = /^(__|message_|activity_|website_message_|has_message|access_)/;
+
+/**
+ * Variables and target fields from a system's own fields (PLAN-INTEGRATIONS-WOO-ODOO16 §3.1).
+ * Adapters give a relation's display name as the value. Lists and files are left out, and so are
+ * targets the system won't take a value for (read-only, computed and not stored).
+ */
+export function catalogueFromFields(
+  fields: FieldOption[],
+  cat: DynamicCatalogue,
+): { variables: VariableDef[]; targets: TargetField[] } {
+  const variables: VariableDef[] = [];
+  const targets: TargetField[] = [];
+  for (const f of fields) {
+    if (SYSTEM_FIELD.test(f.value)) continue;
+    if ((cat.include ?? 'custom') === 'custom' && !f.value.startsWith('x_')) continue;
+    const type = String(f.meta?.type ?? '');
+    const varType = VARIABLE_TYPES[type];
+    if (!varType) continue;
+    const path = `${cat.prefix}.${f.value}`;
+    variables.push({
+      path,
+      label: f.label,
+      type: varType,
+      scope: cat.scope,
+    });
+    if (f.meta?.readonly === true || f.meta?.store === false) continue;
+    const size = Number(f.meta?.size);
+    targets.push({
+      key: path,
+      label: f.label,
+      scope: cat.scope,
+      required: f.meta?.required === true,
+      ...(Number.isFinite(size) && size > 0 ? { maxLength: size } : {}),
+      // Text takes a template; numbers, dates and relations need an expression or a lookup.
+      editable: TEXT_TYPES.has(type) || type === 'many2one' ? 'template' : 'expression',
+    });
+  }
+  return { variables, targets };
 }
 
 /** A route setting's value, falling back to the manifest default (the UI shows the same). */

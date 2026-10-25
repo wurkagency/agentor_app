@@ -1308,49 +1308,63 @@
         "creditNote": "Kreditnota oprettet",
         "customer": "Kunde oprettet",
         "product": "Produkt oprettet",
-        "stock": "Lager opdateret"
+        "stock": "Lager opdateret",
+        "shipment": "Levering sendt videre",
+        "invoiceStatus": "Fakturastatus sendt videre"
       },
       "updated": {
         "order": "Faktura opdateret",
         "creditNote": "Kreditnota opdateret",
         "customer": "Kunde opdateret",
         "product": "Produkt opdateret",
-        "stock": "Lager opdateret"
+        "stock": "Lager opdateret",
+        "shipment": "Levering opdateret",
+        "invoiceStatus": "Fakturastatus opdateret"
       },
       "would_create": {
         "order": "Ville oprette faktura",
         "creditNote": "Ville oprette kreditnota",
         "customer": "Ville oprette kunde",
         "product": "Ville oprette produkt",
-        "stock": "Ville opdatere lager"
+        "stock": "Ville opdatere lager",
+        "shipment": "Ville sende levering videre",
+        "invoiceStatus": "Ville sende fakturastatus videre"
       },
       "would_update": {
         "order": "Ville opdatere faktura",
         "creditNote": "Ville opdatere kreditnota",
         "customer": "Ville opdatere kunde",
         "product": "Ville opdatere produkt",
-        "stock": "Ville opdatere lager"
+        "stock": "Ville opdatere lager",
+        "shipment": "Ville opdatere levering",
+        "invoiceStatus": "Ville opdatere fakturastatus"
       },
       "skipped": {
         "order": "Sprunget over",
         "creditNote": "Sprunget over",
         "customer": "Sprunget over",
         "product": "Sprunget over",
-        "stock": "Sprunget over"
+        "stock": "Sprunget over",
+        "shipment": "Sprunget over",
+        "invoiceStatus": "Sprunget over"
       },
       "failed": {
         "order": "Fejlet",
         "creditNote": "Fejlet",
         "customer": "Fejlet",
         "product": "Fejlet",
-        "stock": "Fejlet"
+        "stock": "Fejlet",
+        "shipment": "Fejlet",
+        "invoiceStatus": "Fejlet"
       },
       "waiting": {
         "order": "Venter",
         "creditNote": "Venter",
         "customer": "Venter",
         "product": "Venter",
-        "stock": "Venter"
+        "stock": "Venter",
+        "shipment": "Venter",
+        "invoiceStatus": "Venter"
       }
     },
     "errorAt": "Fejl · {time}",
@@ -1413,7 +1427,9 @@
       "creditNote": "Kreditnotaer",
       "customer": "Kunder",
       "product": "Produkter",
-      "stock": "Lager"
+      "stock": "Lager",
+      "shipment": "Leveringer",
+      "invoiceStatus": "Fakturastatus"
     },
     "outcome": {
       "failed": "Fejlet",
@@ -3851,6 +3867,8 @@
         "creditNote": "Kreditnotaer",
         "product": "Produkter",
         "stock": "Lager",
+        "shipment": "Leveringer",
+        "invoiceStatus": "Fakturastatus",
         "record": "Records"
       },
       "retryStarted": "Gentagelsen er startet",
@@ -3897,6 +3915,8 @@
         "customer": "Kunde",
         "product": "Produkt",
         "stock": "Lager",
+        "shipment": "Levering",
+        "invoiceStatus": "Fakturastatus",
         "record": "Record"
       },
       "entities": {
@@ -3905,6 +3925,8 @@
         "customer": "kunder",
         "product": "produkter",
         "stock": "lagerposter",
+        "shipment": "leveringer",
+        "invoiceStatus": "fakturastatusser",
         "record": "records"
       },
       "verb": {
@@ -3949,6 +3971,8 @@
         "creditNote": "kreditnota",
         "product": "produkt",
         "stock": "lagerpost",
+        "shipment": "levering",
+        "invoiceStatus": "fakturastatus",
         "record": "record"
       },
       "entities": {
@@ -3957,6 +3981,8 @@
         "creditNote": "kreditnotaer",
         "product": "produkter",
         "stock": "lagerposter",
+        "shipment": "leveringer",
+        "invoiceStatus": "fakturastatusser",
         "record": "records"
       },
       "yesterday": "i går kl. {time}",

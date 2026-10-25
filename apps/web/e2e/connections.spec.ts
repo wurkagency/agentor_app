@@ -38,10 +38,10 @@ test('my connections: six accounts, one broken (D9-Forbindelser)', async ({ page
   await axe(page);
 });
 
-test('catalogue lists 23 systems in five groups (D9-Katalog)', async ({ page }) => {
+test('catalogue lists 24 systems in five groups (D9-Katalog plus Odoo)', async ({ page }) => {
   await login(page, 'mette');
   await page.goto('/connections/new');
-  await expect(page.getByRole('listitem')).toHaveCount(23);
+  await expect(page.getByRole('listitem')).toHaveCount(24);
   // Systems that aren't ready promise nothing: no waitlist button.
   await expect(page.getByRole('button', { name: /Magento/ })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Tilføj konto Dinero' })).toBeVisible();

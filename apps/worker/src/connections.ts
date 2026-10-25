@@ -174,6 +174,10 @@ async function testConnection(deps: ConnectionDeps, tenantId: string, connection
         .flatMap((g) => g!.fields.map((f) => f.lookup))
         .filter((x): x is LookupId => Boolean(x)),
       ...(manifest?.lookups ?? []),
+      // The system's own fields behind dynamic variables and targets (Odoo custom fields).
+      ...[...(manifest?.outputs ?? []), ...(manifest?.inputs ?? [])]
+        .flatMap((p) => [...(p.dynamicVariables ?? []), ...(p.dynamicTargets ?? [])])
+        .map((c): LookupId => `fields:${c.model}`),
     ]);
     for (const list of lists) {
       // One list the system won't give (a missing permission) must not fail the connection.

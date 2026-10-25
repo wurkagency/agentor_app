@@ -1308,49 +1308,63 @@
         "creditNote": "Credit note created",
         "customer": "Customer created",
         "product": "Product created",
-        "stock": "Stock updated"
+        "stock": "Stock updated",
+        "shipment": "Shipment passed on",
+        "invoiceStatus": "Invoice status passed on"
       },
       "updated": {
         "order": "Invoice updated",
         "creditNote": "Credit note updated",
         "customer": "Customer updated",
         "product": "Product updated",
-        "stock": "Stock updated"
+        "stock": "Stock updated",
+        "shipment": "Shipment updated",
+        "invoiceStatus": "Invoice status updated"
       },
       "would_create": {
         "order": "Would create invoice",
         "creditNote": "Would create credit note",
         "customer": "Would create customer",
         "product": "Would create product",
-        "stock": "Would update stock"
+        "stock": "Would update stock",
+        "shipment": "Would pass on shipment",
+        "invoiceStatus": "Would pass on invoice status"
       },
       "would_update": {
         "order": "Would update invoice",
         "creditNote": "Would update credit note",
         "customer": "Would update customer",
         "product": "Would update product",
-        "stock": "Would update stock"
+        "stock": "Would update stock",
+        "shipment": "Would update shipment",
+        "invoiceStatus": "Would update invoice status"
       },
       "skipped": {
         "order": "Skipped",
         "creditNote": "Skipped",
         "customer": "Skipped",
         "product": "Skipped",
-        "stock": "Skipped"
+        "stock": "Skipped",
+        "shipment": "Skipped",
+        "invoiceStatus": "Skipped"
       },
       "failed": {
         "order": "Failed",
         "creditNote": "Failed",
         "customer": "Failed",
         "product": "Failed",
-        "stock": "Failed"
+        "stock": "Failed",
+        "shipment": "Failed",
+        "invoiceStatus": "Failed"
       },
       "waiting": {
         "order": "Waiting",
         "creditNote": "Waiting",
         "customer": "Waiting",
         "product": "Waiting",
-        "stock": "Waiting"
+        "stock": "Waiting",
+        "shipment": "Waiting",
+        "invoiceStatus": "Waiting"
       }
     },
     "errorAt": "Error · {time}",
@@ -1413,7 +1427,9 @@
       "creditNote": "Credit notes",
       "customer": "Customers",
       "product": "Products",
-      "stock": "Stock"
+      "stock": "Stock",
+      "shipment": "Shipments",
+      "invoiceStatus": "Invoice status"
     },
     "outcome": {
       "failed": "Failed",
@@ -3851,6 +3867,8 @@
         "creditNote": "Credit notes",
         "product": "Products",
         "stock": "Stock",
+        "shipment": "Shipments",
+        "invoiceStatus": "Invoice status",
         "record": "Records"
       },
       "retryStarted": "The retry has started",
@@ -3897,6 +3915,8 @@
         "customer": "Customer",
         "product": "Product",
         "stock": "Stock",
+        "shipment": "Shipment",
+        "invoiceStatus": "Invoice status",
         "record": "Record"
       },
       "entities": {
@@ -3905,6 +3925,8 @@
         "customer": "customers",
         "product": "products",
         "stock": "stock items",
+        "shipment": "shipments",
+        "invoiceStatus": "invoice statuses",
         "record": "records"
       },
       "verb": {
@@ -3949,6 +3971,8 @@
         "creditNote": "credit note",
         "product": "product",
         "stock": "stock item",
+        "shipment": "shipment",
+        "invoiceStatus": "invoice status",
         "record": "record"
       },
       "entities": {
@@ -3957,6 +3981,8 @@
         "creditNote": "credit notes",
         "product": "products",
         "stock": "stock items",
+        "shipment": "shipments",
+        "invoiceStatus": "invoice statuses",
         "record": "records"
       },
       "yesterday": "yesterday at {time}",
