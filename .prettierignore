@@ -1,0 +1,8 @@
+docs/
+pnpm-lock.yaml
+**/drizzle/meta/
+.next/
+dist/
+coverage/
+# Rendered e-mail snapshots are compared byte for byte.
+packages/email/test/__snapshots__/

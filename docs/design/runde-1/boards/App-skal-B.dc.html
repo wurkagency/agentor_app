@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>App-skal uden sidebar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F1}
+.ds{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1A1A18;font-size:14px;line-height:1.55}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wrap{width:100%;max-width:1920px;margin:0 auto;box-sizing:border-box}
+.pl{position:relative;font-size:15px;font-weight:500;color:#6B6B67;text-decoration:none;padding:4px 0;white-space:nowrap}
+.pl:hover{color:#1A1A18}
+.pl.on{color:#1A1A18;font-weight:600;box-shadow:inset 0 -2px 0 #1A1A18}
+.sl{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:9999px;font-size:13px;font-weight:500;color:#6B6B67;text-decoration:none;white-space:nowrap}
+.sl:hover{color:#1A1A18;background:rgba(255,255,255,.6)}
+.sl.on{background:#FFFFFF;color:#1A1A18;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.icb{width:36px;height:36px;border-radius:9999px;display:grid;place-items:center;border:0;background:transparent;color:#1A1A18;cursor:pointer;position:relative}
+.icb:hover{background:#FFFFFF}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;box-sizing:border-box;padding:0 28px;border-radius:9999px;font-family:inherit;font-size:12px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;border:0;color:#1A1A18;background:#D0E84A;white-space:nowrap;cursor:pointer}
+.btn-sec{height:36px;padding:0 16px;font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #C8C5BF}
+.col{background:rgba(208,232,74,.18);height:100%}
+.mi{display:flex;align-items:center;gap:12px;height:40px;padding:0 12px;border-radius:8px;font-size:14px;font-weight:500;color:#1A1A18;text-decoration:none}
+.mi:hover,.mi.h{background:#F0EDE8}
+.mi .i{width:16px;height:16px;color:#6B6B67}
+.mi .k{margin-left:auto;font-size:12px;color:#6B6B67;font-weight:500}
+.seg{display:inline-flex;padding:3px;border-radius:9999px;background:#FFFFFF;gap:2px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.seg button{font-family:inherit;height:30px;padding:0 14px;border:0;border-radius:9999px;background:transparent;font-size:13px;font-weight:600;color:#6B6B67;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.seg button.on{background:#1A1A18;color:#FFFFFF}
+</style>
+</helmet>
+<div class="ds" style="width: 100%; min-height: 100vh; background: #F7F5F1; display: flex; flex-direction: column">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+<symbol id="sr" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></symbol>
+<symbol id="hp" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><path d="M12 17h.01"></path></symbol>
+<symbol id="bl" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></symbol>
+<symbol id="ch" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></symbol>
+<symbol id="cx" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></symbol>
+<symbol id="cd" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></symbol>
+<symbol id="us" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></symbol>
+<symbol id="st" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></symbol>
+<symbol id="cc" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"></rect><line x1="2" x2="22" y1="10" y2="10"></line></symbol>
+<symbol id="gl" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path><path d="M2 12h20"></path></symbol>
+<symbol id="lo" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" x2="9" y1="12" y2="12"></line></symbol>
+<symbol id="cr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></symbol>
+<symbol id="ud" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></symbol>
+<symbol id="pu" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></symbol>
+</svg>
+
+<header style="flex: none; padding: 0 clamp(24px, 3vw, 64px)">
+<div class="wrap" style="height: 88px; display: flex; align-items: center; gap: 56px; position: relative; z-index: 2">
+<a href="#" aria-label="Agentor, gå til Overblik" style="text-decoration: none; color: #1A1A18; flex: none; display: inline-flex; align-items: center; line-height: 0"><img src="/_blob/1081042ddccbfe88c57833ef05928055" alt="" style="height: 24px; width: auto; display: block;"></a>
+<nav aria-label="Primær navigation" style="display: flex; align-items: center; gap: 36px; flex: 1; min-width: 0">
+<a class="pl" href="#">Overblik</a>
+<a class="pl on" href="#" aria-current="page">Integrationer</a>
+<a class="pl" href="#">Forbindelser</a>
+<a class="pl" href="#">Aktivitet</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 4px; flex: none">
+<button class="icb" type="button" aria-label="Søg eller hop til, genvej ⌘K"><svg class="i"><use href="#sr"></use></svg></button>
+<button class="icb" type="button" aria-label="Notifikationer: 3 kræver handling, heraf 2 fejl"><svg class="i"><use href="#bl"></use></svg><span style="position: absolute; top: 3px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 9999px; background: #B42318; color: #FFFFFF; font-size: 10px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 0 0 2px #F7F5F1">3</span></button>
+<button type="button" aria-expanded="true" aria-haspopup="menu" aria-label="Konto og virksomhed: Mette Holm, Nordlys Cykler ApS" style="margin-left: 8px; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 10px 0 4px; border: 0; outline: 2px solid #1A1A18; outline-offset: 2px; border-radius: 9999px; background: #FFFFFF; box-shadow: 0 2px 12px rgba(0,0,0,.06); cursor: pointer; font-family: inherit">
+<span style="width: 32px; height: 32px; border-radius: 9999px; background: #13293A; color: #FFFFFF; display: grid; place-items: center; font-size: 11px; font-weight: 600">MH</span>
+<span style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2"><span style="font-size: 13px; font-weight: 600; color: #1A1A18">Nordlys Cykler</span><span style="font-size: 11px; font-weight: 500; color: #6B6B67">Mette Holm</span></span>
+<svg class="i" style="width: 14px; height: 14px; color: #6B6B67"><use href="#ch"></use></svg>
+</button>
+</div>
+<div role="menu" aria-label="Konto" style="position: absolute; top: 76px; right: 0; width: 300px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 8px 32px rgba(0,0,0,.10); padding: 8px; display: flex; flex-direction: column; box-sizing: border-box">
+<div style="display: flex; gap: 12px; align-items: center; padding: 10px 12px 14px">
+<span style="width: 40px; height: 40px; border-radius: 9999px; background: #13293A; color: #FFFFFF; display: grid; place-items: center; font-size: 13px; font-weight: 600; flex: none">MH</span>
+<span style="display: flex; flex-direction: column; line-height: 1.35; min-width: 0"><strong style="font-size: 14px; font-weight: 600">Mette Holm</strong><span style="font-size: 12px; color: #6B6B67">Ejer · Nordlys Cykler ApS</span></span>
+</div>
+<a class="mi" role="menuitem" href="#" style="box-shadow: inset 0 0 0 1px #E4E1DB; margin-bottom: 8px"><svg class="i"><use href="#ud"></use></svg>Skift virksomhed<span class="k">2</span></a>
+<a class="mi" role="menuitem" href="D15-Profil.dc.html"><svg class="i"><use href="#us"></use></svg>Min profil</a>
+<a class="mi h" role="menuitem" href="App-skal-B-Indstillinger.dc.html"><svg class="i"><use href="#st"></use></svg>Indstillinger</a>
+<a class="mi" role="menuitem" href="#"><svg class="i"><use href="#cc"></use></svg>Abonnement og forbrug<span class="k">71 %</span></a>
+<a class="mi" role="menuitem" href="#"><svg class="i"><use href="#gl"></use></svg>Sprog<span class="k">Dansk</span></a>
+<div style="height: 1px; background: #E4E1DB; margin: 8px 4px"></div>
+<a class="mi" role="menuitem" href="#"><svg class="i"><use href="#lo"></use></svg>Log ud</a>
+</div>
+</div>
+</header>
+
+<div style="flex: none; padding: 0 clamp(24px, 3vw, 64px)">
+<div class="wrap" style="height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: inset 0 1px 0 #E4E1DB">
+<nav aria-label="Sekundær navigation · Integrationer" style="display: flex; align-items: center; gap: 4px">
+<a class="sl on" href="#" aria-current="page">Flows <span style="font-size: 11px; font-weight: 600; background: #F0EDE8; border-radius: 9999px; padding: 1px 7px">6</span></a>
+<a class="sl" href="#">Kørsler</a>
+<a class="sl" href="#">Skabeloner</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: #6B6B67; font-weight: 500">
+<span>Transaktioner</span>
+<span style="width: 96px; height: 8px; border-radius: 9999px; background: #E4E1DB; overflow: hidden; display: block"><span style="display: block; width: 71%; height: 8px; border-radius: 9999px; background: #D0E84A; box-shadow: inset 0 0 0 1px rgba(26,26,24,.25)"></span></span>
+<span style="color: #1A1A18; font-weight: 600; font-variant-numeric: tabular-nums">1.420 / 2.000</span>
+</div>
+</div>
+</div>
+
+<main style="flex: 1; min-height: 0; padding: 24px clamp(24px, 3vw, 64px) 48px; display: flex; flex-direction: column">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 24px; flex: 1">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em">Sidetitel</h1>
+<p style="margin: 0; color: #6B6B67">Undertekst på én linje, 14 fg-2.</p>
+</div>
+<div style="display: flex; gap: 16px; align-items: center"><div class="seg" role="group" aria-label="Visning"><button type="button" class="on" aria-pressed="true">Basic</button><button type="button" aria-pressed="false"><svg class="i" style="width: 14px; height: 14px"><use href="#cd"></use></svg>Developer</button></div><span style="width: 1px; height: 24px; background: #E4E1DB"></span><button class="btn btn-sec" type="button">Sekundær</button><button class="btn" type="button"><svg class="i" style="width: 16px; height: 16px"><use href="#pu"></use></svg>Primær</button></div>
+</div>
+<div style="flex: 1; position: relative; border-radius: 16px; box-shadow: inset 0 0 0 1px #C8C5BF; overflow: hidden">
+<div style="position: absolute; inset: 0; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 24px">
+<div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div><div class="col"></div>
+</div>
+<div style="position: absolute; left: 16px; bottom: 14px; display: flex; flex-direction: column; gap: 2px; background: #FFFFFF; border-radius: 8px; padding: 8px 12px; box-shadow: 0 2px 12px rgba(0,0,0,.06)">
+<strong style="font-size: 13px; font-weight: 600">Indholdsområde</strong>
+<span style="font-size: 12px; color: #6B6B67">1200 px centreret · 12 kolonner · 24 px gutter · header og indhold står på samme akse</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

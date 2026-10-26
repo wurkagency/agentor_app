@@ -1,0 +1,69 @@
+/* =============================================================
+   AGENTOR — COLOR TOKENS
+   Reverse-engineered from marketing site + app screenshots.
+   Confidence scores documented inline.
+   ============================================================= */
+
+:root {
+  /* --- Primary: Chartreuse / Electric Lime ---
+     The dominant brand accent — used on CTA buttons, active chips,
+     stat card backgrounds, progress bars, and hero overlays.
+     Confidence: 92% — very distinctive, consistently read as #D0E84A across both shots.
+  */
+  /* Routed through --tenant-* first — see tokens/theming.css for the
+     white-label override mechanism. Undefined --tenant-* = Agentor default. */
+  --color-primary:        var(--tenant-color-primary, #D0E84A);
+  --color-primary-bright: var(--tenant-color-primary-bright, #DCEE55);   /* brighter/paler lime for large panel fills (fit_01) */
+  --color-primary-hover:  var(--tenant-color-primary-hover, #BDD435);   /* slightly darker for hover, estimated */
+  --color-primary-press:  var(--tenant-color-primary-press, #A8BD25);   /* press state, estimated */
+  --color-primary-muted:  var(--tenant-color-primary-muted, #E8F5A0);   /* light tint for subtle fills */
+
+  /* --- Dark / Near-black ---
+     Headings, logo mark, nav wordmark. Very dark warm-biased gray-black.
+     Confidence: 90%
+  */
+  --color-dark:           #1A1A18;
+  --color-dark-80:        rgba(26, 26, 24, 0.80);
+  --color-dark-60:        rgba(26, 26, 24, 0.60);
+
+  /* --- Secondary: Navy ---
+     Deep navy surface used for the CTA band / dark sections.
+     Confidence: 78%
+  */
+  --color-secondary-navy:     var(--tenant-color-secondary-navy, #13293A);
+  --color-on-navy:            #FFFFFF;
+  --color-on-navy-muted:      rgba(255, 255, 255, 0.78);
+
+  /* --- Foreground text scale ---
+     Confidence: 80–85%
+  */
+  --color-fg-1:           #1A1A18;   /* headings, strong emphasis */
+  --color-fg-2:           #6B6B67;   /* body text, descriptions */
+  --color-fg-3:           #9B9B97;   /* muted / tertiary labels */
+  --color-fg-on-primary:  #1A1A18;   /* text on lime buttons/surfaces */
+  --color-fg-on-dark:     #FFFFFF;   /* text on dark/photo backgrounds */
+
+  /* --- Surface / Background scale ---
+     Confidence: 85%
+  */
+  --color-bg-base:        #F0EDE8;   /* warm off-white page canvas */
+  --color-bg-card:        #FFFFFF;   /* card surfaces */
+  --color-bg-primary:     #D0E84A;   /* lime-filled panels */
+  --color-bg-overlay:     rgba(255, 255, 255, 0.92); /* glass-like overlays */
+
+  /* --- Border / Divider ---
+     Confidence: 75%
+  */
+  --color-border:         #E4E1DB;   /* default subtle border */
+  --color-border-strong:  #C8C5BF;   /* emphasized borders */
+
+  /* --- Semantic / Status ---
+     Trend positive (↑) uses primary lime.
+     Confidence: 80%
+  */
+  --color-positive:       var(--color-primary);
+  --color-neutral:        #9B9B97;
+
+  /* --- White (utility) --- */
+  --color-white:          #FFFFFF;
+}

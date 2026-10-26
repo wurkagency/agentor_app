@@ -1,0 +1,1 @@
+ALTER TABLE "invoices" ADD COLUMN "attach_timelog" boolean DEFAULT true NOT NULL;

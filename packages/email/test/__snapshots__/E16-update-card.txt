@@ -1,0 +1,20 @@
+Betalingen blev afvist
+
+Hej Mølle Sport ApS
+
+Betalingen af faktura 2026-1051 på 98,75 kr. blev afvist af kortudstederen.
+
+Kort: Mastercard •••• 0019
+Faktura: 2026-1051 · Startup · oktober
+Beløb inkl. moms: 98,75 kr.
+
+Opdatér betalingskort: https://app.agentor.dk/billing/payment/update?invoice=0190a000-0000-7000-8000-000000001051
+
+Når kortet er opdateret, trækker vi beløbet igen. Vi gemmer aldrig dit kortnummer; det håndteres af QuickPay.
+
+Venlig hilsen
+Agentor
+
+-- 
+Agentor ApS · app.agentor.dk · support@agentor.dk
+Du får denne mail, fordi info@moellesport.dk er faktura-e-mail for Mølle Sport ApS.

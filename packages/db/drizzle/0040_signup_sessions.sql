@@ -1,0 +1,1 @@
+ALTER TABLE "auth"."sessions" ADD COLUMN "sso_login" boolean DEFAULT false NOT NULL;

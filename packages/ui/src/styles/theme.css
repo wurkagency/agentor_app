@@ -1,0 +1,683 @@
+/*
+ * Agentor app design tokens as a Tailwind v4 theme.
+ *
+ * Sources (in order of authority): docs/design/runde-1/README.md decisions, the boards
+ * (Main, Komponenter-*), designspecifikation §2, docs/brand/tokens. Tailwind's default palette,
+ * radii, shadows, font sizes and breakpoints are reset, so only these tokens exist as
+ * utilities. Components never use hex, rgba or arbitrary values (lint rule agentor/no-design-literals).
+ *
+ * White-label: the brand accent routes through --tenant-* first (docs/brand/tokens/theming.css).
+ */
+@theme {
+  /* ---- Colour: brand ----------------------------------------------------------------- */
+  --color-*: initial;
+  --color-primary: var(--tenant-color-primary, #d0e84a);
+  --color-primary-bright: var(--tenant-color-primary-bright, #dcee55);
+  --color-fg-1: #1a1a18;
+  --color-fg-2: #6b6b67;
+  /* fg-3 is 2,79:1 on white: icons and arrows only, never text (Main board). */
+  --color-fg-3: #9b9b97;
+  --color-navy: var(--tenant-color-secondary-navy, #13293a);
+  --color-on-navy: #ffffff;
+  --color-on-navy-muted: rgb(255 255 255 / 0.78);
+  --color-border: #e4e1db;
+  --color-border-strong: #c8c5bf;
+  /* Fill inside white surfaces (skeleton, hover, chips). Not the page background (decision 6). */
+  --color-bg-base: #f0ede8;
+  --color-surface: #ffffff;
+  /* Page background (README decision 6). */
+  --color-canvas: #f7f5f1;
+  --color-canvas-dots: #dcd8d1;
+  --color-subrow: #fcfbf9;
+  --color-white: #ffffff;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* ---- Colour: status (designspecifikation §2.2) ------------------------------------- */
+  --color-ok-fg: #2f7d4f;
+  --color-ok-bg: #e6f2ea;
+  --color-warn-fg: #a86412;
+  --color-warn-bg: #fbf0dc;
+  /* Internal notes in support cases (README decision 17): never shown to the customer. */
+  --color-note-bg: #fbf0dc;
+  --color-error-fg: #b42318;
+  --color-error-bg: #fbe7e4;
+  --color-paused-fg: #6b6b67;
+  --color-paused-bg: #efede8;
+  --color-info-fg: #2b5c8a;
+  --color-info-bg: #e5edf5;
+
+  /* ---- Colour: translucent app tokens found on the boards ---------------------------- */
+  --color-scrim: rgb(26 26 24 / 0.4);
+  /* Behind the mobile modal (MP04). */
+  --color-scrim-strong: rgb(26 26 24 / 0.48);
+  --color-row-hover: rgb(240 237 232 / 0.5);
+  --color-white-60: rgb(255 255 255 / 0.6);
+  --color-white-14: rgb(255 255 255 / 0.14);
+  /* Signup trust panel (SU/OB): cards and secondary text on navy. */
+  --color-white-7: rgb(255 255 255 / 0.07);
+  --color-white-18: rgb(255 255 255 / 0.18);
+  --color-on-navy-soft: rgb(255 255 255 / 0.72);
+  --color-on-navy-strong: rgb(255 255 255 / 0.86);
+  --color-lime-glow: rgb(208 232 74 / 0.2);
+  --color-lime-tint: rgb(208 232 74 / 0.14);
+  --color-lime-diff: rgb(208 232 74 / 0.22);
+  --color-lime-drop: rgb(208 232 74 / 0.3);
+  --color-lime-halo: rgb(208 232 74 / 0.45);
+  --color-navy-tint: rgb(19 41 58 / 0.04);
+
+  /* ---- Colour: dashboard blocks (README decision 19) ---------------------------------- */
+  --color-lime-pale: #e9f59b;
+  --color-lime-deep: #b9d63c;
+  --color-lime-stripe: #bfd93a;
+  --color-lime-light: #e6f29a;
+  --color-gauge-track: #eeebe6;
+  --color-ink-10: rgb(26 26 24 / 0.1);
+
+  /* ---- Colour: profile dashboard and mobile navigation v3 (README decision 25) ---------- */
+  --color-heat-0: #eeebe6;
+  --color-heat-1: #e3efb0;
+  --color-heat-3: #9dbb2a;
+  --color-medal-locked: #efede8;
+  --color-surface-soft: #fbfaf7;
+  --color-surface-soft-line: #eeebe6;
+  --color-streak-from: #fbfcef;
+  --color-streak-to: #f3f8d2;
+  --color-tab-pill: #f3f1ec;
+  --color-on-navy-82: rgb(255 255 255 / 0.82);
+  --color-white-10: rgb(255 255 255 / 0.1);
+  --color-white-8: rgb(255 255 255 / 0.08);
+
+  /* ---- Type (designspecifikation §2.4) ------------------------------------------------- */
+  --font-*: initial;
+  --font-sans: var(--font-jakarta), 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), 'JetBrains Mono', ui-monospace, monospace;
+
+  --text-*: initial;
+  --text-page: 28px;
+  --text-page--line-height: 1.2;
+  --text-page--letter-spacing: -0.01em;
+  --text-page--font-weight: 600;
+  --text-section: 20px;
+  --text-section--line-height: 1.3;
+  --text-section--letter-spacing: -0.01em;
+  --text-section--font-weight: 600;
+  --text-card: 16px;
+  --text-card--line-height: 1.4;
+  --text-card--font-weight: 600;
+  --text-body: 14px;
+  --text-body--line-height: 1.55;
+  --text-table: 13px;
+  --text-table--line-height: 1.4;
+  --text-meta: 12px;
+  --text-meta--line-height: 1.4;
+  --text-micro: 11px;
+  --text-micro--line-height: 1.3;
+  --text-nano: 10px;
+  --text-nano--line-height: 1.2;
+  --text-nav: 15px;
+  --text-nav--line-height: 1.4;
+  --text-mono: 12.5px;
+  --text-mono--line-height: 1.6;
+  --text-profile-name: 36px;
+  --text-profile-name--line-height: 1.1;
+  --text-profile-stat: 26px;
+  --text-profile-stat--line-height: 1.2;
+  --text-profile-card: 17px;
+  --text-profile-card--line-height: 1.3;
+  --text-profile-streak: 22px;
+  --text-profile-streak--line-height: 1.25;
+  --text-stat: 40px;
+  --text-stat--line-height: 1;
+  --text-stat--letter-spacing: -0.03em;
+  --text-stat--font-weight: 700;
+  --text-stat-compact: 24px;
+  --text-stat-compact--line-height: 1;
+  --text-stat-compact--letter-spacing: -0.02em;
+  --text-stat-compact--font-weight: 700;
+  /* Health-band counters on Overblik (D1). */
+  /* Dashboard key figures (README decision 19): large 32 px, compact 24 px. */
+  --text-kpi: 32px;
+  --text-kpi--line-height: 1.1;
+  --text-kpi--letter-spacing: -0.03em;
+  --text-kpi--font-weight: 700;
+  --text-kpi-unit: 15px;
+  --text-kpi-unit--line-height: 1;
+  --text-kpi-unit--font-weight: 600;
+  --text-counter: 28px;
+  --text-counter--line-height: 1;
+  --text-counter--font-weight: 700;
+  --text-logo: 24px;
+  --text-logo--line-height: 1;
+  --text-logo--letter-spacing: -0.02em;
+  --text-logo--font-weight: 700;
+
+  /* Signup and onboarding (README decisions 21–22, SU/OB/MS/MO boards). */
+  --text-su-title: 34px;
+  --text-su-title--line-height: 1.15;
+  --text-su-title--letter-spacing: -0.025em;
+  --text-su-title--font-weight: 700;
+  --text-su-done: 36px;
+  --text-su-done--line-height: 1.15;
+  --text-su-done--letter-spacing: -0.025em;
+  --text-su-done--font-weight: 700;
+  --text-su-panel: 30px;
+  --text-su-panel--line-height: 1.2;
+  --text-su-panel--letter-spacing: -0.02em;
+  --text-su-panel--font-weight: 700;
+  --text-su-lead: 16px;
+  --text-su-lead--line-height: 1.5;
+  --text-su-input: 15px;
+  --text-su-input--line-height: 1.4;
+  --text-su-logo: 22px;
+  --text-su-logo--line-height: 1;
+  --text-su-logo--letter-spacing: -0.02em;
+  --text-su-logo--font-weight: 700;
+  --text-su-plan: 18px;
+  --text-su-plan--line-height: 1.3;
+  --text-su-plan--font-weight: 700;
+  --text-su-plan-m: 17px;
+  --text-su-plan-m--line-height: 1.3;
+  --text-su-plan-m--font-weight: 700;
+  --text-su-price: 30px;
+  --text-su-price--line-height: 1.1;
+  --text-su-price--letter-spacing: -0.02em;
+  --text-su-price--font-weight: 700;
+  --text-su-price-m: 28px;
+  --text-su-price-m--line-height: 1.1;
+  --text-su-price-m--letter-spacing: -0.02em;
+  --text-su-price-m--font-weight: 700;
+  --text-su-code-m: 24px;
+  --text-su-code-m--line-height: 1;
+  --text-su-code-m--font-weight: 700;
+  --text-m-lead: 14.5px;
+  --text-m-lead--line-height: 1.45;
+  /* 16 px on phones so iOS doesn't zoom into the field. */
+  --text-m-input: 16px;
+  --text-m-input--line-height: 1.4;
+
+  /* Mobile (README decision 20, MA/MP boards at 390 × 844). */
+  --text-m-logo: 20px;
+  --text-m-logo--line-height: 1;
+  --text-m-logo--letter-spacing: -0.02em;
+  --text-m-logo--font-weight: 700;
+  /* Page title (MA02 "God morgen, Mette", MA04 "Integrationer"). */
+  --text-m-title: 26px;
+  --text-m-title--line-height: 1.2;
+  --text-m-title--letter-spacing: -0.02em;
+  --text-m-title--font-weight: 700;
+  /* Error headline (MA06). */
+  --text-m-heading: 22px;
+  --text-m-heading--line-height: 1.25;
+  --text-m-heading--font-weight: 700;
+  /* Centred request card (MA12). */
+  --text-m-request: 19px;
+  --text-m-request--line-height: 1.3;
+  --text-m-request--font-weight: 700;
+  /* StatusHero headline, modal title. */
+  --text-m-hero: 18px;
+  --text-m-hero--line-height: 1.3;
+  --text-m-hero--font-weight: 700;
+  /* MobileKpi value: 22/700 on a 30 px line. */
+  --text-m-kpi: 22px;
+  --text-m-kpi--line-height: 30px;
+  --text-m-kpi--letter-spacing: -0.02em;
+  --text-m-kpi--font-weight: 700;
+  /* Chat bubbles and internal notes (MP03). */
+  --text-m-chat: 13.5px;
+  --text-m-chat--line-height: 1.45;
+  /* DeskNote (12.5) and note captions (11.5). */
+  --text-m-note: 12.5px;
+  --text-m-note--line-height: 1.45;
+  --text-m-caption: 11.5px;
+  --text-m-caption--line-height: 1.35;
+  /* WeekBars day labels. */
+  --text-m-axis: 10.5px;
+  --text-m-axis--line-height: 1.2;
+
+  --tracking-*: initial;
+  --tracking-section: 0.06em;
+  --tracking-tight: -0.02em;
+  --tracking-snug: -0.01em;
+  --tracking-normal: 0em;
+  --tracking-eyebrow: 0.08em;
+  --tracking-cta: 0.1em;
+
+  /* ---- Radius (designspecifikation §2.5 + boards) ------------------------------------ */
+  --radius-*: initial;
+  --radius-3xs: 3px; /* error cap on WeekBars (MA02) */
+  --radius-2xs: 4px; /* checkbox */
+  --radius-xs: 6px; /* 24 px logos, kbd */
+  --radius-sm: 8px; /* inputs, table chips, tooltips */
+  --radius-node: 12px; /* editor nodes, palette rows, radio cards, banners */
+  --radius-md: 16px; /* cards, panels, dialogs */
+  --radius-field: 10px; /* inputs inside the mobile modal (MP04) */
+  --radius-bubble: 14px; /* chat bubbles (MP03) */
+  --radius-lg: 20px; /* highlighted lime panels, mobile modal */
+  --radius-xl: 28px;
+  --radius-order: 18px; /* order summary card on the trust panel (SU5) */
+  --radius-hero: 24px; /* profile hero (PR1, D15) */
+  --radius-cell: 5px; /* activity map cells (PR1) */
+  --radius-full: 9999px;
+
+  /* ---- Shadow and rings ------------------------------------------------------------------ */
+  --shadow-*: initial;
+  --shadow-sm: 0 2px 12px rgb(0 0 0 / 0.06);
+  --shadow-card: 0 8px 32px rgb(0 0 0 / 0.1);
+  --shadow-hero: 0 8px 32px rgb(160 190 40 / 0.28);
+  --shadow-overlay: 0 16px 56px rgb(0 0 0 / 0.14);
+  --shadow-ring-strong: inset 0 0 0 1.5px var(--color-border-strong);
+  --shadow-ring-chip: inset 0 0 0 1px var(--color-border-strong);
+  --shadow-ring-border: inset 0 0 0 1px var(--color-border);
+  --shadow-ring-off: inset 0 0 0 1.5px var(--color-fg-2);
+  --shadow-ring-dark: inset 0 0 0 1.5px var(--color-fg-1);
+  --shadow-ring-dark-2: inset 0 0 0 2px var(--color-fg-1);
+  --shadow-ring-lime: inset 0 0 0 1.5px var(--color-primary);
+  --shadow-ring-error: inset 0 0 0 1.5px var(--color-error-fg);
+  --shadow-ring-error-2: inset 0 0 0 2px var(--color-error-fg);
+  --shadow-hairline-t: inset 0 1px 0 var(--color-border);
+  --shadow-hairline-b: inset 0 -1px 0 var(--color-border);
+  --shadow-hairline-l: inset 1px 0 0 var(--color-border);
+  --shadow-hairline-r: inset -1px 0 0 var(--color-border);
+  --shadow-hairline-y: inset 0 1px 0 var(--color-border), inset 0 -1px 0 var(--color-border);
+  --shadow-tab-active: inset 0 -2px 0 var(--color-fg-1);
+  --shadow-tab-active-light: inset 0 -2px 0 var(--color-on-navy);
+  --shadow-row-selected: inset 2px 0 0 var(--color-primary), inset 3px 0 0 var(--color-fg-1);
+  --shadow-cutout-canvas: 0 0 0 2px var(--color-canvas);
+  --shadow-cutout-white: 0 0 0 2px var(--color-white);
+  --shadow-card-error: 0 2px 12px rgb(0 0 0 / 0.06), 0 0 0 1.5px var(--color-error-fg);
+  --shadow-card-warn: 0 2px 12px rgb(0 0 0 / 0.06), 0 0 0 1.5px var(--color-warn-fg);
+  --shadow-lime-dark: 0 0 0 2px var(--color-primary), 0 0 0 3px var(--color-fg-1);
+  --shadow-port-selected: 0 0 0 3px var(--color-white), 0 0 0 4.5px var(--color-fg-1);
+  --shadow-port-drop: 0 0 0 2px var(--color-fg-1), 0 0 0 6px var(--color-lime-halo);
+  --shadow-radio-on: inset 0 0 0 5px var(--color-fg-1);
+  --shadow-dot-broken: 0 0 0 2px var(--color-error-bg);
+  /* Mobile (MA/MP boards). */
+  --shadow-tabbar: 0 -1px 0 var(--color-border);
+  --shadow-row-divider: inset 0 -1px 0 var(--color-gauge-track);
+  --shadow-modal: 0 8px 32px rgb(0 0 0 / 0.18);
+  --shadow-hairline-gauge: inset 0 1px 0 var(--color-gauge-track);
+  /* Logo tiles on the navy trust panel and in the mobile logo row. */
+  --shadow-tile: 0 2px 12px rgb(0 0 0 / 0.18);
+  --shadow-tile-m: 0 2px 10px rgb(0 0 0 / 0.12);
+  --shadow-live-dot: 0 0 0 4px var(--color-lime-glow);
+  --shadow-plan-selected: 0 8px 32px rgb(0 0 0 / 0.1), inset 0 0 0 2px var(--color-fg-1);
+  --shadow-radio-on-lg: inset 0 0 0 7px var(--color-fg-1);
+  --shadow-profile-hero: 0 20px 60px rgb(19 41 58 / 0.28);
+  --shadow-avatar-ring: 0 0 0 5px rgb(255 255 255 / 0.12), 0 0 0 6px rgb(208 232 74 / 0.6);
+  --shadow-camera: 0 6px 18px rgb(0 0 0 / 0.25);
+  --shadow-medal: 0 8px 20px rgb(160 190 40 / 0.35), inset 0 -3px 0 rgb(0 0 0 / 0.08);
+  --shadow-medal-locked: inset 0 0 0 2px var(--color-border);
+  --shadow-soft-line: inset 0 0 0 1px var(--color-surface-soft-line);
+  --shadow-stat-line: inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  --shadow-tabbar-float: 0 10px 30px rgb(26 26 24 / 0.1), inset 0 0 0 1px var(--color-border);
+  --shadow-tabbar-navy: 0 10px 30px rgb(19 41 58 / 0.32);
+  --shadow-ring-strong-2: inset 0 0 0 2px var(--color-border-strong);
+  --shadow-hairline-t-navy: inset 0 1px 0 var(--color-white-14);
+  /* Onboarding diagram nodes (OB1–OB4): white ring while connecting, lime when it works. */
+  --shadow-node-on: 0 0 0 3px var(--color-primary);
+  --shadow-node-active: 0 0 0 3px var(--color-white);
+  --shadow-node-off: 0 0 0 3px var(--color-white-18);
+  --shadow-node-error: 0 0 0 3px var(--color-error-fg);
+  --shadow-cutout-navy: 0 0 0 3px var(--color-navy);
+
+  /* ---- Named sizes that are fixed by the spec but off the 4 px grid ------------------ */
+  --spacing-badge: 22px; /* ModeBadge height (§4) */
+  --spacing-mono-line: 20px;
+  --spacing-header: 88px; /* app header (decision 1) */
+  --spacing-subnav: 56px; /* secondary navigation row */
+  --spacing-editor-header: 64px; /* compact app header in the editor (D3-Editor) */
+  --spacing-editor-toolbar: 56px; /* the editor's own toolbar under it */
+  /* Fluid layout (README decision 15): page side margin, 24 px → 43 px at 1440 → 64 px. */
+  --spacing-gutter: clamp(24px, 3vw, 64px);
+
+  /* ---- Breakpoints (README decision 15): < 768 mobile, 768–1279 tablet, 1280–1919
+     desktop, ≥ 1920 wide desktop. ---------------------------------------------------- */
+  --breakpoint-*: initial;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1280px;
+  --breakpoint-xl: 1920px;
+
+  --container-*: initial;
+  /* Recommended max width for lists, overview and details, centred (decision 15). */
+  --container-content: 1920px;
+  /* Forms and settings cards: at most 960 px each. */
+  --container-form: 960px;
+  /* Chat bubbles on mobile (MP03). */
+  --container-bubble: 84%;
+  --container-focus: 480px;
+  /* Onboarding cards (D14-Onboarding-1 and -2/-3). */
+  --container-onboarding: 880px;
+  /* Signup form column (SU1–SU6). */
+  --container-signup: 560px;
+  --container-signup-wide: 680px;
+  --container-welcome: 1040px;
+  --container-done: 1080px;
+  --container-signup-panel: 480px;
+
+  /* ---- Motion (designspecifikation §2.6) --------------------------------------------- */
+  --ease-*: initial;
+  --ease-standard: ease;
+  --animate-*: initial;
+  --animate-spin: spin 1s linear infinite;
+  --animate-pulse: pulse 1.6s ease-in-out infinite;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.55;
+    }
+  }
+}
+
+/* App shell sizes (README decision 1). Plain properties, used by layout components. */
+:root {
+  --app-header-height: 88px;
+  --app-editor-header-height: 64px;
+  --app-editor-toolbar-height: 56px;
+  --app-secondary-nav-height: 56px;
+  --app-inspector-width: 440px;
+  --app-inspector-width-compact: 400px;
+  --app-palette-width: 240px;
+  --app-bottom-panel-height: 240px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-canvas);
+    color: var(--color-fg-1);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Visible 2 px focus ring with 2 px offset everywhere (designspecifikation §9.1). */
+  :focus-visible {
+    outline: 2px solid var(--color-fg-1);
+    outline-offset: 2px;
+  }
+  .on-navy :focus-visible,
+  .on-navy:focus-visible {
+    outline-color: var(--color-white);
+  }
+  ::placeholder {
+    color: var(--color-fg-2);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@utility tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@utility eyebrow {
+  font-size: var(--text-meta);
+  font-weight: 600;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-fg-2);
+}
+
+@utility dots-grid {
+  background-color: var(--color-canvas);
+  background-image: radial-gradient(var(--color-canvas-dots) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Inspector field row: label left 148 px, control right (README decision 8, D3-Editor). */
+@utility field-inline {
+  grid-template-columns: 148px minmax(0, 1fr);
+}
+
+/* Dialog placement: near the top, never taller or wider than the viewport minus margins. */
+@utility dialog-frame {
+  top: max(64px, 10vh);
+  max-height: calc(100vh - 128px);
+  max-width: calc(100vw - 32px);
+}
+
+/* KeyValueList: label column 140 px (Komponenter-Data). */
+@utility grid-cols-kv {
+  grid-template-columns: 140px minmax(0, 1fr);
+}
+
+/* Dashboard blocks (README decision 19): the highlighted first card, hatched lime for support
+   and forecasts, and the stroke ticks at the end of a segmented bar. */
+@utility bg-hero {
+  background: radial-gradient(
+    120% 140% at 0% 0%,
+    var(--color-lime-pale) 0%,
+    var(--color-primary) 45%,
+    var(--color-lime-deep) 100%
+  );
+}
+/* Profile dashboard (PR1, D15): the lime avatar and medals, and the streak band. */
+@utility bg-avatar-lime {
+  background: linear-gradient(
+    135deg,
+    var(--color-lime-pale),
+    var(--color-primary) 55%,
+    var(--color-lime-deep)
+  );
+}
+@utility bg-medal {
+  background: radial-gradient(
+    circle at 30% 25%,
+    #f3fac6,
+    var(--color-primary) 55%,
+    var(--color-heat-3)
+  );
+}
+@utility bg-streak {
+  background: linear-gradient(120deg, var(--color-streak-from), var(--color-streak-to));
+}
+@utility hatch {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-primary) 0 5px,
+    var(--color-lime-stripe) 5px 7px
+  );
+}
+@utility hatch-light {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-lime-light) 0 5px,
+    var(--color-white) 5px 7px
+  );
+}
+@utility ticks {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-border-strong) 0 1.5px,
+    transparent 1.5px 6px
+  );
+}
+
+/* Key figure rows (README decision 19): the highlighted card is a little wider. */
+@utility grid-cols-kpi-hero {
+  grid-template-columns: minmax(0, 1.35fr) repeat(4, minmax(0, 1fr));
+}
+@utility grid-cols-kpi-hero-3 {
+  grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(0, 1fr));
+}
+
+/* Profile dashboard (PR1, D15): a centred column of at most 1040 px; two cards 1.35 : 1. */
+@utility max-w-profile {
+  max-width: 1040px;
+}
+@utility grid-cols-profile {
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+}
+/* Administration › Produkt (A2): support price beside the plans matrix, 1 : 2. */
+@utility grid-cols-product {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+}
+/* Label column 200 px beside the field (frow on the boards). */
+@utility grid-cols-form-row {
+  grid-template-columns: 200px minmax(0, 1fr);
+}
+
+/* ---- Mobile shell (README decision 20, MA/MP boards) ------------------------------------------
+   Top bar 60 px and tab bar 76 px as drawn. The tab bar's own 8 px bottom padding grows to the
+   home indicator's safe area on phones that have one. */
+:root {
+  --m-topbar-height: 60px;
+  /* MobileTabBar v3 (MX1/MX2): 56 px, 6 px above the home indicator, at least 14 px from the edge. */
+  --m-tabbar-height: 56px;
+  --m-tabbar-bottom: max(14px, calc(env(safe-area-inset-bottom) + 6px));
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+@utility bottom-tabbar {
+  bottom: var(--m-tabbar-bottom);
+}
+/* Room under the content for the floating tab bar, with 16 px to spare. */
+@utility pb-under-tabbar {
+  padding-bottom: calc(var(--m-tabbar-height) + var(--m-tabbar-bottom) + 16px);
+}
+/* Room under the content for a fixed 52 px action bar (MP03 timer). */
+@utility pb-under-bar {
+  padding-bottom: calc(52px + env(safe-area-inset-bottom));
+}
+@utility pb-bar-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+/* MP04 footer: Annullér and the wider "Gem" (flex 1 : 1.4 on the board). */
+@utility grid-cols-m-actions {
+  grid-template-columns: 1fr 1.4fr;
+}
+/* MobileKpi rows: label 20, value 30, visual 30, meta 16 (MA02). */
+@utility grid-rows-m-kpi {
+  grid-template-rows: 20px 30px 30px 16px;
+}
+@utility grid-rows-m-ring {
+  grid-template-rows: 20px 64px 16px;
+}
+/* Touch targets of at least 44 × 44 px (PLAN-MOBILE §4) for controls drawn smaller (chips 32,
+   switches 26): the hit area grows, the drawing doesn't. */
+@utility touch-target {
+  position: relative;
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}
+/* Today's bar in WeekBars (MA02): finer hatch than the dashboard's. */
+@utility hatch-sm {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--color-primary) 0 4px,
+    var(--color-lime-stripe) 4px 6px
+  );
+}
+/* Sideways-scrolling chip rows at 360 px: no scrollbar, the page itself never scrolls sideways. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+/* Signup and onboarding (SU/OB): form column and navy trust panel. */
+@utility grid-cols-signup {
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 1fr);
+}
+@utility grid-cols-signup-wide {
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+}
+@utility grid-cols-logo-wall {
+  grid-template-columns: repeat(4, 56px);
+}
+@utility px-signup {
+  padding-left: clamp(24px, 4vw, 72px);
+  padding-right: clamp(24px, 4vw, 72px);
+}
+@utility px-signup-header {
+  padding-left: clamp(24px, 3vw, 48px);
+  padding-right: clamp(24px, 3vw, 48px);
+}
+@utility px-signup-panel {
+  padding-left: clamp(32px, 4vw, 72px);
+  padding-right: clamp(32px, 4vw, 72px);
+}
+@utility grid-cols-postal {
+  grid-template-columns: minmax(0, 120px) minmax(0, 1fr);
+}
+/* Terms shown from agentor.dk in the payment modal (PLAN-SIGNUP B6). */
+@utility h-dialog-doc {
+  height: min(60vh, 560px);
+}
+@utility grid-cols-welcome {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+}
+@utility grid-cols-done-hero {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+/* FAB, selection bar and timer 12 px above the floating tab bar (MA19, MX1). */
+@utility bottom-tabbar-gap {
+  bottom: calc(var(--m-tabbar-height) + var(--m-tabbar-bottom) + 12px);
+}
+/* A docked action bar right above the floating tab bar (MP26 "Gem ændringer"). */
+@utility bottom-over-tabbar {
+  bottom: calc(var(--m-tabbar-height) + var(--m-tabbar-bottom) + 6px);
+}
+/* MobileTabBar side padding (MX1: 20 / 18) and the active pill's (12 / 16), narrowed below about
+   400 px so four 44 px tabs and "Integrationer" still fit at 360. */
+@utility px-tabbar {
+  padding-left: clamp(6px, calc(100vw - 372px), 20px);
+  padding-right: clamp(6px, calc(100vw - 374px), 18px);
+}
+@utility px-tab-active {
+  padding-left: clamp(8px, calc(100vw - 352px), 12px);
+  padding-right: clamp(10px, calc(100vw - 348px), 16px);
+}
+@utility max-w-tabbar {
+  max-width: 480px;
+}
+
+/* Achievement progress (PR1/D15): a thin dark bar on the border colour. */
+.profile-progress {
+  appearance: none;
+  border: 0;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: var(--color-border);
+}
+.profile-progress::-webkit-progress-bar {
+  background: var(--color-border);
+  border-radius: 9999px;
+}
+.profile-progress::-webkit-progress-value {
+  background: var(--color-fg-1);
+  border-radius: 9999px;
+}
+.profile-progress::-moz-progress-bar {
+  background: var(--color-fg-1);
+  border-radius: 9999px;
+}

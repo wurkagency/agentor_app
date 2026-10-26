@@ -1,0 +1,43 @@
+{
+  "name": "@agentor/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./migrate": {
+      "types": "./dist/migrate.d.ts",
+      "default": "./dist/migrate.js"
+    }
+  },
+  "files": [
+    "dist",
+    "drizzle"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "generate": "drizzle-kit generate",
+    "migrate": "tsx scripts/migrate.ts",
+    "check-rls": "tsx scripts/check-rls.ts",
+    "test": "vitest run --project unit",
+    "test:isolation": "vitest run --project isolation",
+    "test:isolation:canary": "tsx scripts/isolation-canary.ts"
+  },
+  "dependencies": {
+    "@agentor/core": "workspace:*",
+    "drizzle-orm": "^0.45.0",
+    "pg": "^8.0.0"
+  },
+  "devDependencies": {
+    "@agentor/keybox": "workspace:*",
+    "@agentor/config": "workspace:*",
+    "@types/pg": "^8.0.0",
+    "drizzle-kit": "^0.31.0",
+    "tsx": "^4.0.0",
+    "vitest": "^4.0.0"
+  }
+}

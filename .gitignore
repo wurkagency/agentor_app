@@ -1,0 +1,38 @@
+# Dependencies and build output
+node_modules/
+.next/
+dist/
+.turbo/
+coverage/
+playwright-report/
+test-results/
+# Uploaded files in development (STORAGE_DIR); production keeps them under /var/lib/agentor
+.data/
+*.tsbuildinfo
+next-env.d.ts
+
+# Secrets: never commit. Only .env.example is tracked.
+.env
+.env.*
+!.env.example
+*.kek
+*.pem
+
+# Local-only source material (kept in docs/, never committed)
+/docs/CLAUDE-CODE-BUILD-PROMPT.md
+/docs/Inspiration - Workflows/
+/docs/Logo - Integrations/
+/docs/SPECIFICATION.md
+/docs/inspiration/
+/docs/integrations/
+/docs/specifications/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Local screenshot helper
+apps/web/shot.mjs

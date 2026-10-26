@@ -1,0 +1,20 @@
+e-conomic er afbrudt
+
+Hej Mette
+
+Forbindelsen til e-conomic · Nordlys Outlet virker ikke længere, fordi adgangen udløb i går kl. 09:14. Flowet Outlet → regnskab står stille, indtil du logger ind igen.
+
+Påvirket: Outlet → regnskab · 3 ruter
+Venter i kø: 7 ordrer · sendes, når forbindelsen virker
+
+Genforbind e-conomic: https://app.agentor.dk/connections/0190a000-0000-7000-8000-00000000c0de/reconnect
+
+Du logger ind hos e-conomic. Agentor ser aldrig din adgangskode.
+
+Venlig hilsen
+Agentor
+
+-- 
+Agentor ApS · app.agentor.dk · support@agentor.dk
+Du får denne mail, fordi du har slået e-mail til for "Forbindelse afbrudt" hos Nordlys Cykler ApS.
+Ret notifikationer: https://app.agentor.dk/settings/notifications

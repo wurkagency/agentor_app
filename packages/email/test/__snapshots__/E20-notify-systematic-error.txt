@@ -1,0 +1,21 @@
+Samme fejl på flere ordrer
+
+Hej Mette
+
+3 ordrer i Webshop → regnskab og CRM fejlede i dag kl. 14:06 med samme fejl.
+
+Hvorfor
+Kontoen 1010 Salg EU findes ikke længere i Dinero. Ruten sender EU B2B-salg til den konto.
+
+Sådan løser du det
+Vælg en ny konto for EU B2B-salg, fx 1015 Salg EU, i mappingen. Publicér, og gentag de 3 ordrer.
+
+Se fejlen: https://app.agentor.dk/integrations/0190a000-0000-7000-8000-0000000f1000?tab=runs
+
+Venlig hilsen
+Agentor
+
+-- 
+Agentor ApS · app.agentor.dk · support@agentor.dk
+Du får denne mail, fordi du har slået e-mail til for "Systematisk fejl" hos Nordlys Cykler ApS.
+Ret notifikationer: https://app.agentor.dk/settings/notifications

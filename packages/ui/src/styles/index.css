@@ -1,0 +1,7 @@
+/*
+ * Import from the app's global stylesheet after Tailwind:
+ *   @import 'tailwindcss';
+ *   @import '@agentor/ui/styles.css';
+ *   @source '../../../../packages/ui/src';
+ */
+@import './theme.css';
