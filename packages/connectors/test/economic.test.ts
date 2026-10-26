@@ -15,6 +15,7 @@ import {
   EconomicAdapter,
   filterValue,
   openAdapter,
+  orderRefRegExp,
   toInvoiceStatus,
 } from '../src/live/index.js';
 import { agreement, fakeEconomic, type FakeEconomic } from './fake-economic.js';
@@ -896,5 +897,28 @@ describe('e-conomic helpers', () => {
       signatureHeader: 'x-agentor-secret',
       scheme: 'secret-header',
     });
+  });
+});
+
+describe('order-reference pattern from the connection settings', () => {
+  const ref = (other: string, pattern: string) =>
+    toInvoiceStatus({ bookedInvoiceNumber: 1, grossAmount: 10, references: { other } }, pattern)
+      .orderRef;
+
+  it('takes the first group of a safe pattern', () => {
+    expect(ref('Ordre 1042 / web', 'Ordre (\\d+)')).toBe('1042');
+    expect(ref('ingen', '(\\d+)')).toBeNull();
+  });
+
+  it('refuses patterns that can backtrack without end, and uses the whole reference', () => {
+    for (const p of ['(a+)+$', '(\\d*)*x', '(x+){2,}', '(a)\\1', 'x'.repeat(101)])
+      expect(orderRefRegExp(p), p).toBeNull();
+    const start = Date.now();
+    expect(ref(`${'a'.repeat(40)}!`, '(a+)+$')).toBe(`${'a'.repeat(40)}!`);
+    expect(Date.now() - start).toBeLessThan(100);
+  });
+
+  it('falls back to the whole reference for an invalid pattern', () => {
+    expect(ref('1009', '(')).toBe('1009');
   });
 });

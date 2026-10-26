@@ -97,8 +97,7 @@ export function resolvePath(ctx: unknown, path: string): unknown {
   let cur: unknown = ctx;
   for (const key of path.split('.')) {
     if (cur === null || typeof cur !== 'object' || FORBIDDEN.has(key)) return undefined;
-    if (!Object.hasOwn(cur, key)) return undefined;
-    cur = (cur as Record<string, unknown>)[key];
+    cur = Object.getOwnPropertyDescriptor(cur, key)?.value;
   }
   return cur;
 }

@@ -507,6 +507,29 @@ export function toStock(
   return { sourceId: p.productNumber, sku: p.productNumber, quantity: Math.max(0, qty) };
 }
 
+/** Patterns typed into the connection settings run in the worker: bounded and backtracking-safe. */
+const PATTERN_MAX = 100;
+const REFERENCE_MAX = 120;
+// A quantified group that is itself quantified ("(a+)+", "(\d*)*", "(x+){2,}") or a back-reference
+// can backtrack exponentially; those patterns are refused and the whole reference is used.
+const UNSAFE_PATTERN = /\([^)]*[+*}][^)]*\)\s*[+*{]|\\[1-9]/;
+const patternCache = new Map<string, RegExp | null>();
+
+export function orderRefRegExp(pattern: string): RegExp | null {
+  if (patternCache.has(pattern)) return patternCache.get(pattern)!;
+  let re: RegExp | null = null;
+  if (pattern.length <= PATTERN_MAX && !UNSAFE_PATTERN.test(pattern)) {
+    try {
+      // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp -- length-capped, nested quantifiers and back-references refused above, run on a capped string.
+      re = new RegExp(pattern);
+    } catch {
+      re = null;
+    }
+  }
+  patternCache.set(pattern, re);
+  return re;
+}
+
 /** Where a booked invoice stands (§5.1). Versioned by content, so a payment is a new version. */
 export function toInvoiceStatus(b: EcoBooked, orderRefPattern = ''): InvoiceStatus {
   const gross = b.grossAmount ?? 0;
@@ -514,13 +537,10 @@ export function toInvoiceStatus(b: EcoBooked, orderRefPattern = ''): InvoiceStat
   const residual = Math.abs(ore(b.remainder ?? 0));
   const other = (b.references?.other ?? '').trim();
   let orderRef: string | null = other || null;
-  if (other && orderRefPattern) {
-    try {
-      const m = new RegExp(orderRefPattern).exec(other);
-      orderRef = m ? (m[1] ?? m[0]) : null;
-    } catch {
-      orderRef = other;
-    }
+  const re = other && orderRefPattern ? orderRefRegExp(orderRefPattern) : null;
+  if (re) {
+    const m = re.exec(other.slice(0, REFERENCE_MAX));
+    orderRef = m ? (m[1] ?? m[0]) : null;
   }
   return {
     sourceId: String(b.bookedInvoiceNumber),

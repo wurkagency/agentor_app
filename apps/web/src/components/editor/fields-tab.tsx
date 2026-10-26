@@ -72,7 +72,8 @@ export function variablesFor(port: Port | undefined, scope: TargetField['scope']
       v.path.endsWith('.*')
         ? META_ALIASES.map((a) => ({
             ...v,
-            path: v.path.replace('*', a),
+            // "meta.*" → "meta.<alias>": only the trailing wildcard.
+            path: `${v.path.slice(0, -1)}${a}`,
             label: `${v.label}: ${a}`,
           }))
         : [v],
