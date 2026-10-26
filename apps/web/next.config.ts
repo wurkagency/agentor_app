@@ -44,8 +44,8 @@ const config: NextConfig = {
   poweredByHeader: false,
   output: 'standalone',
   transpilePackages: ['@agentor/ui', '@agentor/i18n', '@agentor/core'],
-  // No upgrade question or advisory stop during next build: Next.js is upgraded on purpose, in
-  // the lockfile, never by the deploy (a terminal menu there stalled agentor-deploy).
+  // No upgrade menu during next build: it waits for a key and stalled agentor-deploy. Next.js is
+  // upgraded in package.json and the lockfile.
   experimental: { authInterrupts: true, agentUpgrade: false },
   agentRules: false,
   // Server function arguments (passwords, codes) must never reach a log, not even in development.
