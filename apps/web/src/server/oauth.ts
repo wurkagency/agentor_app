@@ -1,7 +1,9 @@
 import { manifestFor } from '@agentor/connectors';
+import { activeGrant, getMembership } from '@agentor/db';
 import { randomBytes } from 'node:crypto';
 import { z } from 'zod';
-import { redis } from './infra';
+import { db, redis } from './infra';
+import { staffRole } from './platform';
 
 /**
  * Connecting a system with OAuth (PLAN-SIGNUP B11). The start route stores who is connecting what
@@ -24,8 +26,29 @@ const stateSchema = z.object({
   returnTo: z.string().max(300),
   baseUrl: z.string().max(300).nullable(),
   reconnectId: z.uuid().nullable(),
+  /** Started by Agentor support in the customer's app: the help grant it ran under. */
+  supportGrantId: z.uuid().nullable().default(null),
 });
 export type OAuthState = z.infer<typeof stateSchema>;
+
+const MANAGERS = new Set(['owner', 'admin', 'developer']);
+
+/**
+ * May the one who started this connect the system now? A member with a managing role in an
+ * active company, or Agentor staff whose help grant for that company still holds. Checked again
+ * at the callback, so a revoked grant or role stops a login that is under way.
+ */
+export async function mayConnect(
+  s: Pick<OAuthState, 'tenantId' | 'userId' | 'supportGrantId'>,
+): Promise<boolean> {
+  if (s.supportGrantId) {
+    if (!(await staffRole(s.userId))) return false;
+    const grant = await activeGrant(db(), s.userId, s.supportGrantId);
+    return !!grant && grant.tenantId === s.tenantId && grant.scope === 'help';
+  }
+  const membership = await getMembership(db(), s.tenantId, s.userId);
+  return !!membership && MANAGERS.has(membership.role) && membership.signupState === 'active';
+}
 
 /** Where a connection may return to: onboarding steps and the connection pages. */
 export function safeReturn(path: string | null | undefined): string {

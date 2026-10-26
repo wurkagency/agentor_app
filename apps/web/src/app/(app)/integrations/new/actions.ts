@@ -18,7 +18,7 @@ export async function createFromTemplate(
   templateId: string | null,
   name: string,
 ): Promise<ActionResult> {
-  const ctx = await requireRole(['owner', 'admin', 'developer']);
+  const ctx = await requireRole(['owner', 'admin', 'developer'], { support: true });
   const conns = [...(await connectionMap(ctx.tenant.tenantId, ctx.user.id)).values()].filter(
     (c) => c.status !== 'broken',
   );

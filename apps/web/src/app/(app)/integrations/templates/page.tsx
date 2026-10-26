@@ -16,7 +16,7 @@ export default async function TemplatesPage({
 }: {
   searchParams: Promise<{ template?: string }>;
 }) {
-  const ctx = await requireRole(['owner', 'admin', 'developer']);
+  const ctx = await requireRole(['owner', 'admin', 'developer'], { support: true });
   const conns = [...(await connectionMap(ctx.tenant.tenantId, ctx.user.id)).values()];
   const ready = new Set(conns.filter((c) => c.status !== 'broken').map((c) => c.connectorId));
   const { template } = await searchParams;

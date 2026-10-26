@@ -414,6 +414,13 @@
       "when": 1792943107138,
       "tag": "0058_connection_health",
       "breakpoints": true
+    },
+    {
+      "idx": 59,
+      "version": "7",
+      "when": 1793003905751,
+      "tag": "0059_support_connections",
+      "breakpoints": true
     }
   ]
 }

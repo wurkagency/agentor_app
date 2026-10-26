@@ -1,11 +1,7 @@
-import { getMembership } from '@agentor/db';
 import { z } from 'zod';
 import { env } from '@/server/env';
-import { db } from '@/server/infra';
-import { peekOAuthState } from '@/server/oauth';
+import { mayConnect, peekOAuthState } from '@/server/oauth';
 import { claimKeyCallback, rememberConnection, storeConnection } from '@/server/providers';
-
-const MANAGERS = new Set(['owner', 'admin', 'developer']);
 
 const bodySchema = z.object({
   key_id: z.union([z.number(), z.string()]).optional(),
@@ -38,9 +34,7 @@ export async function POST(req: Request) {
   if (parsed.key_permissions !== 'read_write') return fail(400);
   const state = await peekOAuthState(parsed.user_id);
   if (!state || state.connectorId !== 'woocommerce' || !state.baseUrl) return fail(404);
-  const membership = await getMembership(db(), state.tenantId, state.userId);
-  if (!membership || !MANAGERS.has(membership.role) || membership.signupState !== 'active')
-    return fail(403);
+  if (!(await mayConnect(state))) return fail(403);
   // A repeated delivery must not add a second connection.
   if (!(await claimKeyCallback(parsed.user_id))) return fail(200);
   const id = await storeConnection(state, {

@@ -1,14 +1,12 @@
 import { manifestFor } from '@agentor/connectors';
-import { getMembership, isUuid } from '@agentor/db';
+import { isUuid } from '@agentor/db';
 import { NextResponse, type NextRequest } from 'next/server';
 import { getUserSession } from '@/server/auth/session';
 import { env } from '@/server/env';
-import { db } from '@/server/infra';
-import { createOAuthState, safeReturn } from '@/server/oauth';
+import { createOAuthState, mayConnect, safeReturn } from '@/server/oauth';
+import { currentSupportView } from '@/server/platform';
 import { providerAuthorizeUrl } from '@/server/providers';
 import { validatePublicUrl } from '@agentor/http';
-
-const MANAGERS = new Set(['owner', 'admin', 'developer']);
 
 /**
  * GET /connect/[connector]/start?return=/onboarding/accounting[&baseUrl=…][&reconnect=…]
@@ -28,10 +26,17 @@ export async function GET(
   const s = await getUserSession();
   if (!s) return NextResponse.redirect(new URL('/login', env().APP_URL));
   const m = manifestFor(connector);
-  if (!m || !s.activeTenantId) return back('connectError=unknown');
-  const membership = await getMembership(db(), s.activeTenantId, s.user.id);
-  if (!membership || !MANAGERS.has(membership.role) || membership.signupState !== 'active')
-    return back('connectError=forbidden');
+  if (!m) return back('connectError=unknown');
+  // Agentor support in the customer's app connects for that company, under its help grant.
+  const view = await currentSupportView(s);
+  if (view === 'expired') return back('connectError=forbidden');
+  const who = view
+    ? { tenantId: view.grant.tenantId, userId: s.user.id, supportGrantId: view.grant.grantId }
+    : s.activeTenantId
+      ? { tenantId: s.activeTenantId, userId: s.user.id, supportGrantId: null }
+      : null;
+  if (!who) return back('connectError=unknown');
+  if (!(await mayConnect(who))) return back('connectError=forbidden');
   // A shop address for systems that live on the customer's own domain (WooCommerce).
   let baseUrl: string | null = null;
   const rawBase = url.searchParams.get('baseUrl');
@@ -56,8 +61,7 @@ export async function GET(
   }
   if (live && m.id === 'woocommerce' && !baseUrl) return back('connectError=badUrl');
   const state = {
-    tenantId: membership.tenantId,
-    userId: s.user.id,
+    ...who,
     userName: s.user.name,
     connectorId: m.id,
     returnTo: safeReturn(url.searchParams.get('return')),

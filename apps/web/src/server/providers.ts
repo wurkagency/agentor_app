@@ -94,7 +94,14 @@ export async function storeConnection(
 ): Promise<string> {
   const m = manifestFor(state.connectorId);
   if (!m) throw new Error('unknown connector');
-  const actor = { tenantId: state.tenantId, userId: state.userId, name: state.userName, ip: null };
+  const actor = {
+    tenantId: state.tenantId,
+    userId: state.userId,
+    name: state.userName,
+    ip: null,
+    // Logged in the customer's audit log as Agentor support, like everything under a grant.
+    ...(state.supportGrantId ? { kind: 'support' as const } : {}),
+  };
   const webhook = hasWebhook(state.connectorId);
   let id: string;
   if (state.reconnectId) {

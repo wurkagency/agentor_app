@@ -19,7 +19,7 @@ const LIVE_KEY_FLOW = new Set(['woocommerce', 'economic']);
 
 /** Tilføj forbindelse (D9-Katalog): 24 systems in 5 groups (D9 plus Odoo). */
 export default async function CataloguePage() {
-  const ctx = await requireRole(['owner', 'admin', 'developer']);
+  const ctx = await requireRole(['owner', 'admin', 'developer'], { support: true });
   const rows = await listConnections(db(), { tenantId: ctx.tenant.tenantId, userId: ctx.user.id });
   const t = await getTranslations('connections');
   const live = env().CONNECTOR_MODE === 'live';

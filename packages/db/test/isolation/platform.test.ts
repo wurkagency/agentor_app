@@ -339,7 +339,7 @@ describe('a support grant', () => {
     expect(r[2]!.rows![0]!.n).toBe(0);
   });
 
-  it('"Se og hjælpe" edits flows like an Admin, but never team, audit log or connections', async () => {
+  it('"Se og hjælpe" edits flows and connections like an Admin, but never team or audit log', async () => {
     const r = await steps([
       makeStaff(),
       request('help'),
@@ -347,7 +347,7 @@ describe('a support grant', () => {
       asSupport('select count(*)::int as n from flows'),
       asSupport(`update flows set name = name where id = '${ID.flowA1}'`),
       asSupport('select count(*)::int as n from audit_log'),
-      asSupport(`update connections set name = 'x'`),
+      asSupport(`update connections set name = name`),
       asSupport(
         `insert into memberships (tenant_id, user_id, role) values ('${ID.tenantA}', '${STAFF}', 'owner')`,
       ),
@@ -356,7 +356,8 @@ describe('a support grant', () => {
     expect(r[3]!.rows![0]!.n).toBeGreaterThan(0);
     expect(r[4]!.rowCount).toBe(1);
     expect(r[5]!.rows![0]!.n).toBe(0);
-    expect(r[6]!.rowCount ?? 0).toBe(0);
+    // Since 0059: support with a help grant manages connections (support and test integrations).
+    expect(r[6]!.rowCount).toBeGreaterThan(0);
     expect(r[7]!.error).toBeDefined();
     expect(r[8]!.rows![0]!.a).toBe(false);
   });
@@ -368,9 +369,11 @@ describe('a support grant', () => {
       approve,
       asSupport('select count(*)::int as n from flows'),
       asSupport(`update flows set name = name where id = '${ID.flowA1}'`),
+      asSupport(`update connections set name = name`),
     ]);
     expect(r[3]!.rows![0]!.n).toBeGreaterThan(0);
     expect(r[4]!.rowCount ?? 0).toBe(0);
+    expect(r[5]!.rowCount ?? 0).toBe(0);
   });
 
   it('opens only its own tenant, and stops when ended or expired', async () => {

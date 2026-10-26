@@ -1,18 +1,14 @@
 import { manifestFor } from '@agentor/connectors';
-import { getMembership } from '@agentor/db';
 import { NextResponse, type NextRequest } from 'next/server';
 import { getUserSession } from '@/server/auth/session';
 import { env } from '@/server/env';
-import { db } from '@/server/infra';
-import { mockCredentials, takeOAuthState } from '@/server/oauth';
+import { mayConnect, mockCredentials, takeOAuthState } from '@/server/oauth';
 import {
   dineroCredentials,
   economicCredentials,
   rememberedConnection,
   storeConnection,
 } from '@/server/providers';
-
-const MANAGERS = new Set(['owner', 'admin', 'developer']);
 
 /**
  * GET /connect/[connector]/callback?code=…&state=…  (PLAN-SIGNUP B11)
@@ -41,9 +37,7 @@ async function handle(connector: string, q: URLSearchParams) {
       ? !!q.get('token')
       : !!q.get('code');
   if (q.get('error') || !given) return back('connectError=denied');
-  const membership = await getMembership(db(), state.tenantId, state.userId);
-  if (!membership || !MANAGERS.has(membership.role) || membership.signupState !== 'active')
-    return back('connectError=forbidden');
+  if (!(await mayConnect(state))) return back('connectError=forbidden');
   const m = manifestFor(connector);
   if (!m) return back('connectError=unknown');
   let id: string;

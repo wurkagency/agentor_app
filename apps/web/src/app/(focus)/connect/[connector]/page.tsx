@@ -37,7 +37,7 @@ export default async function ConnectPage({
   }
   const started = state ? await peekOAuthState(state) : null;
   if (state && (!started || started.connectorId !== connector)) notFound();
-  if (!started) await requireRole(['owner', 'admin', 'developer']);
+  if (!started) await requireRole(['owner', 'admin', 'developer'], { support: true });
   const m = manifestFor(connector);
   if (!m || (!started && m.auth.type !== 'oauth2') || env().CONNECTOR_MODE !== 'mock') notFound();
   const t = await getTranslations('connections');

@@ -28,7 +28,10 @@ import {
 import { env } from '@/server/env';
 import { db } from '@/server/infra';
 
-/** Owners, admins and developers manage connections (produktspecifikation §6, PLAN Q). */
+/**
+ * Owners, admins and developers manage connections (produktspecifikation §6, PLAN Q), and Agentor
+ * support under a help grant, logged as support in the customer's audit log.
+ */
 const MANAGERS = ['owner', 'admin', 'developer'] as const;
 
 const credentialsSchema = z.record(z.string().max(64), z.string().trim().max(2048));
@@ -72,7 +75,7 @@ export async function connectWithKey(
   connectorId: string,
   raw: unknown,
 ): Promise<ActionResult<{ id: string; webhookUrl: string | null }>> {
-  const ctx = await requireRole(MANAGERS);
+  const ctx = await requireRole(MANAGERS, { support: true });
   const checked = await checkCredentials(connectorId, raw);
   if (!checked.ok) return checked;
   const m = manifestFor(connectorId)!;
@@ -104,7 +107,7 @@ export async function completeMockOAuth(
   reconnectId: string | null,
 ): Promise<ActionResult<{ id: string }>> {
   if (env().CONNECTOR_MODE !== 'mock') return { ok: false, error: 'notAvailable' };
-  const ctx = await requireRole(MANAGERS);
+  const ctx = await requireRole(MANAGERS, { support: true });
   const m = manifestFor(connectorId);
   if (!m || m.auth.type !== 'oauth2') return { ok: false, error: 'unknownConnector' };
   const actor = await actorFor(ctx);
@@ -143,7 +146,7 @@ export async function reconnectWithKey(
   connectorId: string,
   raw: unknown,
 ): Promise<ActionResult> {
-  const ctx = await requireRole(MANAGERS);
+  const ctx = await requireRole(MANAGERS, { support: true });
   if (!isUuid(connectionId)) return { ok: false, error: 'invalid' };
   const checked = await checkCredentials(connectorId, raw);
   if (!checked.ok) return checked;
@@ -166,7 +169,7 @@ export async function reconnectWithKey(
 }
 
 export async function testConnection(connectionId: string): Promise<ActionResult> {
-  const ctx = await requireRole(MANAGERS);
+  const ctx = await requireRole(MANAGERS, { support: true });
   if (!isUuid(connectionId)) return { ok: false, error: 'invalid' };
   const actor = await actorFor(ctx);
   try {
@@ -183,7 +186,7 @@ export async function testConnection(connectionId: string): Promise<ActionResult
 export async function newWebhookAddress(
   connectionId: string,
 ): Promise<ActionResult<{ webhookUrl: string }>> {
-  const ctx = await requireRole(MANAGERS);
+  const ctx = await requireRole(MANAGERS, { support: true });
   if (!isUuid(connectionId)) return { ok: false, error: 'invalid' };
   const actor = await actorFor(ctx);
   const token = await rotateWebhookToken(db(), actor, connectionId);
@@ -209,7 +212,7 @@ export async function saveConnectionSettings(
   connectionId: string,
   raw: unknown,
 ): Promise<ActionResult> {
-  const ctx = await requireRole(MANAGERS);
+  const ctx = await requireRole(MANAGERS, { support: true });
   if (!isUuid(connectionId)) return { ok: false, error: 'invalid' };
   const parsed = z.record(z.string().max(64), settingValueSchema).safeParse(raw);
   if (!parsed.success) return { ok: false, error: 'invalid' };
@@ -255,7 +258,7 @@ export async function saveConnectionSettings(
 }
 
 export async function disconnect(connectionId: string): Promise<ActionResult> {
-  const ctx = await requireRole(MANAGERS);
+  const ctx = await requireRole(MANAGERS, { support: true });
   if (!isUuid(connectionId)) return { ok: false, error: 'invalid' };
   try {
     await deleteConnection(db(), await actorFor(ctx), connectionId);
