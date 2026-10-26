@@ -32,7 +32,9 @@ echo "== Release $R"
 cp -a "$D/repo" "$R"
 cd "$R"
 pnpm install --frozen-lockfile
-pnpm build
+# No questions during the build: Next.js 16.4 asks in a terminal whether to upgrade (Ctrl+C there
+# left a release without a build). next.config turns that check off; no terminal input either way.
+CI=1 pnpm build </dev/null
 
 echo "== Migrations"
 set -a
