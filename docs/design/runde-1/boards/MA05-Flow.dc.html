@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>Mobil · flow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F1}
+.ds{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1A1A18;font-size:14px;line-height:1.55}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.i14{width:14px;height:14px}.i16{width:16px;height:16px}.i24{width:24px;height:24px}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px}
+.wrap{width:100%;max-width:1200px;margin:0 auto;box-sizing:border-box}
+.pl{font-size:15px;font-weight:500;color:#6B6B67;text-decoration:none;padding:4px 0;white-space:nowrap}
+.pl.on{color:#1A1A18;font-weight:600;box-shadow:inset 0 -2px 0 #1A1A18}
+.sl{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:9999px;font-size:13px;font-weight:500;color:#6B6B67;text-decoration:none;white-space:nowrap}
+.sl.on{background:#FFFFFF;color:#1A1A18;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.icb{width:36px;height:36px;border-radius:9999px;display:grid;place-items:center;border:0;background:transparent;color:#1A1A18;cursor:pointer;position:relative;text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;box-sizing:border-box;padding:0 16px;border-radius:9999px;font-family:inherit;font-size:13px;font-weight:600;border:0;color:#1A1A18;background:transparent;white-space:nowrap;cursor:pointer;text-decoration:none}
+.btn-l{height:48px;padding:0 28px;font-size:12px;font-weight:700;letter-spacing:.10em;text-transform:uppercase}
+.btn-s{height:28px;padding:0 12px;font-size:12px}
+.btn-ic{width:28px;height:28px;padding:0}
+.p{background:#D0E84A}
+.s{background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #C8C5BF}
+.dk{background:#13293A;color:#FFFFFF}
+.x{background:#FFFFFF;color:#B42318;box-shadow:inset 0 0 0 1.5px #B42318}
+.dis{background:#F0EDE8;color:#6B6B67;cursor:not-allowed}
+.card{background:#FFFFFF;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.ct{font-size:16px;font-weight:600;line-height:1.4;margin:0}
+.sec{font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em;margin:0}
+.h1{margin:0;font-size:28px;font-weight:600;line-height:1.2;letter-spacing:-.01em}
+.meta{font-size:12px;font-weight:500;color:#6B6B67}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6B6B67;margin:0}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;box-sizing:border-box;padding:0 10px;border-radius:9999px;font-size:12px;font-weight:600;color:#1A1A18;white-space:nowrap}
+.pill .i{width:14px;height:14px}
+.badge{display:inline-flex;align-items:center;gap:5px;height:22px;box-sizing:border-box;padding:0 9px;border-radius:9999px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge .i{width:13px;height:13px}
+.live{background:#13293A;color:#FFFFFF}.test{background:#E5EDF5}
+.dot{width:8px;height:8px;border-radius:9999px;flex:none;display:inline-block}
+.cpt{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;white-space:nowrap}
+.logo{display:grid;place-items:center;box-sizing:border-box;background:#F0EDE8;border:1px solid #E4E1DB;border-radius:8px;font-weight:600;color:#1A1A18;flex:none}
+.logo:has(img){background:#FFFFFF}
+.logo img{width:72%;height:72%;object-fit:contain;display:block}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;line-height:1.4}
+.tbl th{height:40px;text-align:left;font-size:12px;font-weight:600;color:#1A1A18;border-bottom:1px solid #E4E1DB;padding:0 12px;white-space:nowrap}
+.tbl td{height:44px;border-bottom:1px solid #E4E1DB;padding:0 12px;vertical-align:middle;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:0}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.seg{display:inline-flex;padding:3px;border-radius:9999px;background:#FFFFFF;gap:2px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.seg button{font-family:inherit;height:30px;padding:0 14px;border:0;border-radius:9999px;background:transparent;font-size:13px;font-weight:600;color:#6B6B67;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.seg button.on{background:#1A1A18;color:#FFFFFF}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;box-sizing:border-box;padding:0 14px;border-radius:9999px;font-family:inherit;font-size:13px;font-weight:500;color:#1A1A18;background:#FFFFFF;border:0;box-shadow:inset 0 0 0 1px #C8C5BF;cursor:pointer;white-space:nowrap}
+.chip.on{background:#D0E84A;box-shadow:none;font-weight:600}
+.tab{font-family:inherit;background:none;border:0;padding:0 0 10px;font-size:14px;font-weight:600;color:#6B6B67;cursor:pointer;text-decoration:none}
+.tab.on{color:#1A1A18;box-shadow:inset 0 -2px 0 #1A1A18}
+.inp{height:40px;box-sizing:border-box;border:1px solid #E4E1DB;border-radius:8px;padding:0 12px;display:flex;align-items:center;gap:8px;background:#FFFFFF;font-family:inherit;font-size:14px;color:#1A1A18;width:100%}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.fld>label{font-size:13px;font-weight:500}
+.frow{display:grid;grid-template-columns:200px minmax(0,1fr);align-items:center;column-gap:16px;min-height:40px}
+.frow>label,.frow>.lb{font-size:13px;font-weight:500}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:10px 16px;align-items:baseline;margin:0}
+.kv dt{font-size:12px;color:#6B6B67;margin:0}.kv dd{font-size:13px;margin:0}
+.sw{position:relative;width:36px;height:20px;border-radius:9999px;box-sizing:border-box;flex:none;display:inline-block;background:#1A1A18}
+.sw::after{content:"";position:absolute;right:3px;top:3px;width:14px;height:14px;border-radius:9999px;background:#FFFFFF}
+.sw::before{content:"";position:absolute;right:7px;top:7px;width:6px;height:6px;border-radius:9999px;background:#D0E84A;z-index:1}
+.sw.off{background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #6B6B67}
+.sw.off::after{left:4px;top:4px;right:auto;width:12px;height:12px;background:#6B6B67}
+.sw.off::before{display:none}
+.cb{width:18px;height:18px;border-radius:4px;box-sizing:border-box;display:inline-grid;place-items:center;flex:none;box-shadow:inset 0 0 0 1.5px #6B6B67;background:#FFFFFF}
+.cb.on{background:#1A1A18;box-shadow:none;color:#D0E84A}
+.ban{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;font-size:13px}
+.av{width:32px;height:32px;border-radius:9999px;display:inline-grid;place-items:center;font-size:12px;font-weight:600;flex:none;background:#F0EDE8}
+
+.ds .i{width:18px;height:18px}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#6B6B67;font-size:11px;font-weight:600;padding-top:8px}
+.tab .tw{width:52px;height:30px;border-radius:9999px;display:grid;place-items:center}
+.tab.on{color:#1A1A18}.tab.on .tw{background:#D0E84A}
+.ptab.on .tw{background:#13293A;color:#FFFFFF}
+.row{display:flex;align-items:center;gap:12px;min-height:56px;padding:0 16px;box-shadow:inset 0 -1px 0 #EEEBE6;text-decoration:none;color:#1A1A18}
+.row:last-child{box-shadow:none}
+.lg{width:28px;height:28px;border-radius:8px;background:#FFFFFF;box-shadow:inset 0 0 0 1px #E4E1DB;display:grid;place-items:center;flex:none}
+.lg img{width:18px;height:18px;object-fit:contain}
+.sw{width:44px;height:26px;border-radius:9999px;background:#C8C5BF;position:relative;flex:none;border:0;padding:0}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:9999px;background:#FFFFFF}
+.sw[aria-checked="true"]{background:#1A1A18}.sw[aria-checked="true"]::after{left:21px;background:#D0E84A}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 14px;border-radius:9999px;font-size:13px;font-weight:500;background:#FFFFFF;box-shadow:inset 0 0 0 1px #C8C5BF;color:#1A1A18;border:0;font-family:inherit;white-space:nowrap}
+.chip.on{background:#1A1A18;color:#FFFFFF;box-shadow:none;font-weight:600}
+.big{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:52px;border-radius:9999px;border:0;font-family:inherit;font-size:15px;font-weight:600;text-decoration:none;color:#1A1A18;box-sizing:border-box}
+.sec2{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#1A1A18;margin:14px 4px 0}
+</style>
+</helmet>
+<div class="ds" style="width: 390px; height: 844px; background: #F7F5F1; display: flex; flex-direction: column; position: relative; overflow: hidden">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><symbol id="ac" viewBox="0 0 24 24"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"></path></symbol><symbol id="al" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></symbol><symbol id="ar" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></symbol><symbol id="bl" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></symbol><symbol id="cc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></symbol><symbol id="cp" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="10" x2="10" y1="15" y2="9"></line><line x1="14" x2="14" y1="15" y2="9"></line></symbol><symbol id="cx" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></symbol><symbol id="fc" viewBox="0 0 24 24"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"></path><path d="M8.5 2h7"></path><path d="M7 16h10"></path></symbol><symbol id="hm" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></symbol><symbol id="lap" viewBox="0 0 24 24"><path d="M18 5a2 2 0 0 1 2 2v8.526a2 2 0 0 0 .212.897l1.068 2.127a1 1 0 0 1-.9 1.45H3.62a1 1 0 0 1-.9-1.45l1.068-2.127A2 2 0 0 0 4 15.526V7a2 2 0 0 1 2-2z"></path><path d="M20.054 15.987H3.946"></path></symbol><symbol id="mnu" viewBox="0 0 24 24"><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="18" y2="18"></line></symbol><symbol id="pl" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path><path d="m15 5 3 3"></path></symbol><symbol id="pls" viewBox="0 0 24 24"><rect x="14" y="4" width="4" height="16" rx="1"></rect><rect x="6" y="4" width="4" height="16" rx="1"></rect></symbol><symbol id="rf" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></symbol><symbol id="ta" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></symbol><symbol id="up" viewBox="0 0 24 24"><path d="m19 5 3-3"></path><path d="m2 22 3-3"></path><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"></path><path d="M7.5 13.5 10 11"></path><path d="M10.5 16.5 13 14"></path><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"></path></symbol><symbol id="wf" viewBox="0 0 24 24"><rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect></symbol><symbol id="pf" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="10" r="3"></circle><path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path></symbol></svg>
+<header style="flex: none; height: 60px; display: flex; align-items: center; gap: 8px; padding: 0 16px;  color: #1A1A18"><a class="icb" href="MA04-Integrationer.dc.html" aria-label="Tilbage" style="color: #1A1A18; width: 44px; height: 44px; margin-left: -10px"><svg class="i" style="width: 20px; height: 20px"><use href="#al"></use></svg></a><div style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.25"><strong style="font-size: 16px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Webshop → regnskab og CRM</strong><span style="font-size: 12px; color: #6B6B67; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">WooCommerce → Dinero, HubSpot</span></div><a class="icb" href="MA09-Notifikationer.dc.html" aria-label="Notifikationer, 2 nye" style="color: #1A1A18; width: 44px; height: 44px"><svg class="i" style="width: 20px; height: 20px"><use href="#bl"></use></svg><span style="position: absolute; top: 8px; right: 8px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 9999px; background: #B42318; color: #FFFFFF; font-size: 10px; font-weight: 700; display: grid; place-items: center">2</span></a></header>
+<main style="flex: 1; min-height: 0; overflow: hidden; padding: 12px 16px 16px; display: flex; flex-direction: column; gap: 12px">
+<section class="card" style="overflow: hidden; "><div style="padding: 16px; display: flex; flex-direction: column; gap: 10px"><span style="display: flex; align-items: center; gap: 6px"><span class="lg" style="width: 28px; height: 28px"><img src="/_blob/2a2f4ae979d76b93057878040a3dc65b" alt="WooCommerce"></span><span style="color: #9B9B97; display: flex"><svg class="i" style="width: 14px; height: 14px"><use href="#ar"></use></svg></span><span class="lg" style="width: 28px; height: 28px"><img src="/_blob/b0fc7b3ea30379ba1f4587aa5ab39988" alt="Dinero"></span><span class="lg" style="width: 28px; height: 28px"><img src="/_blob/ec1a12de2e94178cbd6b6944d9a1ba2e" alt="HubSpot"></span><span style="flex: 1"></span><span class="pill" style="background: #FBE7E4"><svg class="i" style="color: #B42318"><use href="#cx"></use></svg>Fejl</span></span><div style="display: flex; justify-content: space-between; font-size: 13px"><span class="meta">Sidst kørt</span><strong>for 4 min. siden</strong></div><div style="display: flex; justify-content: space-between; font-size: 13px"><span class="meta">Records i dag</span><strong>1.284 · 3 fejlet</strong></div></div><div style="display: flex; gap: 8px; padding: 0 16px 16px"><a class="btn p" href="MA06-Fejl.dc.html" style="flex: 1; height: 44px"><svg class="i" style="width: 16px; height: 16px"><use href="#rf"></use></svg>Gentag 3 fejlede</a><button class="btn s" type="button" style="flex: 1; height: 44px"><svg class="i" style="width: 16px; height: 16px"><use href="#pls"></use></svg>Pausér flow</button></div></section><h2 class="sec2">Ruter</h2><section class="card" style="overflow: hidden; "><div class="row"><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; padding: 10px 0"><strong style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Ordrer → Dinero Fakturaer</strong><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">3 fejlet · konto 1010 findes ikke</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span class="cpt"><span class="dot" style="background: #B42318"></span>Fejl</span><span class="meta" style="font-size: 11px">Live</span></span></div><div class="row"><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; padding: 10px 0"><strong style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Kunder → Dinero Kontakter</strong><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">for 4 min. siden</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span class="cpt"><span class="dot" style="background: #2F7D4F"></span>Aktiv</span><span class="meta" style="font-size: 11px">Live</span></span></div><div class="row"><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; padding: 10px 0"><strong style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Produkter → Dinero Varer</strong><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">for 4 min. siden</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span class="cpt"><span class="dot" style="background: #2F7D4F"></span>Aktiv</span><span class="meta" style="font-size: 11px">Live</span></span></div><div class="row"><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; padding: 10px 0"><strong style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Kunder → HubSpot Kontakter</strong><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">for 4 min. siden</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span class="cpt"><span class="dot" style="background: #2B5C8A"></span>Test</span><span class="meta" style="font-size: 11px">Test</span></span></div><div class="row"><span style="flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.35; padding: 10px 0"><strong style="font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">Ordrer → HubSpot Handler</strong><span class="meta" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">for 4 min. siden</span></span><span style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px"><span class="cpt"><span class="dot" style="background: #2F7D4F"></span>Aktiv</span><span class="meta" style="font-size: 11px">Kladde</span></span></div></section><div style="display: flex; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 12px; background: #EFEDE8; font-size: 12.5px; color: #1A1A18"><svg class="i" style="width: 18px; height: 18px"><use href="#lap"></use></svg><span style="flex: 1">Mapping, filtre og nye ruter ændres i editoren på computer. <a href="MA20-Flow-Ruter.dc.html" style="color: #1A1A18; font-weight: 600">Se ruter, testkør og publicér</a> · <a href="MA24-Koersler.dc.html" style="color: #1A1A18; font-weight: 600">Kørsler</a></span></div>
+</main>
+<div style="flex: none; padding: 6px 14px 14px"><nav aria-label="Hovedmenu" style="height: 56px; border-radius: 9999px; background: #FFFFFF; box-shadow: 0 10px 30px rgba(26,26,24,.10), 0 0 0 1px rgba(26,26,24,.04); display: flex; align-items: center; justify-content: space-between; padding: 0 18px 0 20px; box-sizing: border-box"><a href="MA03-Overblik-Problemer.dc.html" aria-label="Overblik" style="width: 44px; height: 44px; display: grid; place-items: center; color: #9B9B97; opacity: 1; text-decoration: none"><svg class="i" style="width: 21px; height: 21px"><use href="#hm"></use></svg></a><a href="MA04-Integrationer.dc.html" aria-current="page" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px 0 12px; border-radius: 9999px; background: #F3F1EC; color: #1A1A18; text-decoration: none; font-size: 15px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap"><svg class="i" style="width: 22px; height: 22px"><use href="#wf"></use></svg>Integrationer</a><a href="MA07-Aktivitet.dc.html" aria-label="Aktivitet" style="width: 44px; height: 44px; display: grid; place-items: center; color: #9B9B97; opacity: 1; text-decoration: none"><svg class="i" style="width: 21px; height: 21px"><use href="#ac"></use></svg></a><a href="MA10-Mere.dc.html" aria-label="Mere" style="width: 44px; height: 44px; display: grid; place-items: center; color: #9B9B97; opacity: 1; text-decoration: none"><svg class="i" style="width: 21px; height: 21px"><use href="#mnu"></use></svg></a><a href="MA36-Profil.dc.html" aria-label="Profil" style="width: 44px; height: 44px; display: grid; place-items: center; color: #9B9B97; opacity: 1; text-decoration: none"><svg class="i" style="width: 21px; height: 21px"><use href="#pf"></use></svg></a></nav></div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

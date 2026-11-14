@@ -1,0 +1,58 @@
+/* =============================================================
+   AGENTOR — WHITE-LABEL THEMING LAYER
+   =============================================================
+   Every tenant runs the same product shell (layout, spacing, radii,
+   shadows, type scale, icons, motion) so it always feels like one
+   family of software. What a tenant CAN change is a small, named set
+   of brand tokens — enough to make the product feel like theirs
+   without ever touching component code or writing new CSS.
+
+   HOW IT WORKS
+   colors.css / typography.css define the real tokens as a fallback
+   chain: `--color-primary: var(--tenant-color-primary, #D0E84A)`.
+   A tenant stylesheet (or a small <style> block injected per-tenant
+   at runtime, loaded AFTER styles.css) sets ONLY the --tenant-* custom
+   properties it wants to change. Everything downstream — buttons,
+   chips, active nav states, focus rings, progress bars — recomputes
+   automatically. No component re-styling, no rebuild.
+
+   THEMEABLE (safe for a tenant to set):
+     --tenant-color-primary          main brand accent
+     --tenant-color-primary-hover    hover state
+     --tenant-color-primary-press    active/press state
+     --tenant-color-primary-bright   paler fill variant (large panels)
+     --tenant-color-primary-muted    light tint (badges, focus rings)
+     --tenant-color-secondary-navy   dark accent surface (rare use)
+     --tenant-font-sans              swap the typeface family
+
+   NOT themeable (fixed system foundation — intentionally excluded so
+   the product never looks "broken" or off-brand-for-Agentor no matter
+   who re-skins it): spacing scale, radii, shadows, breakpoints, the
+   neutral gray scale (--color-fg-*, --color-bg-base/card, --color-border*),
+   type sizes/weights/line-heights.
+
+   Tenant NAME and LOGO are DATA, not CSS. Pass them as props —
+   `brandName` / `logoUrl` on <Sidebar> and <AppHeader> — never encode
+   them as CSS custom properties.
+
+   EXAMPLE — a tenant override stylesheet loaded after styles.css:
+
+     :root {
+       --tenant-color-primary:        #0057FF;
+       --tenant-color-primary-hover:  #0046CC;
+       --tenant-color-primary-press:  #003A9E;
+       --tenant-color-primary-bright: #4D8CFF;
+       --tenant-color-primary-muted:  #DCE9FF;
+     }
+
+   That's the entire integration surface. See
+   guidelines/white-label.card.html for a live demo of two tenants
+   rendered side by side from the same components.
+   ============================================================= */
+
+:root {
+  /* Intentionally empty: --tenant-* custom properties are unset by
+     default so every var(--tenant-*, <default>) above resolves to the
+     Agentor look. A tenant only ever needs to set the properties it
+     wants to change. */
+}

@@ -1,0 +1,36 @@
+{
+  "name": "@agentor/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "dev": "tsx watch --env-file-if-exists=../../.env.local src/main.ts",
+    "start": "node dist/main.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@agentor/billing": "workspace:*",
+    "@agentor/connectors": "workspace:*",
+    "@agentor/core": "workspace:*",
+    "@agentor/db": "workspace:*",
+    "@agentor/email": "workspace:*",
+    "@agentor/flows": "workspace:*",
+    "@agentor/i18n": "workspace:*",
+    "@agentor/jobs": "workspace:*",
+    "@agentor/keybox": "workspace:*",
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.0.0",
+    "nodemailer": "^10.0.0",
+    "pino": "^10.0.0",
+    "web-push": "3.6.7"
+  },
+  "devDependencies": {
+    "@agentor/config": "workspace:*",
+    "@types/nodemailer": "^8.0.0",
+    "@types/web-push": "3.6.4",
+    "tsx": "^4.0.0",
+    "vitest": "^4.0.0"
+  }
+}

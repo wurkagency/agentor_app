@@ -1,0 +1,45 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "agentGuidance": false,
+  "globalPassThroughEnv": [
+    "CI",
+    "NODE_ENV",
+    "DATABASE_*",
+    "REDIS_URL",
+    "BETTER_AUTH_SECRET",
+    "APP_URL",
+    "SMTP_URL",
+    "MAIL_FROM",
+    "AGENTOR_*",
+    "E2E_*",
+    "PLAYWRIGHT_*",
+    "ISOLATION_SABOTAGE",
+    "QUICKPAY_*",
+    "INGEST_*",
+    "CVR_PROVIDER",
+    "DATAFORDELER_*",
+    "MAILPIT_API",
+    "CASE_REPLY_DOMAIN",
+    "INBOUND_MAIL_SECRET",
+    "LOG_LEVEL",
+    "KEK_*",
+    "CONNECTOR_MODE"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}

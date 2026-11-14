@@ -1,0 +1,12 @@
+{
+  "extends": "@agentor/config/tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "declaration": false
+  },
+  "include": ["src", "test"]
+}

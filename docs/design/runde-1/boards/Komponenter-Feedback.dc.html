@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>Dialoger og feedback</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F1}
+.ds{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1A1A18;font-size:14px;line-height:1.55}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px}
+.i{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.card{background:#FFFFFF;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);padding:24px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6B6B67;margin:0}
+.sec{font-size:20px;font-weight:600;line-height:1.3;letter-spacing:-.01em;margin:0}
+.ct{font-size:16px;font-weight:600;line-height:1.4;margin:0}
+.meta{font-size:12px;font-weight:500;color:#6B6B67}
+.row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;box-sizing:border-box;padding:0 16px;border-radius:9999px;font-family:inherit;font-size:13px;font-weight:600;line-height:1;border:0;color:#1A1A18;background:transparent;white-space:nowrap;cursor:pointer}
+.btn-s{height:28px;padding:0 12px;font-size:12px}
+.btn-ic{width:32px;height:32px;padding:0}
+.p{background:#D0E84A}
+.s{background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #C8C5BF}
+.xd{background:#B42318;color:#FFFFFF}
+.dis{background:#F0EDE8;color:#6B6B67;box-shadow:none;cursor:not-allowed}
+.badge{display:inline-flex;align-items:center;gap:5px;height:22px;box-sizing:border-box;padding:0 9px;border-radius:9999px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge .i{width:13px;height:13px}
+.scrim{background:rgba(26,26,24,.40);border-radius:20px;padding:40px;display:flex;justify-content:center;align-items:flex-start}
+.dlg{background:#FFFFFF;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.10);display:flex;flex-direction:column}
+.dh{padding:24px 24px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
+.db{padding:12px 24px 24px;display:flex;flex-direction:column;gap:16px}
+.df{padding:16px 24px;display:flex;justify-content:flex-end;gap:8px;box-shadow:inset 0 1px 0 #E4E1DB}
+.inp{height:40px;box-sizing:border-box;border:1px solid #E4E1DB;border-radius:8px;padding:0 12px;background:#FFFFFF;font-family:inherit;font-size:14px;color:#1A1A18;width:100%}
+.toast{width:360px;box-sizing:border-box;background:#FFFFFF;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.10);padding:14px 12px 14px 16px;display:flex;gap:12px;align-items:flex-start;font-size:13px}
+.ban{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-radius:12px;font-size:13px}
+.cb{width:18px;height:18px;border-radius:4px;box-sizing:border-box;display:inline-grid;place-items:center;flex:none}
+.diff{width:100%;border-collapse:collapse;font-size:13px}
+.diff td{padding:10px 0;border-bottom:1px solid #E4E1DB;vertical-align:top}
+.diff tr:last-child td{border-bottom:0}
+</style>
+</helmet>
+<div class="ds" style="width: 1440px; min-height: 1760px; box-sizing: border-box; padding: 64px 80px; background: #F7F5F1; display: flex; flex-direction: column; gap: 32px">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+<symbol id="cc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></symbol>
+<symbol id="ta" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></symbol>
+<symbol id="cx" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></symbol>
+<symbol id="up" viewBox="0 0 24 24"><path d="m19 5 3-3"></path><path d="m2 22 3-3"></path><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"></path><path d="M7.5 13.5 10 11"></path><path d="M10.5 16.5 13 14"></path><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"></path></symbol>
+<symbol id="if" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></symbol>
+<symbol id="fc" viewBox="0 0 24 24"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"></path><path d="M8.5 2h7"></path><path d="M7 16h10"></path></symbol>
+<symbol id="rd" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path></symbol>
+<symbol id="ar" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></symbol>
+<symbol id="xx" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></symbol>
+<symbol id="ck" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></symbol>
+<symbol id="tr" viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></symbol>
+<symbol id="pu" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></symbol>
+<symbol id="pn" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path></symbol>
+</svg>
+
+<header style="display: flex; flex-direction: column; gap: 8px">
+<p class="eyebrow">Komponentark · 3 af 4</p>
+<h1 style="margin: 0; font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em">Dialoger og feedback</h1>
+<p style="margin: 0; color: #6B6B67">Dialog (standard, destruktiv, Gå Live), Toast og Banner. Handlinger er højrestillede, den sikre handling står til venstre for den primære.</p>
+</header>
+
+<section style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="meta">Dialog · standard · 480 px · efterindlæsning med overskriv</span>
+<div class="scrim">
+<div class="dlg" role="dialog" aria-labelledby="d1t" style="width: 480px">
+<div class="dh"><h3 id="d1t" class="ct">Efterindlæs ordrer</h3><button class="btn btn-ic" type="button" aria-label="Luk" style="margin: -6px -8px 0 0"><svg class="i"><use href="#xx"></use></svg></button></div>
+<div class="db">
+<p style="margin: 0">Agentor henter ordrer fra 1. okt. 2026 til i dag fra nordlys-cykler.dk og sender dem til Dinero.</p>
+<div style="background: #F0EDE8; border-radius: 12px; padding: 12px 16px; display: flex; flex-direction: column; gap: 4px; font-size: 13px">
+<div style="display: flex; justify-content: space-between"><span>Ordrer i perioden</span><strong style="font-variant-numeric: tabular-nums">218</strong></div>
+<div style="display: flex; justify-content: space-between"><span>Findes allerede i Dinero og overskrives</span><strong style="font-variant-numeric: tabular-nums">174</strong></div>
+<div style="display: flex; justify-content: space-between"><span>Oprettes nye</span><strong style="font-variant-numeric: tabular-nums">44</strong></div>
+</div>
+<p class="meta" style="margin: 0">Overskrevne fakturaer kan ikke gendannes fra Agentor.</p>
+</div>
+<div class="df"><button class="btn s" type="button">Annullér</button><button class="btn p" type="button">Efterindlæs 218 ordrer</button></div>
+</div>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 12px">
+<span class="meta">Dialog · destruktiv · kræver indtastning af navnet</span>
+<div class="scrim">
+<div class="dlg" role="alertdialog" aria-labelledby="d2t" style="width: 480px">
+<div class="dh"><div class="row" style="gap: 12px; flex-wrap: nowrap"><span style="width: 32px; height: 32px; border-radius: 9999px; background: #FBE7E4; color: #B42318; display: grid; place-items: center; flex: none"><svg class="i"><use href="#tr"></use></svg></span><h3 id="d2t" class="ct">Slet flowet "Lager retur"?</h3></div><button class="btn btn-ic" type="button" aria-label="Luk" style="margin: -6px -8px 0 0"><svg class="i"><use href="#xx"></use></svg></button></div>
+<div class="db">
+<ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 4px">
+<li>2 ruter og deres mapping slettes.</li>
+<li>Kørselshistorik gemmes i 90 dage og kan stadig ses under Aktivitet.</li>
+<li>Data, der allerede er sendt til WooCommerce, bliver liggende.</li>
+</ul>
+<div style="display: flex; flex-direction: column; gap: 6px"><label for="d2i" style="font-size: 13px; font-weight: 500">Skriv <strong>Lager retur</strong> for at bekræfte</label><input id="d2i" class="inp" value="Lager re"></div>
+</div>
+<div class="df"><button class="btn s" type="button">Annullér</button><button class="btn dis" type="button" disabled=""><svg class="i"><use href="#tr"></use></svg>Slet flow</button></div>
+</div>
+</div>
+<span class="meta">Knappen bliver rød (#B42318, hvid tekst 6,57:1), når navnet er skrevet korrekt.</span>
+</div>
+</section>
+
+<section style="display: flex; flex-direction: column; gap: 12px">
+<span class="meta">Dialog · Gå Live · diff-dialog 720 px · viser hvad der skrives hvorhen</span>
+<div class="scrim" style="padding: 40px">
+<div class="dlg" role="dialog" aria-labelledby="d3t" style="width: 720px">
+<div class="dh"><div style="display: flex; flex-direction: column; gap: 4px"><h3 id="d3t" class="ct">Publicér v8 og gå Live</h3><span class="meta">Webshop → regnskab og CRM · 3 ændringer siden v7</span></div><button class="btn btn-ic" type="button" aria-label="Luk" style="margin: -6px -8px 0 0"><svg class="i"><use href="#xx"></use></svg></button></div>
+<div class="db">
+<table class="diff">
+<tbody>
+<tr><td style="width: 40px"><span style="width: 24px; height: 24px; border-radius: 9999px; background: #F0EDE8; display: grid; place-items: center"><svg class="i" style="width: 14px; height: 14px"><use href="#pn"></use></svg></span></td><td><strong style="font-weight: 600">Ordrer → Dinero Fakturaer</strong><br><span class="meta">Konto for EU B2B-salg: </span><span class="mono" style="text-decoration: line-through; color: #6B6B67">1010</span> <svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg> <span class="mono">1015 Salg EU</span></td><td style="text-align: right"><span class="badge" style="background: #13293A; color: #FFFFFF"><svg class="i"><use href="#rd"></use></svg>Live</span></td></tr>
+<tr><td><span style="width: 24px; height: 24px; border-radius: 9999px; background: #D0E84A; display: grid; place-items: center"><svg class="i" style="width: 14px; height: 14px"><use href="#rd"></use></svg></span></td><td><strong style="font-weight: 600">Kunder → HubSpot Kontakter</strong><br><span class="meta">Tilstand: </span><span style="font-size: 13px">Test</span> <svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg> <strong style="font-size: 13px">Live</strong><span class="meta"> · ca. 1.240 kontakter oprettes ved første kørsel</span></td><td style="text-align: right"><span class="row" style="gap: 6px; justify-content: flex-end; flex-wrap: nowrap"><span class="badge" style="background: #E5EDF5"><svg class="i" style="color: #2B5C8A"><use href="#fc"></use></svg>Test</span><svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg><span class="badge" style="background: #13293A; color: #FFFFFF"><svg class="i"><use href="#rd"></use></svg>Live</span></span></td></tr>
+<tr><td><span style="width: 24px; height: 24px; border-radius: 9999px; background: #F0EDE8; display: grid; place-items: center"><svg class="i" style="width: 14px; height: 14px"><use href="#pu"></use></svg></span></td><td><strong style="font-weight: 600">Filter på Ordrer → Dinero Fakturaer</strong><br><span class="meta">Tilføjet: </span><span style="font-size: 13px">Kun ordrer med total &gt; 0</span></td><td style="text-align: right"><span class="badge" style="background: #13293A; color: #FFFFFF"><svg class="i"><use href="#rd"></use></svg>Live</span></td></tr>
+</tbody>
+</table>
+<div style="background: #F0EDE8; border-radius: 12px; padding: 12px 16px; display: flex; gap: 12px; font-size: 13px"><svg class="i" style="color: #2B5C8A; margin-top: 2px"><use href="#if"></use></svg><span>Næste kørsel er kl. 14:10. Nye ordrer bogføres derefter som fakturaer i Dinero, og nye kunder oprettes i HubSpot.</span></div>
+<label style="display: flex; gap: 12px; align-items: flex-start; font-size: 14px; cursor: pointer"><span class="cb" style="background: #1A1A18; color: #D0E84A; margin-top: 2px"><svg class="i" style="width: 13px; height: 13px; stroke-width: 2.5"><use href="#ck"></use></svg></span><span><strong style="font-weight: 600">Jeg forstår, at der bogføres i Dinero</strong><br><span class="meta">Bogførte fakturaer kan kun rettes med en kreditnota.</span></span></label>
+</div>
+<div class="df" style="justify-content: space-between"><button class="btn" type="button">Se fuld ændringsliste</button><span class="row" style="gap: 8px"><button class="btn s" type="button">Annullér</button><button class="btn p" type="button"><svg class="i"><use href="#rd"></use></svg>Publicér og gå Live</button></span></div>
+</div>
+</div>
+</section>
+
+<section style="display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 24px; align-items: start">
+<div class="card" style="display: flex; flex-direction: column; gap: 12px; background: transparent; box-shadow: none; padding: 0">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 class="sec">Toast</h2><span class="meta">360 px · nederst til højre · 6 s</span></div>
+<div class="toast" role="status"><svg class="i" style="color: #2F7D4F; margin-top: 2px"><use href="#cc"></use></svg><div style="flex: 1"><strong style="font-weight: 600">Publiceret v8</strong><br><span style="color: #6B6B67">Ændringerne gælder fra næste kørsel.</span></div><button class="btn btn-ic" type="button" aria-label="Luk" style="width: 24px; height: 24px"><svg class="i" style="width: 14px; height: 14px"><use href="#xx"></use></svg></button></div>
+<div class="toast" role="status"><svg class="i" style="color: #6B6B67; margin-top: 2px"><use href="#if"></use></svg><div style="flex: 1"><strong style="font-weight: 600">Flowet er sat på pause</strong><br><span style="color: #6B6B67">Lager retur</span></div><button class="btn btn-s s" type="button">Fortryd</button></div>
+<div class="toast" role="alert"><svg class="i" style="color: #B42318; margin-top: 2px"><use href="#cx"></use></svg><div style="flex: 1"><strong style="font-weight: 600">Kunne ikke gentage 3 ordrer</strong><br><span style="color: #6B6B67">Dinero svarer ikke lige nu. Vi prøver igen om 5 min.</span></div><button class="btn btn-ic" type="button" aria-label="Luk" style="width: 24px; height: 24px"><svg class="i" style="width: 14px; height: 14px"><use href="#xx"></use></svg></button></div>
+<div class="toast" role="status"><svg class="i" style="color: #2B5C8A; margin-top: 2px"><use href="#fc"></use></svg><div style="flex: 1"><strong style="font-weight: 600">Testkørsel færdig</strong><br><span style="color: #6B6B67">10 records · 9 ville oprettes · 1 sprunget over</span></div><button class="btn btn-s s" type="button">Vis</button></div>
+<span class="meta">Fejl-toasten bliver stående, til den lukkes.</span>
+</div>
+<div class="card" style="display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 class="sec">Banner</h2><span class="meta">I kort eller globalt i fuld bredde (48 px) · status-bg · ikon + tekst + handling</span></div>
+<div class="ban" style="background: #FBE7E4" role="alert"><svg class="i" style="color: #B42318; margin-top: 2px"><use href="#up"></use></svg><div style="flex: 1"><strong style="font-weight: 600">Forbindelsen til e-conomic er afbrudt.</strong> Adgangen udløb i går kl. 09:14, så Outlet → regnskab kører ikke. Log ind igen for at fortsætte.</div><button class="btn btn-s" type="button" style="background: #13293A; color: #FFFFFF">Genautentificér</button></div>
+<div class="ban" style="background: #FBF0DC" role="status"><svg class="i" style="color: #A86412; margin-top: 2px"><use href="#ta"></use></svg><div style="flex: 1"><strong style="font-weight: 600">Du har brugt 89 % af månedens transaktioner.</strong> Ved 100 % sættes nye kørsler i kø til 1. nov.</div><button class="btn btn-s s" type="button">Se planer</button></div>
+<div class="ban" style="background: #E5EDF5" role="status"><svg class="i" style="color: #2B5C8A; margin-top: 2px"><use href="#if"></use></svg><div style="flex: 1"><strong style="font-weight: 600">Mette Holm redigerer dette flow.</strong> Det er åbnet skrivebeskyttet.</div></div>
+<span class="meta">Global variant</span>
+<div style="height: 48px; background: #FBE7E4; display: flex; align-items: center; gap: 12px; padding: 0 16px 0 24px; border-radius: 0; margin: 0 -24px; font-size: 13px" role="alert"><svg class="i" style="color: #B42318"><use href="#cx"></use></svg><span style="flex: 1"><strong style="font-weight: 600">Betalingen for november fejlede.</strong> Opdatér dit kort inden 25. okt., så dine flows bliver ved med at køre.</span><button class="btn btn-s s" type="button">Opdatér betaling</button></div>
+<div style="height: 48px; background: #E5EDF5; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 24px; margin: 0 -24px -24px; border-radius: 0 0 16px 16px; font-size: 13px" role="status"><svg class="i" style="color: #2B5C8A"><use href="#if"></use></svg><span style="flex: 1">Planlagt vedligehold 21. okt. kl. 02:00–02:30. Kørsler sættes i kø og sendes bagefter.</span><button class="btn btn-ic" type="button" aria-label="Luk" style="width: 28px; height: 28px"><svg class="i" style="width: 14px; height: 14px"><use href="#xx"></use></svg></button></div>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1760}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

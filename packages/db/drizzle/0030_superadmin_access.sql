@@ -1,0 +1,1 @@
+ALTER TABLE "support_access_grants" ADD COLUMN "superadmin" boolean DEFAULT false NOT NULL;

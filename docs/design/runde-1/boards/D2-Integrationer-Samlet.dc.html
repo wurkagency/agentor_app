@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>Integrationer · samlet</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F1}
+.ds{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1A1A18;font-size:14px;line-height:1.55}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.wrap{width:100%;max-width:1920px;margin:0 auto;box-sizing:border-box}
+.pl{position:relative;font-size:15px;font-weight:500;color:#6B6B67;text-decoration:none;padding:4px 0;white-space:nowrap}
+.pl.on{color:#1A1A18;font-weight:600;box-shadow:inset 0 -2px 0 #1A1A18}
+.sl{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 16px;border-radius:9999px;font-size:13px;font-weight:500;color:#6B6B67;text-decoration:none;white-space:nowrap}
+.sl.on{background:#FFFFFF;color:#1A1A18;font-weight:600;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.icb{width:36px;height:36px;border-radius:9999px;display:grid;place-items:center;border:0;background:transparent;color:#1A1A18;cursor:pointer;position:relative}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;box-sizing:border-box;padding:0 16px;border-radius:9999px;font-family:inherit;font-size:13px;font-weight:600;border:0;color:#1A1A18;background:transparent;white-space:nowrap;cursor:pointer;text-decoration:none}
+.btn-l{height:48px;padding:0 28px;font-size:12px;font-weight:700;letter-spacing:.10em;text-transform:uppercase}
+.btn-s{height:28px;padding:0 12px;font-size:12px}
+.btn-ic{width:28px;height:28px;padding:0}
+.p{background:#D0E84A}
+.s{background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #C8C5BF}
+.seg{display:inline-flex;padding:3px;border-radius:9999px;background:#FFFFFF;gap:2px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.seg button{font-family:inherit;height:30px;padding:0 14px;border:0;border-radius:9999px;background:transparent;font-size:13px;font-weight:600;color:#6B6B67;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.seg button.on{background:#1A1A18;color:#FFFFFF}
+.chip{display:inline-flex;align-items:center;gap:6px;height:32px;box-sizing:border-box;padding:0 14px;border-radius:9999px;font-family:inherit;font-size:13px;font-weight:500;color:#1A1A18;background:#FFFFFF;border:0;box-shadow:inset 0 0 0 1px #C8C5BF;cursor:pointer;white-space:nowrap}
+.chip.on{background:#D0E84A;box-shadow:none;font-weight:600}
+.card{background:#FFFFFF;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.meta{font-size:12px;font-weight:500;color:#6B6B67}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;box-sizing:border-box;padding:0 10px;border-radius:9999px;font-size:12px;font-weight:600;color:#1A1A18;white-space:nowrap}
+.pill .i{width:14px;height:14px}
+.badge{display:inline-flex;align-items:center;gap:5px;height:22px;box-sizing:border-box;padding:0 9px;border-radius:9999px;font-size:12px;font-weight:600;white-space:nowrap}
+.badge .i{width:13px;height:13px}
+.live{background:#13293A;color:#FFFFFF}
+.test{background:#E5EDF5}
+.dot{width:8px;height:8px;border-radius:9999px;flex:none}
+.cpt{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.logo{display:grid;place-items:center;box-sizing:border-box;background:#F0EDE8;border:1px solid #E4E1DB;font-weight:600;color:#1A1A18;flex:none;width:24px;height:24px;font-size:10px;border-radius:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:13px;line-height:1.4}
+.tbl th{height:40px;text-align:left;font-size:12px;font-weight:600;color:#1A1A18;border-bottom:1px solid #E4E1DB;padding:0 12px;white-space:nowrap}
+.tbl td{height:44px;border-bottom:1px solid #E4E1DB;padding:0 12px;vertical-align:middle;white-space:nowrap}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.sel td{background:rgba(240,237,232,.5)}
+.sel td:first-child{box-shadow:inset 2px 0 0 #D0E84A, inset 3px 0 0 #1A1A18}
+.sub td{height:36px;background:#FCFBF9}
+.cb{width:16px;height:16px;border-radius:4px;box-sizing:border-box;display:inline-block;box-shadow:inset 0 0 0 1.5px #6B6B67;background:#FFFFFF;vertical-align:middle}
+.tree{position:absolute;left:30px;top:0;bottom:50%;width:12px;border-left:1px solid #C8C5BF;border-bottom:1px solid #C8C5BF;border-bottom-left-radius:6px}
+.flow{font-weight:600;color:#1A1A18;text-decoration:none}
+.logo:has(img){background:#FFFFFF}
+.logo img{width:72%;height:72%;object-fit:contain;display:block}
+</style>
+</helmet>
+<div class="ds" style="width: 100%; min-height: 100vh; background: #F7F5F1; display: flex; flex-direction: column">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+<symbol id="sr" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></symbol>
+<symbol id="bl" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></symbol>
+<symbol id="ch" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></symbol>
+<symbol id="cr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></symbol>
+<symbol id="cc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></symbol>
+<symbol id="cx" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></symbol>
+<symbol id="up" viewBox="0 0 24 24"><path d="m19 5 3-3"></path><path d="m2 22 3-3"></path><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"></path><path d="M7.5 13.5 10 11"></path><path d="M10.5 16.5 13 14"></path><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"></path></symbol>
+<symbol id="cp" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="10" x2="10" y1="15" y2="9"></line><line x1="14" x2="14" y1="15" y2="9"></line></symbol>
+<symbol id="fc" viewBox="0 0 24 24"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"></path><path d="M8.5 2h7"></path><path d="M7 16h10"></path></symbol>
+<symbol id="pl" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path><path d="m15 5 3 3"></path></symbol>
+<symbol id="rd" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path></symbol>
+<symbol id="ar" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></symbol>
+<symbol id="pu" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></symbol>
+<symbol id="el" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></symbol>
+<symbol id="cd" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></symbol>
+<symbol id="ud" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></symbol>
+<symbol id="ex" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></symbol>
+<symbol id="pe" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path></symbol>
+<symbol id="rf" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M8 16H3v5"></path></symbol>
+</svg>
+
+<header style="flex: none; padding: 0 clamp(24px, 3vw, 64px)">
+<div class="wrap" style="height: 88px; display: flex; align-items: center; gap: 56px">
+<a href="D1-Overblik.dc.html" aria-label="Agentor, gå til Overblik" style="text-decoration: none; color: #1A1A18; flex: none; display: inline-flex; align-items: center; line-height: 0"><img src="/_blob/1081042ddccbfe88c57833ef05928055" alt="" style="height: 24px; width: auto; display: block;"></a>
+<nav aria-label="Primær navigation" style="display: flex; align-items: center; gap: 36px; flex: 1; min-width: 0">
+<a class="pl" href="D1-Overblik.dc.html">Overblik</a>
+<a class="pl on" href="#" aria-current="page">Integrationer</a>
+<a class="pl" href="#">Forbindelser</a>
+<a class="pl" href="#">Aktivitet</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 4px; flex: none">
+<button class="icb" type="button" aria-label="Søg eller hop til, genvej ⌘K"><svg class="i"><use href="#sr"></use></svg></button>
+<button class="icb" type="button" aria-label="Notifikationer: 2 kræver handling, heraf 2 fejl"><svg class="i"><use href="#bl"></use></svg><span style="position: absolute; top: 3px; right: 2px; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 9999px; background: #B42318; color: #FFFFFF; font-size: 10px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 0 0 2px #F7F5F1">2</span></button>
+<button type="button" aria-haspopup="menu" aria-label="Konto og virksomhed: Mette Holm, Nordlys Cykler ApS" style="margin-left: 8px; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 10px 0 4px; border: 0; border-radius: 9999px; background: #FFFFFF; box-shadow: 0 2px 12px rgba(0,0,0,.06); cursor: pointer; font-family: inherit">
+<span style="width: 32px; height: 32px; border-radius: 9999px; background: #13293A; color: #FFFFFF; display: grid; place-items: center; font-size: 11px; font-weight: 600">MH</span>
+<span style="display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2"><span style="font-size: 13px; font-weight: 600">Nordlys Cykler</span><span style="font-size: 11px; font-weight: 500; color: #6B6B67">Mette Holm</span></span>
+<svg class="i" style="width: 14px; height: 14px; color: #6B6B67"><use href="#ch"></use></svg>
+</button>
+</div>
+</div>
+</header>
+
+<div style="flex: none; padding: 0 clamp(24px, 3vw, 64px)">
+<div class="wrap" style="height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: inset 0 1px 0 #E4E1DB">
+<nav aria-label="Sekundær navigation · Integrationer" style="display: flex; align-items: center; gap: 4px">
+<a class="sl on" href="#" aria-current="page">Flows <span style="font-size: 11px; font-weight: 600; background: #F0EDE8; border-radius: 9999px; padding: 1px 7px">6</span></a>
+<a class="sl" href="#">Kørsler</a>
+<a class="sl" href="#">Skabeloner</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 12px; font-size: 12px; color: #6B6B67; font-weight: 500">
+<span>Transaktioner</span>
+<span style="width: 96px; height: 8px; border-radius: 9999px; background: #E4E1DB; overflow: hidden; display: block"><span style="display: block; width: 71%; height: 8px; border-radius: 9999px; background: #D0E84A; box-shadow: inset 0 0 0 1px rgba(26,26,24,.25)"></span></span>
+<span style="color: #1A1A18; font-weight: 600; font-variant-numeric: tabular-nums">1.420 / 2.000</span>
+</div>
+</div>
+</div>
+
+<main style="flex: 1; min-height: 0; padding: 20px clamp(24px, 3vw, 64px) 48px">
+<div class="wrap" style="display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 24px">
+<div style="display: flex; flex-direction: column; gap: 4px">
+<h1 style="margin: 0; font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em">Integrationer</h1>
+<p style="margin: 0; color: #6B6B67">6 flows · 1 med fejl · 1 afbrudt · 1 pauset</p>
+</div>
+<div style="display: flex; gap: 16px; align-items: center"><div class="seg" role="group" aria-label="Visning"><button type="button" class="on" aria-pressed="true">Basic</button><button type="button" aria-pressed="false"><svg class="i" style="width: 14px; height: 14px"><use href="#cd"></use></svg>Developer</button></div><span style="width: 1px; height: 24px; background: #E4E1DB"></span><a class="btn btn-l p" href="#"><svg class="i" style="width: 16px; height: 16px"><use href="#pu"></use></svg>Nyt flow</a></div>
+</div>
+
+<div style="display: flex; align-items: center; gap: 8px">
+<label style="display: flex; align-items: center; gap: 8px; height: 36px; width: 280px; box-sizing: border-box; padding: 0 14px; border-radius: 9999px; background: #FFFFFF; box-shadow: 0 2px 12px rgba(0,0,0,.06); color: #6B6B67"><svg class="i" style="width: 16px; height: 16px"><use href="#sr"></use></svg><input placeholder="Søg i flows, ruter og forbindelser" aria-label="Søg i flows" style="border: 0; outline: 0; font: inherit; font-size: 13px; flex: 1; min-width: 0; background: transparent; color: #1A1A18"></label>
+<span style="width: 8px"></span>
+<button class="chip" type="button">Status<svg class="i" style="width: 14px; height: 14px"><use href="#ch"></use></svg></button>
+<button class="chip" type="button">Kilde<svg class="i" style="width: 14px; height: 14px"><use href="#ch"></use></svg></button>
+<button class="chip" type="button">Destination<svg class="i" style="width: 14px; height: 14px"><use href="#ch"></use></svg></button>
+<button class="chip" type="button">Tilstand<svg class="i" style="width: 14px; height: 14px"><use href="#ch"></use></svg></button>
+<span style="flex: 1"></span>
+<button class="btn" type="button"><svg class="i" style="width: 16px; height: 16px"><use href="#ex"></use></svg>Fold alle ud</button>
+</div>
+
+<section class="card" style="overflow: hidden">
+<table class="tbl">
+<thead><tr>
+<th style="width: 16px; padding-left: 20px"><span class="cb" aria-label="Vælg alle"></span></th>
+<th style="width: 24px; padding: 0 4px"></th>
+<th><span style="display: inline-flex; align-items: center; gap: 4px">Flow<svg class="i" style="width: 14px; height: 14px"><use href="#ud"></use></svg></span></th>
+<th>Forbindelser</th>
+<th>Status</th>
+<th>Tilstand</th>
+<th class="num">Records 7 dage</th>
+<th>Sidst kørt</th>
+<th style="width: 150px"></th>
+</tr></thead>
+<tbody>
+<tr>
+<td style="padding-left: 20px"><span class="cb"></span></td>
+<td style="padding: 0 4px"><button class="btn btn-ic" type="button" aria-label="Fold Outlet → regnskab ud" aria-expanded="false"><svg class="i" style="width: 16px; height: 16px"><use href="#cr"></use></svg></button></td>
+<td><a class="flow" href="#">Outlet → regnskab</a><span class="meta"> · 3 ruter</span></td>
+<td><span style="display: inline-flex; align-items: center; gap: 6px"><span class="logo"><img src="/_blob/c4fa7e9713426e6bf824b492bdc0f2b5" alt="Shopify"></span><svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg><span class="logo"><img src="/_blob/95b70a4a13463e5882c443af894d72f1" alt="e-conomic"></span></span></td>
+<td><span class="pill" style="background: #FBE7E4"><svg class="i" style="color: #B42318"><use href="#up"></use></svg>Afbrudt · siden i går</span></td>
+<td><span class="badge live"><svg class="i"><use href="#rd"></use></svg>Live</span></td>
+<td class="num">0</td>
+<td class="meta">i går 09:14</td>
+<td style="text-align: right">Genetablér</td>
+</tr>
+<tr>
+<td style="padding-left: 20px"><span class="cb"></span></td>
+<td style="padding: 0 4px"><a class="btn btn-ic" href="D2-Integrationer.dc.html" aria-label="Fold Webshop → regnskab og CRM ud" aria-expanded="false" title="Fold ud" style="background: #D0E84A"><svg class="i" style="width: 16px; height: 16px"><use href="#cr"></use></svg></a></td>
+<td><a class="flow" href="D3-Editor-Start.dc.html">Webshop → regnskab og CRM</a><span class="meta"> · 5 ruter</span></td>
+<td><span style="display: inline-flex; align-items: center; gap: 6px"><span class="logo"><img src="/_blob/2a2f4ae979d76b93057878040a3dc65b" alt="WooCommerce"></span><svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg><span style="display: inline-flex"><span class="logo" style="box-shadow: 0 0 0 2px #FFFFFF"><img src="/_blob/b0fc7b3ea30379ba1f4587aa5ab39988" alt="Dinero"></span><span class="logo" style="margin-left: -6px; box-shadow: 0 0 0 2px #FFFFFF"><img src="/_blob/ec1a12de2e94178cbd6b6944d9a1ba2e" alt="HubSpot"></span><span class="logo" style="margin-left: -6px; box-shadow: 0 0 0 2px #FFFFFF"><img src="/_blob/672c5f0550758ab066fe4bb96295ca47" alt="Brevo"></span></span></span></td>
+<td><span class="pill" style="background: #FBE7E4"><svg class="i" style="color: #B42318"><use href="#cx"></use></svg>Fejl · siden 14:02</span></td>
+<td><span class="meta">Blandet</span></td>
+<td class="num">1.284</td>
+<td class="meta">for 4 min. siden</td>
+<td style="text-align: right"><span style="display: inline-flex; gap: 4px; align-items: center"><a class="btn btn-s p" href="D3-Editor-Start.dc.html"><svg class="i" style="width: 14px; height: 14px"><use href="#pe"></use></svg>Åbn editor</a><button class="btn btn-ic" type="button" aria-label="Flere handlinger"><svg class="i" style="width: 16px; height: 16px"><use href="#el"></use></svg></button></span></td>
+</tr>
+<tr>
+<td style="padding-left: 20px"><span class="cb"></span></td>
+<td style="padding: 0 4px"><button class="btn btn-ic" type="button" aria-label="Fold Kreditnotaer ud" aria-expanded="false"><svg class="i" style="width: 16px; height: 16px"><use href="#cr"></use></svg></button></td>
+<td><a class="flow" href="#">Kreditnotaer</a><span class="meta"> · 1 rute</span></td>
+<td><span style="display: inline-flex; align-items: center; gap: 6px"><span class="logo"><img src="/_blob/2a2f4ae979d76b93057878040a3dc65b" alt="WooCommerce"></span><svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg><span class="logo"><img src="/_blob/b0fc7b3ea30379ba1f4587aa5ab39988" alt="Dinero"></span></span></td>
+<td><span class="pill" style="background: #E6F2EA"><svg class="i" style="color: #2F7D4F"><use href="#cc"></use></svg>Aktiv</span></td>
+<td><span class="badge live"><svg class="i"><use href="#rd"></use></svg>Live</span></td>
+<td class="num">37</td>
+<td class="meta">for 9 min. siden</td>
+<td></td>
+</tr>
+<tr>
+<td style="padding-left: 20px"><span class="cb"></span></td>
+<td style="padding: 0 4px"><button class="btn btn-ic" type="button" aria-label="Fold Kunder til nyhedsbrev ud" aria-expanded="false"><svg class="i" style="width: 16px; height: 16px"><use href="#cr"></use></svg></button></td>
+<td><a class="flow" href="#">Kunder til nyhedsbrev</a><span class="meta"> · 1 rute</span></td>
+<td><span style="display: inline-flex; align-items: center; gap: 6px"><span class="logo"><img src="/_blob/c4fa7e9713426e6bf824b492bdc0f2b5" alt="Shopify"></span><svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg><span class="logo"><img src="/_blob/672c5f0550758ab066fe4bb96295ca47" alt="Brevo"></span></span></td>
+<td><span class="pill" style="background: #E6F2EA"><svg class="i" style="color: #2F7D4F"><use href="#cc"></use></svg>Aktiv</span></td>
+<td><span class="badge live"><svg class="i"><use href="#rd"></use></svg>Live</span></td>
+<td class="num">204</td>
+<td class="meta">for 12 min. siden</td>
+<td></td>
+</tr>
+<tr>
+<td style="padding-left: 20px"><span class="cb"></span></td>
+<td style="padding: 0 4px"><button class="btn btn-ic" type="button" aria-label="Fold Lager retur ud" aria-expanded="false"><svg class="i" style="width: 16px; height: 16px"><use href="#cr"></use></svg></button></td>
+<td><a class="flow" href="#">Lager retur</a><span class="meta"> · 2 ruter</span></td>
+<td><span style="display: inline-flex; align-items: center; gap: 6px"><span class="logo"><img src="/_blob/b0fc7b3ea30379ba1f4587aa5ab39988" alt="Dinero"></span><svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg><span class="logo"><img src="/_blob/2a2f4ae979d76b93057878040a3dc65b" alt="WooCommerce"></span></span></td>
+<td><span class="pill" style="background: #EFEDE8"><svg class="i" style="color: #6B6B67"><use href="#cp"></use></svg>Pauset</span></td>
+<td><span class="badge live"><svg class="i"><use href="#rd"></use></svg>Live</span></td>
+<td class="num">0</td>
+<td class="meta">1. okt. 2026</td>
+<td style="text-align: right"><a class="btn btn-s s" href="#">Genoptag</a></td>
+</tr>
+<tr>
+<td style="padding-left: 20px; border-bottom: 0"><span class="cb"></span></td>
+<td style="padding: 0 4px; border-bottom: 0"><button class="btn btn-ic" type="button" aria-label="Fold B2B-ordrer ud" aria-expanded="false"><svg class="i" style="width: 16px; height: 16px"><use href="#cr"></use></svg></button></td>
+<td style="border-bottom: 0"><a class="flow" href="#">B2B-ordrer</a><span class="meta"> · 1 rute</span></td>
+<td style="border-bottom: 0"><span style="display: inline-flex; align-items: center; gap: 6px"><span class="logo"><img src="/_blob/2a2f4ae979d76b93057878040a3dc65b" alt="WooCommerce"></span><svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg><span class="logo"><img src="/_blob/b0fc7b3ea30379ba1f4587aa5ab39988" alt="Dinero"></span></span></td>
+<td style="border-bottom: 0"><span class="pill" style="border: 1px dashed #C8C5BF"><svg class="i" style="color: #6B6B67"><use href="#pl"></use></svg>Kladde · ikke publiceret</span></td>
+<td style="border-bottom: 0"><span class="meta">–</span></td>
+<td class="num" style="border-bottom: 0">–</td>
+<td class="meta" style="border-bottom: 0">Aldrig</td>
+<td style="text-align: right; border-bottom: 0"><a class="btn btn-s s" href="#">Fortsæt opsætning</a></td>
+</tr>
+</tbody>
+</table>
+</section>
+</div>
+</main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

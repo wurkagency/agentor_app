@@ -1,0 +1,20 @@
+/* =============================================================
+   AGENTOR — SHADOW TOKENS
+   Cards use soft, large-radius drop shadows. UI is generally
+   on light surfaces with subtle depth cues.
+   Confidence: 75% — shadows estimated from visual weight in JPGs.
+   ============================================================= */
+
+:root {
+  /* Card drop shadow — used on white overlay cards */
+  --shadow-card:    0 8px 32px rgba(0, 0, 0, 0.10);
+
+  /* Elevated overlay / modal */
+  --shadow-overlay: 0 16px 56px rgba(0, 0, 0, 0.14);
+
+  /* Subtle — nav, chips */
+  --shadow-sm:      0 2px 12px rgba(0, 0, 0, 0.06);
+
+  /* None */
+  --shadow-none:    none;
+}

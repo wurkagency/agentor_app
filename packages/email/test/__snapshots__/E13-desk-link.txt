@@ -1,0 +1,14 @@
+Fortsæt på din computer
+
+Du bad om at åbne Mapping for Ordrer → Dinero Fakturaer på din computer. Siden findes kun på computer, fordi den kræver mere plads.
+
+Åbn siden: https://app.agentor.dk/integrations/wf_8a2/routes/r_19/mapping
+
+Du skal være logget ind. Har du ikke bedt om linket, kan du se bort fra denne mail.
+
+Venlig hilsen
+Agentor
+
+-- 
+Agentor ApS · app.agentor.dk · support@agentor.dk
+Du får denne mail, fordi du trykkede "Send link til min computer" i Agentor-appen.

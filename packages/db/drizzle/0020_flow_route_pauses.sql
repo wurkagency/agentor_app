@@ -1,0 +1,1 @@
+ALTER TABLE "flows" ADD COLUMN "route_pauses" jsonb DEFAULT '{}'::jsonb NOT NULL;

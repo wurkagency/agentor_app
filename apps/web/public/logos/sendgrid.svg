@@ -1,0 +1,12 @@
+<svg version="1.1" viewBox="0 0 100 100" height="100px" width="100px" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg">
+  <title>Sendgrid</title>
+  <g fill-rule="evenodd" fill="none" stroke-width="1" stroke="none" id="Sendgrid">
+    <g fill-rule="nonzero" id="sendgrid">
+      <polygon points="33.5 33 0 33 0 66.4998036 0 100 33.5 100 67 100 67 66.4998036 67 33" fill="#9DE1F3" id="Path"></polygon>
+      <polygon points="33 0 33 33.5000001 33 67 66.5 67 100 67 100 0" fill="#27B4E1" id="Path"></polygon>
+      <polygon points="0 100 33 100 33 67 0 67" fill="#1A82E2" id="Path"></polygon>
+      <polygon points="67 33 100 33 100 0 67 0" fill="#1A82E2" id="Path"></polygon>
+      <polygon points="34 67 67 67 67 34 34 34" fill="#239FD7" id="Path"></polygon>
+    </g>
+  </g>
+</svg>

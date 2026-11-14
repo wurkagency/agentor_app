@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<title>Flow-editor · listevisning</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400&amp;display=swap">
+<style>
+body{margin:0;background:#F7F5F1}
+.ds{font-family:'Plus Jakarta Sans',system-ui,sans-serif;color:#1A1A18;font-size:14px;line-height:1.55}
+.i{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.i16{width:16px;height:16px}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;font-size:12.5px}
+.pl{position:relative;font-size:14px;font-weight:500;color:#6B6B67;text-decoration:none;padding:4px 0;white-space:nowrap}
+.pl.on{color:#1A1A18;font-weight:600;box-shadow:inset 0 -2px 0 #1A1A18}
+.icb{width:32px;height:32px;border-radius:9999px;display:grid;place-items:center;border:0;background:transparent;color:#1A1A18;cursor:pointer;position:relative}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:36px;box-sizing:border-box;padding:0 16px;border-radius:9999px;font-family:inherit;font-size:13px;font-weight:600;border:0;color:#1A1A18;background:transparent;white-space:nowrap;cursor:pointer;text-decoration:none}
+.btn-s{height:28px;padding:0 12px;font-size:12px}
+.p{background:#D0E84A}
+.s{background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #C8C5BF}
+.dis{background:#F0EDE8;color:#6B6B67;cursor:not-allowed}
+.seg{display:inline-flex;padding:3px;border-radius:9999px;background:#F0EDE8;gap:2px}
+.seg button{font-family:inherit;height:28px;padding:0 12px;border:0;border-radius:9999px;background:transparent;font-size:12px;font-weight:600;color:#6B6B67;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.seg button.on{background:#FFFFFF;color:#1A1A18;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.seg.dk button.on{background:#1A1A18;color:#FFFFFF;box-shadow:none}
+.meta{font-size:12px;font-weight:500;color:#6B6B67}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#6B6B67;margin:0}
+.logo{display:grid;place-items:center;box-sizing:border-box;background:#F0EDE8;border:1px solid #E4E1DB;border-radius:8px;font-weight:600;color:#1A1A18;flex:none}
+.dot{width:8px;height:8px;border-radius:9999px;flex:none}
+.badge{display:inline-flex;align-items:center;gap:4px;height:20px;box-sizing:border-box;padding:0 8px;border-radius:9999px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge .i{width:12px;height:12px}
+.live{background:#13293A;color:#FFFFFF}
+.test{background:#E5EDF5;color:#1A1A18}
+.pill{display:inline-flex;align-items:center;gap:6px;height:24px;box-sizing:border-box;padding:0 10px;border-radius:9999px;font-size:12px;font-weight:600;color:#1A1A18;white-space:nowrap}
+.pill .i{width:14px;height:14px}
+.pal{display:flex;align-items:center;gap:10px;height:44px;padding:0 10px;border-radius:12px;font-size:13px;cursor:grab}
+.pal:hover{background:#F7F5F1}
+.node{position:absolute;width:240px;background:#FFFFFF;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.nh{height:56px;display:flex;align-items:center;gap:10px;padding:0 14px;box-shadow:inset 0 -1px 0 #E4E1DB}
+.nr{position:relative;height:36px;display:flex;align-items:center;gap:8px;padding:0 16px;font-size:13px}
+.port{position:absolute;top:13px;width:10px;height:10px;border-radius:9999px;box-sizing:border-box}
+.pr{right:-5px}
+.pL{left:-5px}
+.on-p{background:#1A1A18}
+.free{background:#FFFFFF;box-shadow:inset 0 0 0 1.5px #6B6B67}
+.tab{font-family:inherit;background:none;border:0;padding:0 0 10px;font-size:13px;font-weight:600;color:#6B6B67;cursor:pointer}
+.tab.on{color:#1A1A18;box-shadow:inset 0 -2px 0 #1A1A18}
+.fld{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fld label{font-size:12px;font-weight:500;color:#1A1A18}
+.cbx{height:36px;box-sizing:border-box;border:1px solid #E4E1DB;border-radius:8px;padding:0 10px;display:flex;align-items:center;gap:8px;background:#FFFFFF;font-family:inherit;font-size:13px;color:#1A1A18;width:100%;cursor:pointer;text-align:left}
+.cbx .n{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ct{font-size:16px;font-weight:600;line-height:1.4;margin:0}
+.frow{display:grid;grid-template-columns:148px minmax(0,1fr);align-items:center;column-gap:12px;row-gap:4px;min-height:36px}
+.frow>label{font-size:13px;font-weight:500;color:#1A1A18}
+.sh{display:inline-flex;align-items:center;gap:6px;background:none;border:0;padding:0;margin:0 0 0 -2px;font:inherit;font-size:16px;font-weight:600;color:#1A1A18;cursor:pointer}
+.sh .i{width:16px;height:16px;color:#6B6B67}
+.sw{position:relative;width:36px;height:20px;border-radius:9999px;box-sizing:border-box;flex:none;display:inline-block;background:#1A1A18}
+.sw::after{content:"";position:absolute;right:3px;top:3px;width:14px;height:14px;border-radius:9999px;background:#FFFFFF}
+.sw::before{content:"";position:absolute;right:7px;top:7px;width:6px;height:6px;border-radius:9999px;background:#D0E84A;z-index:1}
+.lt{width:100%;border-collapse:collapse;font-size:13px}
+.lt th{height:36px;text-align:left;font-size:12px;font-weight:600;color:#1A1A18;border-bottom:1px solid #E4E1DB;padding:0 12px;white-space:nowrap}
+.lt td{height:44px;border-bottom:1px solid #E4E1DB;padding:0 12px;white-space:nowrap}
+.mt{width:100%;border-collapse:collapse;font-size:13px}
+.mt th{height:32px;text-align:left;font-size:12px;font-weight:600;color:#1A1A18;border-bottom:1px solid #E4E1DB;padding:0 8px}
+.mt td{height:34px;border-bottom:1px solid #E4E1DB;padding:0 8px;vertical-align:middle;white-space:nowrap}
+.mt .cbx{height:28px;border-color:transparent;background:#F7F5F1;padding:0 8px;font-size:12.5px}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.zbtn{width:32px;height:32px;border:0;background:transparent;border-radius:9999px;display:grid;place-items:center;cursor:pointer;color:#1A1A18}
+.logo:has(img){background:#FFFFFF}
+.logo img{width:72%;height:72%;object-fit:contain;display:block}
+section[aria-label="Lærred"]{container-type:inline-size}
+section[aria-label="Lærred"] > :not([style*="left: 16px"]):not([style*="right: 16px"]):not([style*="left: 50%"]){translate:max(0px, calc(50cqw - 380px)) 0}
+</style>
+</helmet>
+<div class="ds" style="width: 100%; height: 100vh; min-height: 720px; background: #F7F5F1; display: flex; flex-direction: column; overflow: hidden">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true">
+<symbol id="sr" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></symbol>
+<symbol id="bl" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></symbol>
+<symbol id="ch" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></symbol>
+<symbol id="ud" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></symbol>
+<symbol id="al" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></symbol>
+<symbol id="un" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"></path></symbol>
+<symbol id="re" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"></path><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5A5.5 5.5 0 0 0 9.5 20H13"></path></symbol>
+<symbol id="ls" viewBox="0 0 24 24"><path d="M3 12h.01"></path><path d="M3 18h.01"></path><path d="M3 6h.01"></path><path d="M8 12h13"></path><path d="M8 18h13"></path><path d="M8 6h13"></path></symbol>
+<symbol id="wf" viewBox="0 0 24 24"><rect width="8" height="8" x="3" y="3" rx="2"></rect><path d="M7 11v4a2 2 0 0 0 2 2h4"></path><rect width="8" height="8" x="13" y="13" rx="2"></rect></symbol>
+<symbol id="cd" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></symbol>
+<symbol id="ck" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"></path></symbol>
+<symbol id="py" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"></polygon></symbol>
+<symbol id="el" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></symbol>
+<symbol id="cc" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m9 12 2 2 4-4"></path></symbol>
+<symbol id="cx" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></symbol>
+<symbol id="fc" viewBox="0 0 24 24"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2"></path><path d="M8.5 2h7"></path><path d="M7 16h10"></path></symbol>
+<symbol id="rd" viewBox="0 0 24 24"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9"></path><path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5"></path><circle cx="12" cy="12" r="2"></circle><path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5"></path><path d="M19.1 4.9C23 8.8 23 15.1 19.1 19"></path></symbol>
+<symbol id="pu" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="M12 5v14"></path></symbol>
+<symbol id="mi" viewBox="0 0 24 24"><path d="M5 12h14"></path></symbol>
+<symbol id="mx" viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></symbol>
+<symbol id="mp" viewBox="0 0 24 24"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"></path><path d="M15 5.764v15"></path><path d="M9 3.236v15"></path></symbol>
+<symbol id="if" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></symbol>
+<symbol id="up" viewBox="0 0 24 24"><path d="m19 5 3-3"></path><path d="m2 22 3-3"></path><path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z"></path><path d="M7.5 13.5 10 11"></path><path d="M10.5 16.5 13 14"></path><path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z"></path></symbol>
+<symbol id="cr" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></symbol>
+<symbol id="prc" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path><path d="m8 9 3 3-3 3"></path></symbol>
+<symbol id="ta" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></symbol>
+<symbol id="xx" viewBox="0 0 24 24"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></symbol>
+<symbol id="ar" viewBox="0 0 24 24"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></symbol>
+<symbol id="pn" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.376 3.622a1 1 0 0 1 3.002 3.002L7.368 18.635a2 2 0 0 1-.855.506l-2.872.838a.5.5 0 0 1-.62-.62l.838-2.872a2 2 0 0 1 .506-.854z"></path></symbol>
+<symbol id="pro" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M15 3v18"></path><path d="m10 15-3-3 3-3"></path></symbol>
+<symbol id="cir" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle></symbol>
+<symbol id="sk" viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20 5 4"></polygon><line x1="19" x2="19" y1="5" y2="19"></line></symbol>
+<symbol id="lk" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></symbol>
+</svg>
+
+<header style="flex: none; height: 64px; padding: 0 24px; display: flex; align-items: center; gap: 48px">
+<a href="D1-Overblik.dc.html" aria-label="Agentor, gå til Overblik" style="text-decoration: none; color: #1A1A18; flex: none; display: inline-flex; align-items: center; line-height: 0"><img src="/_blob/1081042ddccbfe88c57833ef05928055" alt="" style="height: 22px; width: auto; display: block;"></a>
+<nav aria-label="Primær navigation" style="display: flex; align-items: center; gap: 32px; flex: 1">
+<a class="pl" href="D1-Overblik.dc.html">Overblik</a>
+<a class="pl on" href="D2-Integrationer.dc.html" aria-current="page">Integrationer</a>
+<a class="pl" href="#">Forbindelser</a>
+<a class="pl" href="#">Aktivitet</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 4px">
+<button class="icb" type="button" aria-label="Søg eller hop til, genvej ⌘K"><svg class="i"><use href="#sr"></use></svg></button>
+<button class="icb" type="button" aria-label="Notifikationer: 2 kræver handling, heraf 2 fejl"><svg class="i"><use href="#bl"></use></svg><span style="position: absolute; top: 1px; right: 0; min-width: 16px; height: 16px; padding: 0 4px; box-sizing: border-box; border-radius: 9999px; background: #B42318; color: #FFFFFF; font-size: 10px; font-weight: 700; display: grid; place-items: center; box-shadow: 0 0 0 2px #F7F5F1">2</span></button>
+<button type="button" aria-haspopup="menu" aria-label="Konto og virksomhed: Mette Holm, Nordlys Cykler ApS" style="margin-left: 8px; display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 8px 0 3px; border: 0; border-radius: 9999px; background: #FFFFFF; box-shadow: 0 2px 12px rgba(0,0,0,.06); cursor: pointer; font-family: inherit"><span style="width: 30px; height: 30px; border-radius: 9999px; background: #13293A; color: #FFFFFF; display: grid; place-items: center; font-size: 11px; font-weight: 600">MH</span><span style="font-size: 13px; font-weight: 600">Nordlys Cykler</span><svg class="i" style="width: 14px; height: 14px; color: #6B6B67"><use href="#ch"></use></svg></button>
+</div>
+</header>
+
+<div style="flex: none; height: 56px; background: #FFFFFF; box-shadow: inset 0 -1px 0 #E4E1DB, inset 0 1px 0 #E4E1DB; display: flex; align-items: center; gap: 12px; padding: 0 16px 0 12px">
+<a class="icb" href="D2-Integrationer.dc.html" aria-label="Tilbage til Integrationer"><svg class="i"><use href="#al"></use></svg></a>
+<div style="display: flex; flex-direction: column; line-height: 1.25; min-width: 0">
+<span style="font-size: 15px; font-weight: 600">Webshop → regnskab og CRM</span>
+<span class="meta">Publiceret v7 · Kladde med 3 ændringer · gemt for 1 min. siden</span>
+</div>
+<span style="flex: 1"></span>
+<button class="icb" type="button" aria-label="Fortryd"><svg class="i i16"><use href="#un"></use></svg></button>
+<button class="icb" type="button" aria-label="Gendan" disabled="" style="color: #9B9B97"><svg class="i i16"><use href="#re"></use></svg></button>
+<div class="seg" role="group" aria-label="Visning af flow"><button type="button" class="on" aria-pressed="true"><svg class="i" style="width: 14px; height: 14px"><use href="#ls"></use></svg>Liste</button><button type="button"><svg class="i" style="width: 14px; height: 14px"><use href="#wf"></use></svg>Lærred</button></div>
+<div class="seg dk" role="group" aria-label="Detaljeniveau"><button type="button" class="on" aria-pressed="true">Basic</button><button type="button"><svg class="i" style="width: 14px; height: 14px"><use href="#cd"></use></svg>Developer</button></div>
+<span style="width: 1px; height: 24px; background: #E4E1DB"></span>
+<button class="btn" type="button"><svg class="i i16"><use href="#ck"></use></svg>Validér</button>
+<a class="btn s" href="#"><svg class="i i16"><use href="#py"></use></svg>Testkør</a>
+<a class="btn p" href="#">Publicér</a>
+<button class="icb" type="button" aria-label="Flere handlinger for flowet"><svg class="i"><use href="#el"></use></svg></button>
+</div>
+
+<div style="flex: 1; min-height: 0; display: flex">
+
+<aside aria-label="Forbindelser" style="width: 240px; flex: none; background: #FFFFFF; box-shadow: inset -1px 0 0 #E4E1DB; display: flex; flex-direction: column; padding: 16px 12px; box-sizing: border-box; gap: 14px">
+<label style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 9999px; background: #F7F5F1; color: #6B6B67"><svg class="i i16"><use href="#sr"></use></svg><input placeholder="Søg forbindelser" aria-label="Søg forbindelser" style="border: 0; outline: 0; background: transparent; font: inherit; font-size: 13px; flex: 1; min-width: 0"></label>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<p class="eyebrow" style="padding: 0 10px 4px">Webshop</p>
+<div class="pal"><span class="logo" style="width: 24px; height: 24px; font-size: 10px; border-radius: 6px"><img src="/_blob/2a2f4ae979d76b93057878040a3dc65b" alt="WooCommerce"></span><span style="flex: 1; display: flex; flex-direction: column; line-height: 1.3; min-width: 0"><strong style="font-weight: 600">WooCommerce</strong><span class="meta">nordlys-cykler.dk · kilde</span></span><span class="dot" style="background: #2F7D4F" aria-label="Aktiv"></span></div>
+<div class="pal"><span class="logo" style="width: 24px; height: 24px; font-size: 10px; border-radius: 6px"><img src="/_blob/c4fa7e9713426e6bf824b492bdc0f2b5" alt="Shopify"></span><span style="flex: 1; display: flex; flex-direction: column; line-height: 1.3; min-width: 0"><strong style="font-weight: 600">Shopify</strong><span class="meta">Nordlys Outlet</span></span><span class="dot" style="background: #2F7D4F" aria-label="Aktiv"></span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<p class="eyebrow" style="padding: 0 10px 4px">ERP</p>
+<div class="pal"><span class="logo" style="width: 24px; height: 24px; font-size: 10px; border-radius: 6px"><img src="/_blob/b0fc7b3ea30379ba1f4587aa5ab39988" alt="Dinero"></span><span style="flex: 1; display: flex; flex-direction: column; line-height: 1.3; min-width: 0"><strong style="font-weight: 600">Dinero</strong><span class="meta">Nordlys Cykler · i flowet</span></span><span class="dot" style="background: #2F7D4F" aria-label="Aktiv"></span></div>
+<div class="pal"><span class="logo" style="width: 24px; height: 24px; font-size: 10px; border-radius: 6px"><img src="/_blob/95b70a4a13463e5882c443af894d72f1" alt="e-conomic"></span><span style="flex: 1; display: flex; flex-direction: column; line-height: 1.3; min-width: 0"><strong style="font-weight: 600">e-conomic</strong><span class="meta">Nordlys Outlet · afbrudt</span></span><svg class="i" style="width: 14px; height: 14px; color: #B42318" aria-label="Afbrudt"><use href="#up"></use></svg></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<p class="eyebrow" style="padding: 0 10px 4px">CRM</p>
+<div class="pal"><span class="logo" style="width: 24px; height: 24px; font-size: 10px; border-radius: 6px"><img src="/_blob/ec1a12de2e94178cbd6b6944d9a1ba2e" alt="HubSpot"></span><span style="flex: 1; display: flex; flex-direction: column; line-height: 1.3; min-width: 0"><strong style="font-weight: 600">HubSpot</strong><span class="meta">Nordlys Cykler · i flowet</span></span><span class="dot" style="background: #2F7D4F" aria-label="Aktiv"></span></div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 2px">
+<p class="eyebrow" style="padding: 0 10px 4px">Marketing</p>
+<div class="pal"><span class="logo" style="width: 24px; height: 24px; font-size: 10px; border-radius: 6px"><img src="/_blob/672c5f0550758ab066fe4bb96295ca47" alt="Brevo"></span><span style="flex: 1; display: flex; flex-direction: column; line-height: 1.3; min-width: 0"><strong style="font-weight: 600">Brevo</strong><span class="meta">Nyhedsbrev · i flowet</span></span><span class="dot" style="background: #2F7D4F" aria-label="Aktiv"></span></div>
+</div>
+<a class="btn btn-s" href="#" style="align-self: flex-start; margin-left: 4px"><svg class="i" style="width: 14px; height: 14px"><use href="#pu"></use></svg>Tilføj forbindelse</a>
+<span style="flex: 1"></span>
+<div style="background: #F7F5F1; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600"><span>Destinationer</span><span style="font-variant-numeric: tabular-nums">3 af 3</span></div>
+<div style="display: flex; gap: 4px"><span style="flex: 1; height: 6px; border-radius: 9999px; background: #1A1A18"></span><span style="flex: 1; height: 6px; border-radius: 9999px; background: #1A1A18"></span><span style="flex: 1; height: 6px; border-radius: 9999px; background: #1A1A18"></span></div>
+<span class="meta">Flere kræver Enterprise. <a href="#" style="color: #1A1A18; font-weight: 600">Se planer</a></span>
+</div>
+</aside>
+
+<section aria-label="Listevisning" style="flex: 1; min-width: 0; overflow: hidden; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px"><div style="display: flex; justify-content: space-between; align-items: center"><div style="display: flex; align-items: center; gap: 10px"><span class="logo" style="width: 32px; height: 32px"><img src="/_blob/2a2f4ae979d76b93057878040a3dc65b" alt="WooCommerce"></span><div style="display: flex; flex-direction: column; line-height: 1.3"><strong style="font-weight: 600">Kilde: WooCommerce</strong><span class="meta">nordlys-cykler.dk · 5 ruter til 3 destinationer</span></div></div><a class="btn s" href="#"><svg class="i i16"><use href="#pu"></use></svg>Tilføj rute</a></div><div style="background: #FFFFFF; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.06); overflow: hidden"><table class="lt"><thead><tr><th style="padding-left: 20px">Rute</th><th>Tilstand</th><th>Status</th><th>Filtre</th><th style="width: 24px"></th></tr></thead><tbody><tr><td colspan="5" style="height: 48px; background: #F7F5F1; border-bottom: 1px solid #E4E1DB"><span style="display: inline-flex; align-items: center; gap: 10px"><span class="logo" style="width: 24px; height: 24px; border-radius: 6px; font-size: 10px"><img src="/_blob/b0fc7b3ea30379ba1f4587aa5ab39988" alt="Dinero"></span><strong style="font-weight: 600">Dinero</strong><span class="meta">Nordlys Cykler</span></span></td></tr><tr style="background: rgba(208,232,74,.18); box-shadow: inset 2px 0 0 #D0E84A"><td style="padding-left: 20px"><span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600">Ordrer <svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg> Fakturaer</span></td><td><span class="badge live"><svg class="i"><use href="#rd"></use></svg>Live</span></td><td><span class="cpt" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2F7D4F"></span>Aktiv</span></td><td style="white-space: normal; color: #1A1A18; font-size: 12.5px">Kun ordrer med total &gt; 0</td><td style="text-align: right"><svg class="i" style="width: 14px; height: 14px; color: #6B6B67"><use href="#cr"></use></svg></td></tr><tr><td style="padding-left: 20px"><span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 400">Kreditnotaer <svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg> Kreditnotaer</span></td><td><span class="badge live"><svg class="i"><use href="#rd"></use></svg>Live</span></td><td><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #B42318"></span>Fejl · 2 records</span></td><td style="white-space: normal; color: #1A1A18; font-size: 12.5px">Alle</td><td style="text-align: right"><svg class="i" style="width: 14px; height: 14px; color: #6B6B67"><use href="#cr"></use></svg></td></tr><tr><td style="padding-left: 20px"><span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 400">Kunder <svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg> Kunder</span></td><td><span class="badge live"><svg class="i"><use href="#rd"></use></svg>Live</span></td><td><span class="cpt" style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2F7D4F"></span>Aktiv</span></td><td style="white-space: normal; color: #1A1A18; font-size: 12.5px">Kun kunder med e-mail</td><td style="text-align: right"><svg class="i" style="width: 14px; height: 14px; color: #6B6B67"><use href="#cr"></use></svg></td></tr><tr><td colspan="5" style="height: 48px; background: #F7F5F1; border-bottom: 1px solid #E4E1DB"><span style="display: inline-flex; align-items: center; gap: 10px"><span class="logo" style="width: 24px; height: 24px; border-radius: 6px; font-size: 10px"><img src="/_blob/ec1a12de2e94178cbd6b6944d9a1ba2e" alt="HubSpot"></span><strong style="font-weight: 600">HubSpot</strong><span class="meta">Nordlys Cykler</span></span></td></tr><tr><td style="padding-left: 20px"><span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 400">Kunder <svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg> Kontakter</span></td><td><span class="badge test"><svg class="i" style="color: #2B5C8A"><use href="#fc"></use></svg>Test</span></td><td><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #2B5C8A"></span>Test</span></td><td style="white-space: normal; color: #1A1A18; font-size: 12.5px">Kun kunder, der har handlet</td><td style="text-align: right"><svg class="i" style="width: 14px; height: 14px; color: #6B6B67"><use href="#cr"></use></svg></td></tr><tr><td colspan="5" style="height: 48px; background: #F7F5F1; border-bottom: 1px solid #E4E1DB"><span style="display: inline-flex; align-items: center; gap: 10px"><span class="logo" style="width: 24px; height: 24px; border-radius: 6px; font-size: 10px"><img src="/_blob/672c5f0550758ab066fe4bb96295ca47" alt="Brevo"></span><strong style="font-weight: 600">Brevo</strong><span class="meta">Nyhedsbrev</span></span></td></tr><tr><td style="padding-left: 20px"><span style="display: inline-flex; align-items: center; gap: 6px; font-weight: 400">Kunder <svg class="i" style="width: 12px; height: 12px; color: #9B9B97"><use href="#ar"></use></svg> Kontakter</span></td><td><span class="badge live"><svg class="i"><use href="#rd"></use></svg>Live</span></td><td><span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span class="dot" style="background: #6B6B67"></span>Pauset</span></td><td style="white-space: normal; color: #1A1A18; font-size: 12.5px">Kun kunder med samtykke til nyhedsbrev</td><td style="text-align: right"><svg class="i" style="width: 14px; height: 14px; color: #6B6B67"><use href="#cr"></use></svg></td></tr></tbody></table></div><span class="meta">Alle handlinger på lærredet kan også udføres her med tastaturet. Pil op/ned vælger en rute, Enter åbner den.</span></section>
+
+<aside aria-label="Inspektør for rute" style="width: 440px; flex: none; background: #FFFFFF; box-shadow: inset 1px 0 0 #E4E1DB; display: flex; flex-direction: column">
+<div style="padding: 16px 20px 0; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-direction: column; gap: 2px"><span class="eyebrow">Rute</span><h2 class="ct">Ordrer → Dinero Fakturaer</h2></div>
+<span style="display: flex; align-items: center; gap: 2px"><button class="icb" type="button" aria-label="Flere handlinger for ruten: pause, slet"><svg class="i"><use href="#el"></use></svg></button><button class="btn btn-s" type="button" aria-label="Skjul inspektøren" title="Skjul inspektøren ( ] )" style="padding: 0 10px; background: #F7F5F1"><svg class="i" style="width: 16px; height: 16px"><use href="#prc"></use></svg></button></span>
+</div>
+<div style="display: flex; align-items: center; gap: 8px"><span class="badge live" style="height: 22px; font-size: 12px"><svg class="i"><use href="#rd"></use></svg>Live</span><span class="pill" style="background: #E6F2EA"><svg class="i" style="color: #2F7D4F"><use href="#cc"></use></svg>Aktiv</span><span class="meta">412 ordrer · 7 dage</span></div>
+<div role="tablist" style="display: flex; gap: 20px; box-shadow: inset 0 -1px 0 #E4E1DB; margin-top: 4px">
+<button class="tab on" role="tab" type="button" aria-selected="true">Generelt</button>
+<button class="tab" role="tab" type="button">Mapping</button>
+<button class="tab" role="tab" type="button">Filtre</button>
+<button class="tab" role="tab" type="button">Kørsel</button>
+<button class="tab" role="tab" type="button">Historik</button>
+</div>
+</div>
+
+<div style="flex: 1; min-height: 0; overflow: hidden; padding: 16px 20px; display: flex; flex-direction: column; gap: 14px">
+<div class="frow" style="min-height: 40px"><label for="g1">Ruten er aktiv</label><div style="display: flex; align-items: center; gap: 10px"><span id="g1" class="sw" role="switch" aria-checked="true"></span><span class="meta">Kører hvert 5. minut</span></div></div>
+<div class="frow"><label>Tilstand</label><div style="display: flex; flex-direction: column; gap: 4px"><div class="seg" role="group" aria-label="Tilstand" style="align-self: flex-start"><button type="button">Test</button><button type="button">Kladde</button><button type="button" class="on" aria-pressed="true">Live</button></div><span class="meta">Live bogfører fakturaer i Dinero.</span></div></div>
+<div class="frow"><label for="g2">Send når</label><button id="g2" class="cbx" type="button"><span class="n">Ordren er gennemført</span><svg class="i i16" style="color: #6B6B67"><use href="#ch"></use></svg></button></div>
+<div class="frow"><label for="g3">Opdatér eksisterende</label><div style="display: flex; flex-direction: column; gap: 4px"><span id="g3" class="sw" role="switch" aria-checked="true"></span><span class="meta">Ændringer i ordren opdaterer fakturaen, så længe den ikke er bogført.</span></div></div>
+<div class="frow"><label for="g4">Match på</label><button id="g4" class="cbx" type="button"><span class="n">Ordrenummer → Fakturareference</span><svg class="i i16" style="color: #6B6B67"><use href="#ch"></use></svg></button></div>
+<div style="box-shadow: inset 0 1px 0 #E4E1DB; padding-top: 6px"><button type="button" aria-expanded="false" style="display: flex; align-items: center; gap: 8px; height: 40px; width: 100%; background: none; border: 0; padding: 0; font-family: inherit; cursor: pointer; color: #6B6B67"><svg class="i i16"><use href="#cr"></use></svg><span class="eyebrow">Avanceret</span><span class="meta" style="margin-left: auto">Konfliktregel, idempotensnøgle</span></button></div>
+</div>
+<div style="flex: none; height: 64px; box-shadow: inset 0 1px 0 #E4E1DB; display: flex; align-items: center; justify-content: space-between; padding: 0 20px">
+<span class="meta">Ingen ugemte ændringer</span>
+<span style="display: flex; gap: 8px"><button class="btn s" type="button">Annullér</button><button class="btn dis" type="button" disabled="">Gem</button></span>
+</div>
+</aside>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+Ugen der gik
+
+Hej Mette
+
+Her er uge 42 (12.–18. okt. 2026) for Nordlys Cykler ApS.
+
+Records: 7.639
+Ordrer: 412
+Fejl: 3
+Uden fejl: 99,6 %
+
+FLOWS
+Webshop → regnskab og CRM  6.910  3 fejl
+Outlet → regnskab  488  Afbrudt fra fredag
+Kunder til nyhedsbrev  204  OK
+Kreditnotaer  37  OK
+
+Åbn Overblik: https://app.agentor.dk/
+
+Venlig hilsen
+Agentor
+
+-- 
+Agentor ApS · app.agentor.dk · support@agentor.dk
+Du får denne mail mandag kl. 8, fordi du har slået ugentlig opsummering til.
+Slå den fra: https://app.agentor.dk/unsubscribe?t=sample
