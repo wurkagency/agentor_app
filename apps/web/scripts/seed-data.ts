@@ -219,3 +219,20 @@ export const CONNECTIONS = {
 
 /** Webhook token for the seeded WooCommerce connection (e2e posts webhooks with it). */
 export const SEED_WOO_WEBHOOK_TOKEN = 'nordlys-seed-woocommerce-webhook-token-0001';
+
+/** Noon UTC `days` from today: the same calendar day in Copenhagen, whatever the season. */
+function daysAhead(days: number): Date {
+  const d = new Date(Date.now() + days * 86_400_000);
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12));
+}
+
+/**
+ * Future dates the seed sets relative to today, so a constraint such as flow_grants_expiry_future
+ * never meets a date that has passed. e2e reads the same values for its expectations.
+ */
+export const SEED_DATES = {
+  /** Sara Lind's access to one flow (D11). */
+  saraGrantExpires: daysAhead(30),
+  /** The Dinero token's expiry on its connection card (D9). */
+  dineroTokenExpires: daysAhead(60),
+};

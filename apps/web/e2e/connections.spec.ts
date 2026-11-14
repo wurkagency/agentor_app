@@ -1,7 +1,8 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { createHmac, randomBytes } from 'node:crypto';
-import { CONNECTIONS, SEED_WOO_WEBHOOK_TOKEN } from '../scripts/seed-data';
+import { formatDate } from '@agentor/i18n';
+import { CONNECTIONS, SEED_DATES, SEED_WOO_WEBHOOK_TOKEN } from '../scripts/seed-data';
 import globalSetup from './global-setup';
 import { login } from './support';
 
@@ -34,7 +35,7 @@ test('my connections: six accounts, one broken (D9-Forbindelser)', async ({ page
   await expect(economic).toContainText('Afbrudt');
   await expect(economic.getByRole('link', { name: 'Genautentificér' })).toBeVisible();
   await expect(card(page, 'WooCommerce')).toContainText('Webhook modtaget');
-  await expect(card(page, 'Dinero')).toContainText('14. jan. 2027');
+  await expect(card(page, 'Dinero')).toContainText(formatDate(SEED_DATES.dineroTokenExpires, 'da'));
   await axe(page);
 });
 

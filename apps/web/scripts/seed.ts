@@ -20,6 +20,7 @@ const {
   FLOWS,
   SEED_PASSWORD,
   SEED_TOTP_SECRET,
+  SEED_DATES,
   SEED_WOO_WEBHOOK_TOKEN,
   SIGNUP_USERS,
   TENANTS,
@@ -204,7 +205,7 @@ await inTenant(n.id, async () => {
         c.accountId,
         USERS.mette.id,
         c.connectorId === 'woocommerce' ? new Date(Date.now() - 60_000) : null,
-        c.connectorId === 'dinero' ? '2027-01-14T00:00:00+01:00' : null,
+        c.connectorId === 'dinero' ? SEED_DATES.dineroTokenExpires : null,
       ],
     );
     const creds =
@@ -229,10 +230,10 @@ await inTenant(n.id, async () => {
   // Flows, versions and run history (D1, D2, D7, D8, D10).
   await seedFlows(owner, n.id, SCENARIO);
 
-  // Sara Lind: external developer with access to one flow until 12. nov. 2026.
+  // Sara Lind: external developer with access to one flow for another 30 days.
   await owner.query(
-    `insert into flow_grants (tenant_id, membership_id, flow_id, expires_at) values ($1, $2, $3, '2026-11-12T23:59:59+01:00')`,
-    [n.id, sara, FLOWS.webshop.id],
+    `insert into flow_grants (tenant_id, membership_id, flow_id, expires_at) values ($1, $2, $3, $4)`,
+    [n.id, sara, FLOWS.webshop.id, SEED_DATES.saraGrantExpires],
   );
 });
 

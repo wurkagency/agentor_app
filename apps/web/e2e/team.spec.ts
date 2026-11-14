@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { TENANTS } from '../scripts/seed-data';
+import { formatDate } from '@agentor/i18n';
+import { SEED_DATES, TENANTS } from '../scripts/seed-data';
 import globalSetup from './global-setup';
 import { latestMailTo } from './mailpit';
 import { adminQuery, login, ownerSql } from './support';
@@ -21,7 +22,7 @@ test('team list shows roles, per-flow access, external users and MFA state (D11-
   const sara = table.getByRole('row', { name: /Sara Lind/ });
   await expect(sara).toContainText('Udvikler');
   await expect(sara).toContainText('1 flow: Webshop → regnskab og CRM');
-  await expect(sara).toContainText('Udløber 12. nov. 2026');
+  await expect(sara).toContainText(`Udløber ${formatDate(SEED_DATES.saraGrantExpires, 'da')}`);
   await expect(sara).toContainText('Ekstern');
   const bo = table.getByRole('row', { name: /Bo Dahl/ });
   await expect(bo).toContainText('Alle flows · kun læse');
