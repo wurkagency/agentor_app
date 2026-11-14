@@ -6,3 +6,5 @@ dist/
 coverage/
 # Rendered e-mail snapshots are compared byte for byte.
 packages/email/test/__snapshots__/
+# Third-party Claude skills, kept as published.
+.claude/skills/
